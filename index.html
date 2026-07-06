@@ -123,6 +123,30 @@
   .session-close{width:100%;margin-top:6px;padding:13px;border:none;border-radius:12px;background:var(--steel);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
   .motiv-banner{background:linear-gradient(135deg,var(--accent),#6c5ce7);color:#fff;padding:12px 16px;border-radius:12px;font-size:13px;font-weight:600;text-align:center;line-height:1.5;margin-bottom:8px}
   .warmup-banner{background:#fff3e0;border:1.5px solid #ffb74d;border-radius:10px;padding:10px 14px;font-size:12px;color:#e65100;margin-bottom:8px;text-align:center;line-height:1.4}
+  .install-banner{border-radius:14px;padding:16px;margin-bottom:12px;color:#fff;position:relative;overflow:hidden;background:linear-gradient(135deg,#1976d2,#1565c0)}
+  .theme-f .install-banner{background:linear-gradient(135deg,#d4619a,#a8245e)}
+  .install-banner::after{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:rgba(255,255,255,.08);border-radius:50%}
+  .install-banner .ib-icon{font-size:32px;margin-bottom:8px}
+  .install-banner .ib-title{font-size:15px;font-weight:800;margin-bottom:4px}
+  .install-banner .ib-text{font-size:12px;opacity:.9;line-height:1.5;margin-bottom:12px}
+  .install-banner .ib-btn{background:#fff;color:#1565c0;border:none;border-radius:10px;padding:11px 20px;font-size:13px;font-weight:700;cursor:pointer;width:100%;text-align:center}
+  .theme-f .install-banner .ib-btn{color:#a8245e}
+  .install-banner .ib-close{position:absolute;top:10px;right:12px;background:none;border:none;color:rgba(255,255,255,.6);font-size:18px;cursor:pointer;z-index:1}
+  .ios-steps{display:flex;gap:12px;margin:10px 0;justify-content:center}
+  .ios-step{text-align:center;font-size:11px;opacity:.9}
+  .ios-step .step-icon{font-size:22px;margin-bottom:4px}
+  .streak-badge{background:linear-gradient(135deg,#f39c12,#e74c3c);color:#fff;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:center;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px}
+  .weight-cmp{font-size:11px;color:var(--ok);font-weight:600;margin-top:2px}
+  .weight-cmp.down{color:var(--warn)}
+  .weight-cmp.same{color:var(--mute)}
+  .copy-report{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:12px 20px;font-size:14px;font-weight:700;cursor:pointer;width:100%;margin:12px 0}
+  .mp-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:#009ee3;color:#fff;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;width:100%;text-decoration:none}
+  .photo-angles{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+  .photo-angles span{background:var(--light);border:1.5px solid var(--line);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--accent)}
+  .studies-list{margin-top:10px}
+  .study-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;font-size:12px}
+  .study-item span{flex:1}
+  .study-item button{background:none;border:none;color:var(--accent);font-weight:600;cursor:pointer;font-size:12px}
   .inact-block{background:#fef3f2;border:1.5px solid #fca5a5;border-radius:12px;padding:14px 16px;margin-bottom:14px}
   .inact-title{font-size:13px;font-weight:700;color:#991b1b;margin-bottom:8px}
   .inact-list{display:flex;flex-wrap:wrap;gap:6px}
@@ -251,9 +275,9 @@
   #modal #mok{background:var(--accent);color:#fff}
   /* Forms */
   .form-sec{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:16px;overflow:hidden}
-  .form-sec-hdr{padding:12px 16px;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--line)}
-  .form-sec-hdr.acuerdo{background:#ede5f8;color:#5e3d8f}
-  .form-sec-hdr.anamnesis{background:#e3f0e8;color:#1a5c35}
+  .form-sec-hdr{padding:12px 16px;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;align-items:center}
+  .form-sec-hdr.acuerdo{background:var(--light);color:var(--accent)}
+  .form-sec-hdr.anamnesis{background:var(--light);color:var(--accent)}
   .theme-f .form-sec-hdr.acuerdo{background:#ede5f8;color:#5e3d8f}
   .theme-f .form-sec-hdr.anamnesis{background:#e3f0e8;color:#1a5c35}
   .form-body{padding:16px}
@@ -452,8 +476,8 @@ function tmplOmar(){
       ex("Flexiones",4,"18","Peso corporal","Press de pecho en máquina","Cuerpo en línea recta, abdomen firme. Bajá el pecho casi al piso sin abrir codos de más.","60 s"),
       ex("Bíceps inclinado",4,"12","10 kg c/lado","Curl en banco Scott","Brazos colgando atrás del torso. Máximo estiramiento abajo, sin mover el codo.","60 s"),
       ex("Bíceps bayesiano",4,"12","14","Curl concentrado","En polea, codo fijo detrás del cuerpo. Apretá arriba 1 segundo.","60 s"),
-      ex("Press hombro máquina",4,"10","A definir","Press militar con mancuernas","","75 s"),
-      ex("Volada lateral mancuerna",4,"10-12","A definir","Elevación lateral en polea","","60 s"),
+      ex("Press hombro máquina",4,"10","A definir","Press militar con mancuernas","Codos a 90°, empujá vertical sin arquear la espalda.","75 s"),
+      ex("Volada lateral mancuerna",4,"10-12","A definir","Elevación lateral en polea","Codos levemente flexionados, subí hasta la altura del hombro sin envión.","60 s"),
     ]},
     { day:"Día 2 · Espalda / Tríceps", ex:[
       ex("Remo unilateral polea",4,"12","27 kg","Remo con mancuerna (serrucho)","Llevá el codo hacia atrás pegado al cuerpo. Apretá la espalda, no tires solo con el brazo.","90 s"),
@@ -461,20 +485,20 @@ function tmplOmar(){
       ex("Vups unilateral",4,"16","10 kg","Pull-over en polea","Movimiento amplio y lento. Sentí el dorsal, sin impulso.","60 s"),
       ex("Dorsalera amplia",4,"12","36","Dominadas asistidas / jalón neutro","Pecho arriba, llevá la barra al pecho con los codos hacia abajo. Sin tirones.","90 s"),
       ex("Press tríceps",4,"10/12","15 x lado","Fondos en banco","Codos pegados al torso y fijos. Extendé completo sin mover los hombros.","60 s"),
-      ex("Remo máquina",4,"12","36","Remo en polea baja","","75 s"),
-      ex("Press francés barra",4,"10","5 x lado","Press francés con mancuernas","","60 s"),
-      ex("Volada frontal polea",4,"10","A definir","Elevación frontal con mancuerna","","60 s"),
-      ex("Remo al mentón barra",4,"10","A definir","Remo al mentón con mancuernas","","75 s"),
+      ex("Remo máquina",4,"12","36","Remo en polea baja","Pecho apoyado, llevá los codos atrás apretando las escápulas.","75 s"),
+      ex("Press francés barra",4,"10","5 x lado","Press francés con mancuernas","Codos fijos apuntando al techo, bajá la barra a la frente controlando.","60 s"),
+      ex("Volada frontal polea",4,"10","A definir","Elevación frontal con mancuerna","Brazo casi extendido, subí hasta la altura del hombro sin balancear.","60 s"),
+      ex("Remo al mentón barra",4,"10","A definir","Remo al mentón con mancuernas","Agarre al ancho de hombros, subí los codos liderando el movimiento.","75 s"),
     ]},
     { day:"Día 3", ex:[
-      ex("Press Arnold sentado",4,"10","A definir","Press militar con mancuernas","","75 s"),
-      ex("Volada posterior mancuerna",4,"8-10","A definir","Pájaro en máquina","","60 s"),
+      ex("Press Arnold sentado",4,"10","A definir","Press militar con mancuernas","Rotá las palmas al subir (mirando hacia vos abajo, hacia afuera arriba).","75 s"),
+      ex("Volada posterior mancuerna",4,"8-10","A definir","Pájaro en máquina","Torso inclinado, codos levemente flexionados, apretá las escápulas arriba.","60 s"),
       ex("Hip thrust abierta y cerrada",4,"10+10","A definir","Hip thrust en máquina","A = abierta, C = cerrada.","90 s"),
-      ex("Aductores máquina",4,"15","A definir","Aductor con banda","","60 s"),
-      ex("Abductores máquina",4,"15","A definir","Abductor con banda","","60 s"),
-      ex("Prensa 45°",4,"12","A definir","Sentadilla en Smith","","90 s"),
+      ex("Aductores máquina",4,"15","A definir","Aductor con banda","Sentate erguida, cerrá las piernas controlando, sin rebote.","60 s"),
+      ex("Abductores máquina",4,"15","A definir","Abductor con banda","Sentate erguida, abrí las piernas controlando, sin rebote.","60 s"),
+      ex("Prensa 45°",4,"12","A definir","Sentadilla en Smith","Pies al ancho de hombros, bajá hasta 90° sin despegar la lumbar.","90 s"),
       ex("Femoral máquina Drop Set",4,"12-10-8-8","A definir","Curl femoral acostado","Drop Set: anotá los 4 pesos de cada bajada.","75 s"),
-      ex("Gemelos parado",4,"15","A definir","Gemelos en máquina","","45 s"),
+      ex("Gemelos parado",4,"15","A definir","Gemelos en máquina","Rango completo: estirá bien abajo y apretá arriba 1 segundo.","45 s"),
     ]},
   ];
 }
@@ -500,28 +524,28 @@ function delfinaStudent(){
     },
     routine:[
       { day:"Día 1", ex:[
-        ex("Press de pecho en máquina",3,"12-15","9","Press plano con mancuernas","","90 s"),
-        ex("Remo sentado en polea",3,"12-15","14","Remo con mancuerna","","75 s"),
+        ex("Press de pecho en máquina",3,"12-15","9","Press plano con mancuernas","Omóplatos retraídos, empujá sin bloquear los codos.","90 s"),
+        ex("Remo sentado en polea",3,"12-15","14","Remo con mancuerna","Pecho alto, llevá el agarre al abdomen apretando las escápulas.","75 s"),
         ex("Prensa · recorrido moderado",3,"12-15","18","Prensa a 45°","Sin bajar profundo (cuidado lumbar L4-L5 / L5-S1).","90 s"),
-        ex("Sillón de cuádriceps",3,"15","18","Extensión en máquina","","75 s"),
-        ex("Femoral en camilla",3,"15","28","Curl femoral sentada","","75 s"),
+        ex("Sillón de cuádriceps",3,"15","18","Extensión en máquina","Extendé completo arriba, bajá controlando sin soltar.","75 s"),
+        ex("Femoral en camilla",3,"15","28","Curl femoral sentada","Flexioná completo arriba, bajá controlando sin soltar.","75 s"),
         ex("Hip thrust liviano",3,"12-15","Sin peso","Puente de glúteo","Técnica prolija, exhalar al subir.","90 s"),
         ex("Tríceps tras nuca",3,"12","5","Tríceps en polea","Empezar con 2,5 kg. Bajar controlado, exhalar al estirar.","60 s"),
-        ex("Volada frontal mancuerna",3,"12","2,5 x lado","Elevación frontal con disco","","60 s"),
+        ex("Volada frontal mancuerna",3,"12","2,5 x lado","Elevación frontal con disco","Subí con brazos casi extendidos hasta la altura del hombro, sin envión.","60 s"),
         ex("Gemelos prensa",3,"12-15","14","Gemelos de pie","Ayuda a la circulación.","60 s"),
-        ex("Apertura máquina",3,"12-15","9","Aperturas con mancuerna","","75 s"),
-        ex("Aductores máquina",3,"15","23","Aductor con banda","","60 s"),
+        ex("Apertura máquina",3,"12-15","9","Aperturas con mancuerna","Codos levemente flexionados, sentí el estiramiento del pectoral.","75 s"),
+        ex("Aductores máquina",3,"15","23","Aductor con banda","Sentate erguida, cerrá las piernas controlando, sin rebote.","60 s"),
       ]},
       { day:"Día 2", ex:[
-        ex("Jalón al pecho supino en polea",3,"12-15","18","Jalón agarre neutro","","90 s"),
+        ex("Jalón al pecho supino en polea",3,"12-15","18","Jalón agarre neutro","Agarre supino, pecho arriba, bajá la barra al pecho controlando.","90 s"),
         ex("Press de hombro mancuernas",3,"12-15","4 x lado","Press de hombro en máquina","Exhalar al subir, sin aguantar aire.","90 s"),
         ex("Bíceps con mancuerna",3,"12","2,5 kg c/lado","Curl con barra","Empezar con 2,5 kg por lado. Sin envión, codos quietos.","60 s"),
-        ex("Abductores en máquina",3,"15","32","Abductor con banda","","60 s"),
+        ex("Abductores en máquina",3,"15","32","Abductor con banda","Abrí las piernas controlando, apretá afuera 1 segundo.","60 s"),
         ex("Gemelos sentada",3,"15-20","Sin peso","Gemelos de pie","Ayuda a la circulación. Movimiento completo y controlado.","60 s"),
-        ex("Remo sentada",3,"12-15","14","Remo en máquina","","75 s"),
-        ex("Bíceps barrita",3,"12","7,5","Curl con barra Z","","60 s"),
-        ex("Femoral máquina",3,"15","28","Curl femoral acostado","","75 s"),
-        ex("Peso muerto mancuernas",3,"12","4 x lado","Peso muerto rumano","","75 s"),
+        ex("Remo sentada",3,"12-15","14","Remo en máquina","Pecho alto, llevá el agarre al abdomen apretando las escápulas.","75 s"),
+        ex("Bíceps barrita",3,"12","7,5","Curl con barra Z","Codos pegados al cuerpo, subí sin balancear.","60 s"),
+        ex("Femoral máquina",3,"15","28","Curl femoral acostado","Flexioná completo, bajá controlando. No uses impulso.","75 s"),
+        ex("Peso muerto mancuernas",3,"12","4 x lado","Peso muerto rumano","Espalda neutra, empujá el suelo con los pies, apretá glúteos arriba.","75 s"),
       ]},
       delfinaDay3(),
     ]
@@ -534,9 +558,9 @@ function delfinaDay3(){
     ex("Tríceps polea",3,"12","2,5 kg","Patada de tríceps","Codos pegados al cuerpo y quietos. Extendé completo.","60 s"),
     ex("Sentadilla con disco",3,"12","5 kg","Sentadilla goblet","Bajá controlada, sin profundidad excesiva (cuidado lumbar). Exhalar al subir.","75 s"),
     ex("Patada de glúteo en máquina",3,"12","9 kg","Patada glúteo en polea","Apretá el glúteo arriba, sin arquear la lumbar.","60 s"),
-    ex("Estocada búlgara",3,"12","Sin peso","Estocada con mancuernas","","75 s"),
-    ex("Bíceps polea",3,"12","9","Curl con mancuerna","","60 s"),
-    ex("Patada lateral con tobillera",3,"12","5","Abductor de pie","","60 s"),
+    ex("Estocada búlgara",3,"12","Sin peso","Estocada con mancuernas","Pie trasero en banco, bajá la rodilla trasera controlando. Torso erguido.","75 s"),
+    ex("Bíceps polea",3,"12","9","Curl con mancuerna","Codos pegados al cuerpo, apretá arriba 1 segundo.","60 s"),
+    ex("Patada lateral con tobillera",3,"12","5","Abductor de pie","De pie, llevá la pierna al costado controlando. Torso quieto.","60 s"),
   ]};
 }
 
@@ -586,28 +610,28 @@ function stuRosario(){
 function stuCarina(){
   return { name:"Carina", theme:"f", weeks:cp(DEFAULT_WEEKS), routine:[
     {day:"Día 1", ex:[
-      ex("Sentadilla asistida",4,"12","10 kg/lado","","Sección: Fuerza.",""),
-      ex("Toco punta con disco",4,"12 c/lado","5 kg","","Sección: Fuerza.",""),
-      ex("Flexiones con rodillas apoyadas",3,"12","Peso corporal","","Sección: Fuerza.",""),
-      ex("Sentadilla Smith",3,"8","Sin peso","","Sección: Fuerza.",""),
-      ex("Plancha conejo",3,"10-15","10 kg","","Sección: Fuerza.",""),
-      ex("Hombro con disco",3,"10","10 kg","","Sección: Fuerza.",""),
-      ex("Abductor en máquina",3,"15","41 kg","","Sección: Glúteo y pierna.",""),
-      ex("Patada y glúteo en máquina",3,"12","14 kg","","Sección: Glúteo y pierna.",""),
-      ex("Tríceps polea soga",3,"12","3 placas","","Sección: Brazos.",""),
-      ex("Volada frontal",3,"12","2 × 4 kg","","Sección: Brazos.",""),
+      ex("Sentadilla asistida",4,"12","10 kg/lado","Sentadilla goblet","Sección: Fuerza.",""),
+      ex("Toco punta con disco",4,"12 c/lado","5 kg","Crunch con disco","Sección: Fuerza.",""),
+      ex("Flexiones con rodillas apoyadas",3,"12","Peso corporal","Press de pecho en máquina","Sección: Fuerza.",""),
+      ex("Sentadilla Smith",3,"8","Sin peso","Sentadilla goblet","Sección: Fuerza.",""),
+      ex("Plancha conejo",3,"10-15","10 kg","Plancha alta","Sección: Fuerza.",""),
+      ex("Hombro con disco",3,"10","10 kg","Elevación frontal con mancuerna","Sección: Fuerza.",""),
+      ex("Abductor en máquina",3,"15","41 kg","Abductor con banda","Sección: Glúteo y pierna.",""),
+      ex("Patada y glúteo en máquina",3,"12","14 kg","Patada de glúteo en polea","Sección: Glúteo y pierna.",""),
+      ex("Tríceps polea soga",3,"12","3 placas","Patada de tríceps con mancuerna","Sección: Brazos.",""),
+      ex("Volada frontal",3,"12","2 × 4 kg","Elevación frontal con disco","Sección: Brazos.",""),
       ex("Cardio · Bicicleta (Nivel 10)",1,"ver detalle","Bici","","Entrada: 2' rápido ↓. Bloque ×4 vueltas: 30\" rápido ↓ · 30\" rápido ↑ · 30\" descanso. Cierre: 2' — 4 pedaleadas rápidas ↑ × 4 ↓.",""),
     ]},
     {day:"Día 2", ex:[
-      ex("Hip thrust en máquina",3,"10","10 kg/lado","","Sección: Glúteo y pierna.",""),
-      ex("Peso muerto",3,"12","20 kg","","Sección: Glúteo y pierna.",""),
-      ex("Aductores",3,"15","27 kg","","Sección: Glúteo y pierna.",""),
-      ex("Isquiotibiales",3,"12","23 kg","","Sección: Glúteo y pierna.",""),
-      ex("Abd bolita",3,"20","Peso corporal","","Sección: Glúteo y pierna.",""),
-      ex("Bíceps mancuerna",3,"12","6 kg/lado","","Sección: Hombros y brazos.",""),
-      ex("Press de hombros",3,"15","6 kg/lado","","Sección: Hombros y brazos.",""),
-      ex("Remo bajo",3,"12","23 kg","","Sección: Hombros y brazos.",""),
-      ex("Plancha toque hombros",3,"20","Peso corporal","","Sección: Core.",""),
+      ex("Hip thrust en máquina",3,"10","10 kg/lado","Puente de glúteo","Sección: Glúteo y pierna.",""),
+      ex("Peso muerto",3,"12","20 kg","Peso muerto rumano con mancuernas","Sección: Glúteo y pierna.",""),
+      ex("Aductores",3,"15","27 kg","Aductor con banda","Sección: Glúteo y pierna.",""),
+      ex("Isquiotibiales",3,"12","23 kg","Curl femoral acostado","Sección: Glúteo y pierna.",""),
+      ex("Abd bolita",3,"20","Peso corporal","Crunch en colchoneta","Sección: Glúteo y pierna.",""),
+      ex("Bíceps mancuerna",3,"12","6 kg/lado","Curl con barra","Sección: Hombros y brazos.",""),
+      ex("Press de hombros",3,"15","6 kg/lado","Press militar con mancuernas","Sección: Hombros y brazos.",""),
+      ex("Remo bajo",3,"12","23 kg","Remo con mancuerna","Sección: Hombros y brazos.",""),
+      ex("Plancha toque hombros",3,"20","Peso corporal","Plancha alta estática","Sección: Core.",""),
       ex("Cardio · Bicicleta",1,"ver detalle","Bici","","Entrada en calor 2'. Bloque ×8 vueltas: 20\" piqué (toma 3) · 20\" descanso (toma 1) · 20\" piqué (toma 2).",""),
     ]},
   ]};
@@ -640,17 +664,17 @@ function natiCaroDay2(){
 function stuNatiCaro(){
   return { name:"Nati / Caro", theme:"f", members:["Nati","Caro"], weeks:cp(DEFAULT_WEEKS), routine:[
     {day:"Día 1", ex:[
-      exD("Sentadilla Smith",4,"12","5 kg/lado","5 kg/lado","Sentadilla goblet","",""),
-      exD("Peso muerto unilateral",4,"12","10 kg/lado","7,5 kg/lado","Peso muerto rumano","",""),
+      exD("Sentadilla Smith",4,"12","5 kg/lado","5 kg/lado","Sentadilla goblet","Pies levemente adelantados, bajá a 90° controlando.",""),
+      exD("Peso muerto unilateral",4,"12","10 kg/lado","7,5 kg/lado","Peso muerto rumano","Una pierna atrás, bajá controlado manteniendo la espalda recta.",""),
       exD("Abd con disco",4,"15","5 kg","5 kg","Crunch en colchoneta","",""),
       exD("Dorsalera",4,"12","50 kg","40 kg","Jalón al pecho agarre neutro","",""),
       exD("Remo",4,"12","50 kg","40 kg","Remo con mancuerna","",""),
-      exD("Abductores",4,"15","110 kg","100 kg","Abductor con banda","",""),
+      exD("Abductores",4,"15","110 kg","100 kg","Abductor con banda","Movimiento controlado en todo el rango.",""),
       exD("Gemelos",4,"15","10 kg/lado","10 kg/lado","Gemelos en máquina","",""),
       exD("Tríceps soga polea",3,"12","18 kg","18 kg","Patada de tríceps","",""),
       exD("Bíceps soga polea",3,"12","18 kg","18 kg","Curl con mancuerna","",""),
       exD("Patada glúteo polea",3,"12","18–23 kg","18–23 kg","Patada de glúteo en máquina","2 series con 18 kg + 1 con 23 kg.",""),
-      exD("Hip thrust",4,"12","15 kg/lado","15 kg/lado","Puente de glúteo","",""),
+      exD("Hip thrust",4,"12","15 kg/lado","15 kg/lado","Puente de glúteo","Apoyá la espalda alta en el banco, apretá glúteos arriba 1 segundo.",""),
       exD("Gemelos en prensa",3,"10-12","47 kg","41 kg","Gemelos de pie","",""),
       exD("Volada lateral",3,"12","5 kg","5 kg","Elevación lateral en polea","",""),
       exD("Swing",3,"12","A definir","A definir","Kettlebell swing","",""),
@@ -662,7 +686,7 @@ function stuNatiCaro(){
 /* ---- Dúo Sofi / Marti (sin pesos fijos: cargan ellas) ---- */
 function sofiMartiDay2(){
   return { day:"Día 2", ex:[
-    exD("Sentadilla Smith",4,"12","15 kg","15 kg","Sentadilla libre","",""),
+    exD("Sentadilla Smith",4,"12","15 kg","15 kg","Sentadilla libre","Pies levemente adelantados, bajá a 90° controlando.",""),
     exD("Volada frontal con barra",4,"10-12","10 kg","10 kg","Elevación frontal con mancuerna","",""),
     exD("Femoral máquina",4,"12","A definir","A definir","Curl femoral acostado","Drop Set: aumentar peso, bajar repeticiones 12/10/8/8.",""),
     exD("Abducción",4,"15","54 kg","63 kg","Abductor con banda","",""),
@@ -671,7 +695,7 @@ function sofiMartiDay2(){
     exD("Press plano tríceps",4,"6-10","5 kg","5 kg","Fondos en banco","Agarre cerrado para tríceps.",""),
     exD("Apertura mancuerna inclinada",4,"8-10","A definir","10 kg","Apertura en máquina","",""),
     exD("Patada glúteo polea",4,"12","23 kg","23 kg","Patada de glúteo en máquina","",""),
-    exD("Volada lateral polea",4,"8-12","5 kg","5 kg","Elevación lateral con mancuerna","",""),
+    exD("Volada lateral polea",4,"8-12","5 kg","5 kg","Elevación lateral con mancuerna","Brazo casi extendido, subí controlado hasta la altura del hombro.",""),
   ]};
 }
 function sofiMartiDay3(){
@@ -712,11 +736,11 @@ function jusYesiDay2(){
   return { day:"Día 2", ex:[
     exD("Step up en Smith",3,"12-10","2,5 kg/lado","5 kg/lado","Step up al cajón con mancuernas","",""),
     exD("Plancha remo",3,"12","7,5 kg","7,5 kg","Renegade row","",""),
-    exD("Crunch polea",3,"15","12 kg","12 kg","Crunch abdominal en colchoneta","",""),
+    exD("Crunch polea",3,"15","12 kg","12 kg","Crunch abdominal en colchoneta","Flexioná el tronco con el abdomen, no tires con los brazos.",""),
     exD("Patada polea",3,"8","9 kg","9 kg","Patada de glúteo en máquina","",""),
     exD("Burpee + volada frontal",3,"16","6 kg","6 kg","Burpee sin salto + elevación frontal","",""),
-    exD("Aductores",3,"12-15","A definir","A definir","Aductor con banda","",""),
-    exD("Bíceps martillo",3,"12","7,5","7,5 kg","Curl martillo con mancuernas","",""),
+    exD("Aductores",3,"12-15","A definir","A definir","Aductor con banda","Movimiento controlado, apretá en la contracción.",""),
+    exD("Bíceps martillo",3,"12","7,5","7,5 kg","Curl martillo con mancuernas","Agarre neutro (palmas enfrentadas), codos quietos.",""),
     exD("Peso muerto tradicional",3,"10","15 kg/lado","15 kg/lado","Peso muerto rumano","",""),
   ]};
 }
@@ -740,157 +764,157 @@ function stuJusYesi(){
 
 function stuMartin(){ return { name:"Martín", theme:"m", weeks:cp(DEFAULT_WEEKS), routine:[
   {day:"Día 1", ex:[
-    ex("Press inclinado",4,"8","7,5 kg","Press inclinado en máquina","","90 s"),
-    ex("Abd toco punta con disco",4,"24","5 kg","","","45 s"),
-    ex("Tríceps unilateral polea",4,"12","1 placa","Patada de tríceps con mancuerna","","60 s"),
-    ex("Abducción polea",4,"15","4,5 kg","Abductor en máquina","","60 s"),
-    ex("Sentadilla Smith",4,"12","12 kg/lado","Sentadilla goblet","","90 s"),
-    ex("Press de hombro mancuerna",4,"12","7,5 kg/lado","Press militar en máquina","","75 s"),
-    ex("Push up lateral",4,"12","Peso corporal","","","60 s"),
+    ex("Press inclinado",4,"8","7,5 kg","Press inclinado en máquina","Banco a 30°, codos a 45° del torso, bajá al esternón controlando.","90 s"),
+    ex("Abd toco punta con disco",4,"24","5 kg","Crunch con disco","Subí el torso y tocá la punta de los pies con el disco. Controlá la bajada.","45 s"),
+    ex("Tríceps unilateral polea",4,"12","1 placa","Patada de tríceps con mancuerna","Codo pegado al cuerpo, extendé completo abajo.","60 s"),
+    ex("Abducción polea",4,"15","4,5 kg","Abductor en máquina","De pie, pierna de trabajo hacia afuera, controlá la vuelta.","60 s"),
+    ex("Sentadilla Smith",4,"12","12 kg/lado","Sentadilla goblet","Pies levemente adelantados, bajá a 90° controlando.","90 s"),
+    ex("Press de hombro mancuerna",4,"12","7,5 kg/lado","Press militar en máquina","Codos a 90°, empujá vertical sin arquear la espalda.","75 s"),
+    ex("Push up lateral",4,"12","Peso corporal","Flexiones laterales","Flexión + desplazamiento lateral. Abdomen firme en todo momento.","60 s"),
   ]},
   {day:"Día 2", ex:[
-    ex("Remo sentado",4,"12","45 kg","Remo en máquina","","75 s"),
-    ex("Bíceps mancuerna",4,"12","10 kg/lado","Curl con barra","","60 s"),
-    ex("Isquios",4,"15","45 kg","Femoral en camilla","","60 s"),
-    ex("Aductores",4,"15","27 kg","Aductor con banda","","60 s"),
-    ex("Peso muerto",4,"12","15 kg/lado","Peso muerto rumano","","90 s"),
+    ex("Remo sentado",4,"12","45 kg","Remo en máquina","Pecho alto, llevá el agarre al abdomen apretando las escápulas.","75 s"),
+    ex("Bíceps mancuerna",4,"12","10 kg/lado","Curl con barra","Codos pegados al cuerpo, rotá la palma al subir.","60 s"),
+    ex("Isquios",4,"15","45 kg","Femoral en camilla","Flexioná completo, bajá controlando sin soltar.","60 s"),
+    ex("Aductores",4,"15","27 kg","Aductor con banda","Movimiento controlado, apretá en la contracción.","60 s"),
+    ex("Peso muerto",4,"12","15 kg/lado","Peso muerto rumano","Espalda neutra, empujá el suelo con los pies, apretá glúteos arriba.","90 s"),
     ex("Peso muerto con barra",1,"8","50 kg","Peso muerto rumano con barra","Serie pesada al final.","120 s"),
-    ex("Pull over mancuerna",4,"12","10 kg","Pull-over en polea","","60 s"),
-    ex("Pull-over en polea soga",4,"15","27 kg","Pull-over con mancuerna","","60 s"),
+    ex("Pull over mancuerna",4,"12","10 kg","Pull-over en polea","Brazos casi extendidos, bajá atrás sintiendo el estiramiento del dorsal.","60 s"),
+    ex("Pull-over en polea soga",4,"15","27 kg","Pull-over con mancuerna","Brazos casi extendidos, llevá la soga hacia abajo con el dorsal.","60 s"),
   ]}
 ] }; }
 
 function stuJoni(){ return { name:"Joni Puebla", theme:"m", weeks:cp(DEFAULT_WEEKS), routine:[
   {day:"Día 1", ex:[
-    ex("Press plano barra",4,"10","A definir","Press plano con mancuernas","","90 s"),
-    ex("Bíceps curl sentado",4,"10","A definir","Curl de pie con barra","","60 s"),
-    ex("Apertura máquina",4,"10","A definir","Aperturas con mancuernas","","60 s"),
-    ex("Bíceps barra",4,"10","A definir","Curl con barra Z","","60 s"),
-    ex("Volada lateral polea",4,"8-10","A definir","Elevación lateral con mancuerna","","60 s"),
-    ex("Peso muerto unilateral",4,"10-12","A definir","Peso muerto rumano","","75 s"),
-    ex("Abductores máquina",4,"12-15","A definir","Abductor con banda","","60 s"),
-    ex("Máquina cuádriceps",4,"10-12","A definir","Extensión de cuádriceps","","60 s"),
+    ex("Press plano barra",4,"10","A definir","Press plano con mancuernas","Omóplatos retraídos, bajá al esternón controlando, sin rebotar.","90 s"),
+    ex("Bíceps curl sentado",4,"10","A definir","Curl de pie con barra","Sentado, codos apoyados en las rodillas, subí controlado.","60 s"),
+    ex("Apertura máquina",4,"10","A definir","Aperturas con mancuernas","Codos levemente flexionados, sentí el estiramiento del pectoral.","60 s"),
+    ex("Bíceps barra",4,"10","A definir","Curl con barra Z","Codos pegados al cuerpo y quietos, subí sin balancear la espalda.","60 s"),
+    ex("Volada lateral polea",4,"8-10","A definir","Elevación lateral con mancuerna","Brazo casi extendido, subí controlado hasta la altura del hombro.","60 s"),
+    ex("Peso muerto unilateral",4,"10-12","A definir","Peso muerto rumano","Una pierna atrás, bajá controlado manteniendo la espalda recta.","75 s"),
+    ex("Abductores máquina",4,"12-15","A definir","Abductor con banda","Sentate erguida, abrí las piernas controlando, sin rebote.","60 s"),
+    ex("Máquina cuádriceps",4,"10-12","A definir","Extensión de cuádriceps","Extendé completo arriba, bajá controlando sin soltar.","60 s"),
   ]},
   {day:"Día 2", ex:[
-    ex("Remo Lachine",4,"10","A definir","Remo en polea baja","","75 s"),
+    ex("Remo Lachine",4,"10","A definir","Remo en polea baja","Pecho apoyado, llevá los codos atrás apretando escápulas.","75 s"),
     ex("Flexiones tríceps",4,"al fallo","Peso corporal","Fondos en paralelas","Series al fallo.","75 s"),
-    ex("Dorsalera amplia",4,"10","A definir","Jalón al pecho agarre abierto","","75 s"),
-    ex("Press hombro máquina",4,"10","A definir","Press militar con mancuernas","","75 s"),
-    ex("Patada tríceps polea",4,"10","A definir","Patada de tríceps con mancuerna","","60 s"),
-    ex("Pull over polea",4,"10","A definir","Pull over con mancuerna","","60 s"),
+    ex("Dorsalera amplia",4,"10","A definir","Jalón al pecho agarre abierto","Agarre abierto, pecho arriba, bajá la barra al mentón sin tirones.","75 s"),
+    ex("Press hombro máquina",4,"10","A definir","Press militar con mancuernas","Codos a 90°, empujá vertical sin arquear la espalda.","75 s"),
+    ex("Patada tríceps polea",4,"10","A definir","Patada de tríceps con mancuerna","Torso inclinado, codo fijo, extendé completo atrás.","60 s"),
+    ex("Pull over polea",4,"10","A definir","Pull over con mancuerna","Brazos casi extendidos, llevá la barra hacia abajo con el dorsal.","60 s"),
     ex("Hip thrust abierta y cerrada",4,"10+10","A definir","Hip thrust en máquina","A = abierta, C = cerrada.","90 s"),
-    ex("Aductores máquina",4,"12-15","A definir","Aductor con banda","","60 s"),
+    ex("Aductores máquina",4,"12-15","A definir","Aductor con banda","Sentate erguida, cerrá las piernas controlando, sin rebote.","60 s"),
   ]},
   {day:"Día 3 · Popurrí", ex:[
     ex("Dominadas",4,"al fallo","Peso corporal","Jalón supino en polea","Series al fallo.","90 s"),
-    ex("Estocada c/ lanzamiento lateral",4,"15/lado","A definir","Estocada con rotación","","75 s"),
-    ex("Step up en cajón",4,"12","A definir","Step up al cajón con mancuerna","","60 s"),
+    ex("Estocada c/ lanzamiento lateral",4,"15/lado","A definir","Estocada con rotación","Combiná la estocada con rotación del torso. Controlá el equilibrio.","75 s"),
+    ex("Step up en cajón",4,"12","A definir","Step up al cajón con mancuerna","Pisá firme con toda la planta, empujá con la pierna de arriba sin impulso.","60 s"),
     ex("Barquito c/ disco",4,"40 s","A definir","V-ups","Isométrico: 40 segundos por serie.","45 s"),
-    ex("Press inclinado mancuerna",4,"10","A definir","Press inclinado en Smith","","75 s"),
-    ex("Crunch abdominal banco",4,"20","Peso corporal","Crunch en colchoneta","","45 s"),
-    ex("Sentadilla goblet",4,"15","A definir","Sentadilla con barra","","75 s"),
-    ex("Tríceps copa",4,"10","A definir","Tríceps en polea","","60 s"),
-    ex("Volada posterior máquina",4,"10","A definir","Pájaro con mancuerna","","60 s"),
-    ex("Bíceps martillo",4,"10","A definir","Curl martillo en polea","","60 s"),
+    ex("Press inclinado mancuerna",4,"10","A definir","Press inclinado en Smith","Banco a 30°, codos a 45°, sentí el estiramiento del pectoral abajo.","75 s"),
+    ex("Crunch abdominal banco",4,"20","Peso corporal","Crunch en colchoneta","Subí con el abdomen, no con el cuello. Controlá la bajada.","45 s"),
+    ex("Sentadilla goblet",4,"15","A definir","Sentadilla con barra","Disco o mancuerna al pecho, bajá controlada con la espalda erguida.","75 s"),
+    ex("Tríceps copa",4,"10","A definir","Tríceps en polea","Codos apuntando al techo, bajá detrás de la cabeza controlando.","60 s"),
+    ex("Volada posterior máquina",4,"10","A definir","Pájaro con mancuerna","Pecho apoyado, llevá los brazos atrás apretando las escápulas.","60 s"),
+    ex("Bíceps martillo",4,"10","A definir","Curl martillo en polea","Agarre neutro (palmas enfrentadas), codos quietos.","60 s"),
   ]}
 ] }; }
 
 function stuFlor(){ return { name:"Flor", theme:"f", weeks:cp(DEFAULT_WEEKS), routine:[
   {day:"Día 1", ex:[
-    ex("Step up",4,"12","2,5 kg","Step up al cajón","","60 s"),
-    ex("Remo plancha",4,"12","7,5 kg","Renegade row","","60 s"),
-    ex("Patada glúteo",4,"12","23 kg","Patada de glúteo en máquina","","60 s"),
-    ex("Plancha lateral",4,"12","4 kg","Plancha lateral con elevación","","45 s"),
-    ex("Tríceps polea unilateral",4,"12","5 kg","Patada de tríceps con mancuerna","","60 s"),
-    ex("Crunch polea",4,"15","32 kg","Crunch en colchoneta","","45 s"),
+    ex("Step up",4,"12","2,5 kg","Step up al cajón","Pisá firme con toda la planta, empujá con la pierna de arriba sin impulso.","60 s"),
+    ex("Remo plancha",4,"12","7,5 kg","Renegade row","En posición de plancha, llevá el codo atrás sin rotar el torso.","60 s"),
+    ex("Patada glúteo",4,"12","23 kg","Patada de glúteo en máquina","Empujá con el talón, apretá el glúteo arriba sin arquear la lumbar.","60 s"),
+    ex("Plancha lateral",4,"12","4 kg","Plancha lateral con elevación","Cuerpo en línea recta, no dejes caer la cadera.","45 s"),
+    ex("Tríceps polea unilateral",4,"12","5 kg","Patada de tríceps con mancuerna","Codo pegado al cuerpo, extendé completo abajo.","60 s"),
+    ex("Crunch polea",4,"15","32 kg","Crunch en colchoneta","Flexioná el tronco con el abdomen, no tires con los brazos.","45 s"),
     ex("Prensa común",4,"9","86 kg","Sentadilla goblet","Progresión: 52 → 75 → 86 kg.","90 s"),
   ]},
   {day:"Día 2", ex:[
     ex("Hip thrust",4,"12","30 kg","Puente de glúteo","Progresión: 10 → 20 → 25 → 30 kg.","90 s"),
-    ex("Inferiores",4,"15","2,5 kg","Elevación de piernas","","45 s"),
-    ex("Dorsalera supina",4,"35","A definir","Jalón supino en polea","","60 s"),
-    ex("Press hombro máquina",4,"12","14 kg","Press militar con mancuernas","","75 s"),
-    ex("Espinales",4,"15","Peso corporal","Hiperextensiones lumbares","","45 s"),
-    ex("Prensa 45°",4,"13","20 kg/lado","Sentadilla en Smith","","90 s"),
-    ex("Barquito",4,"12","10 kg","V-ups","","45 s"),
-    ex("Cuádriceps",4,"12","36 kg","Extensión de cuádriceps en máquina","","60 s"),
-    ex("Abductores",4,"15","50 kg","Abductor con banda","","60 s"),
-    ex("Aductores",4,"10","27 kg","Aductor con banda","","60 s"),
+    ex("Inferiores",4,"15","2,5 kg","Elevación de piernas","Bajá las piernas controlando sin despegar la lumbar del piso.","45 s"),
+    ex("Dorsalera supina",4,"35","A definir","Jalón supino en polea","Agarre supino, pecho arriba, sentí la contracción en los dorsales.","60 s"),
+    ex("Press hombro máquina",4,"12","14 kg","Press militar con mancuernas","Codos a 90°, empujá vertical sin arquear la espalda.","75 s"),
+    ex("Espinales",4,"15","Peso corporal","Hiperextensiones lumbares","Subí el torso controlando, apretá la zona lumbar arriba.","45 s"),
+    ex("Prensa 45°",4,"13","20 kg/lado","Sentadilla en Smith","Pies al ancho de hombros, bajá hasta 90° sin despegar la lumbar.","90 s"),
+    ex("Barquito",4,"12","10 kg","V-ups","Mantené la posición con abdomen contraído, no retengas la respiración.","45 s"),
+    ex("Cuádriceps",4,"12","36 kg","Extensión de cuádriceps en máquina","Extendé completo arriba, bajá controlando sin soltar.","60 s"),
+    ex("Abductores",4,"15","50 kg","Abductor con banda","Movimiento controlado en todo el rango.","60 s"),
+    ex("Aductores",4,"10","27 kg","Aductor con banda","Movimiento controlado, apretá en la contracción.","60 s"),
   ]}
 ] }; }
 
 function stuCintia(){ return { name:"Cintia", theme:"f", weeks:cp(DEFAULT_WEEKS), routine:[
   {day:"Día 1", ex:[
-    ex("Sentadilla sumo Smith",4,"10-12","A definir","Sentadilla sumo con mancuerna","","90 s"),
-    ex("Volada lateral mancuerna",4,"10-12","4 kg","Elevación lateral en polea","","60 s"),
-    ex("Abductores máquina",4,"15","47 kg","Abductor con banda","","60 s"),
-    ex("Bíceps mancuerna",4,"12","A definir","Curl con barra","","60 s"),
+    ex("Sentadilla sumo Smith",4,"10-12","A definir","Sentadilla sumo con mancuerna","Pies anchos, puntas afuera, bajá con espalda erguida.","90 s"),
+    ex("Volada lateral mancuerna",4,"10-12","4 kg","Elevación lateral en polea","Codos levemente flexionados, subí hasta la altura del hombro sin envión.","60 s"),
+    ex("Abductores máquina",4,"15","47 kg","Abductor con banda","Sentate erguida, abrí las piernas controlando, sin rebote.","60 s"),
+    ex("Bíceps mancuerna",4,"12","A definir","Curl con barra","Codos pegados al cuerpo, rotá la palma al subir.","60 s"),
     ex("Máquina cuádriceps Drop Set",4,"12-10-8-8","41 kg","Extensión de cuádriceps","Drop Set: anotá los 4 pesos de cada bajada.","75 s"),
-    ex("Gemelos parado",4,"15","A definir","Gemelos en máquina","","45 s"),
-    ex("Remo máquina",4,"12","23 kg","Remo en polea baja","","75 s"),
-    ex("Dorsalera supina",4,"12","A definir","Jalón supino en polea","","75 s"),
+    ex("Gemelos parado",4,"15","A definir","Gemelos en máquina","Rango completo: estirá bien abajo y apretá arriba 1 segundo.","45 s"),
+    ex("Remo máquina",4,"12","23 kg","Remo en polea baja","Pecho apoyado, llevá los codos atrás apretando las escápulas.","75 s"),
+    ex("Dorsalera supina",4,"12","A definir","Jalón supino en polea","Agarre supino, pecho arriba, sentí la contracción en los dorsales.","75 s"),
     ex("Circuito abdominal",3,"15","Peso corporal","Tabla isométrica 30s + crunch 15 + bicicleta 15","Sit up c/disco + Plancha remo c/mancuerna + Plancha lateral c/rotación. Sin pausa entre ejercicios.","45 s"),
   ]},
   {day:"Día 2", ex:[
-    ex("Hip thrust",4,"10-12","A definir","Puente de glúteo","","90 s"),
-    ex("Aductores máquina",4,"15","A definir","Aductor con banda","","60 s"),
-    ex("Tríceps trasnuca",4,"10-12","5 kg","Tríceps en polea","","60 s"),
-    ex("Press pecho máquina",4,"10-12","3 placas","Press de pecho con mancuernas","","75 s"),
-    ex("Prensa",4,"10-12","5 placas","Prensa a 45°","","90 s"),
+    ex("Hip thrust",4,"10-12","A definir","Puente de glúteo","Apoyá la espalda alta en el banco, apretá glúteos arriba 1 segundo.","90 s"),
+    ex("Aductores máquina",4,"15","A definir","Aductor con banda","Sentate erguida, cerrá las piernas controlando, sin rebote.","60 s"),
+    ex("Tríceps trasnuca",4,"10-12","5 kg","Tríceps en polea","Codos apuntando al techo, bajá detrás de la cabeza controlando.","60 s"),
+    ex("Press pecho máquina",4,"10-12","3 placas","Press de pecho con mancuernas","Omóplatos retraídos, empujá sin bloquear los codos.","75 s"),
+    ex("Prensa",4,"10-12","5 placas","Prensa a 45°","Pies al ancho de hombros, bajá controlado sin despegar la lumbar del respaldo.","90 s"),
     ex("Circuito abdominal",3,"15","Peso corporal","Plancha 30s + crunch oblicuo 15 + mountain climber 15","Espinales máquina + Crunch abdominal + Twist soviético. Sin pausa entre ejercicios.","45 s"),
-    ex("Patada glúteo en polea",4,"12","A definir","Patada de glúteo en máquina","","60 s"),
-    ex("Press hombro mancuerna",4,"10-12","A definir","Press militar en máquina","","75 s"),
+    ex("Patada glúteo en polea",4,"12","A definir","Patada de glúteo en máquina","Empujá con el talón, apretá el glúteo arriba sin arquear la lumbar.","60 s"),
+    ex("Press hombro mancuerna",4,"10-12","A definir","Press militar en máquina","Codos a 90°, empujá vertical sin arquear la espalda.","75 s"),
     ex("Máquina femoral Drop Set",4,"12-10-8-8","A definir","Curl femoral acostado","Drop Set: anotá los 4 pesos de cada bajada.","75 s"),
   ]},
   {day:"Día 3", ex:[
-    ex("Peso muerto barra",4,"10-12","A definir","Peso muerto rumano","","90 s"),
-    ex("Estocada búlgara",4,"10-12","7,5 kg/lado","Estocada con mancuernas","","75 s"),
-    ex("Fondos en cajón",4,"12","Peso corporal","Fondos en paralelas asistidos","","60 s"),
-    ex("Step up en cajón",4,"12","10 kg","Step up al cajón con mancuerna","","60 s"),
-    ex("Plancha remo c/ volada arriba",4,"8-10","A definir","Renegade row + volada","","60 s"),
-    ex("Patada glúteo en polea",4,"12","A definir","Patada de glúteo en máquina","","60 s"),
-    ex("Plancha alta y baja",4,"8-10","Peso corporal","Plancha con desplazamiento","","45 s"),
-    ex("Volada frontal mancuerna",4,"10","A definir","Elevación frontal con mancuerna","","60 s"),
-    ex("Sentadilla goblet",4,"15","A definir","Sentadilla con barra","","75 s"),
+    ex("Peso muerto barra",4,"10-12","A definir","Peso muerto rumano","Espalda neutra, barra pegada a las piernas, apretá glúteos arriba.","90 s"),
+    ex("Estocada búlgara",4,"10-12","7,5 kg/lado","Estocada con mancuernas","Pie trasero en banco, bajá la rodilla trasera controlando. Torso erguido.","75 s"),
+    ex("Fondos en cajón",4,"12","Peso corporal","Fondos en paralelas asistidos","Codos hacia atrás (no a los lados), bajá hasta 90° de codo.","60 s"),
+    ex("Step up en cajón",4,"12","10 kg","Step up al cajón con mancuerna","Pisá firme con toda la planta, empujá con la pierna de arriba sin impulso.","60 s"),
+    ex("Plancha remo c/ volada arriba",4,"8-10","A definir","Renegade row + volada","En plancha, remá y abrí el brazo arriba. Abdomen firme, sin rotar.","60 s"),
+    ex("Patada glúteo en polea",4,"12","A definir","Patada de glúteo en máquina","Empujá con el talón, apretá el glúteo arriba sin arquear la lumbar.","60 s"),
+    ex("Plancha alta y baja",4,"8-10","Peso corporal","Plancha con desplazamiento","Alterná entre plancha alta y baja controlando, sin balancear la cadera.","45 s"),
+    ex("Volada frontal mancuerna",4,"10","A definir","Elevación frontal con mancuerna","Subí con brazos casi extendidos hasta la altura del hombro, sin envión.","60 s"),
+    ex("Sentadilla goblet",4,"15","A definir","Sentadilla con barra","Disco o mancuerna al pecho, bajá controlada con la espalda erguida.","75 s"),
   ]}
 ] }; }
 
 function stuFede(){ return { name:"Fede del Sol", theme:"m", weeks:cp(DEFAULT_WEEKS), routine:[
   {day:"Día 1", ex:[
-    ex("Press plano banco",4,"12","20 kg x lado","Press con mancuernas plano","","90 s"),
-    ex("Bíceps barra",4,"12","24 kg","Curl alterno con mancuernas","","60 s"),
-    ex("Apertura máquina",4,"12","A definir","Aperturas con mancuernas","","60 s"),
-    ex("Press hombro máquina",4,"10-12","19 kg","Press militar con mancuernas","","75 s"),
-    ex("Máquina de cuádriceps",4,"12","A definir","Extensión de cuádriceps","","60 s"),
-    ex("Abductores máquina",4,"15","54 kg","Abductor con banda","","60 s"),
-    ex("Volada lateral polea",4,"10-12","10 kg","Elevación lateral con mancuerna","","60 s"),
-    ex("Bíceps polea barrita",4,"12","A definir","Curl con barra Z","","60 s"),
-    ex("Gemelos parado",4,"15","A definir","Gemelos en máquina","","45 s"),
-    ex("Estocada mancuerna",4,"10","A definir","Estocada búlgara","","75 s"),
+    ex("Press plano banco",4,"12","20 kg x lado","Press con mancuernas plano","Omóplatos retraídos, bajá al esternón controlando, sin rebotar.","90 s"),
+    ex("Bíceps barra",4,"12","24 kg","Curl alterno con mancuernas","Codos pegados al cuerpo y quietos, subí sin balancear la espalda.","60 s"),
+    ex("Apertura máquina",4,"12","A definir","Aperturas con mancuernas","Codos levemente flexionados, sentí el estiramiento del pectoral.","60 s"),
+    ex("Press hombro máquina",4,"10-12","19 kg","Press militar con mancuernas","Codos a 90°, empujá vertical sin arquear la espalda.","75 s"),
+    ex("Máquina de cuádriceps",4,"12","A definir","Extensión de cuádriceps","Extendé completo arriba, bajá controlando sin soltar.","60 s"),
+    ex("Abductores máquina",4,"15","54 kg","Abductor con banda","Sentate erguida, abrí las piernas controlando, sin rebote.","60 s"),
+    ex("Volada lateral polea",4,"10-12","10 kg","Elevación lateral con mancuerna","Brazo casi extendido, subí controlado hasta la altura del hombro.","60 s"),
+    ex("Bíceps polea barrita",4,"12","A definir","Curl con barra Z","Codos pegados al cuerpo, apretá arriba 1 segundo.","60 s"),
+    ex("Gemelos parado",4,"15","A definir","Gemelos en máquina","Rango completo: estirá bien abajo y apretá arriba 1 segundo.","45 s"),
+    ex("Estocada mancuerna",4,"10","A definir","Estocada búlgara","Paso largo, bajá la rodilla trasera sin que la delantera pase la punta del pie.","75 s"),
   ]},
   {day:"Día 2", ex:[
     ex("Dominadas pronas",4,"al fallo","Peso corporal","Jalón al pecho agarre prono","Series al fallo.","90 s"),
-    ex("Volada posterior máquina",4,"10-12","A definir","Pájaro con mancuerna","","60 s"),
-    ex("Press francés mancuerna",4,"10-12","7,5 kg x lado","Press francés con barra","","60 s"),
-    ex("Volada frontal mancuerna",4,"8-10","A definir","Elevación frontal con disco","","60 s"),
-    ex("Hip thrust máquina",4,"10-12","67 kg","Hip thrust con barra","","90 s"),
-    ex("Aductores máquina",4,"15","48 kg","Aductor con banda","","60 s"),
-    ex("Remo bajo máquina",4,"12","A definir","Remo en polea baja","","75 s"),
-    ex("Máquina de isquios",4,"12","A definir","Curl femoral acostado","","60 s"),
-    ex("Tríceps polea barrita",4,"12","A definir","Patada de tríceps con mancuerna","","60 s"),
+    ex("Volada posterior máquina",4,"10-12","A definir","Pájaro con mancuerna","Pecho apoyado, llevá los brazos atrás apretando las escápulas.","60 s"),
+    ex("Press francés mancuerna",4,"10-12","7,5 kg x lado","Press francés con barra","Codos fijos apuntando al techo, bajá controlado detrás de la cabeza.","60 s"),
+    ex("Volada frontal mancuerna",4,"8-10","A definir","Elevación frontal con disco","Subí con brazos casi extendidos hasta la altura del hombro, sin envión.","60 s"),
+    ex("Hip thrust máquina",4,"10-12","67 kg","Hip thrust con barra","Apretá glúteos arriba 1 segundo, no hiperextendas la lumbar.","90 s"),
+    ex("Aductores máquina",4,"15","48 kg","Aductor con banda","Sentate erguida, cerrá las piernas controlando, sin rebote.","60 s"),
+    ex("Remo bajo máquina",4,"12","A definir","Remo en polea baja","Pecho apoyado, llevá los codos atrás apretando las escápulas.","75 s"),
+    ex("Máquina de isquios",4,"12","A definir","Curl femoral acostado","Flexioná completo, bajá controlando. No uses impulso.","60 s"),
+    ex("Tríceps polea barrita",4,"12","A definir","Patada de tríceps con mancuerna","Codos pegados al cuerpo, extendé completo sin mover los hombros.","60 s"),
     ex("Face pull polea",4,"12","A definir","Pull face con banda","Codos altos, llevá la soga hacia la cara.","60 s"),
   ]},
   {day:"Día 3", ex:[
-    ex("Press inclinado barra",4,"10-12","A definir","Press inclinado con mancuernas","","90 s"),
-    ex("Bíceps martillo banco inclinado",4,"10-12","A definir","Curl martillo de pie","","60 s"),
-    ex("Peso muerto barra",4,"12","9,5 kg x lado","Peso muerto rumano mancuernas","","90 s"),
-    ex("Gemelos sentado",4,"15","A definir","Gemelos de pie","","45 s"),
+    ex("Press inclinado barra",4,"10-12","A definir","Press inclinado con mancuernas","Banco a 30°, codos a 45° del torso, bajá al esternón controlando.","90 s"),
+    ex("Bíceps martillo banco inclinado",4,"10-12","A definir","Curl martillo de pie","Banco a 45°, brazos colgando, subí sin mover los codos.","60 s"),
+    ex("Peso muerto barra",4,"12","9,5 kg x lado","Peso muerto rumano mancuernas","Espalda neutra, barra pegada a las piernas, apretá glúteos arriba.","90 s"),
+    ex("Gemelos sentado",4,"15","A definir","Gemelos de pie","Rango completo y controlado, apretá arriba 1 segundo.","45 s"),
     ex("Snatch",4,"12/lado","A definir","Clean and press","Movimiento explosivo controlado.","75 s"),
-    ex("Remo al mentón barrita",4,"12","A definir","Remo al mentón con mancuernas","","60 s"),
+    ex("Remo al mentón barrita",4,"12","A definir","Remo al mentón con mancuernas","Agarre al ancho de hombros, subí los codos liderando el movimiento.","60 s"),
     ex("Flexiones",4,"al fallo","Peso corporal","Press de pecho en máquina","Series al fallo.","60 s"),
-    ex("Dorsalera supina",4,"12","48 kg","Jalón supino en polea","","75 s"),
-    ex("Prensa",4,"12","A definir","Sentadilla goblet","","90 s"),
-    ex("Patada glúteo máquina",4,"12/lado","A definir","Patada de glúteo en polea","","60 s"),
+    ex("Dorsalera supina",4,"12","48 kg","Jalón supino en polea","Agarre supino, pecho arriba, sentí la contracción en los dorsales.","75 s"),
+    ex("Prensa",4,"12","A definir","Sentadilla goblet","Pies al ancho de hombros, bajá controlado sin despegar la lumbar del respaldo.","90 s"),
+    ex("Patada glúteo máquina",4,"12/lado","A definir","Patada de glúteo en polea","Empujá con el talón, apretá el glúteo arriba sin arquear la lumbar.","60 s"),
   ]}
 ] }; }
 
@@ -939,45 +963,86 @@ function seedBatch2(){
 
 /* ---- Formularios (Acuerdo / Anamnesis) ---- */
 const FORM_ACUERDO=[
-  {title:'Datos personales',fields:[
+  {title:'📋 Datos personales',accordion:true,fields:[
     {k:'nombre',l:'Nombre',type:'text',req:1},{k:'apellido',l:'Apellido',type:'text',req:1},
     {k:'dni',l:'DNI',type:'text'},{k:'fecha_nac',l:'Fecha de nacimiento',type:'date'},
     {k:'email',l:'Email',type:'email',req:1},{k:'telefono',l:'Teléfono',type:'tel',req:1},
+    {k:'domicilio',l:'Domicilio',type:'text',full:1},
+    {k:'obra_social',l:'Obra social / Prepaga',type:'text'},
+    {k:'contacto_emergencia',l:'Contacto de emergencia (nombre y teléfono)',type:'text',full:1},
   ]},
-  {title:'Modalidad de clases',fields:[
-    {k:'dias_semana',l:'Días por semana',type:'text'},{k:'duracion',l:'Duración de la clase',type:'text'},
-    {k:'horario',l:'Horario',type:'text'},{k:'reprog',l:'Reprogramaciones por mes',type:'number'},
+  {title:'📝 Modalidad de clases',accordion:true,fields:[
+    {k:'dias_semana',l:'Días por semana',type:'text'},
+    {k:'duracion',l:'Duración de la clase',type:'fixed',value:'60 minutos'},
+    {k:'horario',l:'Horario',type:'text'},
+    {k:'modalidad',l:'Modalidad',type:'select',opts:['Presencial','Virtual','Mixta']},
   ]},
-  {title:'Autorización de imagen',fields:[
-    {k:'aut_redes',l:'Autorizo uso de fotos en redes sociales de TAFIT',type:'check'},
-    {k:'aut_interno',l:'Autorizo fotos de seguimiento interno',type:'check'},
+  {title:'💰 Honorarios y formas de pago',accordion:true,fields:[
+    {k:'_hp1',l:'',type:'fixed',value:'El valor de cada clase será acordado previamente entre las partes.',full:1},
+    {k:'_hp2',l:'',type:'fixed',value:'El pago se realizará por adelantado, de forma mensual, mediante efectivo o transferencia bancaria.',full:1},
+    {k:'_hp3',l:'',type:'fixed',value:'Las clases deberán abonarse entre el 1 y el 10 de cada mes. Pasado ese plazo, se aplicará un recargo adicional sobre el valor acordado.',full:1},
+    {k:'_hp4',l:'',type:'fixed',value:'Los honorarios están sujetos a una actualización trimestral, comunicada con un mes de anticipación.',full:1},
+    {k:'metodo_pago',l:'Método de pago preferido',type:'select',opts:['Efectivo','Transferencia bancaria','Mercado Pago','Otro']},
   ]},
-  {title:'Firma y aceptación',fields:[
-    {k:'acepto',l:'Acepto los términos y condiciones',type:'check',req:1},
+  {title:'⏰ Cancelaciones y reprogramaciones',accordion:true,fields:[
+    {k:'_cr1',l:'',type:'fixed',value:'Las cancelaciones deben informarse con al menos 24 horas de anticipación.',full:1},
+    {k:'_cr2',l:'',type:'fixed',value:'Se permiten hasta 2 reprogramaciones por mes, sujetas a disponibilidad horaria.',full:1},
+    {k:'_cr3',l:'',type:'fixed',value:'En caso de viajes o vacaciones, la alumna/o debe informar con anticipación. Las clases perdidas por ese motivo no serán reintegradas.',full:1},
+    {k:'_cr4',l:'',type:'fixed',value:'Tamara Claveria se reserva el derecho de reprogramar en caso de imprevistos, avisando con la mayor antelación posible.',full:1},
+    {k:'_cr5',l:'',type:'fixed',value:'Las clases son personales e intransferibles.',full:1},
+  ]},
+  {title:'🤝 Compromiso del alumno/a',accordion:true,fields:[
+    {k:'_co1',l:'',type:'fixed',value:'Me comprometo a asistir a las clases en el horario pactado. La llegada tarde no extiende la duración de la clase.',full:1},
+    {k:'_co2',l:'',type:'fixed',value:'Me comprometo a comunicar cualquier molestia, dolor o cambio en mi estado de salud durante o fuera de las sesiones de entrenamiento.',full:1},
+    {k:'_co3',l:'',type:'fixed',value:'Me comprometo a seguir las indicaciones de la entrenadora durante la sesión de entrenamiento.',full:1},
+  ]},
+  {title:'⚕ Lesiones y condiciones preexistentes',accordion:true,fields:[
+    {k:'_le1',l:'',type:'fixed',value:'Declaro haber informado todas las condiciones de salud, lesiones, cirugías y/o limitaciones físicas relevantes en la ficha de Anamnesis. En caso de omisión, eximo de responsabilidad a la profesional.',full:1},
+  ]},
+  {title:'🔒 Confidencialidad',accordion:true,fields:[
+    {k:'_cf1',l:'',type:'fixed',value:'Toda la información personal, de salud y de entrenamiento proporcionada será tratada de forma estrictamente confidencial y utilizada exclusivamente para la planificación y seguimiento del entrenamiento.',full:1},
+  ]},
+  {title:'📸 Autorización de imagen',accordion:true,fields:[
+    {k:'aut_redes',l:'Autorizo el uso de fotos y/o videos en redes sociales de TAFIT',type:'check'},
+    {k:'aut_interno',l:'Autorizo el registro fotográfico de seguimiento interno (progreso)',type:'check'},
+  ]},
+  {title:'📅 Duración y rescisión',accordion:true,fields:[
+    {k:'_dr1',l:'',type:'fixed',value:'Este acuerdo comienza en la fecha de firma y es de carácter mensual renovable.',full:1},
+    {k:'_dr2',l:'',type:'fixed',value:'Cualquiera de las partes puede dar por finalizado el vínculo avisando con al menos 30 días de anticipación.',full:1},
+    {k:'_dr3',l:'',type:'fixed',value:'Las clases ya pagadas y no realizadas al momento de la rescisión no serán reintegradas ni recuperadas.',full:1},
+  ]},
+  {title:'📊 Resultados y expectativas',accordion:true,fields:[
+    {k:'_re1',l:'',type:'fixed',value:'Los resultados del entrenamiento dependen de múltiples factores: constancia, adherencia al plan, alimentación, descanso y predisposición.',full:1},
+    {k:'_re2',l:'',type:'fixed',value:'Tamara Claveria no puede garantizar resultados específicos en plazos determinados, pero sí garantiza un plan profesional, personalizado y el acompañamiento continuo durante todo el proceso.',full:1},
+  ]},
+  {title:'✍ Firma y aceptación',accordion:true,fields:[
+    {k:'acepto',l:'Acepto todos los términos y condiciones establecidos en este acuerdo',type:'check',req:1},
     {k:'ciudad',l:'Ciudad',type:'text'},{k:'fecha_firma',l:'Fecha',type:'date',req:1},
     {k:'firma',l:'Nombre completo (firma digital)',type:'text',req:1,full:1},
     {k:'comentarios',l:'Comentarios adicionales',type:'textarea',full:1},
   ]},
 ];
 const FORM_ANAMNESIS=[
-  {title:'Datos personales',fields:[
+  {title:'📋 Datos personales',accordion:true,fields:[
     {k:'nombre',l:'Nombre',type:'text',req:1},{k:'apellido',l:'Apellido',type:'text',req:1},
     {k:'fecha_nac',l:'Fecha de nacimiento',type:'date'},{k:'edad',l:'Edad',type:'number'},
     {k:'dni',l:'DNI',type:'text'},{k:'nacionalidad',l:'Nacionalidad',type:'text'},
     {k:'email',l:'Email',type:'email',req:1},{k:'telefono',l:'Teléfono',type:'tel',req:1},
     {k:'domicilio',l:'Domicilio',type:'text',full:1},{k:'ocupacion',l:'Ocupación',type:'text'},
-    {k:'nivel_instruccion',l:'Nivel de instrucción',type:'select',opts:['Primario','Secundario','Terciario','Universitario','Posgrado']},
+
   ]},
-  {title:'Contacto de emergencia',fields:[
+  {title:'📞 Contacto de emergencia',accordion:true,fields:[
     {k:'emerg_nombre',l:'Nombre y apellido',type:'text'},{k:'emerg_parentesco',l:'Parentesco',type:'select',opts:['Madre / Padre','Pareja / Cónyuge','Hermano/a','Hijo/a','Amigo/a','Otro familiar']},
     {k:'emerg_telefono',l:'Teléfono',type:'tel'},
   ]},
-  {title:'Medidas y composición corporal',fields:[
+  {title:'📏 Medidas y composición corporal',accordion:true,fields:[
     {k:'peso',l:'Peso actual (kg)',type:'number'},{k:'talla',l:'Talla (cm)',type:'number'},
     {k:'perimetro_cintura',l:'Perímetro cintura (cm)',type:'number'},{k:'medidas_obs',l:'Observaciones',type:'textarea',full:1},
   ]},
-  {title:'Historial de salud',fields:[
+  {title:'⚕ Condiciones de salud',accordion:true,fields:[
     {k:'condiciones',l:'¿Tenés alguna de estas condiciones?',type:'checks',full:1,opts:['Hipertensión arterial','Diabetes tipo 1 o 2','Cardiopatía / arritmia','Colesterol elevado','Asma / EPOC / problemas respiratorios','Artritis / Artrosis','Osteoporosis / Osteopenia','Hipotiroidismo / Hipertiroidismo','Ansiedad / Depresión','Várices / trombosis','Enfermedad renal','Otra condición']},
+  ]},
+  {title:'Historial médico y PAR-Q (tocá para abrir)',accordion:true,fields:[
     {k:'medicamentos',l:'¿Tomás algún medicamento?',type:'yesno'},{k:'medicamentos_det',l:'¿Cuál/es y qué dosis?',type:'textarea',full:1,reveal:'medicamentos'},
     {k:'cirugias',l:'¿Tuviste cirugías?',type:'yesno'},{k:'cirugias_det',l:'¿Cuáles y cuándo?',type:'textarea',full:1,reveal:'cirugias'},
     {k:'lesiones',l:'¿Tenés lesiones, fracturas o dolores crónicos?',type:'yesno'},{k:'lesiones_det',l:'Describí el área y la situación',type:'textarea',full:1,reveal:'lesiones'},
@@ -987,12 +1052,12 @@ const FORM_ANAMNESIS=[
     {k:'parq3',l:'¿Perdiste el equilibrio o el conocimiento recientemente?',type:'yesno'},
     {k:'parq4',l:'¿Tomás medicación para la presión o el corazón?',type:'yesno'},
   ]},
-  {title:'Objetivos de entrenamiento',fields:[
+  {title:'🎯 Objetivos de entrenamiento',accordion:true,fields:[
     {k:'objetivos',l:'¿Qué querés lograr?',type:'checks',full:1,opts:['Bajar de peso / grasa','Ganar masa muscular','Tonificar y definir','Mejorar resistencia cardio','Ganar flexibilidad','Aumentar fuerza','Mejorar postura','Rehabilitación / lesión','Salud y bienestar general','Otro']},
     {k:'objetivo_texto',l:'Objetivo principal en tus propias palabras',type:'textarea',full:1},
     {k:'zona_prioritaria',l:'Zona del cuerpo prioritaria',type:'select',opts:['Glúteos y piernas','Abdomen','Espalda y postura','Brazos','Cuerpo completo']},
   ]},
-  {title:'Actividad física actual',fields:[
+  {title:'🏃 Actividad física actual',accordion:true,fields:[
     {k:'actividad_actual',l:'¿Realizás ejercicio actualmente?',type:'select',opts:['No','Esporádicamente','Sí, regularmente']},
     {k:'dias_ejercicio',l:'¿Cuántos días por semana?',type:'select',opts:['1 día','2-3 días','4-5 días','6-7 días']},
     {k:'hace_cuanto',l:'¿Hace cuánto tiempo?',type:'select',opts:['Menos de 3 meses','3 a 6 meses','6 a 12 meses','1 a 3 años','Más de 3 años']},
@@ -1000,7 +1065,7 @@ const FORM_ANAMNESIS=[
     {k:'nivel_fisico',l:'Nivel de condición física actual',type:'select',opts:['Principiante','Intermedio','Avanzado']},
     {k:'horas_disponibles',l:'Horas disponibles por semana',type:'select',opts:['1-2 hs','3-4 hs','5-6 hs','Más de 7 hs']},
   ]},
-  {title:'Hábitos y estilo de vida',fields:[
+  {title:'🌙 Hábitos y estilo de vida',accordion:true,fields:[
     {k:'sueno_horas',l:'Horas de sueño por noche',type:'select',opts:['Menos de 5 hs','5-6 hs','6-7 hs','7-8 hs','Más de 8 hs']},
     {k:'sueno_calidad',l:'Calidad del sueño',type:'select',opts:['Muy mala','Regular','Buena','Muy buena']},
     {k:'estres',l:'Nivel de estrés',type:'select',opts:['1 · Muy bajo','2 · Bajo','3 · Moderado','4 · Alto','5 · Muy alto']},
@@ -1011,7 +1076,7 @@ const FORM_ANAMNESIS=[
     {k:'alimentacion',l:'¿Cómo es tu alimentación?',type:'select',opts:['Muy buena · Variada y equilibrada','Buena · Bastante ordenada','Moderada · Podría mejorar','Regular · Como lo que puedo','Tengo restricciones / alergias','Bajo supervisión nutricional']},
     {k:'extra',l:'¿Algo más que quieras contarnos?',type:'textarea',full:1},
   ]},
-  {title:'Declaración y firma',fields:[
+  {title:'✍ Declaración y firma',accordion:true,fields:[
     {k:'lugar',l:'Lugar',type:'text'},{k:'fecha_firma',l:'Fecha',type:'date',req:1},
     {k:'firma',l:'Nombre completo (firma digital)',type:'text',req:1,full:1},
   ]},
@@ -1022,14 +1087,16 @@ async function saveForm(type,data){ data._ts=new Date().toISOString(); await Sto
 
 function renderFormHTML(schema,data,type,editable){
   let h='';
-  schema.forEach(sec=>{
-    h+=`<div class="form-sec"><div class="form-sec-hdr ${type}">${esc(sec.title)}</div><div class="form-body"><div class="form-grid">`;
+  schema.forEach((sec,si)=>{
+    const secOpen=!sec.accordion||data._ts;
+    h+=`<div class="form-sec"><div class="form-sec-hdr ${type}" data-act="formAccordion" data-si="${si}" style="cursor:pointer;display:flex;align-items:center">${esc(sec.title)}${sec.accordion?'<span class="ex-chev" style="margin-left:auto;font-size:14px">▾</span>':''}</div><div class="form-body form-acc-body" data-secidx="${si}"${sec.accordion&&!secOpen?' style="display:none"':''}><div class="form-grid">`;
     sec.fields.forEach(f=>{
       const val=data[f.k]||'';
       const cls='form-field'+(f.full?' full':'');
       const req=f.req?'<span class="req"> *</span>':'';
-      if(!editable){
-        /* Vista solo lectura (profe) */
+      if(f.type==='fixed'){
+        h+=`<div class="${cls}"><div class="form-lbl">${esc(f.l)}</div><div class="form-view-val" style="font-weight:600">${esc(f.value)}</div></div>`;
+      } else if(!editable){
         let display=val;
         if(f.type==='check') display=val?'✓ Sí':'✗ No';
         if(f.type==='yesno') display=val==='si'?'Sí':(val==='no'?'No':'—');
@@ -1354,8 +1421,8 @@ function renderApp(){
   const r=routine(), W=weeks(), members=membersOf(); const m=$('main'); m.innerHTML='';
   if(member>=members.length) member=0;
   const f=document.createElement('div'); f.className='focus'; f.innerHTML=`<b>${esc(isDuo()?members[member]:DB.students[active].name)}</b> · cargá peso, reps y RIR de cada serie`; m.appendChild(f);
-  /* Frases motivacionales para alumnos */
-  if(!trainer){
+  /* Frases motivacionales */
+  {
     const FA=["Cada serie te acerca a la mejor versión de vos 💪","Hoy vas a romperla. Confiá en tu proceso 🔥","No importa la velocidad, importa no frenar ✨","Sos más fuerte de lo que creés. ¡Dale con todo! 💥","Sudar es tu cuerpo aplaudiéndote 👏","Hoy es el día que tu futuro yo te va a agradecer 🌟","La disciplina le gana a la motivación. Y acá estás 🏆","Tu cuerpo puede, tu mente tiene que saberlo 🧠💪","Cada rep cuenta. Cada sesión suma. ¡Vamos! 🚀","No compitas con nadie, solo con quien eras ayer 💜"];
     const FV=["¡Te extrañamos en el gym! Volvé que tu cuerpo lo necesita 💪","Dos días sin entrenar… ¡Dale que podés! 🔥","Tu rutina te espera. Un entreno corto es mejor que ninguno ✨","¡Volvé a la acción! Recordá por qué empezaste 💥","Tu progreso no se pierde, solo se pausa. ¡Retomemos! 🌟"];
     const doy=Math.floor((Date.now()-new Date(new Date().getFullYear(),0,0))/86400000);
@@ -1367,6 +1434,10 @@ function renderApp(){
   const seg=document.createElement('div'); seg.className='seg'; seg.innerHTML=r.map((d,i)=>`<button data-act="pickDay" data-i="${i}" class="${i===day?'sel':''}">${esc(d.day.split('·')[0].trim())}</button>`).join(''); m.appendChild(seg);
   /* Entrada en calor */
   const warmup=document.createElement('div'); warmup.className='warmup-banner'; warmup.innerHTML='🔥 <b>Entrada en calor:</b> movilidad articular / bici / cinta / elíptico'; m.appendChild(warmup);
+  /* Racha */
+  showStreak(m);
+  /* Banner de instalación */
+  showInstallBanner(m);
   if(isDuo()){ const ms=document.createElement('div'); ms.className='seg mseg'; ms.innerHTML=members.map((mn,mi)=>`<button data-act="pickMember" data-i="${mi}" class="${mi===member?'sel':''}">👤 ${esc(mn)}</button>`).join(''); m.appendChild(ms); }
   const wk=document.createElement('div'); wk.className='weeks'; wk.innerHTML=W.map((w,i)=>{ const lk=wkLocked(i); return `<button data-act="pickWeek" data-i="${i}" class="${i===week?'sel':''}${lk?' wlock':''}">${lk?'🔒 ':''}${esc(w.t)}<small>${esc(w.n)}</small></button>`; }).join(''); m.appendChild(wk);
   const wd=document.createElement('div'); wd.className='weekdesc'; wd.innerHTML=`<b>${esc(W[week].t)} · ${esc(W[week].n)}</b> — ${esc(W[week].d)}`; m.appendChild(wd);
@@ -1385,7 +1456,8 @@ function renderApp(){
     const maxW=getMaxWeight(ex.n);
     const maxBadge=maxW?` · <span class="max-w">🏆 ${fmt(maxW)}</span>`:'';
     const hdrMeta=`${ex.s}×${esc(ex.r)}${(obj&&obj!=='A definir')?' · '+esc(obj):''}${maxBadge}${setsTotal?(' · '+setsDone+'/'+setsTotal+' ✓'):''}`;
-    let html=`<div class="ex-hdr" data-act="accordion" data-i="${ei}"><span class="num">${ei+1}</span><div class="ex-hdr-info"><div class="ex-hdr-name">${esc(ex.n)}</div><div class="ex-hdr-meta">${hdrMeta}</div><div class="ex-hdr-prog">${progDots}</div></div><span class="ex-chev${isOpen?' open':''}">▾</span></div>`;
+    const wCmp=weightCmpHTML(ex.n,member);
+    let html=`<div class="ex-hdr" data-act="accordion" data-i="${ei}"><span class="num">${ei+1}</span><div class="ex-hdr-info"><div class="ex-hdr-name">${esc(ex.n)}</div><div class="ex-hdr-meta">${hdrMeta}</div>${wCmp}<div class="ex-hdr-prog">${progDots}</div></div><span class="ex-chev${isOpen?' open':''}">▾</span></div>`;
     html+=`<div class="ex-body${isOpen?' open':''}">`;
     html+=`<div class="meta">${ex.s} series · objetivo ${esc(ex.r)} reps${(obj&&obj!=='A definir')?' · '+esc(obj):''}</div>`;
     if(ex.alt) html+=`<div class="alt"><b>Alternativo:</b> ${esc(ex.alt)}</div>`;
@@ -1413,6 +1485,7 @@ function renderApp(){
   progress();
   showWelcome();
   renderWhatsApp();
+  if(locked){ var mpDiv=document.createElement('div'); mpDiv.innerHTML=renderMercadoPago(); if(mpDiv.firstChild) m.appendChild(mpDiv.firstChild); }
 }
 
 function healthPre(m){
@@ -1465,6 +1538,63 @@ function startTabata(){
 }
 function paintTabata(){ var s=tabataState; if(!s) return; var mm=Math.floor(s.time/60),ss=s.time%60; $('tabataTime').textContent=(mm?mm+':':'')+String(ss).padStart(2,'0'); $('tabataPhase').textContent=s.phase==='work'?'¡TRABAJO!':'DESCANSO'; $('tabataPhase').className='tabata-phase '+(s.phase==='work'?'work':'rest-phase'); $('tabataRound').textContent='Ronda '+s.round+' de '+s.rounds; }
 
+/* Banner de instalación PWA */
+/* Racha de entrenamiento */
+function getStreak(){
+  if(!LOGS.length) return 0;
+  var streak=1;
+  for(var i=0;i<LOGS.length-1;i++){
+    var d1=new Date(LOGS[i].date), d2=new Date(LOGS[i+1].date);
+    var diff=Math.floor((d1-d2)/(1000*60*60*24));
+    if(diff<=3) streak++; else break;
+  }
+  return streak;
+}
+function showStreak(container){
+  var s=getStreak();
+  if(s<2) return;
+  var div=document.createElement('div'); div.className='streak-badge';
+  div.innerHTML='🔥 '+s+' sesiones consecutivas · ¡No pierdas la racha!';
+  container.appendChild(div);
+}
+/* Comparativa de peso con sesión anterior */
+function getLastWeight(exName,mi){
+  for(var i=0;i<LOGS.length;i++){
+    var log=LOGS[i];
+    for(var j=0;j<log.ex.length;j++){
+      if(log.ex[j].n!==exName) continue;
+      if(log.ex[j].members&&log.ex[j].members[mi]){
+        var sets=log.ex[j].members[mi].sets;
+        for(var k=0;k<sets.length;k++){ if(sets[k].w&&sets[k].w!=='') return sets[k].w; }
+      } else if(log.ex[j].sets){
+        for(var k=0;k<log.ex[j].sets.length;k++){ if(log.ex[j].sets[k].w&&log.ex[j].sets[k].w!=='') return log.ex[j].sets[k].w; }
+      }
+    }
+  }
+  return null;
+}
+function weightCmpHTML(exName,mi){
+  var prev=getLastWeight(exName,mi);
+  if(!prev) return '';
+  return '<span class="weight-cmp">Última vez: '+prev+' kg</span>';
+}
+/* Banner de instalación PWA */
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); deferredPrompt=e; });
+function isStandalone(){ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true; }
+function isIOS(){ return /iPad|iPhone|iPod/.test(navigator.userAgent); }
+function showInstallBanner(container){
+  if(isStandalone()) return;
+  if(trainer) return;
+  try{ if(localStorage.getItem('tafit:install:dismissed')) return; }catch(e){}
+  var div=document.createElement('div'); div.className='install-banner';
+  if(isIOS()){
+    div.innerHTML='<button class="ib-close" data-act="dismissInstall">✕</button><div class="ib-icon">📲</div><div class="ib-title">¡Instalá TaFit en tu celu!</div><div class="ios-steps"><div class="ios-step"><div class="step-icon">⬆️</div><div>Tocá<br><b>Compartir</b></div></div><div class="ios-step"><div class="step-icon">➕</div><div>Elegí<br><b>Agregar a inicio</b></div></div><div class="ios-step"><div class="step-icon">✅</div><div>Tocá<br><b>Agregar</b></div></div></div><button class="ib-btn" data-act="dismissInstall">¡Entendido!</button>';
+  } else {
+    div.innerHTML='<button class="ib-close" data-act="dismissInstall">✕</button><div class="ib-icon">📲</div><div class="ib-title">¡Instalá TaFit en tu celu!</div><div class="ib-text">Agregá la app a tu pantalla de inicio para acceder más rápido, sin abrir el navegador.</div><button class="ib-btn" data-act="installPWA">Instalar TaFit</button>';
+  }
+  container.appendChild(div);
+}
 function pickDay(i){ day=i; openEx=-1; savePos(); renderApp(); }
 function pickWeek(i){
   if(wkLocked(i)){ const W=weeks(); toast(`🔒 ${W[i].t} se abre al cerrar todas las sesiones de ${W[i-1].t} · ${W[i-1].n}`,'warn'); return; }
@@ -1505,7 +1635,7 @@ function initDarkMode(){ try{ if(localStorage.getItem('tafit:dark')==='1'){ $('a
 /* WhatsApp flotante */
 function renderWhatsApp(){
   var old=document.getElementById('waFloat'); if(old) old.remove();
-  var num=DB.settings.whatsapp||'';
+  var num=DB.settings.whatsapp||'5492616985895';
   if(!num||!locked) return;
   var sName=DB.students[active]?DB.students[active].name:'';
   var a=document.createElement('a'); a.id='waFloat'; a.className='wa-float';
@@ -1514,7 +1644,7 @@ function renderWhatsApp(){
   document.body.appendChild(a);
 }
 function waExLink(exName){
-  var num=DB.settings.whatsapp||'';
+  var num=DB.settings.whatsapp||'5492616985895';
   if(!num) return '';
   var sName=DB.students[active]?DB.students[active].name:'';
   var msg=encodeURIComponent('Hola profe, soy '+sName+'. Tengo una duda con el ejercicio "'+exName+'" 🤔');
@@ -1601,18 +1731,30 @@ async function renderPhotos(){
   const m=$('main'); m.innerHTML='<div class="empty">Cargando fotos…</div>';
   const idx=safeParse(await Store.get('tafit:photoidx:'+active)||'[]',[]);
   let html=`<div class="focus"><b>${esc(DB.students[active].name)}</b> · fotos de progreso</div>`;
-  html+=`<div class="edit-section"><h2>Subir foto</h2><p>Sacá la foto siempre en la misma pose y luz. Se guardan en ${Store.where==='nube'?'la nube de Claude':(Store.where==='dispositivo'?'este dispositivo':'memoria temporal')} y se ordenan por fecha para comparar mes a mes.</p><div class="edit-actions"><label class="impbtn">📷 Agregar foto<input type="file" accept="image/*" data-chg="photo" hidden></label></div></div>`;
+  html+=`<div class="edit-section"><h2>📷 Subir fotos de progreso</h2><p>Sacá las fotos siempre en la misma pose y luz. Recomendamos estas 4 tomas:</p><div class="photo-angles"><span>🧍 Frente</span><span>🔄 Espalda</span><span>👉 Perfil Der.</span><span>👈 Perfil Izq.</span></div><div class="edit-actions"><label class="impbtn">📷 Agregar foto<input type="file" accept="image/*" data-chg="photo" hidden></label><label class="impbtn">📸 Varias fotos<input type="file" accept="image/*" data-chg="photos" multiple hidden></label></div></div>`;
+  html+=`<div class="edit-section"><h2>📊 Estudios corporales</h2><p>Subí archivos de bioimpedancia, DEXA, antropometría u otros estudios de composición corporal.</p><div class="edit-actions"><label class="impbtn">📄 Subir estudio<input type="file" accept="image/*,.pdf" data-chg="study" hidden></label></div>`;
+  const studies=safeParse(await Store.get('tafit:studies:'+active)||'[]',[]);
+  if(studies.length){
+    html+='<div class="studies-list">';
+    studies.forEach((s,i)=>{ html+=`<div class="study-item"><span>📄 ${esc(s.name)} · ${fmtPhotoDate(s.date)}</span><button data-act="viewStudy" data-i="${i}">Ver</button><button data-act="delStudy" data-i="${i}">✕</button></div>`; });
+    html+='</div>';
+  }
+  html+='</div>';
   if(!idx.length){ html+=`<div class="empty">Todavía no hay fotos. Subí la primera para empezar a comparar.</div>`; m.innerHTML=html; return; }
   const sorted=idx.slice().sort((a,b)=> String(b.date).localeCompare(String(a.date)));
   let grid='<div class="pgrid">';
-  for(const p of sorted){ const data=await Store.get('tafit:photo:'+active+':'+p.pid); grid+=`<div class="pcard"><img src="${data||''}" data-act="viewPhoto" data-pid="${esc(p.pid)}" alt=""><div class="pm"><span>${fmtPhotoDate(p.date)}</span><button data-act="delPhoto" data-pid="${esc(p.pid)}">borrar</button></div></div>`; }
+  for(const p of sorted){ const data=await Store.get('tafit:photo:'+active+':'+p.pid); grid+=`<div class="pcard"><img src="${data||''}" data-act="viewPhoto" data-pid="${esc(p.pid)}" alt=""><div class="pm"><span>${fmtPhotoDate(p.date)}${p.angle?' · '+esc(p.angle):''}</span><button data-act="delPhoto" data-pid="${esc(p.pid)}">borrar</button></div></div>`; }
   grid+='</div>';
   m.innerHTML=html+grid;
 }
 function fmtPhotoDate(iso){ const d=new Date(iso); return d.toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'}); }
 function resizeImage(file){ return new Promise((res,rej)=>{ const rd=new FileReader(); rd.onload=()=>{ const img=new Image(); img.onload=()=>{ const max=1000; let w=img.width,h=img.height; if(w>h && w>max){ h=Math.round(h*max/w); w=max; } else if(h>max){ w=Math.round(w*max/h); h=max; } const cv=document.createElement('canvas'); cv.width=w; cv.height=h; cv.getContext('2d').drawImage(img,0,0,w,h); res(cv.toDataURL('image/jpeg',0.72)); }; img.onerror=rej; img.src=rd.result; }; rd.onerror=rej; rd.readAsDataURL(file); }); }
 async function addPhoto(e){ const file=e.target.files[0]; e.target.value=''; if(!file) return; toast("Procesando foto…"); try{ const data=await resizeImage(file); const pid=String(Date.now()); const ok=await Store.set('tafit:photo:'+active+':'+pid, data); if(!ok){ toast("No se pudo guardar (espacio lleno).",'warn'); return; } const idx=safeParse(await Store.get('tafit:photoidx:'+active)||'[]',[]); idx.push({pid,date:new Date().toISOString()}); await Store.set('tafit:photoidx:'+active, JSON.stringify(idx)); toast("Foto agregada ✓",'ok'); renderPhotos(); }catch(err){ toast("No se pudo procesar la imagen",'warn'); } }
+async function addMultiPhotos(e){ const files=e.target.files; e.target.value=''; if(!files.length) return; toast("Procesando "+files.length+" fotos…"); const idx=safeParse(await Store.get('tafit:photoidx:'+active)||'[]',[]); for(let i=0;i<files.length;i++){ try{ const data=await resizeImage(files[i]); const pid=String(Date.now())+'_'+i; await Store.set('tafit:photo:'+active+':'+pid, data); idx.push({pid,date:new Date().toISOString()}); }catch(err){} } await Store.set('tafit:photoidx:'+active, JSON.stringify(idx)); toast(files.length+" fotos agregadas ✓",'ok'); renderPhotos(); }
+async function addStudy(e){ const file=e.target.files[0]; e.target.value=''; if(!file) return; toast("Procesando estudio…"); try{ const data=await resizeImage(file); const sid=String(Date.now()); await Store.set('tafit:study:'+active+':'+sid, data); const studies=safeParse(await Store.get('tafit:studies:'+active)||'[]',[]); studies.push({sid,name:file.name,date:new Date().toISOString()}); await Store.set('tafit:studies:'+active, JSON.stringify(studies)); toast("Estudio guardado ✓",'ok'); renderPhotos(); }catch(err){ toast("No se pudo procesar el archivo",'warn'); } }
 async function delPhoto(pid){ if(!await uiConfirm("¿Borrar esta foto?")) return; await Store.del('tafit:photo:'+active+':'+pid); const idx=safeParse(await Store.get('tafit:photoidx:'+active)||'[]',[]).filter(p=>p.pid!==pid); await Store.set('tafit:photoidx:'+active, JSON.stringify(idx)); renderPhotos(); }
+async function viewStudy(i){ const studies=safeParse(await Store.get('tafit:studies:'+active)||'[]',[]); if(!studies[i]) return; const data=await Store.get('tafit:study:'+active+':'+studies[i].sid); if(data){ $('lb').innerHTML='<img src="'+data+'">'; $('lb').classList.add('show'); } }
+async function delStudy(i){ if(!await uiConfirm("¿Borrar este estudio?")) return; const studies=safeParse(await Store.get('tafit:studies:'+active)||'[]',[]); if(!studies[i]) return; await Store.del('tafit:study:'+active+':'+studies[i].sid); studies.splice(i,1); await Store.set('tafit:studies:'+active, JSON.stringify(studies)); renderPhotos(); }
 async function viewPhoto(pid){ const data=await Store.get('tafit:photo:'+active+':'+pid); if(!data) return; $('lb').innerHTML=`<img src="${data}" alt="">`; $('lb').classList.add('show'); }
 
 /* ===================== EDITAR ===================== */
@@ -1621,7 +1763,7 @@ function renderEdit(){
   const f=document.createElement('div'); f.className='focus'; f.textContent="Editá rutinas, integrantes, semanas, salud y tema"; m.appendChild(f);
   const SEC=(id,title,inner)=>{ const d=document.createElement('details'); d.className='edit-section tacc'; d.dataset.sec=id; if(openSecs.has(id)) d.open=true; d.innerHTML=`<summary><h2>${title}</h2><span class="tchev">▾</span></summary><div class="tacc-body">${inner}</div>`; m.appendChild(d); return d; };
 
-  SEC('pin','Acceso de profe',`<p>Solo vos (con el PIN) editás y agregás. Los alumnos solo ven App, Transcripta y Fotos, registran sus series y dejan observaciones.</p><div class="edit-actions"><button data-act="setPin">${DB.settings.pin?'Cambiar PIN':'Crear PIN'}</button><button data-act="lock">🔒 Bloquear (modo alumno)</button></div><div class="fld mt8"><label>WhatsApp del profe (con código de país, ej: 5492612345678)</label><input id="wafld" value="${esc(DB.settings.whatsapp||'')}" placeholder="5492612345678"></div><div class="edit-actions mt8"><button data-act="saveWa">Guardar WhatsApp</button></div>`);
+  SEC('pin','Acceso de profe',`<p>Solo vos (con el PIN) editás y agregás. Los alumnos solo ven App, Transcripta y Fotos, registran sus series y dejan observaciones.</p><div class="edit-actions"><button data-act="setPin">${DB.settings.pin?'Cambiar PIN':'Crear PIN'}</button><button data-act="lock">🔒 Bloquear (modo alumno)</button></div><div class="fld mt8"><label>WhatsApp del profe (con código de país, ej: 5492612345678)</label><input id="wafld" value="${esc(DB.settings.whatsapp||'')}" placeholder="5492612345678"></div><div class="fld mt8"><label>Link de Mercado Pago (para cobros)</label><input id="mpfld" value="${esc(DB.settings.mercadopago||'')}" placeholder="https://mpago.la/tu-link"></div><div class="edit-actions mt8"><button data-act="saveWa">Guardar</button></div>`);
 
   SEC('alumnos','Alumnos',`<p>Cada alumno/dúo tiene su propia rutina, progresión, registro y fotos.</p>`+
     DB.order.map(id=>{ const s=DB.students[id]; const duo=s.members&&s.members.length>1; return `<div class="stu-row"><span class="sn">${esc(s.name)}</span><span class="tg">${s.theme==='f'?'🌸':'🔵'}${duo?' 👯':''}${s.health&&s.health.enabled?' ⚕':''}</span><button class="ren" data-act="renameStudent" data-id="${esc(id)}">Renombrar</button><button class="del" data-act="deleteStudent" data-id="${esc(id)}">Eliminar</button></div>`; }).join('')+
@@ -1738,8 +1880,32 @@ async function renderReport(){
   var daysSince=''; if(c.last){ var diff=Math.floor((Date.now()-new Date(c.last.date).getTime())/(1000*60*60*24)); if(diff>7) daysSince='<div class="inact">⚠ '+diff+' días sin entrenar</div>'; }
   html+=`<div class="rep-card"><div class="rh"><span class="rn">${c.theme==='f'?'🌸 ':''}${c.duo?'👯 ':''}${esc(c.name)}</span><span class="rw">${esc(c.week)}</span></div><div class="rep-stats"><div><b>${c.sessions}</b><span>Sesiones</span></div><div><b>${c.last?fmtShort(c.last.date):'—'}</b><span>Última</span></div><div><b>${c.adh}%</b><span>Últ. sesión</span></div></div>${daysSince}${formBadges?'<div style="margin-top:4px">'+formBadges+'</div>':''}<div class="rep-last">${c.last?'Último: '+esc(c.last.dayName):'Sin sesiones registradas todavía.'}</div>${c.last&&c.last.obs?`<div class="rep-flag" style="background:#fdecea;color:#8a3327">📝 ${esc(c.last.obs)}</div>`:''}${flag?`<div class="rep-flag">⚕ Revisar pierna · antes: ${esc(c.last.health.pre||'—')} / después: ${esc(c.last.health.post||'—')}${(c.last.health.alarms&&c.last.health.alarms.length)?' · '+esc(c.last.health.alarms.join(', ')):''}</div>`:''}${c.last?`<div class="rep-adh"><i style="width:${c.adh}%"></i></div>`:''}</div>`; });
   m.innerHTML=html;
+  /* Botón copiar informe semanal */
+  var copyBtn=document.createElement('button'); copyBtn.className='copy-report'; copyBtn.dataset.act='copyReport'; copyBtn.textContent='📋 Copiar informe semanal para WhatsApp'; m.appendChild(copyBtn);
+}
+/* Generar texto del informe para copiar */
+function generateReportText(cards){
+  var txt='📊 *INFORME SEMANAL TAFIT*\n'+new Date().toLocaleDateString('es-AR')+'\n\n';
+  cards.forEach(function(c){
+    var ds=c.last?Math.floor((Date.now()-new Date(c.last.date).getTime())/(1000*60*60*24)):999;
+    txt+='*'+c.name+'*\n';
+    txt+='  Sesiones: '+c.sessions+'\n';
+    txt+='  Última: '+(c.last?fmtShort(c.last.date):'sin sesiones')+'\n';
+    txt+='  Adherencia: '+c.adh+'%\n';
+    if(ds>=2&&ds<999) txt+='  ⚠ '+ds+' días sin entrenar\n';
+    if(c.last&&c.last.obs) txt+='  📝 '+c.last.obs+'\n';
+    txt+='\n';
+  });
+  txt+='_Generado por TaFit_';
+  return txt;
 }
 function fmtShort(iso){ const d=new Date(iso); return d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}); }
+/* Mercado Pago */
+function renderMercadoPago(){
+  var link=DB.settings.mercadopago||'';
+  if(!link||!locked) return '';
+  return '<a class="mp-btn" href="'+esc(link)+'" target="_blank" rel="noopener">💳 Pagar con Mercado Pago</a>';
+}
 
 /* ===================== BACKUP ===================== */
 async function exportData(){ const p={ _app:'TaFit', _v:6, exported:new Date().toISOString(), db:DB, data:{}, logs:{} }; for(const id of DB.order){ p.data[id]=safeParse(await Store.get('tafit:data:'+id)||'{}',{}); p.logs[id]=safeParse(await Store.get('tafit:logs:'+id)||'[]',[]); } const blob=new Blob([JSON.stringify(p,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='TaFit-backup-'+new Date().toISOString().slice(0,10)+'.json'; a.click(); URL.revokeObjectURL(url); toast("Backup descargado ✓",'ok'); }
@@ -1769,6 +1935,8 @@ document.addEventListener('click',e=>{
     case 'delLog': delLog(i); break;
     case 'viewPhoto': viewPhoto(pid); break;
     case 'delPhoto': delPhoto(pid); break;
+    case 'viewStudy': viewStudy(+el.dataset.i); break;
+    case 'delStudy': delStudy(+el.dataset.i); break;
     case 'export': exportData(); break;
     case 'addEx': addEx(i); break;
     case 'removeEx': removeEx(i,j); break;
@@ -1787,8 +1955,12 @@ document.addEventListener('click',e=>{
     case 'saveForm': handleSaveForm(el.dataset.ftype); break;
     case 'toggleForm': toggleFormEnable(el.dataset.ftype); break;
     case 'darkMode': toggleDarkMode(); break;
+    case 'dismissInstall': try{ localStorage.setItem('tafit:install:dismissed','1'); }catch(e){} var ib=el.closest('.install-banner'); if(ib) ib.remove(); break;
+    case 'formAccordion': var fbody=el.nextElementSibling; if(fbody&&fbody.classList.contains('form-acc-body')){ fbody.style.display=fbody.style.display==='none'?'':'none'; var chev=el.querySelector('.ex-chev'); if(chev) chev.classList.toggle('open'); } break;
+    case 'installPWA': if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt.userChoice.then(function(r){ if(r.outcome==='accepted'){ try{ localStorage.setItem('tafit:install:dismissed','1'); }catch(e){} var ib2=el.closest('.install-banner'); if(ib2) ib2.remove(); toast('¡TaFit instalada!','ok'); } deferredPrompt=null; }); } else { try{ localStorage.setItem('tafit:install:dismissed','1'); }catch(e){} var ib3=el.closest('.install-banner'); if(ib3) ib3.remove(); } break;
     case 'closeWelcome': var ov=$('welcomeOverlay'); if(ov) ov.remove(); try{ localStorage.setItem('tafit:welcome:'+active,'1'); }catch(e){} break;
-    case 'saveWa': var wf=$('wafld'); if(wf){ DB.settings.whatsapp=wf.value.trim(); saveDB(); toast('WhatsApp guardado ✓','ok'); } break;
+    case 'saveWa': var wf=$('wafld'),mpf=$('mpfld'); if(wf) DB.settings.whatsapp=wf.value.trim(); if(mpf) DB.settings.mercadopago=mpf.value.trim(); saveDB(); toast('Datos guardados ✓','ok'); break;
+    case 'copyReport': var rptCards=[]; DB.order.forEach(function(id){ var s=DB.students[id]; var logs=safeParse(localStorage.getItem('tafit:logs:'+id)||'[]',[]); var last=logs.length?logs[0]:null; var adh=0; if(last){var plan=0,h=0;last.ex.forEach(function(x){if(x.members){x.members.forEach(function(mm){mm.sets.forEach(function(st){plan++;if(st.done)h++})})}else if(x.sets){x.sets.forEach(function(st){plan++;if(st.done)h++})}});adh=plan?Math.round(h/plan*100):0;} rptCards.push({name:s.name,sessions:logs.length,last:last,adh:adh}); }); var txt=generateReportText(rptCards); navigator.clipboard.writeText(txt).then(function(){toast('Informe copiado ✓','ok')}).catch(function(){toast('No se pudo copiar','warn')}); break;
     case 'openTabata': openTabata(); break;
     case 'tabataStart': startTabata(); break;
     case 'tabataStop': stopTabata(); break;
@@ -1803,6 +1975,8 @@ document.addEventListener('change',e=>{
     case 'obs': updObs(el.value); break;
     case 'theme': setTheme(el.value); break;
     case 'photo': addPhoto(e); break;
+    case 'photos': addMultiPhotos(e); break;
+    case 'study': addStudy(e); break;
     case 'import': importData(e); break;
   } }
   /* yesno reveal toggle */
