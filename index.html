@@ -123,6 +123,11 @@
   .session-close{width:100%;margin-top:6px;padding:13px;border:none;border-radius:12px;background:var(--steel);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
   .motiv-banner{background:linear-gradient(135deg,var(--accent),#6c5ce7);color:#fff;padding:12px 16px;border-radius:12px;font-size:13px;font-weight:600;text-align:center;line-height:1.5;margin-bottom:8px}
   .warmup-banner{background:#fff3e0;border:1.5px solid #ffb74d;border-radius:10px;padding:10px 14px;font-size:12px;color:#e65100;margin-bottom:8px;text-align:center;line-height:1.4}
+  .cooldown-banner{background:#e8f5e9;border:1.5px solid #81c784;border-radius:10px;padding:10px 14px;font-size:12px;color:#2e7d32;margin-top:12px;text-align:center;line-height:1.4}
+  .priv-notes{background:#fef9e7;border:1.5px solid #f9e79f;border-radius:12px;padding:12px;margin-top:12px}
+  .pn-title{font-size:12px;font-weight:700;color:#7d6608;margin-bottom:6px}
+  .record-banner{background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:center;margin-bottom:8px;animation:pulse 1s ease-in-out 2}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
   .install-banner{border-radius:14px;padding:16px;margin-bottom:12px;color:#fff;position:relative;overflow:hidden;background:linear-gradient(135deg,#1976d2,#1565c0)}
   .theme-f .install-banner{background:linear-gradient(135deg,#d4619a,#a8245e)}
   .install-banner::after{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:rgba(255,255,255,.08);border-radius:50%}
@@ -147,10 +152,17 @@
   .study-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;font-size:12px}
   .study-item span{flex:1}
   .study-item button{background:none;border:none;color:var(--accent);font-weight:600;cursor:pointer;font-size:12px}
+  .medidas-hist{margin-top:8px}
+  .med-row{display:flex;gap:10px;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid var(--line);font-size:12px;color:var(--navy)}
+  .med-date{font-weight:700;color:var(--accent);min-width:60px}
+  .med-row b{color:var(--navy)}
   .inact-block{background:#fef3f2;border:1.5px solid #fca5a5;border-radius:12px;padding:14px 16px;margin-bottom:14px}
   .inact-title{font-size:13px;font-weight:700;color:#991b1b;margin-bottom:8px}
   .inact-list{display:flex;flex-wrap:wrap;gap:6px}
   .inact-chip{font-size:12px;font-weight:600;color:#991b1b;background:#fee2e2;padding:4px 10px;border-radius:8px}
+  .renew-block{background:#eff6ff;border:1.5px solid #93c5fd;border-radius:12px;padding:14px 16px;margin-bottom:14px}
+  .renew-title{font-size:13px;font-weight:700;color:#1e40af;margin-bottom:8px}
+  .renew-chip{font-size:12px;font-weight:600;color:#1e40af;background:#dbeafe;padding:4px 10px;border-radius:8px}
   .drop-row{display:flex;gap:3px}.dcell{flex:1;min-width:0;padding:7px 3px!important;text-align:center;font-size:11px!important}
   .move-btns{display:flex;flex-direction:column;gap:2px;margin-right:4px}.mbtn{background:var(--light);border:1px solid var(--line);border-radius:4px;font-size:10px;padding:1px 6px;cursor:pointer;color:var(--steel);line-height:1.2}.mbtn:disabled{opacity:.25;cursor:default}.mbtn:hover:not(:disabled){background:var(--accent);color:#fff}
   .session-close:hover{background:var(--navy)}
@@ -1035,10 +1047,6 @@ const FORM_ANAMNESIS=[
     {k:'emerg_nombre',l:'Nombre y apellido',type:'text'},{k:'emerg_parentesco',l:'Parentesco',type:'select',opts:['Madre / Padre','Pareja / Cónyuge','Hermano/a','Hijo/a','Amigo/a','Otro familiar']},
     {k:'emerg_telefono',l:'Teléfono',type:'tel'},
   ]},
-  {title:'📏 Medidas y composición corporal',accordion:true,fields:[
-    {k:'peso',l:'Peso actual (kg)',type:'number'},{k:'talla',l:'Talla (cm)',type:'number'},
-    {k:'perimetro_cintura',l:'Perímetro cintura (cm)',type:'number'},{k:'medidas_obs',l:'Observaciones',type:'textarea',full:1},
-  ]},
   {title:'⚕ Condiciones de salud',accordion:true,fields:[
     {k:'condiciones',l:'¿Tenés alguna de estas condiciones?',type:'checks',full:1,opts:['Hipertensión arterial','Diabetes tipo 1 o 2','Cardiopatía / arritmia','Colesterol elevado','Asma / EPOC / problemas respiratorios','Artritis / Artrosis','Osteoporosis / Osteopenia','Hipotiroidismo / Hipertiroidismo','Ansiedad / Depresión','Várices / trombosis','Enfermedad renal','Otra condición']},
   ]},
@@ -1480,9 +1488,19 @@ function renderApp(){
     <textarea data-chg="obs" placeholder="Ej: cambié dorsalera por jalón neutro, máquina ocupada…">${esc(CACHE[OBSK()]||'')}</textarea>`;
   m.appendChild(ob);
 
+  /* Vuelta a la calma */
+  const cooldown=document.createElement('div'); cooldown.className='cooldown-banner'; cooldown.innerHTML='🧘 <b>Vuelta a la calma:</b> elongación 5-10 min · Estirar los grupos musculares trabajados hoy'; m.appendChild(cooldown);
   const tabBtn=document.createElement('button'); tabBtn.className='tabata-btn'; tabBtn.dataset.act='openTabata'; tabBtn.textContent='⏱ Abrir Tabata / Temporizador'; m.appendChild(tabBtn);
   const btn=document.createElement('button'); btn.className='session-close'; btn.id='closebtn'; btn.dataset.act='close'; btn.textContent='Cerrar sesión y guardar en transcripta'; m.appendChild(btn);
   progress();
+  /* Notas privadas del profe */
+  if(trainer){
+    const notesKey='tafit:notes:'+active;
+    const notesVal=localStorage.getItem(notesKey)||'';
+    const nd=document.createElement('div'); nd.className='priv-notes';
+    nd.innerHTML='<div class="pn-title">🔒 Notas privadas (solo vos las ves)</div><textarea class="form-inp" data-chg="privNote" placeholder="Ej: tiene molestia en rodilla derecha, subir peso la semana que viene...">'+esc(notesVal)+'</textarea>';
+    m.appendChild(nd);
+  }
   showWelcome();
   renderWhatsApp();
   if(locked){ var mpDiv=document.createElement('div'); mpDiv.innerHTML=renderMercadoPago(); if(mpDiv.firstChild) m.appendChild(mpDiv.firstChild); }
@@ -1661,7 +1679,11 @@ function showWelcome(){
   div.innerHTML='<div class="welcome-box"><h2>¡Bienvenido/a a TaFit!</h2><p>Hola <b>'+esc(name)+'</b> 👋<br>Acá vas a encontrar tu rutina personalizada. Tocá cada ejercicio para ver los detalles y cargar tus series.</p><button data-act="closeWelcome">¡Vamos! 💪</button></div>';
   document.body.appendChild(div);
 }
-function updSet(ei,si,mi,f,v){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CACHE[k][f]=v; const box=$('rm-'+ei+'-'+mi); if(box) box.innerHTML=rmHTML(ei,mi); queueSave(); }
+function updSet(ei,si,mi,f,v){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CACHE[k][f]=v; const box=$('rm-'+ei+'-'+mi); if(box) box.innerHTML=rmHTML(ei,mi); queueSave();
+  /* Celebración de nuevo récord */
+  if(f==='w'&&v){ const exName=routine()[day].ex[ei].n; const maxW=getMaxWeight(exName); const cur=firstNum(v); if(cur&&maxW&&cur>maxW){ showRecord(exName,maxW,cur); } }
+}
+function showRecord(name,old,now){ var existing=document.querySelector('.record-banner'); if(existing) existing.remove(); var div=document.createElement('div'); div.className='record-banner'; div.textContent='🏆 ¡Nuevo récord en '+name+'! '+old+' kg → '+now+' kg'; var main=$('main'); if(main) main.insertBefore(div,main.firstChild); setTimeout(function(){if(div.parentNode) div.remove();},5000); }
 function updObs(v){ CACHE[OBSK()]=v; queueSave(); }
 function toggleSet(ei,si,mi,el){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CACHE[k].done=!CACHE[k].done; el.classList.toggle('on',CACHE[k].done); progress(); queueSave(); }
 function progress(){ const r=routine(); let total=0,done=0; const mi=isDuo()?member:0; r[day].ex.forEach((ex,ei)=>{ for(let si=0;si<ex.s;si++){ total++; if((CACHE[K(ei,si,mi)]||{}).done) done++; } }); const pct=total?Math.round(done/total*100):0; if($('prog')) $('prog').style.width=pct+'%'; if($('proglbl')) $('proglbl').textContent=`${done}/${total} series · ${pct}% · ${weeks()[week].t} ${weeks()[week].n}`; const b=$('closebtn'); if(b){ b.classList.toggle('ready',pct===100); b.textContent=pct===100?'✓ Sesión completa · guardar en transcripta':'Cerrar sesión y guardar en transcripta'; } }
@@ -1740,6 +1762,17 @@ async function renderPhotos(){
     html+='</div>';
   }
   html+='</div>';
+  /* Medidas corporales con historial */
+  const medidas=safeParse(await Store.get('tafit:medidas:'+active)||'[]',[]);
+  html+=`<div class="edit-section"><h2>📏 Medidas corporales</h2><p>Registrá las medidas periódicamente para ver la evolución.</p><div class="form-grid"><div class="form-field"><div class="form-lbl">Peso (kg)</div><input class="form-inp" id="med_peso" type="number" placeholder="ej: 65"></div><div class="form-field"><div class="form-lbl">Talla (cm)</div><input class="form-inp" id="med_talla" type="number" placeholder="ej: 165"></div><div class="form-field"><div class="form-lbl">Cintura (cm)</div><input class="form-inp" id="med_cintura" type="number" placeholder="ej: 75"></div><div class="form-field"><div class="form-lbl">Cadera (cm)</div><input class="form-inp" id="med_cadera" type="number" placeholder="ej: 95"></div></div><div class="edit-actions mt8"><button data-act="saveMedidas">📏 Guardar medidas</button></div>`;
+  if(medidas.length){
+    html+='<div class="medidas-hist"><div class="form-lbl" style="margin:12px 0 6px">Historial:</div>';
+    medidas.slice().reverse().forEach(m=>{
+      html+=`<div class="med-row"><span class="med-date">${fmtPhotoDate(m.date)}</span><span>Peso: <b>${m.peso||'—'}</b> kg</span><span>Cintura: <b>${m.cintura||'—'}</b></span><span>Cadera: <b>${m.cadera||'—'}</b></span></div>`;
+    });
+    html+='</div>';
+  }
+  html+='</div>';
   if(!idx.length){ html+=`<div class="empty">Todavía no hay fotos. Subí la primera para empezar a comparar.</div>`; m.innerHTML=html; return; }
   const sorted=idx.slice().sort((a,b)=> String(b.date).localeCompare(String(a.date)));
   let grid='<div class="pgrid">';
@@ -1755,6 +1788,18 @@ async function addStudy(e){ const file=e.target.files[0]; e.target.value=''; if(
 async function delPhoto(pid){ if(!await uiConfirm("¿Borrar esta foto?")) return; await Store.del('tafit:photo:'+active+':'+pid); const idx=safeParse(await Store.get('tafit:photoidx:'+active)||'[]',[]).filter(p=>p.pid!==pid); await Store.set('tafit:photoidx:'+active, JSON.stringify(idx)); renderPhotos(); }
 async function viewStudy(i){ const studies=safeParse(await Store.get('tafit:studies:'+active)||'[]',[]); if(!studies[i]) return; const data=await Store.get('tafit:study:'+active+':'+studies[i].sid); if(data){ $('lb').innerHTML='<img src="'+data+'">'; $('lb').classList.add('show'); } }
 async function delStudy(i){ if(!await uiConfirm("¿Borrar este estudio?")) return; const studies=safeParse(await Store.get('tafit:studies:'+active)||'[]',[]); if(!studies[i]) return; await Store.del('tafit:study:'+active+':'+studies[i].sid); studies.splice(i,1); await Store.set('tafit:studies:'+active, JSON.stringify(studies)); renderPhotos(); }
+async function saveMedidas(){
+  var peso=$('med_peso')?$('med_peso').value:'';
+  var talla=$('med_talla')?$('med_talla').value:'';
+  var cintura=$('med_cintura')?$('med_cintura').value:'';
+  var cadera=$('med_cadera')?$('med_cadera').value:'';
+  if(!peso&&!cintura&&!cadera){ toast('Completá al menos un campo','warn'); return; }
+  var medidas=safeParse(await Store.get('tafit:medidas:'+active)||'[]',[]);
+  medidas.push({date:new Date().toISOString(),peso:peso,talla:talla,cintura:cintura,cadera:cadera});
+  await Store.set('tafit:medidas:'+active, JSON.stringify(medidas));
+  toast('Medidas guardadas ✓','ok');
+  renderPhotos();
+}
 async function viewPhoto(pid){ const data=await Store.get('tafit:photo:'+active+':'+pid); if(!data) return; $('lb').innerHTML=`<img src="${data}" alt="">`; $('lb').classList.add('show'); }
 
 /* ===================== EDITAR ===================== */
@@ -1873,6 +1918,8 @@ async function renderReport(){
   /* Alerta de inactividad: alumnos con 2+ días sin sesión */
   const inactivos=cards.filter(c=>{ if(!c.last) return true; return Math.floor((Date.now()-new Date(c.last.date).getTime())/86400000)>=2; });
   if(inactivos.length){ html+=`<div class="inact-block"><div class="inact-title">⚠ Alumnos sin entrenar (2+ días)</div><div class="inact-list">${inactivos.map(c=>{ const d=c.last?Math.floor((Date.now()-new Date(c.last.date).getTime())/86400000):999; return `<span class="inact-chip">${esc(c.name)} · ${d>=999?'nunca':(d+' días')}</span>`; }).join('')}</div></div>`; }
+  const renovar=cards.filter(c=>{ if(c.sessions<4) return false; return true; });
+  if(renovar.length){ html+=`<div class="renew-block"><div class="renew-title">🔄 Rutinas con 4+ semanas (considerar renovación)</div><div class="inact-list">${renovar.map(c=>`<span class="renew-chip">${esc(c.name)}</span>`).join('')}</div></div>`; }
   cards.forEach(c=>{ const flag=c.last&&c.last.health&&((c.last.health.alarms&&c.last.health.alarms.length)||c.last.health.pre==='warn'||c.last.health.post==='warn');
   let formBadges='';
   if(c.forms.acuerdo) formBadges+=c.fa._ts?'<span class="form-status done" style="margin:4px 4px 0 0">✓ Acuerdo</span>':'<span class="form-status pending" style="margin:4px 4px 0 0">⏳ Acuerdo</span>';
@@ -1937,6 +1984,7 @@ document.addEventListener('click',e=>{
     case 'delPhoto': delPhoto(pid); break;
     case 'viewStudy': viewStudy(+el.dataset.i); break;
     case 'delStudy': delStudy(+el.dataset.i); break;
+    case 'saveMedidas': saveMedidas(); break;
     case 'export': exportData(); break;
     case 'addEx': addEx(i); break;
     case 'removeEx': removeEx(i,j); break;
@@ -1977,6 +2025,7 @@ document.addEventListener('change',e=>{
     case 'photo': addPhoto(e); break;
     case 'photos': addMultiPhotos(e); break;
     case 'study': addStudy(e); break;
+    case 'privNote': try{ localStorage.setItem('tafit:notes:'+active, el.value); }catch(e){} break;
     case 'import': importData(e); break;
   } }
   /* yesno reveal toggle */
