@@ -930,6 +930,8 @@ function stuFede(){ return { name:"Fede del Sol", theme:"m", weeks:cp(DEFAULT_WE
   ]}
 ] }; }
 
+function stuGrupo5(){ return { name:"Grupo 5", theme:"f", members:["M.Marta","Mercedez","Ana","Bernarda","Sofía M."], weeks:cp(DEFAULT_WEEKS), forms:{acuerdo:true,anamnesis:true}, routine:[{day:"Día 1",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]}] }; }
+
 const FEM=new Set(['maria','sofia','valentina','martina','catalina','julieta','camila','lucia','florencia','agustina','micaela','rocio','daniela','gabriela','carla','paula','laura','andrea','romina','belen','ana','luciana','milagros','abril','antonella','brenda','carolina','cecilia','clara','denise','elena','emilia','eugenia','fernanda','guadalupe','ines','isabel','jimena','josefina','lara','lorena','magali','malena','marcela','melina','mora','natalia','nadia','noelia','ornella','pamela','patricia','pia','priscila','renata','sabrina','silvina','tamara','vanesa','vanina','veronica','victoria','yamila','zoe','aldana','ayelen','barbara','celeste','delfina','elisa','estefania','giuliana','ludmila','mia','olivia','salome','sol','trinidad','agostina','morena','luz','candela','jazmin','rosario','pilar','manuela','francisca','constanza','nati','caro','marti','jus','yesi','justine','yesica']);
 const MASC_A=new Set(['luca','elias','matias','tobias','jonas','jeremias','tomas','andres','nicolas','farias','dias']);
 function norm(s){ return (s||'').trim().toLowerCase().split(/\s+/)[0].normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
@@ -1291,6 +1293,7 @@ async function initFirebase(){
   if(!DB._seed.rosario_r2){ const ro=DB.students['rosario']; if(ro) ro.routine=stuRosario().routine; DB._seed.rosario_r2=true; }
   if(!DB._seed.sm_d3){ const sm=DB.students['sofi-marti']; if(sm&&sm.routine){ if(!sm.routine.find(d=>/Día 2/.test(d.day))) sm.routine.splice(1,0,sofiMartiDay2()); if(!sm.routine.find(d=>/Día 3/.test(d.day))) sm.routine.push(sofiMartiDay3()); } DB._seed.sm_d3=true; }
   if(!DB._seed.fede){ if(!DB.students['fede-del-sol']){ DB.students['fede-del-sol']=stuFede(); DB.order.push('fede-del-sol'); } DB._seed.fede=true; }
+  if(!DB._seed.grupo5){ if(!DB.students['grupo-5']){ DB.students['grupo-5']=stuGrupo5(); DB.order.push('grupo-5'); } DB._seed.grupo5=true; }
   DB.order.forEach(id=>{ const s=DB.students[id]; if(!s.theme) s.theme=guessFem(s.name)?'f':'m'; if(!s.weeks) s.weeks=cp(DEFAULT_WEEKS); });
   await saveDB();
   const lastA=await Store.get('tafit:active');
