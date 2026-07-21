@@ -1178,6 +1178,7 @@ async function handleSaveForm(type){
   if(!container) return;
   const data=collectFormData(container);
   await saveForm(type,data);
+  await autoBackup('form:'+type);
   toast(type==='acuerdo'?'Acuerdo guardado ✓':'Anamnesis guardada ✓','ok');
   renderFormTab(type);
 }
@@ -1767,6 +1768,7 @@ async function closeSession(){
   if(!exs.length && !obs && !hh){ toast("No hay nada cargado en esta sesión todavía",'warn'); return; }
   LOGS.unshift({ date:new Date().toISOString(), dayName:r[day].day, week, weekName:weeks()[week].t+' '+weeks()[week].n, ex:exs, obs, health:hh });
   await saveLogs();
+  await autoBackup('sesion');
   toast("Sesión guardada en la transcripta ✓",'ok');
   /* No borramos CACHE para que los datos sigan visibles */
   renderApp();
@@ -1850,6 +1852,37 @@ async function saveMedidas(){
   await Store.set('tafit:medidas:'+active, JSON.stringify(medidas));
   toast('Medidas guardadas ✓','ok');
   renderPhotos();
+}
+/* Backup automático */
+async function autoBackup(trigger){
+  try{
+    var snapshot={
+      trigger:trigger,
+      date:new Date().toISOString(),
+      student:active,
+      name:DB.students[active]?DB.students[active].name:'',
+      cache:JSON.parse(JSON.stringify(CACHE)),
+      logs:LOGS.slice(0,10),
+    };
+    var acuerdo=await Store.get('tafit:form:acuerdo:'+active);
+    var anamnesis=await Store.get('tafit:form:anamnesis:'+active);
+    if(acuerdo) snapshot.acuerdo=acuerdo;
+    if(anamnesis) snapshot.anamnesis=anamnesis;
+    var key='tafit:backup:'+active+':'+Date.now();
+    await Store.set(key, JSON.stringify(snapshot));
+    /* Mantener solo últimos 5 backups por alumno */
+    var prefix='tafit:backup:'+active+':';
+    var allKeys=[];
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(k&&k.startsWith(prefix)) allKeys.push(k);
+    }
+    allKeys.sort();
+    while(allKeys.length>5){
+      var old=allKeys.shift();
+      await Store.del(old);
+    }
+  }catch(e){ console.warn('Backup:',e); }
 }
 async function viewPhoto(pid){ const data=await Store.get('tafit:photo:'+active+':'+pid); if(!data) return; $('lb').innerHTML=`<img src="${data}" alt="">`; $('lb').classList.add('show'); }
 
