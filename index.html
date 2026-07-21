@@ -127,6 +127,10 @@
   .priv-notes{background:#fef9e7;border:1.5px solid #f9e79f;border-radius:12px;padding:12px;margin-top:12px}
   .pn-title{font-size:12px;font-weight:700;color:#7d6608;margin-bottom:6px}
   .record-banner{background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:center;margin-bottom:8px;animation:pulse 1s ease-in-out 2}
+  .quick-edit{background:var(--light);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px}
+  .qe-title{font-size:11px;font-weight:700;color:var(--accent);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+  .mini-dash{background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--navy);text-align:center;margin-bottom:8px;line-height:1.6}
+  .prog-bar2{background:var(--light);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;color:var(--accent);text-align:center;margin-bottom:8px}
   @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
   .install-banner{border-radius:14px;padding:16px;margin-bottom:12px;color:#fff;position:relative;overflow:hidden;background:linear-gradient(135deg,#1976d2,#1565c0)}
   .theme-f .install-banner{background:linear-gradient(135deg,#d4619a,#a8245e)}
@@ -761,12 +765,12 @@ function stuJusYesi(){
     {day:"Día 1", ex:[
       exD("Hip thrust en barra",4,"2×12 + 2×8","80","80 kg","Hip thrust en máquina",BK('A'),""),
       exD("Inferiores c/ peso en pies",4,"12-15","5","5 kg","Elevación de piernas colgado",BK('A'),""),
-      exD("Prensa normal",4,"2×12 + 2×8","30","49 kg","Sentadilla goblet",BK('B'),""),
+      exD("Sentadilla rebote / Prensa",4,"3×15 / 2×12+2×8","A definir","97 kg","Sentadilla goblet / Prensa a 45°","Jus: Sentadilla rebote · Yesi: Prensa normal.","","Sentadilla goblet",BK('B'),""),
       exD("Press militar con mancuerna",4,"10","7,5","7,5 kg","Press militar en máquina",BK('B'),""),
       exD("Máquina de abducciones",4,"20","100","110 kg","Abductores con banda",BK('C'),""),
-      exD("Máquina de isquios",4,"15","32","40 kg","Femoral en camilla",BK('C'),""),
+      exD("Máquina de isquios",4,"15","8 placas","9 placas","Femoral en camilla",BK('C'),""),
       exD("Inferiores paralelas",4,"12","Peso corporal","Peso corporal","Elevación de rodillas en paralelas",BK('D'),""),
-      exD("Remo bajo",4,"12","23","31 kg","Remo en polea con triángulo",BK('D'),""),
+      exD("Remo bajo",4,"12","27 kg","36 kg","Remo en polea con triángulo",BK('D'),""),
       exD("Fondo en paralelas",4,"12","Elástico rojo y negro","Elástico rojo y negro","Fondos en banco",BK('E'),""),
       exD("Plancha oblicuos",4,"15 c/lado","4","4 kg","Bicicleta abdominal",BK('E'),""),
     ]},
@@ -930,7 +934,7 @@ function stuFede(){ return { name:"Fede del Sol", theme:"m", weeks:cp(DEFAULT_WE
   ]}
 ] }; }
 
-function stuGrupo5(){ return { name:"Grupo 5", theme:"f", members:["M.Marta","Mercedez","Ana","Bernarda","Sofía M."], weeks:cp(DEFAULT_WEEKS), forms:{acuerdo:true,anamnesis:true}, routine:[{day:"Día 1",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]}] }; }
+function stuGrupo5(){ return { name:"Grupo 5", theme:"f", members:["M.Marta","Mercedez","Ana","Bernarda","Sofía M."], weeks:cp(DEFAULT_WEEKS), forms:{acuerdo:true,anamnesis:true}, routine:[{day:"Día 1",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]},{day:"Día 2",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]}] }; }
 
 const FEM=new Set(['maria','sofia','valentina','martina','catalina','julieta','camila','lucia','florencia','agustina','micaela','rocio','daniela','gabriela','carla','paula','laura','andrea','romina','belen','ana','luciana','milagros','abril','antonella','brenda','carolina','cecilia','clara','denise','elena','emilia','eugenia','fernanda','guadalupe','ines','isabel','jimena','josefina','lara','lorena','magali','malena','marcela','melina','mora','natalia','nadia','noelia','ornella','pamela','patricia','pia','priscila','renata','sabrina','silvina','tamara','vanesa','vanina','veronica','victoria','yamila','zoe','aldana','ayelen','barbara','celeste','delfina','elisa','estefania','giuliana','ludmila','mia','olivia','salome','sol','trinidad','agostina','morena','luz','candela','jazmin','rosario','pilar','manuela','francisca','constanza','nati','caro','marti','jus','yesi','justine','yesica']);
 const MASC_A=new Set(['luca','elias','matias','tobias','jonas','jeremias','tomas','andres','nicolas','farias','dias']);
@@ -1220,7 +1224,7 @@ async function cloudDel(k){ if(!fsDB||_fromRemote) return; try{ fsDB.collection(
 async function pushAllLocal(){ if(!fsDB) return; let keys;
   if(locked&&active){ keys=myKeys(); }
   else { keys=['tafit:students']; DB.order.forEach(id=>{ keys.push('tafit:data:'+id,'tafit:logs:'+id,'tafit:form:acuerdo:'+id,'tafit:form:anamnesis:'+id); }); }
-  for(const k of keys){ try{ const v=localStorage.getItem(k); if(v) await cloudPush(k,v); }catch(e){} } }
+  for(const k of keys){ try{ const v=localStorage.getItem(k); if(v&&v!=='{}'&&v!=='[]'&&v!=='""') await cloudPush(k,v); }catch(e){} } }
 async function reloadFromRemote(){ try{ const raw=await Store.get('tafit:students'); if(raw){ const p=safeParse(raw,null); if(p&&p.order&&p.order.length) DB=p; } if(DB.students[active]){ CACHE=safeParse(await Store.get('tafit:data:'+active)||'{}',{}); LOGS=safeParse(await Store.get('tafit:logs:'+active)||'[]',[]); } render(); }catch(e){} }
 function updateSyncUI(on){ $('clouddot').className='dot'+(on?' on':''); $('cloudlbl').textContent=on?'Sincronizado':(Store.ls?'En este dispositivo':'Solo esta sesión'); }
 function myKeys(){ /* claves que necesita una alumna con link bloqueado */
@@ -1294,6 +1298,28 @@ async function initFirebase(){
   if(!DB._seed.sm_d3){ const sm=DB.students['sofi-marti']; if(sm&&sm.routine){ if(!sm.routine.find(d=>/Día 2/.test(d.day))) sm.routine.splice(1,0,sofiMartiDay2()); if(!sm.routine.find(d=>/Día 3/.test(d.day))) sm.routine.push(sofiMartiDay3()); } DB._seed.sm_d3=true; }
   if(!DB._seed.fede){ if(!DB.students['fede-del-sol']){ DB.students['fede-del-sol']=stuFede(); DB.order.push('fede-del-sol'); } DB._seed.fede=true; }
   if(!DB._seed.grupo5){ if(!DB.students['grupo-5']){ DB.students['grupo-5']=stuGrupo5(); DB.order.push('grupo-5'); } DB._seed.grupo5=true; }
+  /* Seed: Jus/Yesi Día 1 Semana 2 como completado */
+  if(!DB._seed.jy_log_s2){
+    const jyLogs=safeParse(localStorage.getItem('tafit:logs:jus-yesi')||'[]',[]);
+    if(!jyLogs.find(l=>l.week===1&&/Día 1/.test(l.dayName))){
+      const jyR=DB.students['jus-yesi']?DB.students['jus-yesi'].routine:null;
+      if(jyR&&jyR[0]){
+        const logEx=jyR[0].ex.map(function(e){
+          const sets0=[],sets1=[];
+          for(let s=0;s<e.s;s++){
+            if(e.n==='Remo bajo'){sets0.push({w:'27',r:'12',done:true});sets1.push({w:'36',r:'12',done:true});}
+            else if(e.n==='Máquina de isquios'){sets0.push({w:'8 placas',r:'15',done:true});sets1.push({w:'9 placas',r:'15',done:true});}
+            else if(/Prensa|Sentadilla rebote/.test(e.n)){sets0.push({w:'',r:'15',done:true});sets1.push({w:'97',r:'12',done:true});}
+            else {sets0.push({w:e.w||'',r:e.r||'',done:true});sets1.push({w:e.w2||e.w||'',r:e.r||'',done:true});}
+          }
+          return {n:e.n,members:[{name:'Jus',sets:sets0},{name:'Yesi',sets:sets1}]};
+        });
+        jyLogs.unshift({date:new Date().toISOString(),dayName:jyR[0].day,week:1,weekName:'S2 Volumen',ex:logEx,obs:''});
+        try{localStorage.setItem('tafit:logs:jus-yesi',JSON.stringify(jyLogs));}catch(e){}
+      }
+    }
+    DB._seed.jy_log_s2=true;
+  }
   DB.order.forEach(id=>{ const s=DB.students[id]; if(!s.theme) s.theme=guessFem(s.name)?'f':'m'; if(!s.weeks) s.weeks=cp(DEFAULT_WEEKS); });
   await saveDB();
   const lastA=await Store.get('tafit:active');
@@ -1433,6 +1459,22 @@ function renderApp(){
   const r=routine(), W=weeks(), members=membersOf(); const m=$('main'); m.innerHTML='';
   if(member>=members.length) member=0;
   const f=document.createElement('div'); f.className='focus'; f.innerHTML=`<b>${esc(isDuo()?members[member]:DB.students[active].name)}</b> · cargá peso, reps y RIR de cada serie`; m.appendChild(f);
+  /* Auto-sugerir día siguiente */
+  if(LOGS.length&&!CACHE['_daySet']){
+    const lastDay=LOGS[0].dayName||'';
+    for(let i=0;i<r.length;i++){ if(r[i].day===lastDay&&i+1<r.length){ day=i+1; break; } }
+  }
+  /* Mini dashboard motivacional */
+  {
+    const streak=getStreak();
+    const lastLog=LOGS.length?LOGS[0]:null;
+    const ds=lastLog?Math.floor((Date.now()-new Date(lastLog.date).getTime())/86400000):999;
+    let dashItems=[];
+    dashItems.push('📅 Hoy te toca: <b>'+esc(r[day].day)+'</b>');
+    if(streak>=2) dashItems.push('🔥 '+streak+' sesiones seguidas');
+    if(ds>=2&&ds<999) dashItems.push('⏰ '+ds+' días sin entrenar');
+    const dash=document.createElement('div'); dash.className='mini-dash'; dash.innerHTML=dashItems.join(' · '); m.appendChild(dash);
+  }
   /* Frases motivacionales */
   {
     const FA=["Cada serie te acerca a la mejor versión de vos 💪","Hoy vas a romperla. Confiá en tu proceso 🔥","No importa la velocidad, importa no frenar ✨","Sos más fuerte de lo que creés. ¡Dale con todo! 💥","Sudar es tu cuerpo aplaudiéndote 👏","Hoy es el día que tu futuro yo te va a agradecer 🌟","La disciplina le gana a la motivación. Y acá estás 🏆","Tu cuerpo puede, tu mente tiene que saberlo 🧠💪","Cada rep cuenta. Cada sesión suma. ¡Vamos! 🚀","No compitas con nadie, solo con quien eras ayer 💜"];
@@ -1444,6 +1486,8 @@ function renderApp(){
     const mb=document.createElement('div'); mb.className='motiv-banner'; mb.textContent=frase; m.appendChild(mb);
   }
   const seg=document.createElement('div'); seg.className='seg'; seg.innerHTML=r.map((d,i)=>`<button data-act="pickDay" data-i="${i}" class="${i===day?'sel':''}">${esc(d.day.split('·')[0].trim())}</button>`).join(''); m.appendChild(seg);
+  /* Barra de progreso de ejercicios */
+  const pb2=document.createElement('div'); pb2.className='prog-bar2'; pb2.id='progbar2'; pb2.textContent='Vas 0 de '+r[day].ex.length+' ejercicios · 0% completado'; m.appendChild(pb2);
   /* Entrada en calor */
   const warmup=document.createElement('div'); warmup.className='warmup-banner'; warmup.innerHTML='🔥 <b>Entrada en calor:</b> movilidad articular / bici / cinta / elíptico'; m.appendChild(warmup);
   /* Racha */
@@ -1471,6 +1515,9 @@ function renderApp(){
     const wCmp=weightCmpHTML(ex.n,member);
     let html=`<div class="ex-hdr" data-act="accordion" data-i="${ei}"><span class="num">${ei+1}</span><div class="ex-hdr-info"><div class="ex-hdr-name">${esc(ex.n)}</div><div class="ex-hdr-meta">${hdrMeta}</div>${wCmp}<div class="ex-hdr-prog">${progDots}</div></div><span class="ex-chev${isOpen?' open':''}">▾</span></div>`;
     html+=`<div class="ex-body${isOpen?' open':''}">`;
+    if(trainer){
+      html+=`<div class="quick-edit"><div class="qe-title">✏ Edición rápida</div><div class="form-grid"><div class="form-field full"><div class="form-lbl">Ejercicio</div><input class="form-inp" value="${esc(ex.n)}" data-chg="qedit" data-ei="${ei}" data-f="n"></div><div class="form-field"><div class="form-lbl">Series</div><input class="form-inp" value="${esc(ex.s)}" data-chg="qedit" data-ei="${ei}" data-f="s" inputmode="numeric"></div><div class="form-field"><div class="form-lbl">Reps</div><input class="form-inp" value="${esc(ex.r)}" data-chg="qedit" data-ei="${ei}" data-f="r"></div><div class="form-field"><div class="form-lbl">Peso obj.</div><input class="form-inp" value="${esc(ex.w)}" data-chg="qedit" data-ei="${ei}" data-f="w"></div><div class="form-field"><div class="form-lbl">Descanso</div><input class="form-inp" value="${esc(ex.rest)}" data-chg="qedit" data-ei="${ei}" data-f="rest"></div></div></div>`;
+    }
     html+=`<div class="meta">${ex.s} series · objetivo ${esc(ex.r)} reps${(obj&&obj!=='A definir')?' · '+esc(obj):''}</div>`;
     if(ex.alt) html+=`<div class="alt"><b>Alternativo:</b> ${esc(ex.alt)}</div>`;
     if(ex.tip) html+=`<div class="tip">💡 ${esc(ex.tip)}</div>`;
@@ -1690,7 +1737,7 @@ function updSet(ei,si,mi,f,v){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CACHE
 function showRecord(name,old,now){ var existing=document.querySelector('.record-banner'); if(existing) existing.remove(); var div=document.createElement('div'); div.className='record-banner'; div.textContent='🏆 ¡Nuevo récord en '+name+'! '+old+' kg → '+now+' kg'; var main=$('main'); if(main) main.insertBefore(div,main.firstChild); setTimeout(function(){if(div.parentNode) div.remove();},5000); }
 function updObs(v){ CACHE[OBSK()]=v; queueSave(); }
 function toggleSet(ei,si,mi,el){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CACHE[k].done=!CACHE[k].done; el.classList.toggle('on',CACHE[k].done); progress(); queueSave(); }
-function progress(){ const r=routine(); let total=0,done=0; const mi=isDuo()?member:0; r[day].ex.forEach((ex,ei)=>{ for(let si=0;si<ex.s;si++){ total++; if((CACHE[K(ei,si,mi)]||{}).done) done++; } }); const pct=total?Math.round(done/total*100):0; if($('prog')) $('prog').style.width=pct+'%'; if($('proglbl')) $('proglbl').textContent=`${done}/${total} series · ${pct}% · ${weeks()[week].t} ${weeks()[week].n}`; const b=$('closebtn'); if(b){ b.classList.toggle('ready',pct===100); b.textContent=pct===100?'✓ Sesión completa · guardar en transcripta':'Cerrar sesión y guardar en transcripta'; } }
+function progress(){ const r=routine(); let total=0,done=0; const mi=isDuo()?member:0; let exDone=0; r[day].ex.forEach((ex,ei)=>{ let allDone=true; for(let si=0;si<ex.s;si++){ total++; if((CACHE[K(ei,si,mi)]||{}).done) done++; else allDone=false; } if(allDone&&ex.s>0) exDone++; }); const pct=total?Math.round(done/total*100):0; if($('prog')) $('prog').style.width=pct+'%'; if($('proglbl')) $('proglbl').textContent=`${done}/${total} series · ${exDone}/${r[day].ex.length} ejercicios · ${pct}%`; if($('progbar2')) $('progbar2').textContent=`Vas ${exDone} de ${r[day].ex.length} ejercicios · ${pct}% completado`; const b=$('closebtn'); if(b){ b.classList.toggle('ready',pct===100); b.textContent=pct===100?'✓ Sesión completa · guardar en transcripta':'Cerrar sesión y guardar en transcripta'; } }
 
 function restSec(s){ if(!s) return 0; const str=String(s); if(str.includes(':')){ const p=str.split(':'); return (parseInt(p[0])||0)*60+(parseInt(p[1])||0); } const n=firstNum(str); return n?Math.round(n):0; }
 /* Vibración + beep (el contexto de audio se crea en el tap para que iPhone lo permita) */
@@ -2030,6 +2077,7 @@ document.addEventListener('change',e=>{
     case 'photos': addMultiPhotos(e); break;
     case 'study': addStudy(e); break;
     case 'privNote': try{ localStorage.setItem('tafit:notes:'+active, el.value); }catch(e){} break;
+    case 'qedit': { const ei=+el.dataset.ei; const f=el.dataset.f; const v=el.value; const ex=routine()[day].ex[ei]; if(ex){ if(f==='s') ex.s=+v||ex.s; else ex[f]=v; saveDB(); } break; }
     case 'import': importData(e); break;
   } }
   /* yesno reveal toggle */
