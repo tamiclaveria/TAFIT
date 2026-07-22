@@ -1517,7 +1517,7 @@ function renderApp(){
     let html=`<div class="ex-hdr" data-act="accordion" data-i="${ei}"><span class="num">${ei+1}</span><div class="ex-hdr-info"><div class="ex-hdr-name">${esc(ex.n)}</div><div class="ex-hdr-meta">${hdrMeta}</div>${wCmp}<div class="ex-hdr-prog">${progDots}</div></div><span class="ex-chev${isOpen?' open':''}">▾</span></div>`;
     html+=`<div class="ex-body${isOpen?' open':''}">`;
     if(trainer){
-      html+=`<div class="quick-edit"><div class="qe-title">✏ Edición rápida</div><div class="form-grid"><div class="form-field full"><div class="form-lbl">Ejercicio</div><input class="form-inp" value="${esc(ex.n)}" data-chg="qedit" data-ei="${ei}" data-f="n"></div><div class="form-field"><div class="form-lbl">Series</div><input class="form-inp" value="${esc(ex.s)}" data-chg="qedit" data-ei="${ei}" data-f="s" inputmode="numeric"></div><div class="form-field"><div class="form-lbl">Reps</div><input class="form-inp" value="${esc(ex.r)}" data-chg="qedit" data-ei="${ei}" data-f="r"></div><div class="form-field"><div class="form-lbl">Peso obj.</div><input class="form-inp" value="${esc(ex.w)}" data-chg="qedit" data-ei="${ei}" data-f="w"></div><div class="form-field"><div class="form-lbl">Descanso</div><input class="form-inp" value="${esc(ex.rest)}" data-chg="qedit" data-ei="${ei}" data-f="rest"></div></div></div>`;
+      html+=`<div class="quick-edit"><div class="qe-title">✏ Edición rápida</div><div class="form-grid"><div class="form-field full"><div class="form-lbl">Ejercicio</div><input class="form-inp" value="${esc(ex.n)}" data-chg="qedit" data-ei="${ei}" data-f="n"></div><div class="form-field"><div class="form-lbl">Series</div><input class="form-inp" value="${esc(ex.s)}" data-chg="qedit" data-ei="${ei}" data-f="s"></div><div class="form-field"><div class="form-lbl">Reps</div><input class="form-inp" value="${esc(ex.r)}" data-chg="qedit" data-ei="${ei}" data-f="r"></div><div class="form-field"><div class="form-lbl">Peso obj.</div><input class="form-inp" value="${esc(ex.w)}" data-chg="qedit" data-ei="${ei}" data-f="w"></div><div class="form-field"><div class="form-lbl">Descanso</div><input class="form-inp" value="${esc(ex.rest)}" data-chg="qedit" data-ei="${ei}" data-f="rest"></div></div></div>`;
     }
     html+=`<div class="meta">${ex.s} series · objetivo ${esc(ex.r)} reps${(obj&&obj!=='A definir')?' · '+esc(obj):''}</div>`;
     if(ex.alt) html+=`<div class="alt"><b>Alternativo:</b> ${esc(ex.alt)}</div>`;
@@ -2110,7 +2110,16 @@ document.addEventListener('change',e=>{
     case 'photos': addMultiPhotos(e); break;
     case 'study': addStudy(e); break;
     case 'privNote': try{ localStorage.setItem('tafit:notes:'+active, el.value); }catch(e){} break;
-    case 'qedit': { const ei=+el.dataset.ei; const f=el.dataset.f; const v=el.value; const ex=routine()[day].ex[ei]; if(ex){ if(f==='s') ex.s=+v||ex.s; else ex[f]=v; saveDB(); } break; }
+    case 'qedit': { const ei=+el.dataset.ei; const f=el.dataset.f; const v=el.value; const ex=routine()[day].ex[ei]; if(ex){ if(f==='s'){
+      /* Parsear expresiones como "1x10 3x8" */
+      const parts=v.match(/(\d+)\s*[xX×]\s*(\d+)/g);
+      if(parts&&parts.length>1){
+        let totalS=0; const repParts=[];
+        parts.forEach(function(p){ const m=p.match(/(\d+)\s*[xX×]\s*(\d+)/); if(m){ totalS+=parseInt(m[1]); repParts.push(m[1]+'×'+m[2]); } });
+        ex.s=totalS; ex.r=repParts.join(' + ');
+      } else { ex.s=+v||ex.s; }
+      saveDB(); renderApp();
+    } else { ex[f]=v; saveDB(); } } break; }
     case 'import': importData(e); break;
   } }
   /* yesno reveal toggle */
