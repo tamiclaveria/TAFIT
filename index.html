@@ -1460,11 +1460,6 @@ function renderApp(){
   const r=routine(), W=weeks(), members=membersOf(); const m=$('main'); m.innerHTML='';
   if(member>=members.length) member=0;
   const f=document.createElement('div'); f.className='focus'; f.innerHTML=`<b>${esc(isDuo()?members[member]:DB.students[active].name)}</b> · cargá peso, reps y RIR de cada serie`; m.appendChild(f);
-  /* Auto-sugerir día siguiente */
-  if(LOGS.length&&!CACHE['_daySet']){
-    const lastDay=LOGS[0].dayName||'';
-    for(let i=0;i<r.length;i++){ if(r[i].day===lastDay&&i+1<r.length){ day=i+1; break; } }
-  }
   /* Mini dashboard motivacional */
   {
     const streak=getStreak();
