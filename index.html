@@ -934,7 +934,27 @@ function stuFede(){ return { name:"Fede del Sol", theme:"m", weeks:cp(DEFAULT_WE
   ]}
 ] }; }
 
-function stuGrupo5(){ return { name:"Grupo 5", theme:"f", members:["M.Marta","Mercedez","Ana","Bernarda","Sofía M."], weeks:cp(DEFAULT_WEEKS), forms:{acuerdo:true,anamnesis:true}, routine:[{day:"Día 1",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]},{day:"Día 2",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]}] }; }
+function stuGrupo5(){ return { name:"Grupo 5", theme:"f", members:["M.Marta","Mercedez","Ana","Bernarda","Sofía M."], weeks:cp(DEFAULT_WEEKS), forms:{acuerdo:true,anamnesis:true}, routine:[
+  {day:"Día 1",ex:[
+    ex("Bíceps",3,"12","A definir","Curl con barra","Codos pegados al cuerpo, subí sin balancear.","60 s"),
+    ex("Toco punta con disco",3,"16","A definir","Crunch con disco","Subí el torso y tocá la punta de los pies con el disco.","45 s"),
+    ex("Cuádriceps máquina",3,"12","A definir","Extensión de cuádriceps","Extendé completo arriba, bajá controlando.","60 s"),
+    ex("Press hombros",3,"10-12","A definir","Press militar con mancuernas","Codos a 90°, empujá vertical sin arquear la espalda.","75 s"),
+    ex("Abductores máquina",3,"15","A definir","Abductor con banda","Abrí las piernas controlando, apretá afuera 1 segundo.","60 s"),
+  ]},
+  {day:"Día 2",ex:[
+    ex("Sentadilla sumo",3,"12","A definir","Sentadilla goblet","Pies anchos, puntas afuera, bajá con espalda erguida.","75 s"),
+    ex("Aductores",3,"15","A definir","Aductor con banda","Movimiento controlado, apretá en la contracción.","60 s"),
+    ex("Press francés",3,"10-12","A definir","Tríceps en polea","Codos fijos apuntando al techo, bajá controlado.","60 s"),
+    ex("Twist",3,"15","A definir","Crunch oblicuo","Rotá el torso completo, no solo los brazos.","45 s"),
+    ex("Peso muerto",3,"12","A definir","Peso muerto rumano con mancuernas","Espalda neutra, barra pegada a las piernas, apretá glúteos arriba.","75 s"),
+    ex("Búlgaras",3,"12","A definir","Estocada con mancuernas","Pie trasero en banco, bajá la rodilla controlando. Torso erguido.","75 s"),
+    ex("Pull over",3,"15","A definir","Pull over en polea","Brazos casi extendidos, sentí el estiramiento del dorsal.","60 s"),
+    ex("Sit up con mancuernas",3,"20","A definir","Crunch con disco","Subí el torso completo, mancuerna al pecho.","45 s"),
+    ex("Remo",3,"12","A definir","Remo con mancuerna","Pecho alto, llevá los codos atrás apretando escápulas.","75 s"),
+    ex("Isquios",3,"12","A definir","Curl femoral acostado","Flexioná completo, bajá controlando sin soltar.","60 s"),
+  ]}
+] }; }
 
 const FEM=new Set(['maria','sofia','valentina','martina','catalina','julieta','camila','lucia','florencia','agustina','micaela','rocio','daniela','gabriela','carla','paula','laura','andrea','romina','belen','ana','luciana','milagros','abril','antonella','brenda','carolina','cecilia','clara','denise','elena','emilia','eugenia','fernanda','guadalupe','ines','isabel','jimena','josefina','lara','lorena','magali','malena','marcela','melina','mora','natalia','nadia','noelia','ornella','pamela','patricia','pia','priscila','renata','sabrina','silvina','tamara','vanesa','vanina','veronica','victoria','yamila','zoe','aldana','ayelen','barbara','celeste','delfina','elisa','estefania','giuliana','ludmila','mia','olivia','salome','sol','trinidad','agostina','morena','luz','candela','jazmin','rosario','pilar','manuela','francisca','constanza','nati','caro','marti','jus','yesi','justine','yesica']);
 const MASC_A=new Set(['luca','elias','matias','tobias','jonas','jeremias','tomas','andres','nicolas','farias','dias']);
@@ -1226,7 +1246,7 @@ async function pushAllLocal(){ if(!fsDB) return; let keys;
   if(locked&&active){ keys=myKeys(); }
   else { keys=['tafit:students']; DB.order.forEach(id=>{ keys.push('tafit:data:'+id,'tafit:logs:'+id,'tafit:form:acuerdo:'+id,'tafit:form:anamnesis:'+id); }); }
   for(const k of keys){ try{ const v=localStorage.getItem(k); if(v&&v!=='{}'&&v!=='[]'&&v!=='""') await cloudPush(k,v); }catch(e){} } }
-async function reloadFromRemote(){ try{ const raw=await Store.get('tafit:students'); if(raw){ const p=safeParse(raw,null); if(p&&p.order&&p.order.length) DB=p; } if(DB.students[active]){ CACHE=safeParse(await Store.get('tafit:data:'+active)||'{}',{}); LOGS=safeParse(await Store.get('tafit:logs:'+active)||'[]',[]); } render(); }catch(e){} }
+async function reloadFromRemote(){ try{ const raw=await Store.get('tafit:students'); if(raw){ const p=safeParse(raw,null); if(p&&p.order&&p.order.length) DB=p; } runSeeds(); await saveDB(); if(DB.students[active]){ CACHE=safeParse(await Store.get('tafit:data:'+active)||'{}',{}); LOGS=safeParse(await Store.get('tafit:logs:'+active)||'[]',[]); } render(); }catch(e){} }
 function updateSyncUI(on){ $('clouddot').className='dot'+(on?' on':''); $('cloudlbl').textContent=on?'Sincronizado':(Store.ls?'En este dispositivo':'Solo esta sesión'); }
 function myKeys(){ /* claves que necesita una alumna con link bloqueado */
   return ['tafit:students','tafit:data:'+active,'tafit:logs:'+active,'tafit:form:acuerdo:'+active,'tafit:form:anamnesis:'+active];
@@ -1280,6 +1300,9 @@ async function initFirebase(){
   if(raw){ const p=safeParse(raw,null); if(p&&p.order&&p.order.length) DB=p; }
   if(!DB.order||!DB.order.length){ DB={ order:['omar'], students:{ omar:{ name:'Omar', routine:tmplOmar(), theme:'m' } }, settings:{pin:""}, _seed:{} }; }
   if(!DB.settings) DB.settings={pin:""};
+  runSeeds();
+  await saveDB();
+function runSeeds(){
   if(!DB._seed) DB._seed={};
   if(!DB._seed.delfina){ if(!DB.students['delfina']){ DB.students['delfina']=delfinaStudent(); DB.order.push('delfina'); } DB._seed.delfina=true; }
   if(!DB._seed.delfina_d3){ const d=DB.students['delfina']; if(d&&d.routine&&d.routine.length<3) d.routine.push(delfinaDay3()); DB._seed.delfina_d3=true; }
@@ -1299,6 +1322,7 @@ async function initFirebase(){
   if(!DB._seed.sm_d3){ const sm=DB.students['sofi-marti']; if(sm&&sm.routine){ if(!sm.routine.find(d=>/Día 2/.test(d.day))) sm.routine.splice(1,0,sofiMartiDay2()); if(!sm.routine.find(d=>/Día 3/.test(d.day))) sm.routine.push(sofiMartiDay3()); } DB._seed.sm_d3=true; }
   if(!DB._seed.fede){ if(!DB.students['fede-del-sol']){ DB.students['fede-del-sol']=stuFede(); DB.order.push('fede-del-sol'); } DB._seed.fede=true; }
   if(!DB._seed.grupo5){ if(!DB.students['grupo-5']){ DB.students['grupo-5']=stuGrupo5(); DB.order.push('grupo-5'); } DB._seed.grupo5=true; }
+  if(!DB._seed.grupo5_r2){ const g5=DB.students['grupo-5']; if(g5) g5.routine=stuGrupo5().routine; DB._seed.grupo5_r2=true; }
   /* Seed: Jus/Yesi Día 1 Semana 2 como completado */
   if(!DB._seed.jy_log_s2){
     const jyLogs=safeParse(localStorage.getItem('tafit:logs:jus-yesi')||'[]',[]);
@@ -1321,6 +1345,8 @@ async function initFirebase(){
     }
     DB._seed.jy_log_s2=true;
   }
+}
+
   DB.order.forEach(id=>{ const s=DB.students[id]; if(!s.theme) s.theme=guessFem(s.name)?'f':'m'; if(!s.weeks) s.weeks=cp(DEFAULT_WEEKS); });
   await saveDB();
   const lastA=await Store.get('tafit:active');
@@ -1764,8 +1790,7 @@ async function closeSession(){
   LOGS.unshift({ date:new Date().toISOString(), dayName:r[day].day, week, weekName:weeks()[week].t+' '+weeks()[week].n, ex:exs, obs, health:hh });
   await saveLogs();
   await autoBackup('sesion');
-  toast("Sesión guardada en la transcripta ✓",'ok');
-  /* No borramos CACHE para que los datos sigan visibles */
+  toast("✓ Sesión guardada en la transcripta",'ok');
   renderApp();
 }
 
@@ -1943,7 +1968,12 @@ function renderEdit(){
   const bottom=document.createElement('div'); bottom.className='edit-bottom'; bottom.innerHTML=`<button class="save" data-act="saveRoutine">Guardar rutina</button>`; m.appendChild(bottom);
   const note=document.createElement('div'); note.className='note'; note.textContent="Los datos cargados se guardan por posición. Si reordenás o eliminás ejercicios con datos en curso, se corren. Cerrá la sesión o exportá un backup antes de reordenar."; m.appendChild(note);
 }
-function collectForm(){ const out=[]; document.querySelectorAll('.edit-day').forEach(dayEl=>{ const di=+dayEl.dataset.day; const dayName=(dayEl.querySelector('.dayname').value||'').trim()||('Día '+(di+1)); const exes=[]; dayEl.querySelectorAll('.edit-ex').forEach(exEl=>{ const g=f=>{ const el=exEl.querySelector('[data-field="'+f+'"]'); return el?el.value:''; }; const n=(g('n')||'').trim(); const obj={ n, s:Math.max(1,parseInt(g('s'))||1), r:(g('r')||'').trim()||'—', w:(g('w')||'').trim()||'A definir', alt:(g('alt')||'').trim(), tip:(g('tip')||'').trim(), rest:(g('rest')||'').trim(), vid:YT(n||'ejercicio') }; const w2el=exEl.querySelector('[data-field="w2"]'); if(w2el) obj.w2=(w2el.value||'').trim()||'A definir'; exes.push(obj); }); out[di]={ day:dayName, ex:exes }; }); return out; }
+function collectForm(){ const out=[]; document.querySelectorAll('.edit-day').forEach(dayEl=>{ const di=+dayEl.dataset.day; const dayName=(dayEl.querySelector('.dayname').value||'').trim()||('Día '+(di+1)); const exes=[]; dayEl.querySelectorAll('.edit-ex').forEach(exEl=>{ const g=f=>{ const el=exEl.querySelector('[data-field="'+f+'"]'); return el?el.value:''; }; const n=(g('n')||'').trim(); const rawS=(g('s')||'').trim();
+      /* Parsear expresiones como "1x10 3x8" */
+      let finalS=Math.max(1,parseInt(rawS)||1); let finalR=(g('r')||'').trim()||'—';
+      const sParts=rawS.match(/(\d+)\s*[xX×]\s*(\d+)/g);
+      if(sParts&&sParts.length>1){ let totalS=0; const repP=[]; sParts.forEach(function(p){ const m=p.match(/(\d+)\s*[xX×]\s*(\d+)/); if(m){ totalS+=parseInt(m[1]); repP.push(m[1]+'×'+m[2]); } }); finalS=totalS; finalR=repP.join(' + '); }
+      const obj={ n, s:finalS, r:finalR, w:(g('w')||'').trim()||'A definir', alt:(g('alt')||'').trim(), tip:(g('tip')||'').trim(), rest:(g('rest')||'').trim(), vid:YT(n||'ejercicio') }; const w2el=exEl.querySelector('[data-field="w2"]'); if(w2el) obj.w2=(w2el.value||'').trim()||'A definir'; exes.push(obj); }); out[di]={ day:dayName, ex:exes }; }); return out; }
 function collectWeeks(){ const out=[]; document.querySelectorAll('.week-row').forEach(wr=>{ const g=f=>{ const el=wr.querySelector('[data-wf="'+f+'"]'); return el?el.value.trim():''; }; out.push({ t:g('t')||'S', n:g('n')||'', d:g('d')||'' }); }); return out.length?out:cp(DEFAULT_WEEKS); }
 function collectHealth(){ const sec=$('healthsec'); if(!sec) return DB.students[active].health; const g=sel=>{ const el=sec.querySelector(sel); return el?el.value:''; }; const enabled=g('[data-hf="enabled"]')==='on'; const leg=g('[data-hf="leg"]')==='on'; const tag=g('[data-hf="tag"]').trim(); const alarms=g('[data-hf="alarms"]').split(',').map(s=>s.trim()).filter(Boolean); const warning=g('[data-hf="warning"]').trim(); const rules=[]; sec.querySelectorAll('.hrule').forEach(rr=>{ const t=(rr.querySelector('[data-hf="rt"]').value||'').trim(); const d=(rr.querySelector('[data-hf="rd"]').value||'').trim(); if(t||d) rules.push({t,d}); }); return { enabled, tag, leg, alarms, warning, rules }; }
 function collectMembers(){ const el=$('membersfld'); if(!el) return DB.students[active].members; const arr=el.value.split(',').map(s=>s.trim()).filter(Boolean); return arr; }
