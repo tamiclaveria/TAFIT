@@ -130,6 +130,7 @@
   .quick-edit{background:var(--light);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px}
   .qe-title{font-size:11px;font-weight:700;color:var(--accent);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
   .mini-dash{background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--navy);text-align:center;margin-bottom:8px;line-height:1.6}
+  .sync-btn{background:none;border:none;color:#fff;font-size:16px;cursor:pointer;margin-left:6px;opacity:.7;font-weight:700}.sync-btn:active{opacity:1;transform:rotate(180deg)}
   .prog-bar2{background:var(--light);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;color:var(--accent);text-align:center;margin-bottom:8px}
   @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
   .install-banner{border-radius:14px;padding:16px;margin-bottom:12px;color:#fff;position:relative;overflow:hidden;background:linear-gradient(135deg,#1976d2,#1565c0)}
@@ -403,7 +404,7 @@
       <div class="topright">
         <button class="dark-toggle" id="darkbtn" data-act="darkMode">🌙</button>
         <button class="lockbtn" id="lockbtn" data-act="lock"></button>
-        <div class="cloud"><span class="dot" id="clouddot"></span><span id="cloudlbl">…</span></div>
+        <div class="cloud"><span class="dot" id="clouddot"></span><span id="cloudlbl">…</span><button class="sync-btn" data-act="forceSync" title="Sincronizar">↻</button></div>
       </div>
     </div>
     <div class="pickrow" id="pickrow"></div>
@@ -624,7 +625,7 @@ function stuRosario(){
 
 /* ---- Carina (individual, 2 días por secciones + cardio) ---- */
 function stuCarina(){
-  return { name:"Carina", theme:"f", weeks:cp(DEFAULT_WEEKS), routine:[
+  return { name:"Carina / Lucía", theme:"f", members:["Carina","Lucía"], weeks:cp(DEFAULT_WEEKS), routine:[
     {day:"Día 1", ex:[
       ex("Sentadilla asistida",4,"12","10 kg/lado","Sentadilla goblet","Sección: Fuerza.",""),
       ex("Toco punta con disco",4,"12 c/lado","5 kg","Crunch con disco","Sección: Fuerza.",""),
@@ -934,6 +935,21 @@ function stuFede(){ return { name:"Fede del Sol", theme:"m", weeks:cp(DEFAULT_WE
   ]}
 ] }; }
 
+function stuAdrianaX(){ return { name:"Adriana / X", theme:"f", members:["Adriana","X"], weeks:cp(DEFAULT_WEEKS), forms:{acuerdo:true,anamnesis:true}, routine:[
+  {day:"Día 1",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]},
+  {day:"Día 2",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]}
+] }; }
+function stuMicaela(){ return { name:"Micaela Guevara", theme:"f", weeks:cp(DEFAULT_WEEKS), forms:{anamnesis:true}, routine:[
+  {day:"Día 1",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]},
+  {day:"Día 2",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]},
+  {day:"Día 3",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]},
+  {day:"Día 4",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]},
+  {day:"Día 5",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]},
+  {day:"Día 6",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]}
+] }; }
+function stuCecilia(){ return { name:"Cecilia", theme:"f", weeks:cp(DEFAULT_WEEKS), forms:{anamnesis:true}, routine:[
+  {day:"Día 1",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]}
+] }; }
 function stuGrupo5(){ return { name:"Grupo 5", theme:"f", members:["M.Marta","Mercedez","Ana","Bernarda","Sofía M."], weeks:cp(DEFAULT_WEEKS), forms:{acuerdo:true,anamnesis:true}, routine:[
   {day:"Día 1",ex:[
     ex("Bíceps",3,"12","A definir","Curl con barra","Codos pegados al cuerpo, subí sin balancear.","60 s"),
@@ -973,8 +989,8 @@ document.addEventListener('toggle',e=>{ const d=e.target; if(d&&d.matches&&d.mat
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const K=(ei,si,mi)=>"w"+week+"_"+day+"|"+ei+"|"+si+(mi?"|m"+mi:"");
-const OBSK=()=>'obs|w'+week+'_'+day;
+const K=(ei,si,mi)=>day+"|"+ei+"|"+si+(mi?"|m"+mi:"");
+const OBSK=()=>'obs|'+day;
 /* Migrar CACHE keys viejas (sin prefijo de semana) al formato nuevo */
 function migrateCache(){
   if(CACHE._wMigrated) return;
@@ -1019,6 +1035,11 @@ function isDuo(){ return membersOf().length>1; }
 async function saveDB(){ await Store.set('tafit:students', JSON.stringify(DB)); }
 async function saveData(){ await Store.set('tafit:data:'+active, JSON.stringify(CACHE)); }
 async function saveLogs(){ await Store.set('tafit:logs:'+active, JSON.stringify(LOGS)); }
+/* Auto-guardado cada 5 minutos */
+setInterval(async function(){
+  if(!active||!DB.students[active]) return;
+  try{ await saveData(); await autoBackup('auto'); }catch(e){}
+}, 5*60*1000);
 /* Protección: al recibir LOGS de Firebase, solo AGREGAR sesiones nuevas, nunca borrar existentes */
 function mergeLogs(localLogs, remoteLogs){
   if(!remoteLogs||!remoteLogs.length) return localLogs;
@@ -1293,7 +1314,7 @@ async function pushAllLocal(){ if(!fsDB) return; let keys;
   if(locked&&active){ keys=myKeys(); }
   else { keys=['tafit:students']; DB.order.forEach(id=>{ keys.push('tafit:data:'+id,'tafit:logs:'+id,'tafit:form:acuerdo:'+id,'tafit:form:anamnesis:'+id); const s=DB.students[id]; if(s&&s.members&&s.members.length>1){ for(let mi=0;mi<s.members.length;mi++){ keys.push('tafit:form:acuerdo:'+id+':'+mi,'tafit:form:anamnesis:'+id+':'+mi); } } }); }
   for(const k of keys){ try{ const v=localStorage.getItem(k); if(v&&v!=='{}'&&v!=='[]'&&v!=='""') await cloudPush(k,v); }catch(e){} } }
-async function reloadFromRemote(){ try{ const raw=await Store.get('tafit:students'); if(raw){ const p=safeParse(raw,null); if(p&&p.order&&p.order.length) DB=p; } if(DB.students[active]){ CACHE=safeParse(await Store.get('tafit:data:'+active)||'{}',{}); migrateCache(); const remoteLogs=safeParse(await Store.get('tafit:logs:'+active)||'[]',[]); LOGS=mergeLogs(LOGS,remoteLogs); } render(); }catch(e){} }
+async function reloadFromRemote(){ try{ const raw=await Store.get('tafit:students'); if(raw){ const p=safeParse(raw,null); if(p&&p.order&&p.order.length) DB=p; } if(DB.students[active]){ CACHE=safeParse(await Store.get('tafit:data:'+active)||'{}',{}); const remoteLogs=safeParse(await Store.get('tafit:logs:'+active)||'[]',[]); LOGS=mergeLogs(LOGS,remoteLogs); } render(); }catch(e){} }
 function updateSyncUI(on){ $('clouddot').className='dot'+(on?' on':''); $('cloudlbl').textContent=on?'Sincronizado':(Store.ls?'En este dispositivo':'Solo esta sesión'); }
 function myKeys(){ /* claves que necesita una alumna con link bloqueado */
   return ['tafit:students','tafit:data:'+active,'tafit:logs:'+active,'tafit:form:acuerdo:'+active,'tafit:form:anamnesis:'+active];
@@ -1364,6 +1385,10 @@ function runSeeds(){
   if(!DB._seed.sm_d3){ const sm=DB.students['sofi-marti']; if(sm&&sm.routine){ if(!sm.routine.find(d=>/Día 2/.test(d.day))) sm.routine.splice(1,0,sofiMartiDay2()); if(!sm.routine.find(d=>/Día 3/.test(d.day))) sm.routine.push(sofiMartiDay3()); } DB._seed.sm_d3=true; }
   if(!DB._seed.fede){ if(!DB.students['fede-del-sol']){ DB.students['fede-del-sol']=stuFede(); DB.order.push('fede-del-sol'); } DB._seed.fede=true; }
   if(!DB._seed.grupo5){ if(!DB.students['grupo-5']){ DB.students['grupo-5']=stuGrupo5(); DB.order.push('grupo-5'); } DB._seed.grupo5=true; }
+  if(!DB._seed.adriana){ if(!DB.students['adriana-x']){ DB.students['adriana-x']=stuAdrianaX(); DB.order.push('adriana-x'); } DB._seed.adriana=true; }
+  if(!DB._seed.micaela){ if(!DB.students['micaela']){ DB.students['micaela']=stuMicaela(); DB.order.push('micaela'); } DB._seed.micaela=true; }
+  if(!DB._seed.cecilia){ if(!DB.students['cecilia']){ DB.students['cecilia']=stuCecilia(); DB.order.push('cecilia'); } DB._seed.cecilia=true; }
+  if(!DB._seed.carina_duo){ const ca=DB.students['carina']; if(ca&&!ca.members){ ca.name='Carina / Lucía'; ca.members=['Carina','Lucía']; } DB._seed.carina_duo=true; }
   /* Seed: Jus/Yesi Día 1 Semana 2 como completado */
   if(!DB._seed.jy_log_s2){
     const jyLogs=safeParse(localStorage.getItem('tafit:logs:jus-yesi')||'[]',[]);
@@ -1416,7 +1441,7 @@ function whenFirebaseReady(tries){
   if(tries<=0){ updateSyncUI(false); return; }
   setTimeout(()=>whenFirebaseReady(tries-1),500);
 }
-async function loadStudent(){ CACHE=safeParse(await Store.get('tafit:data:'+active)||'{}',{}); migrateCache(); LOGS=safeParse(await Store.get('tafit:logs:'+active)||'[]',[]); openEx=-1;
+async function loadStudent(){ CACHE=safeParse(await Store.get('tafit:data:'+active)||'{}',{}); LOGS=safeParse(await Store.get('tafit:logs:'+active)||'[]',[]); openEx=-1;
   /* recordar dónde quedó: integrante, día y semana */
   let pos={}; try{ pos=safeParse(localStorage.getItem('tafit:pos:'+active)||'{}',{}); }catch(e){}
   const r=(DB.students[active]&&DB.students[active].routine)||[];
@@ -1808,7 +1833,7 @@ function showWelcome(){
 }
 function updSet(ei,si,mi,f,v){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CACHE[k][f]=v; const box=$('rm-'+ei+'-'+mi); if(box) box.innerHTML=rmHTML(ei,mi); queueSave();
   /* Celebración de nuevo récord */
-  if(f==='w'&&v){ const exName=routine()[day].ex[ei].n; const maxW=getMaxWeight(exName); const cur=firstNum(v); if(cur&&maxW&&cur>maxW){ showRecord(exName,maxW,cur); } }
+  if(f==='w'&&v){ const exName=routine()[day].ex[ei]?routine()[day].ex[ei].n:''; const maxW=getMaxWeight(exName); const cur=firstNum(v); if(cur&&cur>0&&maxW>0&&cur>maxW){ showRecord(exName,maxW,cur); } }
 }
 function showRecord(name,old,now){ var existing=document.querySelector('.record-banner'); if(existing) existing.remove(); var div=document.createElement('div'); div.className='record-banner'; div.textContent='🏆 ¡Nuevo récord en '+name+'! '+old+' kg → '+now+' kg'; var main=$('main'); if(main) main.insertBefore(div,main.firstChild); setTimeout(function(){if(div.parentNode) div.remove();},5000); }
 function updObs(v){ CACHE[OBSK()]=v; queueSave(); }
@@ -2168,6 +2193,7 @@ document.addEventListener('click',e=>{
     case 'toggleForm': toggleFormEnable(el.dataset.ftype); break;
     case 'togglePause': togglePause(); break;
     case 'formMember': member=+el.dataset.m; renderFormTab(el.dataset.ft); break;
+    case 'forceSync': toast('Sincronizando…'); location.reload(); break;
     case 'darkMode': toggleDarkMode(); break;
     case 'dismissInstall': try{ localStorage.setItem('tafit:install:dismissed','1'); }catch(e){} var ib=el.closest('.install-banner'); if(ib) ib.remove(); break;
     case 'formAccordion': var fbody=el.nextElementSibling; if(fbody&&fbody.classList.contains('form-acc-body')){ fbody.style.display=fbody.style.display==='none'?'':'none'; var chev=el.querySelector('.ex-chev'); if(chev) chev.classList.toggle('open'); } break;
