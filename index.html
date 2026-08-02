@@ -940,12 +940,63 @@ function stuAdrianaX(){ return { name:"Adriana / X", theme:"f", members:["Adrian
   {day:"Día 2",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]}
 ] }; }
 function stuMicaela(){ return { name:"Micaela Guevara", theme:"f", weeks:cp(DEFAULT_WEEKS), forms:{anamnesis:true}, routine:[
-  {day:"Día 1",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]},
-  {day:"Día 2",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]},
-  {day:"Día 3",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]},
-  {day:"Día 4",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]},
-  {day:"Día 5",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]},
-  {day:"Día 6",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]}
+  {day:"Día 1 · Piernas / Cuádriceps", ex:[
+    ex("Extensiones de cuádriceps",4,"15","A definir","Sentadilla en Smith","1 segundo de retención arriba. Máxima carga con técnica.","90 s"),
+    ex("Prensa 45° pies medios",4,"12","A definir","Hack squat","Pies al ancho de hombros en el medio de la plataforma.","90 s"),
+    ex("Hack",4,"12","A definir","Prensa a 45°","Bajá controlado, no bloquees rodillas arriba.","90 s"),
+    ex("Curl femoral",4,"12","A definir","Femoral acostado","Flexioná completo, bajá controlando.","60 s"),
+    ex("Aductores máquina",4,"15","A definir","Aductor con banda","Cerrá controlando, apretá adentro 1 segundo.","60 s"),
+  ]},
+  {day:"Día 2 · Torso Completo", ex:[
+    ex("Jalón al pecho",4,"12","A definir","Dominadas asistidas","Pecho arriba, llevá la barra al pecho con codos hacia abajo.","75 s"),
+    ex("Remo sentado en polea",4,"12","A definir","Remo con mancuerna","Pecho alto, llevá el agarre al abdomen apretando escápulas.","75 s"),
+    ex("Remo unilateral mancuerna",4,"10","A definir","Remo en máquina","Codo pegado al cuerpo, apretá la espalda arriba.","60 s"),
+    ex("Press militar",4,"12","A definir","Press de hombros en máquina","Codos a 90°, empujá vertical sin arquear la espalda.","75 s"),
+    ex("Elevaciones laterales",4,"12","A definir","Elevación lateral en polea","Codos levemente flexionados, subí hasta la altura del hombro.","60 s"),
+    ex("Face pull",4,"12","A definir","Pull face con banda","Codos altos, llevá la soga hacia la cara.","60 s"),
+    ex("Curl bíceps barra",4,"12","A definir","Curl alterno con mancuernas","Codos pegados al cuerpo, subí sin balancear.","60 s"),
+    ex("Curl martillo",4,"10","A definir","Curl martillo en polea","Agarre neutro (palmas enfrentadas), codos quietos.","60 s"),
+    ex("Tríceps en polea",4,"12","A definir","Patada de tríceps con mancuerna","Codos pegados al cuerpo, extendé completo.","60 s"),
+    ex("Tríceps francés",4,"10","A definir","Press francés con mancuernas","Codos fijos apuntando al techo, bajá controlado.","60 s"),
+  ]},
+  {day:"Día 3 · Glúteos Intenso", ex:[
+    ex("Hip Thrust",5,"15","A definir","Puente de glúteo","Apretá glúteos arriba 1 segundo, no hiperextendas la lumbar.","90 s"),
+    ex("Sumo con mancuerna abajo",4,"15","A definir","Sentadilla sumo en Smith","Pies anchos, puntas afuera, mancuerna colgando al centro.","75 s"),
+    ex("Peso muerto rodillas semirrígidas",4,"15","A definir","Peso muerto rumano con barra","Rodillas levemente flexionadas y fijas, sentí el estiramiento en isquios.","90 s"),
+    ex("Búlgaras en Smith",4,"15","A definir","Estocada búlgara con mancuernas","Pie trasero en banco, bajá controlado, torso erguido.","75 s"),
+    ex("Patada en banco alta",4,"12","A definir","Patada de glúteo en polea","Apoyá el pie en el banco, empujá con el talón hacia arriba.","60 s"),
+    ex("Abductores en máquina",4,"15","A definir","Abductor con banda","15 reps torso atrás + 15 reps torso inclinado adelante.","60 s"),
+  ]},
+  {day:"Día 4 · Torso 2", ex:[
+    ex("Jalón cerrado",4,"15","A definir","Jalón al pecho agarre neutro","1 segundo de sostén abajo. Apretá dorsales.","75 s"),
+    ex("Remo en máquina agarre neutro",4,"12","A definir","Remo sentado en polea","Pecho apoyado, llevá los codos atrás apretando escápulas.","75 s"),
+    ex("Pullover en polea",4,"12","A definir","Pull over con mancuerna","Brazos casi extendidos, sentí el estiramiento del dorsal.","60 s"),
+    ex("Press militar en Smith",4,"15","A definir","Press de hombros con mancuernas","Empujá vertical sin arquear la espalda.","75 s"),
+    ex("Elevaciones laterales inclinadas",4,"12","A definir","Elevación lateral en polea","Torso inclinado en banco, subí controlado.","60 s"),
+    ex("Pájaros deltoides posterior",4,"12","A definir","Pájaro en máquina","Torso inclinado, codos levemente flexionados, apretá escápulas.","60 s"),
+    ex("Curl alternado",4,"12","A definir","Curl con barra","Alterná brazos, codos quietos, sin balancear.","60 s"),
+    ex("Curl en polea",4,"10","A definir","Curl con mancuerna","Codos pegados, apretá arriba 1 segundo.","60 s"),
+    ex("Tríceps tras nuca sentada",4,"12","A definir","Tríceps en polea","Con 1 mancuerna. Codos apuntando al techo, bajá detrás de la cabeza.","60 s"),
+    ex("Extensión unilateral tríceps polea",4,"10","A definir","Patada de tríceps con mancuerna","Codo fijo, extendé completo. Polea o mancuerna.","60 s"),
+    ex("Aductores en máquina",4,"15","A definir","Aductor con banda","Cerrá controlando, apretá adentro 1 segundo.","60 s"),
+  ]},
+  {day:"Día 5 · Glúteos Aislados", ex:[
+    ex("Hip Thrust",4,"12","A definir","Puente de glúteo","Apretá glúteos arriba 1 segundo.","90 s"),
+    ex("Patada de glúteos banco alta",4,"12","A definir","Patada de glúteo en polea","Apoyá el pie, empujá con el talón hacia arriba.","60 s"),
+    ex("Patadas laterales en polea",4,"12","A definir","Abductor de pie","Pierna hacia afuera, controlá la vuelta.","60 s"),
+    ex("Peso muerto rodillas semirrígidas",4,"15","A definir","Peso muerto rumano con barra","Rodillas levemente flexionadas y fijas.","90 s"),
+    ex("Abductores hacia afuera",4,"15","A definir","Abductor con banda","15 torso atrás + 15 torso adelante.","60 s"),
+    ex("Camilla boca abajo",4,"15","A definir","Curl femoral acostado","Flexioná completo, bajá controlando.","60 s"),
+    ex("Femorales parado",5,"15","A definir","Femoral de pie en máquina","Rango completo, sin impulso.","60 s"),
+  ]},
+  {day:"Día 6 · Glúteos + Cuádriceps", ex:[
+    ex("Extensiones de cuádriceps",4,"15","A definir","Sentadilla en Smith","1 segundo de retención arriba. Máxima carga con técnica.","90 s"),
+    ex("Sumo en Smith",4,"12","A definir","Sentadilla sumo con mancuerna","Pies anchos, puntas afuera, bajá controlado.","75 s"),
+    ex("Búlgaras en Smith",4,"12","A definir","Estocada búlgara con mancuernas","Pie trasero en banco, bajá controlado.","75 s"),
+    ex("Peso muerto rodillas semirrígidas",4,"12","A definir","Peso muerto rumano con barra","Rodillas levemente flexionadas y fijas.","90 s"),
+    ex("Patada de glúteos alta en banco",4,"12","A definir","Patada de glúteo en polea","Empujá con el talón, apretá el glúteo arriba.","60 s"),
+    ex("Aductores en máquina",4,"15","A definir","Aductor con banda","Cerrá controlando, apretá adentro 1 segundo.","60 s"),
+  ]}
 ] }; }
 function stuCecilia(){ return { name:"Cecilia", theme:"f", weeks:cp(DEFAULT_WEEKS), forms:{anamnesis:true}, routine:[
   {day:"Día 1", ex:[
