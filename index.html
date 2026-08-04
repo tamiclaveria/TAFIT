@@ -1424,8 +1424,6 @@ async function initFirebase(){
     _pushRaw('tafit:ping','ok').then(ok=>{ if(ok){ updateSyncUI(true); flushPending(); } });
     /* pull: cloud → local (solo si local no tiene) */
     try{ const snap=await kvQuery().get(); snap.forEach(function(doc){ var k=doc.id,v=doc.data().v; if(shouldSync(k)&&v!=null){ try{ if(localStorage.getItem(k)!==v) localStorage.setItem(k,v); }catch(e){} } }); }catch(e){ console.warn('Pull:',e); }
-    /* refrescar DB/CACHE/LOGS en memoria con lo recién bajado de la nube ANTES de permitir comparar el PIN u otros datos (evita comparar contra una copia vieja) */
-    try{ await reloadFromRemote(); }catch(e){}
     /* push: local → cloud */
     await pushAllLocal();
     /* real-time listener */
@@ -1478,6 +1476,7 @@ function runSeeds(){
   if(!DB._seed.grupo5){ if(!DB.students['grupo-5']){ DB.students['grupo-5']=stuGrupo5(); DB.order.push('grupo-5'); } DB._seed.grupo5=true; }
   if(!DB._seed.adriana){ if(!DB.students['adriana-x']){ DB.students['adriana-x']=stuAdrianaX(); DB.order.push('adriana-x'); } DB._seed.adriana=true; }
   if(!DB._seed.micaela){ if(!DB.students['micaela']){ DB.students['micaela']=stuMicaela(); DB.order.push('micaela'); } DB._seed.micaela=true; }
+  if(!DB._seed.micaela_r2){ const mi=DB.students['micaela']; if(mi) mi.routine=stuMicaela().routine; DB._seed.micaela_r2=true; }
   if(!DB._seed.cecilia){ if(!DB.students['cecilia']){ DB.students['cecilia']=stuCecilia(); DB.order.push('cecilia'); } DB._seed.cecilia=true; }
   if(!DB._seed.carina_duo){ const ca=DB.students['carina']; if(ca&&!ca.members){ ca.name='Carina / Lucía'; ca.members=['Carina','Lucía']; } DB._seed.carina_duo=true; }
   /* Seed: Jus/Yesi Día 1 Semana 2 como completado */
