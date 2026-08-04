@@ -1424,6 +1424,8 @@ async function initFirebase(){
     _pushRaw('tafit:ping','ok').then(ok=>{ if(ok){ updateSyncUI(true); flushPending(); } });
     /* pull: cloud → local (solo si local no tiene) */
     try{ const snap=await kvQuery().get(); snap.forEach(function(doc){ var k=doc.id,v=doc.data().v; if(shouldSync(k)&&v!=null){ try{ if(localStorage.getItem(k)!==v) localStorage.setItem(k,v); }catch(e){} } }); }catch(e){ console.warn('Pull:',e); }
+    /* refrescar DB/CACHE/LOGS en memoria con lo recién bajado de la nube ANTES de permitir comparar el PIN u otros datos (evita comparar contra una copia vieja) */
+    try{ await reloadFromRemote(); }catch(e){}
     /* push: local → cloud */
     await pushAllLocal();
     /* real-time listener */
