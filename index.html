@@ -1266,6 +1266,7 @@ const FORM_ANAMNESIS=[
 ];
 
 function formKey(type){ const mm=membersOf(); return 'tafit:form:'+type+':'+active+(mm.length>1?':'+member:''); }
+function mediaKey(prefix){ const mm=membersOf(); return prefix+active+(mm.length>1?':'+member:''); }
 async function loadForm(type){ return safeParse(await Store.get(formKey(type))||'{}',{}); }
 async function saveForm(type,data){ data._ts=new Date().toISOString(); await Store.set(formKey(type), JSON.stringify(data)); }
 
@@ -1855,9 +1856,9 @@ function pickWeek(i){
   week=i; savePos(); renderApp();
 }
 /* Una semana está completa cuando cada día de la rutina tiene su sesión cerrada en esa semana */
-function weekDone(wi){ const r=routine(); return r.length>0 && r.every(d=> LOGS.some(l=> l.week===wi && l.dayName===d.day)); }
-/* Para alumnas: la semana i se desbloquea al completar la anterior. La profe ve todo. */
-function wkLocked(i){ return !trainer && i>0 && !weekDone(i-1) && !LOGS.some(l=>l.week>=i); }
+function weekDone(wi){ const r=routine(); return r.length>0 && r.every(function(d){ return LOGS.some(function(l){ return +l.week===+wi && l.dayName===d.day; }); }); }
+/* Para alumnas: la semana i se desbloquea SOLO al completar TODOS los días de la anterior. La profe ve todo. */
+function wkLocked(i){ return !trainer && i>0 && !weekDone(i-1); }
 function pickMember(i){ member=i; openEx=-1; savePos(); renderApp(); }
 
 /* Peso más alto registrado por ejercicio */
@@ -1993,11 +1994,17 @@ async function delLog(i){ if(!await uiConfirm("¿Eliminar esta sesión del regis
 /* ===================== FOTOS ===================== */
 async function renderPhotos(){
   const m=$('main'); m.innerHTML='<div class="empty">Cargando fotos…</div>';
-  const idx=safeParse(await Store.get('tafit:photoidx:'+active)||'[]',[]);
-  let html=`<div class="focus"><b>${esc(DB.students[active].name)}</b> · fotos de progreso</div>`;
+  const idx=safeParse(await Store.get(mediaKey('tafit:photoidx:'))||'[]',[]);
+  const pmembers=membersOf();
+  let html='';
+  if(pmembers.length>1){
+    html+=`<div class="seg" style="margin-bottom:8px">${pmembers.map((mn,i)=>`<button data-act="photoMember" data-m="${i}" class="${i===member?'sel':''}">${esc(mn)}</button>`).join('')}</div>`;
+  }
+  const pMemberName=pmembers.length>1?pmembers[member]:DB.students[active].name;
+  html+=`<div class="focus"><b>${esc(pMemberName)}</b> · fotos de progreso</div>`;
   html+=`<div class="edit-section"><h2>📷 Subir fotos de progreso</h2><p>Sacá las fotos siempre en la misma pose y luz. Recomendamos estas 4 tomas:</p><div class="photo-angles"><span>🧍 Frente</span><span>🔄 Espalda</span><span>👉 Perfil Der.</span><span>👈 Perfil Izq.</span></div><div class="edit-actions"><label class="impbtn">📷 Agregar foto<input type="file" accept="image/*" data-chg="photo" hidden></label><label class="impbtn">📸 Varias fotos<input type="file" accept="image/*" data-chg="photos" multiple hidden></label></div></div>`;
   html+=`<div class="edit-section"><h2>📊 Estudios corporales</h2><p>Subí archivos de bioimpedancia, DEXA, antropometría u otros estudios de composición corporal.</p><div class="edit-actions"><label class="impbtn">📄 Subir estudio<input type="file" accept="image/*,.pdf" data-chg="study" hidden></label></div>`;
-  const studies=safeParse(await Store.get('tafit:studies:'+active)||'[]',[]);
+  const studies=safeParse(await Store.get(mediaKey('tafit:studies:'))||'[]',[]);
   if(studies.length){
     html+='<div class="studies-list">';
     studies.forEach((s,i)=>{ html+=`<div class="study-item"><span>📄 ${esc(s.name)} · ${fmtPhotoDate(s.date)}</span><button data-act="viewStudy" data-i="${i}">Ver</button><button data-act="delStudy" data-i="${i}">✕</button></div>`; });
@@ -2005,7 +2012,7 @@ async function renderPhotos(){
   }
   html+='</div>';
   /* Medidas corporales con historial */
-  const medidas=safeParse(await Store.get('tafit:medidas:'+active)||'[]',[]);
+  const medidas=safeParse(await Store.get(mediaKey('tafit:medidas:'))||'[]',[]);
   html+=`<div class="edit-section"><h2>📏 Medidas corporales</h2><p>Registrá las medidas periódicamente para ver la evolución.</p><div class="form-grid"><div class="form-field"><div class="form-lbl">Peso (kg)</div><input class="form-inp" id="med_peso" type="number" placeholder="ej: 65"></div><div class="form-field"><div class="form-lbl">Talla (cm)</div><input class="form-inp" id="med_talla" type="number" placeholder="ej: 165"></div><div class="form-field"><div class="form-lbl">Cintura (cm)</div><input class="form-inp" id="med_cintura" type="number" placeholder="ej: 75"></div><div class="form-field"><div class="form-lbl">Cadera (cm)</div><input class="form-inp" id="med_cadera" type="number" placeholder="ej: 95"></div></div><div class="edit-actions mt8"><button data-act="saveMedidas">📏 Guardar medidas</button></div>`;
   if(medidas.length){
     html+='<div class="medidas-hist"><div class="form-lbl" style="margin:12px 0 6px">Historial:</div>';
@@ -2018,27 +2025,27 @@ async function renderPhotos(){
   if(!idx.length){ html+=`<div class="empty">Todavía no hay fotos. Subí la primera para empezar a comparar.</div>`; m.innerHTML=html; return; }
   const sorted=idx.slice().sort((a,b)=> String(b.date).localeCompare(String(a.date)));
   let grid='<div class="pgrid">';
-  for(const p of sorted){ const data=await Store.get('tafit:photo:'+active+':'+p.pid); grid+=`<div class="pcard"><img src="${data||''}" data-act="viewPhoto" data-pid="${esc(p.pid)}" alt=""><div class="pm"><span>${fmtPhotoDate(p.date)}${p.angle?' · '+esc(p.angle):''}</span><button data-act="delPhoto" data-pid="${esc(p.pid)}">borrar</button></div></div>`; }
+  for(const p of sorted){ const data=await Store.get(mediaKey('tafit:photo:')+':'+p.pid); grid+=`<div class="pcard"><img src="${data||''}" data-act="viewPhoto" data-pid="${esc(p.pid)}" alt=""><div class="pm"><span>${fmtPhotoDate(p.date)}${p.angle?' · '+esc(p.angle):''}</span><button data-act="delPhoto" data-pid="${esc(p.pid)}">borrar</button></div></div>`; }
   grid+='</div>';
   m.innerHTML=html+grid;
 }
 function fmtPhotoDate(iso){ const d=new Date(iso); return d.toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'}); }
 function resizeImage(file){ return new Promise((res,rej)=>{ const rd=new FileReader(); rd.onload=()=>{ const img=new Image(); img.onload=()=>{ const max=1000; let w=img.width,h=img.height; if(w>h && w>max){ h=Math.round(h*max/w); w=max; } else if(h>max){ w=Math.round(w*max/h); h=max; } const cv=document.createElement('canvas'); cv.width=w; cv.height=h; cv.getContext('2d').drawImage(img,0,0,w,h); res(cv.toDataURL('image/jpeg',0.72)); }; img.onerror=rej; img.src=rd.result; }; rd.onerror=rej; rd.readAsDataURL(file); }); }
-async function addPhoto(e){ const file=e.target.files[0]; e.target.value=''; if(!file) return; toast("Procesando foto…"); try{ const data=await resizeImage(file); const pid=String(Date.now()); const ok=await Store.set('tafit:photo:'+active+':'+pid, data); if(!ok){ toast("No se pudo guardar (espacio lleno).",'warn'); return; } const idx=safeParse(await Store.get('tafit:photoidx:'+active)||'[]',[]); idx.push({pid,date:new Date().toISOString()}); await Store.set('tafit:photoidx:'+active, JSON.stringify(idx)); toast("Foto agregada ✓",'ok'); renderPhotos(); }catch(err){ toast("No se pudo procesar la imagen",'warn'); } }
-async function addMultiPhotos(e){ const files=e.target.files; e.target.value=''; if(!files.length) return; toast("Procesando "+files.length+" fotos…"); const idx=safeParse(await Store.get('tafit:photoidx:'+active)||'[]',[]); for(let i=0;i<files.length;i++){ try{ const data=await resizeImage(files[i]); const pid=String(Date.now())+'_'+i; await Store.set('tafit:photo:'+active+':'+pid, data); idx.push({pid,date:new Date().toISOString()}); }catch(err){} } await Store.set('tafit:photoidx:'+active, JSON.stringify(idx)); toast(files.length+" fotos agregadas ✓",'ok'); renderPhotos(); }
-async function addStudy(e){ const file=e.target.files[0]; e.target.value=''; if(!file) return; toast("Procesando estudio…"); try{ const data=await resizeImage(file); const sid=String(Date.now()); await Store.set('tafit:study:'+active+':'+sid, data); const studies=safeParse(await Store.get('tafit:studies:'+active)||'[]',[]); studies.push({sid,name:file.name,date:new Date().toISOString()}); await Store.set('tafit:studies:'+active, JSON.stringify(studies)); toast("Estudio guardado ✓",'ok'); renderPhotos(); }catch(err){ toast("No se pudo procesar el archivo",'warn'); } }
-async function delPhoto(pid){ if(!await uiConfirm("¿Borrar esta foto?")) return; await Store.del('tafit:photo:'+active+':'+pid); const idx=safeParse(await Store.get('tafit:photoidx:'+active)||'[]',[]).filter(p=>p.pid!==pid); await Store.set('tafit:photoidx:'+active, JSON.stringify(idx)); renderPhotos(); }
-async function viewStudy(i){ const studies=safeParse(await Store.get('tafit:studies:'+active)||'[]',[]); if(!studies[i]) return; const data=await Store.get('tafit:study:'+active+':'+studies[i].sid); if(data){ $('lb').innerHTML='<img src="'+data+'">'; $('lb').classList.add('show'); } }
-async function delStudy(i){ if(!await uiConfirm("¿Borrar este estudio?")) return; const studies=safeParse(await Store.get('tafit:studies:'+active)||'[]',[]); if(!studies[i]) return; await Store.del('tafit:study:'+active+':'+studies[i].sid); studies.splice(i,1); await Store.set('tafit:studies:'+active, JSON.stringify(studies)); renderPhotos(); }
+async function addPhoto(e){ const file=e.target.files[0]; e.target.value=''; if(!file) return; toast("Procesando foto…"); try{ const data=await resizeImage(file); const pid=String(Date.now()); const ok=await Store.set(mediaKey('tafit:photo:')+':'+pid, data); if(!ok){ toast("No se pudo guardar (espacio lleno).",'warn'); return; } const idx=safeParse(await Store.get(mediaKey('tafit:photoidx:'))||'[]',[]); idx.push({pid,date:new Date().toISOString()}); await Store.set(mediaKey('tafit:photoidx:'), JSON.stringify(idx)); toast("Foto agregada ✓",'ok'); renderPhotos(); }catch(err){ toast("No se pudo procesar la imagen",'warn'); } }
+async function addMultiPhotos(e){ const files=e.target.files; e.target.value=''; if(!files.length) return; toast("Procesando "+files.length+" fotos…"); const idx=safeParse(await Store.get(mediaKey('tafit:photoidx:'))||'[]',[]); for(let i=0;i<files.length;i++){ try{ const data=await resizeImage(files[i]); const pid=String(Date.now())+'_'+i; await Store.set(mediaKey('tafit:photo:')+':'+pid, data); idx.push({pid,date:new Date().toISOString()}); }catch(err){} } await Store.set(mediaKey('tafit:photoidx:'), JSON.stringify(idx)); toast(files.length+" fotos agregadas ✓",'ok'); renderPhotos(); }
+async function addStudy(e){ const file=e.target.files[0]; e.target.value=''; if(!file) return; toast("Procesando estudio…"); try{ const data=await resizeImage(file); const sid=String(Date.now()); await Store.set(mediaKey('tafit:study:')+':'+sid, data); const studies=safeParse(await Store.get(mediaKey('tafit:studies:'))||'[]',[]); studies.push({sid,name:file.name,date:new Date().toISOString()}); await Store.set(mediaKey('tafit:studies:'), JSON.stringify(studies)); toast("Estudio guardado ✓",'ok'); renderPhotos(); }catch(err){ toast("No se pudo procesar el archivo",'warn'); } }
+async function delPhoto(pid){ if(!await uiConfirm("¿Borrar esta foto?")) return; await Store.del(mediaKey('tafit:photo:')+':'+pid); const idx=safeParse(await Store.get(mediaKey('tafit:photoidx:'))||'[]',[]).filter(p=>p.pid!==pid); await Store.set(mediaKey('tafit:photoidx:'), JSON.stringify(idx)); renderPhotos(); }
+async function viewStudy(i){ const studies=safeParse(await Store.get(mediaKey('tafit:studies:'))||'[]',[]); if(!studies[i]) return; const data=await Store.get(mediaKey('tafit:study:')+':'+studies[i].sid); if(data){ $('lb').innerHTML='<img src="'+data+'">'; $('lb').classList.add('show'); } }
+async function delStudy(i){ if(!await uiConfirm("¿Borrar este estudio?")) return; const studies=safeParse(await Store.get(mediaKey('tafit:studies:'))||'[]',[]); if(!studies[i]) return; await Store.del(mediaKey('tafit:study:')+':'+studies[i].sid); studies.splice(i,1); await Store.set(mediaKey('tafit:studies:'), JSON.stringify(studies)); renderPhotos(); }
 async function saveMedidas(){
   var peso=$('med_peso')?$('med_peso').value:'';
   var talla=$('med_talla')?$('med_talla').value:'';
   var cintura=$('med_cintura')?$('med_cintura').value:'';
   var cadera=$('med_cadera')?$('med_cadera').value:'';
   if(!peso&&!cintura&&!cadera){ toast('Completá al menos un campo','warn'); return; }
-  var medidas=safeParse(await Store.get('tafit:medidas:'+active)||'[]',[]);
+  var medidas=safeParse(await Store.get(mediaKey('tafit:medidas:'))||'[]',[]);
   medidas.push({date:new Date().toISOString(),peso:peso,talla:talla,cintura:cintura,cadera:cadera});
-  await Store.set('tafit:medidas:'+active, JSON.stringify(medidas));
+  await Store.set(mediaKey('tafit:medidas:'), JSON.stringify(medidas));
   toast('Medidas guardadas ✓','ok');
   renderPhotos();
 }
@@ -2073,7 +2080,7 @@ async function autoBackup(trigger){
     }
   }catch(e){ console.warn('Backup:',e); }
 }
-async function viewPhoto(pid){ const data=await Store.get('tafit:photo:'+active+':'+pid); if(!data) return; $('lb').innerHTML=`<img src="${data}" alt="">`; $('lb').classList.add('show'); }
+async function viewPhoto(pid){ const data=await Store.get(mediaKey('tafit:photo:')+':'+pid); if(!data) return; $('lb').innerHTML=`<img src="${data}" alt="">`; $('lb').classList.add('show'); }
 
 /* ===================== EDITAR ===================== */
 function renderEdit(){
@@ -2283,6 +2290,7 @@ document.addEventListener('click',e=>{
     case 'toggleForm': toggleFormEnable(el.dataset.ftype); break;
     case 'togglePause': togglePause(); break;
     case 'formMember': member=+el.dataset.m; renderFormTab(el.dataset.ft); break;
+    case 'photoMember': member=+el.dataset.m; renderPhotos(); break;
     case 'forceSync': toast('Sincronizando…'); location.reload(); break;
     case 'darkMode': toggleDarkMode(); break;
     case 'dismissInstall': try{ localStorage.setItem('tafit:install:dismissed','1'); }catch(e){} var ib=el.closest('.install-banner'); if(ib) ib.remove(); break;
