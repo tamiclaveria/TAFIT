@@ -1668,7 +1668,8 @@ function isDropSet(ex){ return /drop\s*-?\s*set/i.test((ex.n||'')+'|'+(ex.r||'')
 function setsTable(ex,ei,mi,objetivo){
   let sets='';
   const isDrop=isDropSet(ex);
-  for(let si=0;si<ex.s;si++){ const v=CACHE[K(ei,si,mi)]||{};
+  const _cw=cacheIsCurrentWeek();
+  for(let si=0;si<ex.s;si++){ const v=_cw?(CACHE[K(ei,si,mi)]||{}):{};
     if(isDrop){
       const ws=(v.w||'').split('/');while(ws.length<4)ws.push('');
       sets+=`<tr><td class="s">S${si+1}</td>
