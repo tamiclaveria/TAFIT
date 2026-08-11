@@ -626,180 +626,40 @@ function stuRosario(){
 /* ---- Carina (individual, 2 días por secciones + cardio) ---- */
 function stuCarina(){
   return { name:"Carina / Lucía", theme:"f", members:["Carina","Lucía"], weeks:cp(DEFAULT_WEEKS), routine:[
-    {day:"Día 1", ex:[
-      ex("Sentadilla asistida",4,"12","10 kg/lado","Sentadilla goblet","Sección: Fuerza.",""),
-      ex("Toco punta con disco",4,"12 c/lado","5 kg","Crunch con disco","Sección: Fuerza.",""),
-      ex("Flexiones con rodillas apoyadas",3,"12","Peso corporal","Press de pecho en máquina","Sección: Fuerza.",""),
-      ex("Sentadilla Smith",3,"8","Sin peso","Sentadilla goblet","Sección: Fuerza.",""),
-      ex("Plancha conejo",3,"10-15","10 kg","Plancha alta","Sección: Fuerza.",""),
-      ex("Hombro con disco",3,"10","10 kg","Elevación frontal con mancuerna","Sección: Fuerza.",""),
-      ex("Abductor en máquina",3,"15","41 kg","Abductor con banda","Sección: Glúteo y pierna.",""),
-      ex("Patada y glúteo en máquina",3,"12","14 kg","Patada de glúteo en polea","Sección: Glúteo y pierna.",""),
-      ex("Tríceps polea soga",3,"12","3 placas","Patada de tríceps con mancuerna","Sección: Brazos.",""),
-      ex("Volada frontal",3,"12","2 × 4 kg","Elevación frontal con disco","Sección: Brazos.",""),
-      ex("Cardio · Bicicleta (Nivel 10)",1,"ver detalle","Bici","","Entrada: 2' rápido ↓. Bloque ×4 vueltas: 30\" rápido ↓ · 30\" rápido ↑ · 30\" descanso. Cierre: 2' — 4 pedaleadas rápidas ↑ × 4 ↓.",""),
-    ]},
-    {day:"Día 2", ex:[
-      ex("Hip thrust en máquina",3,"10","10 kg/lado","Puente de glúteo","Sección: Glúteo y pierna.",""),
-      ex("Peso muerto",3,"12","20 kg","Peso muerto rumano con mancuernas","Sección: Glúteo y pierna.",""),
-      ex("Aductores",3,"15","27 kg","Aductor con banda","Sección: Glúteo y pierna.",""),
-      ex("Isquiotibiales",3,"12","23 kg","Curl femoral acostado","Sección: Glúteo y pierna.",""),
-      ex("Abd bolita",3,"20","Peso corporal","Crunch en colchoneta","Sección: Glúteo y pierna.",""),
-      ex("Bíceps mancuerna",3,"12","6 kg/lado","Curl con barra","Sección: Hombros y brazos.",""),
-      ex("Press de hombros",3,"15","6 kg/lado","Press militar con mancuernas","Sección: Hombros y brazos.",""),
-      ex("Remo bajo",3,"12","23 kg","Remo con mancuerna","Sección: Hombros y brazos.",""),
-      ex("Plancha toque hombros",3,"20","Peso corporal","Plancha alta estática","Sección: Core.",""),
-      ex("Cardio · Bicicleta",1,"ver detalle","Bici","","Entrada en calor 2'. Bloque ×8 vueltas: 20\" piqué (toma 3) · 20\" descanso (toma 1) · 20\" piqué (toma 2).",""),
-    ]},
-  ]};
-}
-
-/* ---- Dúo Nati / Caro (1er peso Nati, 2do Caro) ---- */
-function natiCaroDay2(){
-  const A="🔁 Bloque A · Complex ×3";
-  const B="⏱ Bloque B · 45\" / 15\" ×3 vueltas";
-  const C="🔁 Bloque C · 10 reps c/u";
-  return { day:"Día 2 · Funcional", ex:[
-    exD("Wall ball",3,"15","6","6 kg","Sentadilla + press",A,""),
-    exD("Plancha codo + toque de hombro",3,"isométrico","Peso corporal","Peso corporal","Plancha alta",A,""),
-    exD("Swing alternos",3,"16","Kettlebell negra","Kettlebell morada","Kettlebell swing",A,""),
-    exD("Plancha baja",3,"isométrico","Peso corporal","Peso corporal","Plancha alta",A,""),
-    exD("Volada lateral",3,"15","4","2,5 kg","Elevación lateral en polea",A,""),
-    exD("Plancha invertida",3,"isométrico","Peso corporal","Peso corporal","Puente de glúteo",A,""),
-    exD("Puente de glúteo",3,"45 s","20 kg","20 kg","Hip thrust",B,""),
-    exD("Sentadilla sumo",3,"45 s","Kettlebell roja","Kettlebell roja","Sentadilla goblet",B,""),
-    exD("Bicho muerto (dead bug)",3,"45 s","10 kg","10 kg","Crunch bicicleta",B,""),
-    exD("Plancha remo",3,"45 s","4","4 kg","Renegade row",B,""),
-    exD("Flexiones laterales",3,"45 s","Peso corporal","Peso corporal","Plancha lateral",B,""),
-    exD("Bolita (abd)",3,"45 s","Peso corporal","Peso corporal","Crunch",B,""),
-    exD("Sentadilla abierta y cerrada",3,"10","Kettlebell roja","Kettlebell roja","Sentadilla sumo",C,""),
-    exD("Caminata a la plancha",3,"10","Peso corporal","Peso corporal","Inchworm",C,""),
-    exD("Grass hopper",3,"10","Peso corporal","Peso corporal","Mountain climber",C,""),
-    exD("Bíceps martillo",3,"10","7,5","6 kg","Curl con barra",C,""),
-  ]};
-}
-function stuNatiCaro(){
-  return { name:"Nati / Caro", theme:"f", members:["Nati","Caro"], weeks:cp(DEFAULT_WEEKS), routine:[
-    {day:"Día 1", ex:[
-      exD("Sentadilla Smith",4,"12","5 kg/lado","5 kg/lado","Sentadilla goblet","Pies levemente adelantados, bajá a 90° controlando.",""),
-      exD("Peso muerto unilateral",4,"12","10 kg/lado","7,5 kg/lado","Peso muerto rumano","Una pierna atrás, bajá controlado manteniendo la espalda recta.",""),
-      exD("Abd con disco",4,"15","5 kg","5 kg","Crunch en colchoneta","",""),
-      exD("Dorsalera",4,"12","50 kg","40 kg","Jalón al pecho agarre neutro","",""),
-      exD("Remo",4,"12","50 kg","40 kg","Remo con mancuerna","",""),
-      exD("Abductores",4,"15","110 kg","100 kg","Abductor con banda","Movimiento controlado en todo el rango.",""),
-      exD("Gemelos",4,"15","10 kg/lado","10 kg/lado","Gemelos en máquina","",""),
-      exD("Tríceps soga polea",3,"12","18 kg","18 kg","Patada de tríceps","",""),
-      exD("Bíceps soga polea",3,"12","18 kg","18 kg","Curl con mancuerna","",""),
-      exD("Patada glúteo polea",3,"12","18–23 kg","18–23 kg","Patada de glúteo en máquina","2 series con 18 kg + 1 con 23 kg.",""),
-      exD("Hip thrust",4,"12","15 kg/lado","15 kg/lado","Puente de glúteo","Apoyá la espalda alta en el banco, apretá glúteos arriba 1 segundo.",""),
-      exD("Gemelos en prensa",3,"10-12","47 kg","41 kg","Gemelos de pie","",""),
-      exD("Volada lateral",3,"12","5 kg","5 kg","Elevación lateral en polea","",""),
-      exD("Swing",3,"12","A definir","A definir","Kettlebell swing","",""),
-    ]},
-    natiCaroDay2(),
-  ]};
-}
-
-/* ---- Dúo Sofi / Marti (sin pesos fijos: cargan ellas) ---- */
-function sofiMartiDay2(){
-  return { day:"Día 2", ex:[
-    exD("Sentadilla Smith",4,"12","15 kg","15 kg","Sentadilla libre","Pies levemente adelantados, bajá a 90° controlando.",""),
-    exD("Volada frontal con barra",4,"10-12","10 kg","10 kg","Elevación frontal con mancuerna","Brazos casi extendidos, subí hasta la altura del hombro sin envión.",""),
-    exD("Femoral máquina",4,"12","A definir","A definir","Curl femoral acostado","Drop Set: aumentar peso, bajar repeticiones 12/10/8/8.",""),
-    exD("Abducción",4,"15","54 kg","63 kg","Abductor con banda","Abrí las piernas controlando, apretá afuera 1 segundo.",""),
-    exD("Gemelos parada",4,"15","29 kg","77 kg","Gemelos en máquina","Rango completo: estirá bien abajo y apretá arriba 1 segundo.",""),
-    exD("Press inclinado máquina",4,"12","A definir","27 kg","Press inclinado con mancuernas","Banco a 30°, empujá sin bloquear los codos.",""),
-    exD("Press plano tríceps",4,"6-10","5 kg","5 kg","Fondos en banco","Agarre cerrado para tríceps.",""),
-    exD("Apertura mancuerna inclinada",4,"8-10","A definir","10 kg","Apertura en máquina","Banco inclinado, codos levemente flexionados, sentí el estiramiento.",""),
-    exD("Patada glúteo polea",4,"12","23 kg","23 kg","Patada de glúteo en máquina","Empujá con el talón, apretá el glúteo arriba sin arquear la lumbar.",""),
-    exD("Volada lateral polea",4,"8-12","5 kg","5 kg","Elevación lateral con mancuerna","Brazo casi extendido, subí controlado hasta la altura del hombro.",""),
-  ]};
-}
-function sofiMartiDay3(){
-  return { day:"Día 3", ex:[
-    exD("Step up en Smith",3,"8-10","A definir","A definir","Step up al cajón","Pisá firme con toda la planta, empujá con la pierna de arriba.",""),
-    exD("Sit up con tríceps disco",3,"15","A definir","A definir","Crunch con extensión de tríceps","Subí completo con el disco y extendé los brazos arriba.",""),
-    exD("Caminata lunar",3,"12/lado","A definir","A definir","Estocada caminando","Paso largo, bajá la rodilla controlando alternando piernas.",""),
-    exD("Barquito con disco",3,"40 s","A definir","A definir","V-ups","Isométrico: 40 segundos por serie.",""),
-    exD("Dominadas",3,"al fallo","Peso corporal","Peso corporal","Jalón en polea agarre supino","Series al fallo.",""),
-    exD("Espinales en banco",3,"15","Peso corporal","Peso corporal","Hiperextensiones","Subí el torso controlando, apretá la zona lumbar arriba.",""),
-    exD("Hombro posterior",3,"10-12","A definir","A definir","Pájaro con mancuerna","Torso inclinado, codos levemente flexionados, apretá escápulas.",""),
-    exD("Crunch oblicuo banco abdominal",3,"12/lado","Peso corporal","Peso corporal","Crunch oblicuo en colchoneta","Rotá el torso al subir, controlá la bajada.",""),
-    exD("Cuádriceps máquina Drop Set",3,"12-10-8-8","A definir","A definir","Extensión de cuádriceps","Drop Set: anotá los 4 pesos de cada bajada.",""),
-    exD("Curl femoral en máquina",3,"8-10","A definir","A definir","Curl femoral acostado","Flexioná completo, bajá controlando. No uses impulso.",""),
-  ]};
-}
-function stuSofiMarti(){
-  return { name:"Sofi / Marti", theme:"f", members:["Sofi","Marti"], weeks:cp(WEEKS6), routine:[
-    {day:"Día 1", ex:[
-      exD("Hip thrust abierta y cerrada",3,"10 + 10","25 kg","25 kg","Hip thrust en máquina",BK('A'),""),
-      exD("Plancha baja con abducción de cadera",3,"20","Peso corporal","Peso corporal","Plancha lateral con abducción",BK('A'),""),
-      exD("Press de hombros sentado mancuerna",3,"12","7,5 kg","A definir","Press militar en máquina",BK('B'),""),
-      exD("Peso muerto con barra",3,"12","A definir","A definir","Peso muerto rumano mancuernas",BK('B'),""),
-      exD("Bíceps polea barrita",3,"12","25 kg","A definir","Curl con mancuernas",BK('C'),""),
-      exD("Press Pallof",3,"24 (12 c/lado)","A definir","A definir","Press Pallof con banda",BK('C'),""),
-      exD("Prensa 45°",3,"12","A definir","40 kg","Sentadilla goblet",BK('D'),""),
-      exD("Aducción",3,"15","A definir","50 kg","Aductor con banda",BK('D'),""),
-      exD("Remo supino con barra",3,"10-12","A definir","20 kg","Remo en máquina agarre supino",BK('E'),""),
-      exD("Dorsalera agarre en V",3,"10-12","A definir","36 kg","Jalón agarre abierto",BK('E'),""),
-    ]},
-    sofiMartiDay2(),
-    sofiMartiDay3(),
-  ]};
-}
-
-/* ---- Dúo Jus / Yesi (Día 2 pendiente) ---- */
-function jusYesiDay2(){
-  return { day:"Día 2", ex:[
-    exD("Step up en Smith",3,"12-10","2,5 kg/lado","5 kg/lado","Step up al cajón con mancuernas","Pisá firme con toda la planta, empujá con la pierna de arriba.",""),
-    exD("Plancha remo",3,"12","7,5 kg","7,5 kg","Renegade row","",""),
-    exD("Crunch polea",3,"15","12 kg","12 kg","Crunch abdominal en colchoneta","Flexioná el tronco con el abdomen, no tires con los brazos.",""),
-    exD("Patada polea",3,"8","9 kg","9 kg","Patada de glúteo en máquina","",""),
-    exD("Burpee + volada frontal",3,"16","6 kg","6 kg","Burpee sin salto + elevación frontal","",""),
-    exD("Aductores",3,"12-15","A definir","A definir","Aductor con banda","Movimiento controlado, apretá en la contracción.",""),
-    exD("Bíceps martillo",3,"12","7,5","7,5 kg","Curl martillo con mancuernas","Agarre neutro (palmas enfrentadas), codos quietos.",""),
-    exD("Peso muerto tradicional",3,"10","15 kg/lado","15 kg/lado","Peso muerto rumano","",""),
-  ]};
-}
-function stuJusYesi(){
-  return { name:"Jus / Yesi", theme:"f", members:["Jus","Yesi"], weeks:cp(WEEKS_JY), routine:[
-    {day:"Día 1", ex:[
-      exD("Hip thrust en barra",4,"2×12 + 2×8","80","80 kg","Hip thrust en máquina",BK('A'),""),
-      exD("Inferiores c/ peso en pies",4,"12-15","5","5 kg","Elevación de piernas colgado",BK('A'),""),
-      exD("Sentadilla rebote / Prensa",4,"3×15 / 2×12+2×8","A definir","97 kg","Sentadilla goblet / Prensa a 45°","Jus: Sentadilla rebote · Yesi: Prensa normal.","","Sentadilla goblet",BK('B'),""),
-      exD("Press militar con mancuerna",4,"10","7,5","7,5 kg","Press militar en máquina",BK('B'),""),
-      exD("Máquina de abducciones",4,"20","100","110 kg","Abductores con banda",BK('C'),""),
-      exD("Máquina de isquios",4,"15","8 placas","9 placas","Femoral en camilla",BK('C'),""),
-      exD("Inferiores paralelas",4,"12","Peso corporal","Peso corporal","Elevación de rodillas en paralelas",BK('D'),""),
-      exD("Remo bajo",4,"12","27 kg","36 kg","Remo en polea con triángulo",BK('D'),""),
-      exD("Fondo en paralelas",4,"12","Elástico rojo y negro","Elástico rojo y negro","Fondos en banco",BK('E'),""),
-      exD("Plancha oblicuos",4,"15 c/lado","4","4 kg","Bicicleta abdominal",BK('E'),""),
-    ]},
-    jusYesiDay2(),
-  ]};
-}
-
-function stuMartin(){ return { name:"Martín", theme:"m", weeks:cp(DEFAULT_WEEKS), routine:[
-  {day:"Día 1", ex:[
-    ex("Press inclinado",4,"8","7,5 kg","Press inclinado en máquina","Banco a 30°, codos a 45° del torso, bajá al esternón controlando.","90 s"),
-    ex("Abd toco punta con disco",4,"24","5 kg","Crunch con disco","Subí el torso y tocá la punta de los pies con el disco. Controlá la bajada.","45 s"),
-    ex("Tríceps unilateral polea",4,"12","1 placa","Patada de tríceps con mancuerna","Codo pegado al cuerpo, extendé completo abajo.","60 s"),
-    ex("Abducción polea",4,"15","4,5 kg","Abductor en máquina","De pie, pierna de trabajo hacia afuera, controlá la vuelta.","60 s"),
-    ex("Sentadilla Smith",4,"12","12 kg/lado","Sentadilla goblet","Pies levemente adelantados, bajá a 90° controlando.","90 s"),
-    ex("Press de hombro mancuerna",4,"12","7,5 kg/lado","Press militar en máquina","Codos a 90°, empujá vertical sin arquear la espalda.","75 s"),
-    ex("Push up lateral",4,"12","Peso corporal","Flexiones laterales","Flexión + desplazamiento lateral. Abdomen firme en todo momento.","60 s"),
+  {day:"Día 1 · Funcional", ex:[
+    ex("── BLOQUE 1 (45s/15s) ──",3,"45 s","","","Circuito: 45 seg trabajo, 15 seg descanso, 3 vueltas.","15 s"),
+    ex("Monigotes",3,"45 s","Peso corporal","Jumping jacks","Movimiento dinámico de calentamiento.","15 s"),
+    ex("Puente glúteo con pelota",3,"45 s","Pelota","Puente de glúteo","Apretá glúteos arriba, pelota entre las rodillas.","15 s"),
+    ex("Berrinches",3,"45 s","Peso corporal","Mountain climbers","Movimiento explosivo controlado.","15 s"),
+    ex("Sentadilla isométrica",3,"45 s","Peso corporal","Sentadilla en pared","Mantené la posición a 90°, espalda contra la pared.","15 s"),
+    ex("── BLOQUE 2 (Dúo) ──",3,"10","","","Circuito en pareja: 3 vueltas, 10 reps cada ejercicio.","60 s"),
+    ex("Bíceps + Hombros",3,"10","A definir","Curl + press combinado","Curl de bíceps seguido de press de hombros sin bajar.",""),
+    ex("Sentadilla con salto",3,"10","Peso corporal","Sentadilla normal","Bajá controlado, subí explosivo.",""),
+    ex("Flexiones / Press francés",3,"10","A definir","Fondos en banco","Alternar flexiones y press francés.",""),
+    ex("Plancha step",3,"10","Peso corporal","Plancha alta","Alterná subir y bajar de plancha alta a baja.",""),
+    ex("Apertura mancuernas",3,"10","A definir","Apertura en máquina","Banco plano o inclinado, codos flexionados.",""),
+    ex("Inferiores c/tobillera",3,"15","Tobillera","Inferiores sin tobillera","Bajá las piernas controlando sin despegar la lumbar.",""),
+    ex("── BLOQUE 3 ──",3,"10-15","","","Bloque final: 3 vueltas.","60 s"),
+    ex("Búlgaras",3,"10 x lado","A definir","Estocada con mancuernas","Pie trasero en banco, bajá controlado.",""),
+    ex("Lanzamiento lateral pelota",3,"10 x lado","Pelota","Twist soviético","Rotá el torso lanzando la pelota al costado.",""),
+    ex("Patada glúteo c/tobillera",3,"15 x lado","Tobillera","Patada de glúteo en polea","Empujá con el talón, apretá glúteo arriba.",""),
+    ex("Plancha rotación",3,"15 x lado","Peso corporal","Plancha lateral","Rotá el torso llevando el brazo hacia arriba.",""),
   ]},
   {day:"Día 2", ex:[
-    ex("Remo sentado",4,"12","45 kg","Remo en máquina","Pecho alto, llevá el agarre al abdomen apretando las escápulas.","75 s"),
-    ex("Bíceps mancuerna",4,"12","10 kg/lado","Curl con barra","Codos pegados al cuerpo, rotá la palma al subir.","60 s"),
-    ex("Isquios",4,"15","45 kg","Femoral en camilla","Flexioná completo, bajá controlando sin soltar.","60 s"),
-    ex("Aductores",4,"15","27 kg","Aductor con banda","Movimiento controlado, apretá en la contracción.","60 s"),
-    ex("Peso muerto",4,"12","15 kg/lado","Peso muerto rumano","Espalda neutra, empujá el suelo con los pies, apretá glúteos arriba.","90 s"),
-    ex("Peso muerto con barra",1,"8","50 kg","Peso muerto rumano con barra","Serie pesada al final.","120 s"),
-    ex("Pull over mancuerna",4,"12","10 kg","Pull-over en polea","Brazos casi extendidos, bajá atrás sintiendo el estiramiento del dorsal.","60 s"),
-    ex("Pull-over en polea soga",4,"15","27 kg","Pull-over con mancuerna","Brazos casi extendidos, llevá la soga hacia abajo con el dorsal.","60 s"),
+    ex("Peso muerto barra",3,"10","A definir","Peso muerto rumano mancuernas","Espalda neutra, apretá glúteos arriba.","90 s"),
+    ex("Estocada c/mancuerna",3,"12","A definir","Estocada búlgara","Paso largo, bajá controlado.","75 s"),
+    ex("Plancha serrucho/bolita",3,"20","Peso corporal","Plancha alta","Deslizá la bolita con los pies manteniendo la plancha.","45 s"),
+    ex("Aductores",3,"15","A definir","Aductor con banda","Cerrá controlando, apretá adentro.","60 s"),
+    ex("Hip thrust",3,"12","A definir","Puente de glúteo","Apretá glúteos arriba 1 segundo.","90 s"),
+    ex("Volada combinada",3,"12","A definir","Elevación lateral + frontal","Lateral + frontal en un solo movimiento.","60 s"),
+    ex("Prensa",3,"15","A definir","Sentadilla goblet","Bajá controlado sin despegar la lumbar.","90 s"),
+    ex("Tríceps trasnuca",3,"10","A definir","Tríceps en polea","Codos al techo, bajá detrás de la cabeza controlando.","60 s"),
+    ex("Sentadilla Smith/sumo",3,"10-15","A definir","Sentadilla sumo con mancuerna","Pies anchos, puntas afuera.","75 s"),
+    ex("Deltoides máquina",3,"10-12","A definir","Elevación lateral mancuerna","Empujá sin arquear la espalda.","60 s"),
+    ex("Press pecho",3,"10-12","A definir","Press con mancuernas","Omóplatos retraídos, bajá controlando.","75 s"),
   ]}
 ] }; }
+
 
 function stuJoni(){ return { name:"Joni Puebla", theme:"m", weeks:cp(WEEKS6), routine:[
   {day:"Día 1", ex:[
@@ -1074,6 +934,40 @@ function stuAstrid(){ return { name:"Astrid Figueras", theme:"f", weeks:cp(DEFAU
     ex("Sentadilla goblet",4,"15","A definir","Sentadilla con barra","Disco o mancuerna al pecho, bajá controlada con la espalda erguida.","75 s"),
   ]}
 ] }; }
+function stuNatiCaro(){ return { name:"Nati / Caro", theme:"f", members:["Nati","Caro"], weeks:cp(DEFAULT_WEEKS), routine:[
+  {day:"Día 1 · Funcional", ex:[
+    ex("── BLOQUE 1 (45s/15s) ──",3,"45 s","","","Circuito: 45 seg trabajo, 15 seg descanso, 3 vueltas.","15 s"),
+    ex("Monigotes",3,"45 s","Peso corporal","Jumping jacks","Movimiento dinámico de calentamiento.","15 s"),
+    ex("Puente glúteo con pelota",3,"45 s","Pelota","Puente de glúteo","Apretá glúteos arriba, pelota entre las rodillas.","15 s"),
+    ex("Berrinches",3,"45 s","Peso corporal","Mountain climbers","Movimiento explosivo controlado.","15 s"),
+    ex("Sentadilla isométrica",3,"45 s","Peso corporal","Sentadilla en pared","Mantené la posición a 90°.","15 s"),
+    ex("── BLOQUE 2 (Dúo) ──",3,"10","","","Circuito en pareja: 3 vueltas, 10 reps.","60 s"),
+    ex("Bíceps + Hombros",3,"10","A definir","Curl + press combinado","Curl de bíceps seguido de press de hombros.",""),
+    ex("Sentadilla con salto",3,"10","Peso corporal","Sentadilla normal","Bajá controlado, subí explosivo.",""),
+    ex("Flexiones / Press francés",3,"10","A definir","Fondos en banco","Alternar flexiones y press francés.",""),
+    ex("Plancha step",3,"10","Peso corporal","Plancha alta","Alterná subir y bajar de plancha alta a baja.",""),
+    ex("Apertura mancuernas",3,"10","A definir","Apertura en máquina","Banco plano o inclinado, codos flexionados.",""),
+    ex("Inferiores c/tobillera",3,"15","Tobillera","Inferiores sin tobillera","Bajá las piernas controlando.",""),
+    ex("── BLOQUE 3 ──",3,"10-15","","","Bloque final: 3 vueltas.","60 s"),
+    ex("Búlgaras",3,"10 x lado","A definir","Estocada con mancuernas","Pie trasero en banco, bajá controlado.",""),
+    ex("Lanzamiento lateral pelota",3,"10 x lado","Pelota","Twist soviético","Rotá el torso lanzando al costado.",""),
+    ex("Patada glúteo c/tobillera",3,"15 x lado","Tobillera","Patada de glúteo en polea","Empujá con el talón, apretá glúteo.",""),
+    ex("Plancha rotación",3,"15 x lado","Peso corporal","Plancha lateral","Rotá el torso llevando el brazo arriba.",""),
+  ]},
+  {day:"Día 2", ex:[
+    ex("Peso muerto barra",3,"10","A definir","Peso muerto rumano mancuernas","Espalda neutra, apretá glúteos arriba.","90 s"),
+    ex("Estocada c/mancuerna",3,"12","A definir","Estocada búlgara","Paso largo, bajá controlado.","75 s"),
+    ex("Plancha serrucho/bolita",3,"20","Peso corporal","Plancha alta","Deslizá manteniendo la plancha.","45 s"),
+    ex("Aductores",3,"15","A definir","Aductor con banda","Cerrá controlando.","60 s"),
+    ex("Hip thrust",3,"12","A definir","Puente de glúteo","Apretá glúteos arriba 1 segundo.","90 s"),
+    ex("Volada combinada",3,"12","A definir","Elevación lateral + frontal","Lateral + frontal en un movimiento.","60 s"),
+    ex("Prensa",3,"15","A definir","Sentadilla goblet","Bajá controlado sin despegar la lumbar.","90 s"),
+    ex("Tríceps trasnuca",3,"10","A definir","Tríceps en polea","Codos al techo, bajá detrás controlando.","60 s"),
+    ex("Sentadilla Smith/sumo",3,"10-15","A definir","Sentadilla sumo mancuerna","Pies anchos, puntas afuera.","75 s"),
+    ex("Deltoides máquina",3,"10-12","A definir","Elevación lateral mancuerna","Empujá sin arquear.","60 s"),
+    ex("Press pecho",3,"10-12","A definir","Press con mancuernas","Omóplatos retraídos, bajá controlando.","75 s"),
+  ]}
+] }; }
 function stuGrupo5(){ return { name:"Grupo 5", theme:"f", members:["M.Marta","Mercedez","Ana","Bernarda","Sofía M."], weeks:cp(DEFAULT_WEEKS), forms:{acuerdo:true,anamnesis:true}, routine:[
   {day:"Día 1",ex:[
     ex("Bíceps",3,"12","A definir","Curl con barra","Codos pegados al cuerpo, subí sin balancear.","60 s"),
@@ -1132,11 +1026,18 @@ function migrateCache(){
 /* Obtener ejercicio con override de semana actual */
 /* Verificar si los datos del CACHE son de la semana actual */
 function cacheIsCurrentWeek(){
+  /* Si el alumno tiene _activeWeek guardado en CACHE, usar eso */
+  if(CACHE._activeWeek!==undefined && +CACHE._activeWeek===+week) return true;
+  /* Si no hay LOGS, es semana actual */
   if(!LOGS.length) return true;
   var lastLog=LOGS[0];
+  /* Si el último LOG es de esta semana, mostrar datos */
   if(+lastLog.week===+week) return true;
+  /* Si estamos en una semana posterior sin LOGS, verificar si hay datos activos */
   if(+lastLog.week<+week){
-    return LOGS.some(function(l){ return +l.week===+week; });
+    if(LOGS.some(function(l){ return +l.week===+week; })) return true;
+    /* Si no hay LOG para esta semana, los datos del CACHE son de otra semana */
+    return false;
   }
   return true;
 }
@@ -1523,6 +1424,8 @@ function runSeeds(){
   if(!DB._seed.adriana){ if(!DB.students['adriana-x']){ DB.students['adriana-x']=stuAdrianaX(); DB.order.push('adriana-x'); } DB._seed.adriana=true; }
   if(!DB._seed.micaela){ if(!DB.students['micaela']){ DB.students['micaela']=stuMicaela(); DB.order.push('micaela'); } DB._seed.micaela=true; }
   if(!DB._seed.micaela_r2){ const mi=DB.students['micaela']; if(mi) mi.routine=stuMicaela().routine; DB._seed.micaela_r2=true; }
+  if(!DB._seed.carina_r2){ const ca=DB.students['carina']; if(ca) ca.routine=stuCarina().routine; DB._seed.carina_r2=true; }
+  if(!DB._seed.nati_r2){ const nc=DB.students['nati-caro']; if(nc) nc.routine=stuNatiCaro().routine; DB._seed.nati_r2=true; }
   if(!DB._seed.astrid){ if(!DB.students['astrid']){ DB.students['astrid']=stuAstrid(); DB.order.push('astrid'); } DB._seed.astrid=true; }
   if(!DB._seed.joni_6w){ const jn=DB.students['joni-puebla']; if(jn&&jn.weeks&&jn.weeks.length===4){ jn.weeks.push({t:'S5',n:'Pico',d:'Máxima carga con técnica. Series cortas e intensas.'},{t:'S6',n:'Descarga',d:'Reducir carga 40%. Recuperación activa.'}); } DB._seed.joni_6w=true; }
   if(!DB._seed.cecilia){ if(!DB.students['cecilia']){ DB.students['cecilia']=stuCecilia(); DB.order.push('cecilia'); } DB._seed.cecilia=true; }
@@ -1970,7 +1873,7 @@ function showWelcome(){
   div.innerHTML='<div class="welcome-box"><h2>¡Bienvenido/a a TaFit!</h2><p>Hola <b>'+esc(name)+'</b> 👋<br>Acá vas a encontrar tu rutina personalizada. Tocá cada ejercicio para ver los detalles y cargar tus series.</p><button data-act="closeWelcome">¡Vamos! 💪</button></div>';
   document.body.appendChild(div);
 }
-function updSet(ei,si,mi,f,v){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CACHE[k][f]=v; const box=$('rm-'+ei+'-'+mi); if(box) box.innerHTML=rmHTML(ei,mi); queueSave();
+function updSet(ei,si,mi,f,v){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CACHE[k][f]=v; CACHE._activeWeek=week; const box=$('rm-'+ei+'-'+mi); if(box) box.innerHTML=rmHTML(ei,mi); queueSave();
   /* Celebración de nuevo récord */
   if(f==='w'&&v){ const exName=routine()[day].ex[ei]?routine()[day].ex[ei].n:''; const maxW=getMaxWeight(exName); const cur=firstNum(v); if(cur&&cur>0&&maxW>0&&cur>maxW){ showRecord(exName,maxW,cur); } }
 }
