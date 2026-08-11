@@ -801,7 +801,7 @@ function stuMartin(){ return { name:"Martín", theme:"m", weeks:cp(DEFAULT_WEEKS
   ]}
 ] }; }
 
-function stuJoni(){ return { name:"Joni Puebla", theme:"m", weeks:cp(DEFAULT_WEEKS), routine:[
+function stuJoni(){ return { name:"Joni Puebla", theme:"m", weeks:cp(WEEKS6), routine:[
   {day:"Día 1", ex:[
     ex("Press plano barra",4,"10","A definir","Press plano con mancuernas","Omóplatos retraídos, bajá al esternón controlando, sin rebotar.","90 s"),
     ex("Bíceps curl sentado",4,"10","A definir","Curl de pie con barra","Sentado, codos apoyados en las rodillas, subí controlado.","60 s"),
@@ -1524,6 +1524,7 @@ function runSeeds(){
   if(!DB._seed.micaela){ if(!DB.students['micaela']){ DB.students['micaela']=stuMicaela(); DB.order.push('micaela'); } DB._seed.micaela=true; }
   if(!DB._seed.micaela_r2){ const mi=DB.students['micaela']; if(mi) mi.routine=stuMicaela().routine; DB._seed.micaela_r2=true; }
   if(!DB._seed.astrid){ if(!DB.students['astrid']){ DB.students['astrid']=stuAstrid(); DB.order.push('astrid'); } DB._seed.astrid=true; }
+  if(!DB._seed.joni_6w){ const jn=DB.students['joni-puebla']; if(jn&&jn.weeks&&jn.weeks.length===4){ jn.weeks.push({t:'S5',n:'Pico',d:'Máxima carga con técnica. Series cortas e intensas.'},{t:'S6',n:'Descarga',d:'Reducir carga 40%. Recuperación activa.'}); } DB._seed.joni_6w=true; }
   if(!DB._seed.cecilia){ if(!DB.students['cecilia']){ DB.students['cecilia']=stuCecilia(); DB.order.push('cecilia'); } DB._seed.cecilia=true; }
   if(!DB._seed.carina_duo){ const ca=DB.students['carina']; if(ca&&!ca.members){ ca.name='Carina / Lucía'; ca.members=['Carina','Lucía']; } DB._seed.carina_duo=true; }
   /* Seed: Jus/Yesi Día 1 Semana 2 como completado */
