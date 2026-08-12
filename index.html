@@ -1572,8 +1572,8 @@ function isDropSet(ex){ return /drop\s*-?\s*set/i.test((ex.n||'')+'|'+(ex.r||'')
 function setsTable(ex,ei,mi,objetivo){
   let sets='';
   const isDrop=isDropSet(ex);
-  const _cw=cacheIsCurrentWeek();
-  for(let si=0;si<ex.s;si++){ const v=_cw?(CACHE[K(ei,si,mi)]||{}):{};
+  const _showCache=(CACHE._activeWeek===undefined||+CACHE._activeWeek===+week);
+    for(let si=0;si<ex.s;si++){ const v=_showCache?(CACHE[K(ei,si,mi)]||{}):{};
     if(isDrop){
       const ws=(v.w||'').split('/');while(ws.length<4)ws.push('');
       sets+=`<tr><td class="s">S${si+1}</td>
@@ -1644,7 +1644,7 @@ function renderApp(){
     /* mini progress for header (solo del integrante seleccionado) */
     const selMi=isDuo()?member:0;
     let setsDone=0,setsTotal=0,progDots='';
-    const _cw=cacheIsCurrentWeek(); for(let si=0;si<ex.s;si++){ setsTotal++; const d=_cw&&(CACHE[K(ei,si,selMi)]||{}).done; if(d) setsDone++; progDots+=`<i${d?' class="done"':''}></i>`; }
+    const _sc2=(CACHE._activeWeek===undefined||+CACHE._activeWeek===+week); for(let si=0;si<ex.s;si++){ setsTotal++; const d=_sc2&&(CACHE[K(ei,si,selMi)]||{}).done; if(d) setsDone++; progDots+=`<i${d?' class="done"':''}></i>`; }
     const obj=objFor(ex,selMi);
     const maxW=getMaxWeight(ex.n);
     const maxBadge=maxW?` · <span class="max-w">🏆 ${fmt(maxW)}</span>`:'';
@@ -1880,7 +1880,7 @@ function updSet(ei,si,mi,f,v){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CACHE
 function showRecord(name,old,now){ var existing=document.querySelector('.record-banner'); if(existing) existing.remove(); var div=document.createElement('div'); div.className='record-banner'; div.textContent='🏆 ¡Nuevo récord en '+name+'! '+old+' kg → '+now+' kg'; var main=$('main'); if(main) main.insertBefore(div,main.firstChild); setTimeout(function(){if(div.parentNode) div.remove();},5000); }
 function updObs(v){ CACHE[OBSK()]=v; queueSave(); }
 function toggleSet(ei,si,mi,el){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CACHE[k].done=!CACHE[k].done; el.classList.toggle('on',CACHE[k].done); progress(); queueSave(); }
-function progress(){ const r=routine(); let total=0,done=0; const mi=isDuo()?member:0; let exDone=0; const _cwp=cacheIsCurrentWeek(); r[day].ex.forEach((ex,ei)=>{ let allDone=true; for(let si=0;si<ex.s;si++){ total++; if(_cwp&&(CACHE[K(ei,si,mi)]||{}).done) done++; else allDone=false; } if(allDone&&ex.s>0) exDone++; }); const pct=total?Math.round(done/total*100):0; if($('prog')) $('prog').style.width=pct+'%'; if($('proglbl')) $('proglbl').textContent=`${done}/${total} series · ${exDone}/${r[day].ex.length} ejercicios · ${pct}%`; if($('progbar2')) $('progbar2').textContent=`Vas ${exDone} de ${r[day].ex.length} ejercicios · ${pct}% completado`; const b=$('closebtn'); if(b){ b.classList.toggle('ready',pct===100); b.textContent=pct===100?'✓ Sesión completa · guardar en transcripta':'Cerrar sesión y guardar en transcripta'; } }
+function progress(){ const r=routine(); let total=0,done=0; const mi=isDuo()?member:0; let exDone=0; const _sc3=(CACHE._activeWeek===undefined||+CACHE._activeWeek===+week); r[day].ex.forEach((ex,ei)=>{ let allDone=true; for(let si=0;si<ex.s;si++){ total++; if(_sc3&&(CACHE[K(ei,si,mi)]||{}).done) done++; else allDone=false; } if(allDone&&ex.s>0) exDone++; }); const pct=total?Math.round(done/total*100):0; if($('prog')) $('prog').style.width=pct+'%'; if($('proglbl')) $('proglbl').textContent=`${done}/${total} series · ${exDone}/${r[day].ex.length} ejercicios · ${pct}%`; if($('progbar2')) $('progbar2').textContent=`Vas ${exDone} de ${r[day].ex.length} ejercicios · ${pct}% completado`; const b=$('closebtn'); if(b){ b.classList.toggle('ready',pct===100); b.textContent=pct===100?'✓ Sesión completa · guardar en transcripta':'Cerrar sesión y guardar en transcripta'; } }
 
 function restSec(s){ if(!s) return 0; const str=String(s); if(str.includes(':')){ const p=str.split(':'); return (parseInt(p[0])||0)*60+(parseInt(p[1])||0); } const n=firstNum(str); return n?Math.round(n):0; }
 /* Vibración + beep (el contexto de audio se crea en el tap para que iPhone lo permita) */
@@ -1911,6 +1911,17 @@ async function closeSession(){
   LOGS.unshift({ date:new Date().toISOString(), dayName:r[day].day, week, weekName:weeks()[week].t+' '+weeks()[week].n, ex:exs, obs, health:hh });
   await saveLogs();
   await autoBackup('sesion');
+  /* Limpiar tildes Y pesos del día cerrado para que no aparezcan en semanas/días siguientes */
+  r[day].ex.forEach(function(ex,ei){
+    for(var mi2=0;mi2<members.length;mi2++){
+      for(var si=0;si<ex.s;si++){
+        delete CACHE[K(ei,si,mi2)];
+      }
+    }
+  });
+  delete CACHE[OBSK()];
+  delete CACHE._activeWeek;
+  await saveData();
   toast("✓ Sesión guardada en la transcripta",'ok');
   renderApp();
 }
