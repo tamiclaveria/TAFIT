@@ -968,6 +968,41 @@ function stuNatiCaro(){ return { name:"Nati / Caro", theme:"f", members:["Nati",
     ex("Press pecho",3,"10-12","A definir","Press con mancuernas","Omóplatos retraídos, bajá controlando.","75 s"),
   ]}
 ] }; }
+function stuGime(){ return { name:"Gime", theme:"f", weeks:cp(DEFAULT_WEEKS), forms:{anamnesis:true}, routine:[
+  {day:"Día 1", ex:[
+    ex("Sentadilla sumo Smith",4,"10-12","A definir","Sentadilla sumo con mancuerna","Pies anchos, puntas afuera, bajá con espalda erguida.","90 s"),
+    ex("Volada lateral mancuerna",4,"10-12","4 kg","Elevación lateral en polea","Codos levemente flexionados, subí hasta la altura del hombro sin envión.","60 s"),
+    ex("Abductores máquina",4,"15","47 kg","Abductor con banda","Sentate erguida, abrí las piernas controlando, sin rebote.","60 s"),
+    ex("Bíceps mancuerna",4,"12","A definir","Curl con barra","Codos pegados al cuerpo, rotá la palma al subir.","60 s"),
+    ex("Máquina cuádriceps Drop Set",4,"12-10-8-8","41 kg","Extensión de cuádriceps","Drop Set: anotá los 4 pesos de cada bajada.","75 s"),
+    ex("Gemelos parado",4,"15","A definir","Gemelos en máquina","Rango completo: estirá bien abajo y apretá arriba 1 segundo.","45 s"),
+    ex("Remo máquina",4,"12","23 kg","Remo en polea baja","Pecho apoyado, llevá los codos atrás apretando las escápulas.","75 s"),
+    ex("Dorsalera supina",4,"12","A definir","Jalón supino en polea","Agarre supino, pecho arriba, sentí la contracción en los dorsales.","75 s"),
+    ex("Circuito abdominal",3,"15","Peso corporal","Tabla isométrica 30s + crunch 15 + bicicleta 15","Sit up c/disco + Plancha remo c/mancuerna + Plancha lateral c/rotación. Sin pausa entre ejercicios.","45 s"),
+  ]},
+  {day:"Día 2", ex:[
+    ex("Hip thrust",4,"10-12","A definir","Puente de glúteo","Apoyá la espalda alta en el banco, apretá glúteos arriba 1 segundo.","90 s"),
+    ex("Aductores máquina",4,"15","A definir","Aductor con banda","Sentate erguida, cerrá las piernas controlando, sin rebote.","60 s"),
+    ex("Tríceps trasnuca",4,"10-12","5 kg","Tríceps en polea","Codos apuntando al techo, bajá detrás de la cabeza controlando.","60 s"),
+    ex("Press pecho máquina",4,"10-12","3 placas","Press de pecho con mancuernas","Omóplatos retraídos, empujá sin bloquear los codos.","75 s"),
+    ex("Prensa",4,"10-12","5 placas","Prensa a 45°","Pies al ancho de hombros, bajá controlado sin despegar la lumbar del respaldo.","90 s"),
+    ex("Circuito abdominal",3,"15","Peso corporal","Plancha 30s + crunch oblicuo 15 + mountain climber 15","Espinales máquina + Crunch abdominal + Twist soviético. Sin pausa entre ejercicios.","45 s"),
+    ex("Patada glúteo en polea",4,"12","A definir","Patada de glúteo en máquina","Empujá con el talón, apretá el glúteo arriba sin arquear la lumbar.","60 s"),
+    ex("Press hombro mancuerna",4,"10-12","A definir","Press militar en máquina","Codos a 90°, empujá vertical sin arquear la espalda.","75 s"),
+    ex("Máquina femoral Drop Set",4,"12-10-8-8","A definir","Curl femoral acostado","Drop Set: anotá los 4 pesos de cada bajada.","75 s"),
+  ]},
+  {day:"Día 3", ex:[
+    ex("Peso muerto barra",4,"10-12","A definir","Peso muerto rumano","Espalda neutra, barra pegada a las piernas, apretá glúteos arriba.","90 s"),
+    ex("Estocada búlgara",4,"10-12","7,5 kg/lado","Estocada con mancuernas","Pie trasero en banco, bajá la rodilla trasera controlando. Torso erguido.","75 s"),
+    ex("Fondos en cajón",4,"12","Peso corporal","Fondos en paralelas asistidos","Codos hacia atrás (no a los lados), bajá hasta 90° de codo.","60 s"),
+    ex("Step up en cajón",4,"12","10 kg","Step up al cajón con mancuerna","Pisá firme con toda la planta, empujá con la pierna de arriba sin impulso.","60 s"),
+    ex("Plancha remo c/ volada arriba",4,"8-10","A definir","Renegade row + volada","En plancha, remá y abrí el brazo arriba. Abdomen firme, sin rotar.","60 s"),
+    ex("Patada glúteo en polea",4,"12","A definir","Patada de glúteo en máquina","Empujá con el talón, apretá el glúteo arriba sin arquear la lumbar.","60 s"),
+    ex("Plancha alta y baja",4,"8-10","Peso corporal","Plancha con desplazamiento","Alterná entre plancha alta y baja controlando, sin balancear la cadera.","45 s"),
+    ex("Volada frontal mancuerna",4,"10","A definir","Elevación frontal con mancuerna","Subí con brazos casi extendidos hasta la altura del hombro, sin envión.","60 s"),
+    ex("Sentadilla goblet",4,"15","A definir","Sentadilla con barra","Disco o mancuerna al pecho, bajá controlada con la espalda erguida.","75 s"),
+  ]}
+] }; }
 function stuGrupo5(){ return { name:"Grupo 5", theme:"f", members:["M.Marta","Mercedez","Ana","Bernarda","Sofía M."], weeks:cp(DEFAULT_WEEKS), forms:{acuerdo:true,anamnesis:true}, routine:[
   {day:"Día 1",ex:[
     ex("Bíceps",3,"12","A definir","Curl con barra","Codos pegados al cuerpo, subí sin balancear.","60 s"),
@@ -1409,6 +1444,7 @@ function runSeeds(){
   if(!DB._seed.micaela_r2){ const mi=DB.students['micaela']; if(mi) mi.routine=stuMicaela().routine; DB._seed.micaela_r2=true; }
   if(!DB._seed.carina_r2){ const ca=DB.students['carina']; if(ca) ca.routine=stuCarina().routine; DB._seed.carina_r2=true; }
   if(!DB._seed.nati_r2){ const nc=DB.students['nati-caro']; if(nc) nc.routine=stuNatiCaro().routine; DB._seed.nati_r2=true; }
+  if(!DB._seed.gime){ if(!DB.students['gime']){ DB.students['gime']=stuGime(); DB.order.push('gime'); } DB._seed.gime=true; }
   if(!DB._seed.astrid){ if(!DB.students['astrid']){ DB.students['astrid']=stuAstrid(); DB.order.push('astrid'); } DB._seed.astrid=true; }
   if(!DB._seed.joni_6w){ const jn=DB.students['joni-puebla']; if(jn&&jn.weeks&&jn.weeks.length===4){ jn.weeks.push({t:'S5',n:'Pico',d:'Máxima carga con técnica. Series cortas e intensas.'},{t:'S6',n:'Descarga',d:'Reducir carga 40%. Recuperación activa.'}); } DB._seed.joni_6w=true; }
   if(!DB._seed.cecilia){ if(!DB.students['cecilia']){ DB.students['cecilia']=stuCecilia(); DB.order.push('cecilia'); } DB._seed.cecilia=true; }
