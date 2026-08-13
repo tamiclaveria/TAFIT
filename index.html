@@ -83,7 +83,7 @@
 
   .ex{background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;border:1px solid var(--line);box-shadow:0 2px 8px rgba(13,27,42,.04)}
   .ex h3{font-size:15px;color:var(--navy);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  .ex h3 .num{background:var(--steel);color:#fff;width:22px;height:22px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;flex:none}
+  .ex h3 .num,.ex-hdr .num{background:var(--steel);color:#fff;width:22px;height:22px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;flex:none}
   .ex .meta{font-size:12px;color:var(--mute);margin:4px 0 2px 30px}
   .ex .alt{font-size:12px;color:var(--niebla);margin:0 0 0 30px}
   .ex .alt b{color:var(--mute);font-weight:700}
@@ -366,6 +366,8 @@
   #app.dark .welcome-box h2{color:#e0e6ed}
   #app.dark .welcome-box p{color:#8a9ab0}
   #app.dark #modal .mbox{background:#182838}
+  #app.dark .weekdesc{background:#182838;border-color:#253545;color:#e0e6ed}
+  #app.dark .progwrap{background:#182838;border-color:#253545}
   /* Dark mode + tema femenino */
   #app.dark.theme-f{--accent:#d4619a;--ok:#4caf93;--warn:#e05555}
   #app.dark.theme-f .seg button.sel{background:#d4619a;border-color:#d4619a}
@@ -1022,6 +1024,77 @@ function stuGrupo5(){ return { name:"Grupo 5", theme:"f", members:["M.Marta","Me
     ex("Sit up con mancuernas",3,"20","A definir","Crunch con disco","Subí el torso completo, mancuerna al pecho.","45 s"),
     ex("Remo",3,"12","A definir","Remo con mancuerna","Pecho alto, llevá los codos atrás apretando escápulas.","75 s"),
     ex("Isquios",3,"12","A definir","Curl femoral acostado","Flexioná completo, bajá controlando sin soltar.","60 s"),
+  ]}
+] }; }
+
+/* ---- Sofi / Marti (dúo, 3 días) ---- */
+function stuSofiMarti(){ return { name:"Sofi / Marti", theme:"f", members:["Sofi","Marti"], weeks:cp(DEFAULT_WEEKS), routine:[
+  {day:"Día 1", ex:[
+    ex("Sentadilla goblet",4,"12","A definir","Sentadilla con barra","Disco o mancuerna al pecho, bajá controlada con la espalda erguida.","75 s"),
+    ex("Remo con mancuerna",4,"12","A definir","Remo en polea baja","Pecho alto, llevá los codos atrás apretando escápulas.","75 s"),
+    ex("Press de pecho máquina",4,"10-12","A definir","Press con mancuernas","Omóplatos retraídos, bajá controlando sin rebotar.","75 s"),
+    ex("Peso muerto rumano mancuernas",3,"12","A definir","Peso muerto con barra","Espalda neutra, barra pegada a las piernas.","90 s"),
+    ex("Elevación lateral mancuerna",3,"12-15","A definir","Elevación lateral en polea","Codos levemente flexionados, subí sin balancear el torso.","60 s"),
+    ex("Curl femoral acostado",3,"12","A definir","Curl femoral sentado","Flexioná completo, bajá controlando sin soltar.","60 s"),
+    ex("Abdominales en polea",3,"15","A definir","Crunch con disco","Subí el torso desde el abdomen, no tires del cuello.","45 s"),
+  ]}
+] }; }
+function sofiMartiDay2(){ return {day:"Día 2", ex:[
+  ex("Prensa 45°",4,"12-15","A definir","Sentadilla goblet","Pies a la altura de los hombros, bajá sin despegar la lumbar.","90 s"),
+  ex("Jalón al pecho",4,"10-12","A definir","Dorsalera agarre cerrado","Pecho arriba, bajá la barra al mentón sin tirones.","75 s"),
+  ex("Estocada con mancuernas",3,"10 x lado","A definir","Búlgaras en banco","Paso largo, bajá controlado, torso erguido.","75 s"),
+  ex("Press de hombros mancuerna",3,"10-12","A definir","Press militar con barra","Codos a 90°, empujá vertical sin arquear la espalda.","75 s"),
+  ex("Aductores en máquina",3,"15","A definir","Aductor con banda","Cerrá controlando, apretá en la contracción.","60 s"),
+  ex("Curl de bíceps con barra",3,"10-12","A definir","Curl con mancuernas","Codos pegados al cuerpo y quietos.","60 s"),
+  ex("Plancha con toque de hombro",3,"20","Peso corporal","Plancha alta","Cadera estable, no rotes el torso.","45 s"),
+] }; }
+function sofiMartiDay3(){ return {day:"Día 3", ex:[
+  ex("Peso muerto sumo",4,"10","A definir","Peso muerto convencional","Pies anchos, puntas afuera, espalda neutra.","90 s"),
+  ex("Remo Lachine",3,"10-12","A definir","Remo en polea baja","Pecho apoyado, apretá escápulas al final.","75 s"),
+  ex("Hip thrust en máquina",3,"12","A definir","Puente de glúteo","Apretá glúteos arriba 1 segundo.","90 s"),
+  ex("Press inclinado mancuerna",3,"10-12","A definir","Press inclinado en Smith","Banco a 30°, sentí el estiramiento del pectoral abajo.","75 s"),
+  ex("Extensión de cuádriceps",3,"12-15","A definir","Sentadilla isométrica","Extendé completo arriba, bajá controlando.","60 s"),
+  ex("Tríceps en polea",3,"12","A definir","Fondos en banco","Codos apuntando al techo, bajá detrás controlando.","60 s"),
+  ex("Abductores en máquina",3,"15","A definir","Abductor con banda","Abrí las piernas controlando, apretá afuera.","60 s"),
+] }; }
+
+/* ---- Jus / Yesi (dúo, 2 días) ---- */
+function stuJusYesi(){ return { name:"Jus / Yesi", theme:"f", members:["Jus","Yesi"], weeks:cp(DEFAULT_WEEKS), routine:[
+  {day:"Día 1", ex:[
+    exD("Remo bajo",3,"12","27","36","Remo en polea baja","Pecho alto, llevá los codos atrás apretando escápulas.","75 s"),
+    exD("Máquina de isquios",3,"15","8 placas","9 placas","Curl femoral acostado","Flexioná completo, bajá controlando sin soltar.","60 s"),
+    exD("Prensa",3,"15","A definir","97","Sentadilla goblet","Pies a la altura de los hombros, bajá sin despegar la lumbar.","90 s"),
+    exD("Press de pecho máquina",3,"10-12","A definir","A definir","Press con mancuernas","Omóplatos retraídos, bajá controlando sin rebotar.","75 s"),
+    exD("Elevación lateral mancuerna",3,"12-15","A definir","A definir","Elevación lateral en polea","Codos levemente flexionados, subí sin balancear.","60 s"),
+    exD("Abdominales en polea",3,"15","A definir","A definir","Crunch con disco","Subí el torso desde el abdomen.","45 s"),
+  ]}
+] }; }
+function jusYesiDay2(){ return {day:"Día 2", ex:[
+  exD("Sentadilla rebote",3,"15","A definir","A definir","Sentadilla goblet","Bajá controlada y subí con impulso leve, sin perder la técnica.","75 s"),
+  exD("Peso muerto rumano mancuernas",3,"12","A definir","A definir","Peso muerto con barra","Espalda neutra, barra pegada a las piernas.","90 s"),
+  exD("Jalón al pecho",3,"10-12","A definir","A definir","Dorsalera agarre cerrado","Pecho arriba, bajá la barra al mentón sin tirones.","75 s"),
+  exD("Estocada con mancuernas",3,"10 x lado","A definir","A definir","Búlgaras en banco","Paso largo, bajá controlado, torso erguido.","75 s"),
+  exD("Curl de bíceps con barra",3,"10-12","A definir","A definir","Curl con mancuernas","Codos pegados al cuerpo y quietos.","60 s"),
+  exD("Tríceps en polea",3,"12","A definir","A definir","Fondos en banco","Codos apuntando al techo, bajá detrás controlando.","60 s"),
+] }; }
+
+/* ---- Martín (2 días) ---- */
+function stuMartin(){ return { name:"Martín", theme:"m", weeks:cp(DEFAULT_WEEKS), routine:[
+  {day:"Día 1", ex:[
+    ex("Press plano barra",4,"10","A definir","Press plano con mancuernas","Omóplatos retraídos, bajá al esternón controlando, sin rebotar.","90 s"),
+    ex("Remo con barra",4,"10","A definir","Remo en polea baja","Pecho alto, llevá los codos atrás apretando escápulas.","90 s"),
+    ex("Press militar mancuerna",3,"10","A definir","Press militar con barra","Codos a 90°, empujá vertical sin arquear la espalda.","75 s"),
+    ex("Dominadas asistidas",3,"al fallo","A definir","Jalón supino en polea","Series al fallo, controlá la bajada.","90 s"),
+    ex("Curl de bíceps con barra",3,"10-12","A definir","Curl con mancuernas","Codos pegados al cuerpo y quietos.","60 s"),
+    ex("Tríceps en polea",3,"10-12","A definir","Fondos en banco","Codos apuntando al techo, bajá detrás controlando.","60 s"),
+  ]},
+  {day:"Día 2", ex:[
+    ex("Sentadilla con barra",4,"10","A definir","Sentadilla goblet","Pecho arriba, bajá controlado con la espalda erguida.","90 s"),
+    ex("Peso muerto rumano",4,"10","A definir","Peso muerto con mancuernas","Espalda neutra, barra pegada a las piernas.","90 s"),
+    ex("Prensa 45°",3,"12-15","A definir","Sentadilla con barra","Pies a la altura de los hombros, bajá sin despegar la lumbar.","90 s"),
+    ex("Estocada con mancuernas",3,"10 x lado","A definir","Búlgaras en banco","Paso largo, bajá controlado, torso erguido.","75 s"),
+    ex("Curl femoral acostado",3,"12","A definir","Curl femoral sentado","Flexioná completo, bajá controlando sin soltar.","60 s"),
+    ex("Abdominales en polea",3,"15","A definir","Crunch con disco","Subí el torso desde el abdomen, no tires del cuello.","45 s"),
   ]}
 ] }; }
 
@@ -1897,7 +1970,7 @@ function updSet(ei,si,mi,f,v){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CACHE
 }
 function showRecord(name,old,now){ var existing=document.querySelector('.record-banner'); if(existing) existing.remove(); var div=document.createElement('div'); div.className='record-banner'; div.textContent='🏆 ¡Nuevo récord en '+name+'! '+old+' kg → '+now+' kg'; var main=$('main'); if(main) main.insertBefore(div,main.firstChild); setTimeout(function(){if(div.parentNode) div.remove();},5000); }
 function updObs(v){ CACHE[OBSK()]=v; queueSave(); }
-function toggleSet(ei,si,mi,el){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CACHE[k].done=!CACHE[k].done; el.classList.toggle('on',CACHE[k].done); progress(); queueSave(); }
+function toggleSet(ei,si,mi,el){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CACHE[k].done=!CACHE[k].done; CACHE[k]._w=week; el.classList.toggle('on',CACHE[k].done); progress(); queueSave(); }
 function progress(){ const r=routine(); let total=0,done=0; const mi=isDuo()?member:0; let exDone=0; r[day].ex.forEach((ex,ei)=>{ let allDone=true; for(let si=0;si<ex.s;si++){ total++; const _rp=(CACHE[K(ei,si,mi)]||{}); if((_rp._w===undefined||+_rp._w===+week)&&_rp.done) done++; else allDone=false; } if(allDone&&ex.s>0) exDone++; }); const pct=total?Math.round(done/total*100):0; if($('prog')) $('prog').style.width=pct+'%'; if($('proglbl')) $('proglbl').textContent=`${done}/${total} series · ${exDone}/${r[day].ex.length} ejercicios · ${pct}%`; if($('progbar2')) $('progbar2').textContent=`Vas ${exDone} de ${r[day].ex.length} ejercicios · ${pct}% completado`; const b=$('closebtn'); if(b){ b.classList.toggle('ready',pct===100); b.textContent=pct===100?'✓ Sesión completa · guardar en transcripta':'Cerrar sesión y guardar en transcripta'; } }
 
 function restSec(s){ if(!s) return 0; const str=String(s); if(str.includes(':')){ const p=str.split(':'); return (parseInt(p[0])||0)*60+(parseInt(p[1])||0); } const n=firstNum(str); return n?Math.round(n):0; }
