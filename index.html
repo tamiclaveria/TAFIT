@@ -1117,6 +1117,21 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const K=(ei,si,mi)=>day+"|"+ei+"|"+si+(mi?"|m"+mi:"");
 const OBSK=()=>'obs|'+day;
+/* Semana efectiva de un registro de serie: si no tiene _w (dato viejo), se lo trata como semana 0 (S1) en vez de "cualquier semana", para que no aparezca tildado en semanas que todavía no se hicieron */
+function wOf(raw){ return (raw&&raw._w!==undefined)?+raw._w:0; }
+/* Migración única: a los registros viejos que quedaron sin _w (tildados sin cargar peso, de antes del fix) les asigna semana 0 para que dejen de aparecer en semanas futuras no realizadas */
+function migrateLegacyWeeks(){
+  if(CACHE._wLegacyFixed) return;
+  let changed=false;
+  Object.keys(CACHE).forEach(function(k){
+    const v=CACHE[k];
+    if(v&&typeof v==='object'&&!Array.isArray(v)&&v._w===undefined&&(v.done!==undefined||v.w!==undefined||v.r!==undefined||v.rir!==undefined)){
+      v._w=0; changed=true;
+    }
+  });
+  CACHE._wLegacyFixed=true;
+  if(changed) queueSave();
+}
 /* Migrar CACHE keys viejas (sin prefijo de semana) al formato nuevo */
 function migrateCache(){
   if(CACHE._wMigrated) return;
@@ -1441,7 +1456,7 @@ async function pushAllLocal(){ if(!fsDB) return; let keys;
   if(locked&&active){ keys=myKeys(); }
   else { keys=['tafit:students']; DB.order.forEach(id=>{ keys.push('tafit:data:'+id,'tafit:logs:'+id,'tafit:form:acuerdo:'+id,'tafit:form:anamnesis:'+id); const s=DB.students[id]; if(s&&s.members&&s.members.length>1){ for(let mi=0;mi<s.members.length;mi++){ keys.push('tafit:form:acuerdo:'+id+':'+mi,'tafit:form:anamnesis:'+id+':'+mi); } } }); }
   for(const k of keys){ try{ const v=localStorage.getItem(k); if(v&&v!=='{}'&&v!=='[]'&&v!=='""') await cloudPush(k,v); }catch(e){} } }
-async function reloadFromRemote(){ try{ const raw=await Store.get('tafit:students'); if(raw){ const p=safeParse(raw,null); if(p&&p.order&&p.order.length){ if(!DB._ts||!p._ts||p._ts>=DB._ts) DB=p; } } if(DB.students[active]){ CACHE=safeParse(await Store.get('tafit:data:'+active)||'{}',{}); const remoteLogs=safeParse(await Store.get('tafit:logs:'+active)||'[]',[]); LOGS=mergeLogs(LOGS,remoteLogs); } render(); }catch(e){} }
+async function reloadFromRemote(){ try{ const raw=await Store.get('tafit:students'); if(raw){ const p=safeParse(raw,null); if(p&&p.order&&p.order.length){ if(!DB._ts||!p._ts||p._ts>=DB._ts) DB=p; } } if(DB.students[active]){ CACHE=safeParse(await Store.get('tafit:data:'+active)||'{}',{}); migrateLegacyWeeks(); const remoteLogs=safeParse(await Store.get('tafit:logs:'+active)||'[]',[]); LOGS=mergeLogs(LOGS,remoteLogs); } render(); }catch(e){} }
 function updateSyncUI(on){ $('clouddot').className='dot'+(on?' on':''); $('cloudlbl').textContent=on?'Sincronizado':(Store.ls?'En este dispositivo':'Solo esta sesión'); }
 function myKeys(){ /* claves que necesita una alumna con link bloqueado */
   return ['tafit:students','tafit:data:'+active,'tafit:logs:'+active,'tafit:form:acuerdo:'+active,'tafit:form:anamnesis:'+active];
@@ -1574,7 +1589,7 @@ function whenFirebaseReady(tries){
   if(tries<=0){ updateSyncUI(false); return; }
   setTimeout(()=>whenFirebaseReady(tries-1),500);
 }
-async function loadStudent(){ CACHE=safeParse(await Store.get('tafit:data:'+active)||'{}',{}); LOGS=safeParse(await Store.get('tafit:logs:'+active)||'[]',[]); openEx=-1;
+async function loadStudent(){ CACHE=safeParse(await Store.get('tafit:data:'+active)||'{}',{}); migrateLegacyWeeks(); LOGS=safeParse(await Store.get('tafit:logs:'+active)||'[]',[]); openEx=-1;
   /* recordar dónde quedó: integrante, día y semana */
   let pos={}; try{ pos=safeParse(localStorage.getItem('tafit:pos:'+active)||'{}',{}); }catch(e){}
   const r=(DB.students[active]&&DB.students[active].routine)||[];
@@ -1664,7 +1679,7 @@ function isDropSet(ex){ return /drop\s*-?\s*set/i.test((ex.n||'')+'|'+(ex.r||'')
 function setsTable(ex,ei,mi,objetivo){
   let sets='';
   const isDrop=isDropSet(ex);
-  for(let si=0;si<ex.s;si++){ const _raw=CACHE[K(ei,si,mi)]||{}; const v=(_raw._w!==undefined&&+_raw._w!==+week)?{}:_raw;
+  for(let si=0;si<ex.s;si++){ const _raw=CACHE[K(ei,si,mi)]||{}; const v=(wOf(_raw)!==+week)?{}:_raw;
     if(isDrop){
       const ws=(v.w||'').split('/');while(ws.length<4)ws.push('');
       sets+=`<tr><td class="s">S${si+1}</td>
@@ -1735,7 +1750,7 @@ function renderApp(){
     /* mini progress for header (solo del integrante seleccionado) */
     const selMi=isDuo()?member:0;
     let setsDone=0,setsTotal=0,progDots='';
-    for(let si=0;si<ex.s;si++){ setsTotal++; const _rd=(CACHE[K(ei,si,selMi)]||{}); const d=(_rd._w!==undefined&&+_rd._w!==+week)?false:_rd.done; if(d) setsDone++; progDots+=`<i${d?' class="done"':''}></i>`; }
+    for(let si=0;si<ex.s;si++){ setsTotal++; const _rd=(CACHE[K(ei,si,selMi)]||{}); const d=(wOf(_rd)!==+week)?false:_rd.done; if(d) setsDone++; progDots+=`<i${d?' class="done"':''}></i>`; }
     const obj=objFor(ex,selMi);
     const maxW=getMaxWeight(ex.n);
     const maxBadge=maxW?` · <span class="max-w">🏆 ${fmt(maxW)}</span>`:'';
@@ -1971,7 +1986,7 @@ function updSet(ei,si,mi,f,v){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CACHE
 function showRecord(name,old,now){ var existing=document.querySelector('.record-banner'); if(existing) existing.remove(); var div=document.createElement('div'); div.className='record-banner'; div.textContent='🏆 ¡Nuevo récord en '+name+'! '+old+' kg → '+now+' kg'; var main=$('main'); if(main) main.insertBefore(div,main.firstChild); setTimeout(function(){if(div.parentNode) div.remove();},5000); }
 function updObs(v){ CACHE[OBSK()]=v; queueSave(); }
 function toggleSet(ei,si,mi,el){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CACHE[k].done=!CACHE[k].done; CACHE[k]._w=week; el.classList.toggle('on',CACHE[k].done); progress(); queueSave(); }
-function progress(){ const r=routine(); let total=0,done=0; const mi=isDuo()?member:0; let exDone=0; r[day].ex.forEach((ex,ei)=>{ let allDone=true; for(let si=0;si<ex.s;si++){ total++; const _rp=(CACHE[K(ei,si,mi)]||{}); if((_rp._w===undefined||+_rp._w===+week)&&_rp.done) done++; else allDone=false; } if(allDone&&ex.s>0) exDone++; }); const pct=total?Math.round(done/total*100):0; if($('prog')) $('prog').style.width=pct+'%'; if($('proglbl')) $('proglbl').textContent=`${done}/${total} series · ${exDone}/${r[day].ex.length} ejercicios · ${pct}%`; if($('progbar2')) $('progbar2').textContent=`Vas ${exDone} de ${r[day].ex.length} ejercicios · ${pct}% completado`; const b=$('closebtn'); if(b){ b.classList.toggle('ready',pct===100); b.textContent=pct===100?'✓ Sesión completa · guardar en transcripta':'Cerrar sesión y guardar en transcripta'; } }
+function progress(){ const r=routine(); let total=0,done=0; const mi=isDuo()?member:0; let exDone=0; r[day].ex.forEach((ex,ei)=>{ let allDone=true; for(let si=0;si<ex.s;si++){ total++; const _rp=(CACHE[K(ei,si,mi)]||{}); if(wOf(_rp)===+week&&_rp.done) done++; else allDone=false; } if(allDone&&ex.s>0) exDone++; }); const pct=total?Math.round(done/total*100):0; if($('prog')) $('prog').style.width=pct+'%'; if($('proglbl')) $('proglbl').textContent=`${done}/${total} series · ${exDone}/${r[day].ex.length} ejercicios · ${pct}%`; if($('progbar2')) $('progbar2').textContent=`Vas ${exDone} de ${r[day].ex.length} ejercicios · ${pct}% completado`; const b=$('closebtn'); if(b){ b.classList.toggle('ready',pct===100); b.textContent=pct===100?'✓ Sesión completa · guardar en transcripta':'Cerrar sesión y guardar en transcripta'; } }
 
 function restSec(s){ if(!s) return 0; const str=String(s); if(str.includes(':')){ const p=str.split(':'); return (parseInt(p[0])||0)*60+(parseInt(p[1])||0); } const n=firstNum(str); return n?Math.round(n):0; }
 /* Vibración + beep (el contexto de audio se crea en el tap para que iPhone lo permita) */
@@ -1984,7 +1999,7 @@ function paintRest(){ const mm=Math.floor(restLeft/60), ss=restLeft%60; $('restn
 function stopRest(){ if(restInt){ clearInterval(restInt); restInt=null; } $('rest').classList.remove('show'); }
 
 function firstNum(s){ if(s==null) return null; const m=String(s).replace(',','.').match(/-?\d+(\.\d+)?/); return m?parseFloat(m[0]):null; }
-function bestSet(ei,mi){ const ex=routine()[day].ex[ei]; let best=null; for(let si=0;si<ex.s;si++){ const raw=CACHE[K(ei,si,mi)]||{}; const v=(raw._w===undefined||+raw._w===+week)?raw:{}; const w=firstNum(v.w),r=firstNum(v.r); if(w==null||r==null||w<=0||r<=0) continue; const e=w*(1+r/30); if(!best||e>best.e) best={w,r,e}; } return best; }
+function bestSet(ei,mi){ const ex=routine()[day].ex[ei]; let best=null; for(let si=0;si<ex.s;si++){ const raw=CACHE[K(ei,si,mi)]||{}; const v=(wOf(raw)===+week)?raw:{}; const w=firstNum(v.w),r=firstNum(v.r); if(w==null||r==null||w<=0||r<=0) continue; const e=w*(1+r/30); if(!best||e>best.e) best={w,r,e}; } return best; }
 function rmHTML(ei,mi){ const b=bestSet(ei,mi); if(!b) return `<summary>RM estimados (8RM→1RM) <span class="best">cargá peso y reps</span></summary><div class="rmempty">Cuando cargues peso y reps de al menos una serie, calculo los RM con la fórmula de Epley.</div>`; let grid=''; for(let n=8;n>=1;n--){ grid+=`<div><b>${fmt(b.e/(1+n/30))}</b><span>${n}RM</span></div>`; } return `<summary>RM estimados (8RM→1RM) <span class="best">mejor: ${fmt(b.w)}×${b.r}</span></summary><div class="rmgrid">${grid}</div>`; }
 function fmt(x){ return (Math.round(x*2)/2).toString().replace('.',',')+' kg'; }
 
