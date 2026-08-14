@@ -2239,7 +2239,7 @@ function pickWeek(i){
 /* Una semana está completa cuando cada día de la rutina tiene su sesión cerrada en esa semana */
 function weekDone(wi){ const r=routine(); return r.length>0 && r.every(function(d){ return LOGS.some(function(l){ return +l.week===+wi && l.dayName===d.day; }); }); }
 /* Para alumnas: la semana i se desbloquea SOLO al completar TODOS los días de la anterior. La profe ve todo. */
-function wkLocked(i){ return !trainer && i>0 && !weekDone(i-1); }
+function wkLocked(i){ if(trainer) return false; const unlockW=(DB.students[active]&&DB.students[active].unlockWeek)||0; if(i<=unlockW) return false; return i>0 && !weekDone(i-1); }
 function pickMember(i){ member=i; openEx=-1; savePos(); renderApp(); }
 
 /* Peso más alto registrado por ejercicio */
@@ -2492,7 +2492,9 @@ function renderEdit(){
 
   SEC('members',`Integrantes de ${esc(DB.students[active].name)}`,`<p>Si entrenan en dúo, poné los dos nombres separados por coma (1.º = primera columna). Cada una registra sus series y su RM por separado.</p><div class="fld"><input id="membersfld" value="${esc(membersOf().join(', '))}" placeholder="Nati, Caro"></div><div class="edit-bottom mt8"><button class="save" data-act="saveMembers">Guardar integrantes</button></div>`);
 
+  const unlockW=DB.students[active].unlockWeek||0;
   let wkHtml=`<p>Cada alumno puede tener su propia progresión.</p>`;
+  wkHtml+=`<div class="fld mt8"><label>Desbloqueo manual · dejar entrar a ${esc(DB.students[active].name)} aunque no haya cerrado sesiones de semanas anteriores</label><select id="unlockWeekSel">${weeks().map((w,i)=>`<option value="${i}" ${i===unlockW?'selected':''}>Hasta ${esc(w.t)} · ${esc(w.n)}</option>`).join('')}</select></div><div class="edit-actions mt8"><button data-act="saveUnlockWeek">Guardar desbloqueo</button></div>`;
   weeks().forEach((w,i)=>{ wkHtml+=`<div class="week-row" data-w="${i}"><div class="fld"><label>Etiqueta</label><input data-wf="t" value="${esc(w.t)}"></div><div class="fld"><label>Nombre</label><input data-wf="n" value="${esc(w.n)}"></div><div class="fld wfull"><label>Indicación</label><textarea data-wf="d">${esc(w.d)}</textarea></div><button class="delw" data-act="removeWeek" data-i="${i}">Eliminar semana</button></div>`; });
   wkHtml+=`<button class="addx mt8" data-act="addWeek">+ Agregar semana</button><div class="edit-bottom mt8"><button class="save" data-act="saveWeeks">Guardar semanas</button></div>`;
   SEC('weeks',`Semanas de progresión (${weeks().length})`,wkHtml);
@@ -2726,6 +2728,7 @@ document.addEventListener('click',e=>{
     case 'removeRule': removeRule(i); break;
     case 'saveRoutine': saveRoutine(); break;
     case 'saveWeeks': saveWeeks(); break;
+    case 'saveUnlockWeek': { const sel=$('unlockWeekSel'); if(sel){ DB.students[active].unlockWeek=+sel.value; saveDB(); toast('Desbloqueo guardado ✓ · ya puede entrar a esa semana','ok'); } break; }
     case 'saveHealth': saveHealth(); break;
     case 'saveMembers': saveMembers(); break;
     case 'setPin': setPin(); break;
