@@ -110,6 +110,8 @@
   /* ---- Técnica en acordeón: cerrado por defecto para no alargar la tarjeta ---- */
   .tipacc{border:1.5px solid var(--line);border-radius:9px;overflow:hidden;background:var(--card);margin:9px 0 0 30px}
   .tipacc summary{list-style:none;display:flex;align-items:center;gap:8px;padding:8px 11px;cursor:pointer;font-size:12px;font-weight:700;color:var(--steel);-webkit-user-select:none;user-select:none}
+  .tc-gen{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--niebla);background:var(--light);border-radius:6px;padding:1px 6px}
+  #app.dark .tc-gen{background:#111d2b;color:#7a8a9a}
   .tipacc summary::-webkit-details-marker{display:none}
   .tipacc .chev{margin-left:auto;font-size:10px;color:var(--niebla);transition:.15s}
   .tipacc[open] .chev{transform:rotate(180deg)}
@@ -587,10 +589,11 @@ function getBlockCfg(ex){
 /* Técnica en acordeón: cerrada por defecto para no alargar la tarjeta (nativo <details>,
    funciona sin JavaScript también). Si escribís cada punto en una línea nueva en "Técnica",
    se muestran como puntos separados; si no, se muestra como un solo párrafo. */
-function tipAccordionHTML(tip){
+function tipAccordionHTML(tip,isGeneric){
   const pts=(tip||'').split(/\n+/).map(s=>s.trim()).filter(Boolean);
   const body=(pts.length>1?pts:[tip]).map(p=>`<div class="tc-pt"><span class="tc-dot"></span><p>${esc(p)}</p></div>`).join('');
-  return `<details class="tipacc"><summary>💡 Técnica <span class="chev">▾</span></summary><div class="tc-body">${body}</div></details>`;
+  const lbl=isGeneric?'💡 Técnica <span class="tc-gen">general</span>':'💡 Técnica';
+  return `<details class="tipacc"><summary>${lbl} <span class="chev">▾</span></summary><div class="tc-body">${body}</div></details>`;
 }
 
 /* ==== Cumpleaños: se leen de "Fecha de nacimiento" (Anamnesis o Acuerdo), sin pedir carga aparte ==== */
@@ -1295,6 +1298,21 @@ function exCategory(name){
   for(const [cat,re] of EX_CAT_RULES){ if(re.test(n)) return cat; }
   return 'funcional';
 }
+/* Técnica genérica por grupo muscular: se usa SOLO si el ejercicio no tiene su propio tip cargado,
+   así todos los ejercicios muestran algo en "Técnica" aunque todavía no le hayas escrito uno a medida. */
+const GENERIC_TIPS={
+  pecho:'Omóplatos retraídos contra el banco, bajá controlando el peso y evitá rebotar en el pecho.',
+  hombros:'Movimiento controlado, sin balancear el cuerpo. Evitá subir el peso por encima de la línea de los hombros si sentís pinzamiento.',
+  biceps:'Codos pegados al torso, subí y bajá controlando — no uses impulso de la espalda.',
+  core:'Activá el abdomen antes de moverte y mantené la zona lumbar apoyada o neutra durante todo el ejercicio.',
+  piernas:'Rodillas alineadas con la punta del pie, bajá controlado y apoyá bien el talón.',
+  espalda:'Pecho arriba, omóplatos juntos al tirar, evitá redondear la espalda baja.',
+  triceps:'Codos fijos y cerca del cuerpo, extendé completo sin trabar la articulación con fuerza.',
+  gluteos:'Apretá glúteos arriba 1 segundo en cada repetición, sin arquear de más la zona lumbar.',
+  cardio:'Ritmo constante y controlado — priorizá la técnica antes que la velocidad.',
+  funcional:'Movimiento controlado de principio a fin, priorizando la técnica antes que la carga o la velocidad.',
+};
+function tipFor(ex){ return (ex.tip&&ex.tip.trim())?ex.tip:GENERIC_TIPS[exCategory(ex.n)]; }
 function exThumbHTML(ex,ei){
   /* Si más adelante Tami carga su propia foto/video por ejercicio (ex.img), se muestra esa
      en vez del ícono genérico — mismo lugar, mismo gesto de "tocar para agrandar". */
@@ -2004,14 +2022,14 @@ function renderApp(){
     const maxBadge=maxW?` · <span class="max-w">🏆 ${fmt(maxW)}</span>`:'';
     const hdrMeta=`${ex.s}×${esc(ex.r)}${(obj&&obj!=='A definir')?' · '+esc(obj):''}${maxBadge}${setsTotal?(' · '+setsDone+'/'+setsTotal+' ✓'):''}`;
     const wCmp=weightCmpHTML(ex.n,member);
-    let html=`<div class="ex-hdr" data-act="accordion" data-i="${ei}"><span class="num">${ei+1}</span>${exThumbHTML(ex,ei)}<div class="ex-hdr-info"><div class="ex-hdr-name">${esc(ex.n)}</div><div class="ex-hdr-meta">${hdrMeta}</div>${wCmp}<div class="ex-hdr-prog">${progDots}</div></div><span class="ex-chev${isOpen?' open':''}">▾</span></div>`;
+    let html=`<div class="ex-hdr" data-act="accordion" data-i="${ei}"><span class="num">${ei+1}</span><div class="ex-hdr-info"><div class="ex-hdr-name">${esc(ex.n)}</div><div class="ex-hdr-meta">${hdrMeta}</div>${wCmp}<div class="ex-hdr-prog">${progDots}</div></div><span class="ex-chev${isOpen?' open':''}">▾</span></div>`;
     html+=`<div class="ex-body${isOpen?' open':''}">`;
     if(trainer){
       html+=`<div class="quick-edit"><div class="qe-title">✏ Edición rápida</div><div class="form-grid"><div class="form-field full"><div class="form-lbl">Ejercicio</div><input class="form-inp" value="${esc(ex.n)}" data-chg="qedit" data-ei="${ei}" data-f="n"></div><div class="form-field"><div class="form-lbl">Series</div><input class="form-inp" value="${esc(ex.s)}" data-chg="qedit" data-ei="${ei}" data-f="s"></div><div class="form-field"><div class="form-lbl">Reps</div><input class="form-inp" value="${esc(ex.r)}" data-chg="qedit" data-ei="${ei}" data-f="r"></div><div class="form-field"><div class="form-lbl">Peso obj.</div><input class="form-inp" value="${esc(ex.w)}" data-chg="qedit" data-ei="${ei}" data-f="w"></div><div class="form-field"><div class="form-lbl">Descanso</div><input class="form-inp" value="${esc(ex.rest)}" data-chg="qedit" data-ei="${ei}" data-f="rest"></div><div class="form-field full"><div class="form-lbl">Observación / Técnica</div><textarea class="form-inp" data-chg="qedit" data-ei="${ei}" data-f="tip" placeholder="Ej: rodillas semi rígidas, no bloquear codos...">${esc(ex.tip||'')}</textarea></div></div></div>`;
     }
     html+=`<div class="meta">${ex.s} series · objetivo ${esc(ex.r)} reps${(obj&&obj!=='A definir')?' · '+esc(obj):''}</div>`;
     if(ex.alt) html+=`<div class="alt"><b>Alternativo:</b> ${esc(ex.alt)}</div>`;
-    if(ex.tip) html+=tipAccordionHTML(ex.tip);
+    html+=tipAccordionHTML(tipFor(ex),!(ex.tip&&ex.tip.trim()));
     const restChip = `<span class="rest" data-act="rest" data-sec="${restSec(ex.rest)||60}">⏱ Descanso ${ex.rest?esc(ex.rest):'60 s'}</span>`;
     html+=`<div class="chips">${restChip}<a class="vid" href="${esc(ex.vid||YT(ex.n))}" target="_blank" rel="noopener">▶ Ver técnica</a>${waExLink(ex.n)}</div>`;
     const last=lastFor(ex.n);
