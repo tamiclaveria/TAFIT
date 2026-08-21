@@ -64,6 +64,7 @@
   .seg{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
   .seg button{flex:1;min-width:84px;padding:10px 4px;border:2px solid var(--line);background:#fff;border-radius:11px;font-size:13px;font-weight:700;color:var(--mute);cursor:pointer}
   .seg button.sel{border-color:var(--accent);color:var(--navy);background:var(--light)}
+  .daytag{font-size:11px;margin-left:3px;vertical-align:middle}
   .mseg{margin-top:-4px}
   .mseg button{border-radius:999px;padding:11px 4px}
   .mseg button.sel{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -224,6 +225,40 @@
   #app.dark .bday-block{background:#241626;border-color:#5a2a5a}
   #app.dark .week-block{background:#182838;border-color:#253545}
   #app.dark .week-row2{border-color:#253545}
+  /* Vencimiento de plan (30 días) */
+  .due-block{border-radius:12px;padding:14px 16px;margin-bottom:14px}
+  .due-block.vencido{background:#fef3f2;border:1.5px solid #fca5a5}
+  .due-block.porvencer{background:#fff8ec;border:1.5px solid #fbd38d}
+  .due-title{font-size:13px;font-weight:700;margin-bottom:8px}
+  .due-block.vencido .due-title{color:#991b1b}
+  .due-block.porvencer .due-title{color:#92600a}
+  .due-row{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.55);border-radius:8px;padding:7px 10px;margin-bottom:5px;font-size:12.5px}
+  .due-row:last-child{margin-bottom:0}
+  .due-name{font-weight:700;color:var(--ink)}
+  .due-chip{font-size:11px;font-weight:700;padding:3px 9px;border-radius:7px}
+  .due-block.vencido .due-chip{background:#fee2e2;color:#991b1b}
+  .due-block.porvencer .due-chip{background:#fef0d5;color:#92600a}
+  .plan-line{font-size:12px;color:var(--mute);margin-top:4px}
+  .plan-line b{color:var(--ink)}
+  .plan-ok{color:var(--ok);font-weight:700}
+  .plan-warn{color:#a06a00;font-weight:700}
+  .plan-bad{color:var(--warn);font-weight:700}
+  .plan-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+  .plan-card .pc-top{display:flex;align-items:center;gap:8px;font-weight:800;font-size:14px;margin-bottom:12px;color:var(--navy)}
+  .plan-status{border-radius:10px;padding:11px 13px;font-size:13px;font-weight:700;margin-bottom:12px}
+  .plan-status.ok{background:var(--okbg);color:#1b7a43}
+  .plan-status.warn{background:#fff3dc;color:#8a5a10}
+  .plan-status.bad{background:#fdecea;color:#96281f}
+  .plan-status.none{background:var(--light);color:var(--mute)}
+  .plan-date-inp{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:9px;font-size:14px;color:var(--ink);background:#fff;margin-bottom:12px}
+  .plan-btn{width:100%;padding:12px;border:none;border-radius:10px;background:var(--accent);color:#fff;font-weight:800;font-size:13px;cursor:pointer}
+  .plan-hint{font-size:11.5px;color:var(--mute);margin-top:10px;line-height:1.5}
+  #app.dark .due-block.vencido{background:#2a1616;border-color:#5a2a2a}
+  #app.dark .due-block.porvencer{background:#2a2416;border-color:#5a4a2a}
+  #app.dark .due-row{background:rgba(255,255,255,.06)}
+  #app.dark .plan-card{background:#182838;border-color:#253545}
+  #app.dark .plan-date-inp{background:#0f1c29;border-color:#253545;color:#e0e6ed}
+  #app.dark .plan-status.none{background:#182838}
   .drop-row{display:flex;gap:3px}.dcell{flex:1;min-width:0;padding:7px 3px!important;text-align:center;font-size:11px!important}
   .move-btns{display:flex;flex-direction:column;gap:2px;margin-right:4px}.mbtn{background:var(--light);border:1px solid var(--line);border-radius:4px;font-size:10px;padding:1px 6px;cursor:pointer;color:var(--steel);line-height:1.2}.mbtn:disabled{opacity:.25;cursor:default}.mbtn:hover:not(:disabled){background:var(--accent);color:#fff}
   .session-close:hover{background:var(--navy)}
@@ -577,6 +612,10 @@ const BK=l=>"🔗 Bloque "+l+" · apareado";
    Formato nuevo: ex.blk=true + ex.blkWork/ex.blkRest/ex.blkRounds (segundos/vueltas explícitos).
    Formato viejo (ya cargado en algunas rutinas, ej "── BLOQUE 1 (45s/15s) ──"): se detecta por
    el patrón de guiones en el nombre y se interpreta al vuelo, sin tocar los datos guardados. */
+/* Tipo de día (opcional): permite diferenciar por ejemplo días de Gimnasio de días de Funcional
+   dentro de la misma rutina, útil para alumnos que alternan entre lugares/rutinas (ej: viajan sin gym). */
+const DAYTYPE_OPTS=[{v:'',l:'General (sin tipo)'},{v:'gym',l:'🏋️ Gimnasio'},{v:'funcional',l:'🎒 Funcional'}];
+function dayTypeTag(d){ if(!d||!d.type) return ''; const o=DAYTYPE_OPTS.find(x=>x.v===d.type); return o?o.l:''; }
 function isBlockRow(ex){ return !!(ex&&(ex.blk||/^──.*──\s*$/.test((ex.n||'').trim()))); }
 function blockTitleClean(ex){ return (ex.n||'').replace(/^──\s*/,'').replace(/\s*──$/,'').trim()||'Bloque'; }
 function getBlockCfg(ex){
@@ -610,6 +649,23 @@ function daysUntilBirthday(mo,d){
   let next=new Date(now.getFullYear(),mo-1,d);
   if(next<now) next=new Date(now.getFullYear()+1,mo-1,d);
   return Math.round((next-now)/86400000);
+}
+
+/* ==== Vencimiento de plan: opcional, se calcula a partir de la fecha del último pago cargada
+   a mano en Editar. El plan dura 30 días desde esa fecha. Si no hay fecha cargada, no se
+   muestra ninguna alerta (no se asume nada sobre alumnos sin el dato). ==== */
+const PLAN_DAYS=30;
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function planDueInfo(planPaidISO){
+  if(!planPaidISO) return null;
+  const paid=new Date(planPaidISO+'T00:00:00');
+  if(isNaN(paid.getTime())) return null;
+  const now=new Date(); now.setHours(0,0,0,0);
+  const due=new Date(paid.getTime()); due.setDate(due.getDate()+PLAN_DAYS);
+  const daysLeft=Math.round((due-now)/86400000);
+  const status=daysLeft<0?'bad':(daysLeft<=5?'warn':'ok');
+  const dueStr=due.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'});
+  return { daysLeft, dueStr, status };
 }
 
 function tmplOmar(){
@@ -1224,6 +1280,100 @@ function stuMartin(){ return { name:"Martín", theme:"m", weeks:cp(DEFAULT_WEEKS
   ]}
 ] }; }
 
+/* Mauri viaja por trabajo: 15 días en Neuquén (sin gimnasio) y 15 en Córdoba (con gimnasio).
+   5 días de Gimnasio (hipertrofia, nivel intermedio) + 5 días de Funcional (bandas/mancuernas
+   livianas/peso corporal), etiquetados con "type" para que se distingan con el ícono en la app. */
+function blkRow(title,desc,work,rest,rounds){ return { n:title, s:rounds, r:'', w:'', alt:'', tip:desc, rest:rest?(rest+' s'):'', vid:'', blk:true, blkWork:work, blkRest:rest, blkRounds:rounds }; }
+function stuMauri(){ return { name:"Mauri", theme:"m", weeks:cp(DEFAULT_WEEKS), routine:[
+  { day:"Día 1 · Empuje (Pecho / Hombro / Tríceps)", type:'gym', ex:[
+    ex("Press banca con barra",4,"8-10","A definir","","Bajar controlado, no rebotar en el pecho.","90 s"),
+    ex("Press inclinado con mancuernas",3,"10-12","A definir","","30-45° de inclinación.","75 s"),
+    ex("Press militar con mancuernas",3,"10","A definir","","Sentado o de pie, core firme.","75 s"),
+    ex("Aperturas en polea o máquina",3,"12-15","A definir","","Codos semi flexionados fijos.","60 s"),
+    ex("Elevaciones laterales",3,"15","A definir","","Peso moderado, sin usar impulso.","45 s"),
+    ex("Fondos en máquina o press francés",3,"10-12","A definir","","Codos cerca del cuerpo.","60 s"),
+    ex("Extensión de tríceps en polea",3,"12-15","A definir","","Codos fijos, no abrir.","45 s"),
+  ]},
+  { day:"Día 2 · Tracción (Espalda / Bíceps)", type:'gym', ex:[
+    ex("Dominadas asistidas o jalón al pecho",4,"8-10","A definir","","Escápulas activas antes de tirar.","90 s"),
+    ex("Remo con barra",3,"10","A definir","","Torso a 45°, espalda neutra.","75 s"),
+    ex("Remo unilateral con mancuerna",3,"10-12 c/lado","A definir","","Apoyo en banco.","60 s"),
+    ex("Jalón al pecho agarre cerrado",3,"12","A definir","","Llevar codos hacia atrás y abajo.","60 s"),
+    ex("Curl con barra",3,"10-12","A definir","","Sin balanceo de cadera.","60 s"),
+    ex("Curl martillo",3,"12","A definir","","Agarre neutro, controlado.","45 s"),
+    ex("Face pull en polea",3,"15","A definir","","Rotación externa de hombro.","45 s"),
+  ]},
+  { day:"Día 3 · Piernas (Cuádriceps / Glúteo)", type:'gym', ex:[
+    ex("Sentadilla con barra",4,"8-10","A definir","","Profundidad completa, rodillas alineadas.","120 s"),
+    ex("Prensa 45°",3,"10-12","A definir","","No bloquear rodillas al extender.","90 s"),
+    ex("Zancadas con mancuernas",3,"10 c/lado","A definir","","Paso amplio, torso erguido.","75 s"),
+    ex("Extensión de cuádriceps",3,"12-15","A definir","","Pausa 1 seg arriba.","60 s"),
+    ex("Peso muerto rumano",3,"10","A definir","","Espalda neutra, barra pegada a piernas.","90 s"),
+    ex("Hip thrust",3,"12","A definir","","Contraer glúteo arriba 1 seg.","75 s"),
+    ex("Gemelos de pie",4,"15","A definir","","Rango completo de movimiento.","45 s"),
+  ]},
+  { day:"Día 4 · Torso (otro énfasis)", type:'gym', ex:[
+    ex("Press inclinado con barra",4,"8-10","A definir","","Barra baja hasta la clavícula.","90 s"),
+    ex("Remo en polea baja",4,"10","A definir","","Espalda recta, tirar con codos.","90 s"),
+    ex("Press militar con barra",3,"8-10","A definir","","De pie, core firme.","75 s"),
+    ex("Dominadas supinas o jalón supino",3,"10","A definir","","Enfoca más bíceps.","75 s"),
+    ex("Elevaciones laterales en polea",3,"15","A definir","","Tensión constante.","45 s"),
+    ex("Curl inclinado con mancuernas",3,"12","A definir","","Banco a 45-60°.","60 s"),
+    ex("Press francés con barra Z",3,"10-12","A definir","","Codos fijos apuntando al techo.","60 s"),
+  ]},
+  { day:"Día 5 · Pierna posterior + Core (otro énfasis)", type:'gym', ex:[
+    ex("Peso muerto convencional",4,"6-8","A definir","","Técnica prioritaria sobre el peso.","120 s"),
+    ex("Sentadilla búlgara",3,"10 c/lado","A definir","","Pie trasero elevado en banco.","90 s"),
+    ex("Curl femoral acostado o sentado",3,"12","A definir","","Controlar la fase excéntrica.","60 s"),
+    ex("Abducción de cadera en máquina",3,"15","A definir","","Activación de glúteo medio.","45 s"),
+    ex("Gemelos sentado",3,"15","A definir","","Enfoca sóleo.","45 s"),
+    ex("Plancha abdominal",3,"40 seg","Peso corporal","","Cadera alineada, no hundir lumbar.","45 s"),
+    ex("Elevación de piernas colgado o en banco",3,"15","A definir","","Movimiento controlado, sin balanceo.","45 s"),
+  ]},
+  { day:"Día 6 · Funcional Empuje", type:'funcional', ex:[
+    ex("Flexiones de brazos",4,"12-15","Peso corporal","","De rodillas si hace falta regular.","60 s"),
+    ex("Press militar con mancuernas livianas",3,"12-15","A definir","","De pie o sentado.","60 s"),
+    ex("Press horizontal con banda elástica",3,"15","Banda elástica","","Banda anclada a la espalda o puerta.","45 s"),
+    ex("Fondos en silla o banco",3,"12-15","Peso corporal","","Codos cerca del cuerpo.","60 s"),
+    ex("Elevaciones laterales con banda o mancuerna",3,"15","A definir","","Sin impulso.","45 s"),
+    blkRow("Circuito final","Flexiones + press con banda + plancha, 3 rondas.",40,20,3),
+  ]},
+  { day:"Día 7 · Funcional Tracción", type:'funcional', ex:[
+    ex("Remo con banda elástica",4,"15","Banda elástica","","Banda anclada a puerta o poste.","60 s"),
+    ex("Remo unilateral con mancuerna",3,"12 c/lado","A definir","","Apoyado en banco o silla.","60 s"),
+    ex("Curl de bíceps con banda",3,"15","Banda elástica","","Pisar la banda, codos fijos.","45 s"),
+    ex("Superman / extensión lumbar",3,"15","Peso corporal","","Subir y bajar controlado.","45 s"),
+    ex("Face pull con banda",3,"15","Banda elástica","","Rotación externa de hombro.","45 s"),
+    blkRow("Circuito final","Remo con banda + curl con banda + superman, 3 rondas.",40,20,3),
+  ]},
+  { day:"Día 8 · Funcional Piernas", type:'funcional', ex:[
+    ex("Sentadilla con salto o peso corporal",4,"15-20","Peso corporal","","Aterrizaje suave, rodillas alineadas.","60 s"),
+    ex("Zancadas caminando",3,"12 c/lado","Peso corporal","","Paso amplio.","60 s"),
+    ex("Peso muerto rumano a una pierna",3,"10 c/lado","Mancuerna liviana","","Equilibrio y control.","60 s"),
+    ex("Hip thrust a una pierna o con banda",3,"15 c/lado","A definir","","Contracción de glúteo arriba.","45 s"),
+    ex("Sentadilla sumo con mancuerna",3,"15","A definir","","Pies bien abiertos.","60 s"),
+    ex("Elevación de talones (gemelos)",4,"20","Peso corporal","","Rango completo.","30 s"),
+    blkRow("Circuito final","Sentadilla con salto + zancadas + plancha, 3 rondas.",40,20,3),
+  ]},
+  { day:"Día 9 · Funcional Full Body", type:'funcional', ex:[
+    ex("Burpees",4,"10","Peso corporal","","Ritmo sostenido, no perfección.","60 s"),
+    ex("Sentadilla + press militar (mancuernas)",3,"12","A definir","","Movimiento combinado.","60 s"),
+    ex("Remo con banda + zancada (combinado)",3,"12 c/lado","Banda elástica","","Alternar remo y zancada.","60 s"),
+    ex("Mountain climbers",3,"30 seg","Peso corporal","","Cadera estable.","45 s"),
+    ex("Plancha con toque de hombro",3,"20 (10 c/lado)","Peso corporal","","Mínimo balanceo de cadera.","45 s"),
+    blkRow("Circuito final","10 burpees + 15 sentadillas + 20 seg plancha, 4 rondas.",45,15,4),
+  ]},
+  { day:"Día 10 · Funcional Cardio + Core", type:'funcional', ex:[
+    ex("Jumping jacks",3,"40 seg","Peso corporal","","Ritmo constante.","30 s"),
+    ex("Escaladores (mountain climbers)",3,"30 seg","Peso corporal","","Rápido pero controlado.","30 s"),
+    ex("Sentadilla sumo + press con mancuerna",3,"15","A definir","","Movimiento combinado.","45 s"),
+    ex("Abdominales bicicleta",3,"20","Peso corporal","","Codo a rodilla contraria.","30 s"),
+    ex("Plancha lateral",3,"30 seg c/lado","Peso corporal","","Cadera elevada y alineada.","30 s"),
+    ex("Elevación de piernas acostado",3,"15","Peso corporal","","Zona lumbar pegada al piso.","30 s"),
+    blkRow("Circuito final","Jumping jacks + escaladores + sentadilla sumo + plancha, 4 rondas.",30,15,4),
+  ]},
+] }; }
+
 const FEM=new Set(['maria','sofia','valentina','martina','catalina','julieta','camila','lucia','florencia','agustina','micaela','rocio','daniela','gabriela','carla','paula','laura','andrea','romina','belen','ana','luciana','milagros','abril','antonella','brenda','carolina','cecilia','clara','denise','elena','emilia','eugenia','fernanda','guadalupe','ines','isabel','jimena','josefina','lara','lorena','magali','malena','marcela','melina','mora','natalia','nadia','noelia','ornella','pamela','patricia','pia','priscila','renata','sabrina','silvina','tamara','vanesa','vanina','veronica','victoria','yamila','zoe','aldana','ayelen','barbara','celeste','delfina','elisa','estefania','giuliana','ludmila','mia','olivia','salome','sol','trinidad','agostina','morena','luz','candela','jazmin','rosario','pilar','manuela','francisca','constanza','nati','caro','marti','jus','yesi','justine','yesica']);
 const MASC_A=new Set(['luca','elias','matias','tobias','jonas','jeremias','tomas','andres','nicolas','farias','dias']);
 function norm(s){ return (s||'').trim().toLowerCase().split(/\s+/)[0].normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
@@ -1777,6 +1927,7 @@ function runSeeds(){
   if(!DB._seed.joni_6w){ const jn=DB.students['joni-puebla']; if(jn&&jn.weeks&&jn.weeks.length===4){ jn.weeks.push({t:'S5',n:'Pico',d:'Máxima carga con técnica. Series cortas e intensas.'},{t:'S6',n:'Descarga',d:'Reducir carga 40%. Recuperación activa.'}); } DB._seed.joni_6w=true; }
   if(!DB._seed.cecilia){ if(!DB.students['cecilia']){ DB.students['cecilia']=stuCecilia(); DB.order.push('cecilia'); } DB._seed.cecilia=true; }
   if(!DB._seed.carina_duo){ const ca=DB.students['carina']; if(ca&&!ca.members){ ca.name='Carina / Lucía'; ca.members=['Carina','Lucía']; } DB._seed.carina_duo=true; }
+  if(!DB._seed.mauri){ if(!DB.students['mauri']){ DB.students['mauri']=stuMauri(); DB.order.push('mauri'); } DB._seed.mauri=true; }
   /* Seed: Jus/Yesi Día 1 Semana 2 como completado */
   if(!DB._seed.jy_log_s2){
     const jyLogs=safeParse(localStorage.getItem('tafit:logs:jus-yesi')||'[]',[]);
@@ -1923,6 +2074,8 @@ async function deleteStudent(id){ if(DB.order.length<=1){ toast("Tiene que queda
 async function setTheme(v){ DB.students[active].theme=v; await saveDB(); render(); }
 async function toggleFormEnable(type){ const st=DB.students[active]; if(!st.forms) st.forms={}; st.forms[type]=!st.forms[type]; await saveDB(); renderEdit(); }
 async function togglePause(){ DB.students[active].paused=!DB.students[active].paused; await saveDB(); toast(DB.students[active].paused?'Alumno pausado ✓':'Alumno activado ✓','ok'); renderEdit(); }
+async function savePlanDate(){ const el=$('planPaidInput'); const v=el?el.value:''; DB.students[active].planPaid=v; await saveDB(); toast(v?'Fecha de pago guardada ✓':'Fecha de pago borrada ✓','ok'); renderEdit(); }
+async function planToday(){ DB.students[active].planPaid=todayISO(); await saveDB(); toast('Pago de hoy registrado ✓','ok'); renderEdit(); }
 
 /* ===================== APP ===================== */
 function objFor(ex,mi){ return mi===0 ? ex.w : (ex.w2||ex.w); }
@@ -1963,7 +2116,7 @@ function renderApp(){
     const lastLog=LOGS.length?LOGS[0]:null;
     const ds=lastLog?Math.floor((Date.now()-new Date(lastLog.date).getTime())/86400000):999;
     let dashItems=[];
-    dashItems.push('📅 Hoy te toca: <b>'+esc(r[day].day)+'</b>');
+    dashItems.push('📅 Hoy te toca: <b>'+esc(r[day].day)+'</b>'+(dayTypeTag(r[day])?' '+dayTypeTag(r[day]):''));
     if(streak>=2) dashItems.push('🔥 '+streak+' sesiones seguidas');
     if(ds>=2&&ds<999) dashItems.push('⏰ '+ds+' días sin entrenar');
     const dash=document.createElement('div'); dash.className='mini-dash'; dash.innerHTML=dashItems.join(' · '); m.appendChild(dash);
@@ -1978,7 +2131,7 @@ function renderApp(){
     const frase=ds>=2?FV[doy%FV.length]:FA[doy%FA.length];
     const mb=document.createElement('div'); mb.className='motiv-banner'; mb.textContent=frase; m.appendChild(mb);
   }
-  const seg=document.createElement('div'); seg.className='seg'; seg.innerHTML=r.map((d,i)=>`<button data-act="pickDay" data-i="${i}" class="${i===day?'sel':''}">${esc(d.day.split('·')[0].trim())}</button>`).join(''); m.appendChild(seg);
+  const seg=document.createElement('div'); seg.className='seg'; seg.innerHTML=r.map((d,i)=>`<button data-act="pickDay" data-i="${i}" class="${i===day?'sel':''}">${esc(d.day.split('·')[0].trim())}${d.type?`<i class="daytag daytag-${esc(d.type)}">${d.type==='gym'?'🏋️':'🎒'}</i>`:''}</button>`).join(''); m.appendChild(seg);
   /* Barra de progreso de ejercicios */
   const realExCount=r[day].ex.filter(e=>!isBlockRow(e)).length;
   const pb2=document.createElement('div'); pb2.className='prog-bar2'; pb2.id='progbar2'; pb2.textContent='Vas 0 de '+realExCount+' ejercicios · 0% completado'; m.appendChild(pb2);
@@ -2516,14 +2669,26 @@ function renderEdit(){
   const isPaused=DB.students[active].paused;
   SEC('forms',`Formularios de ${esc(DB.students[active].name)}`,`<p style="font-size:13px;color:var(--mute);margin-bottom:12px">Activá los formularios que este alumno debe completar. Le aparecen como pestañas en su link.</p><div class="edit-actions"><button data-act="toggleForm" data-ftype="acuerdo" style="${stForms.acuerdo?'background:var(--ok);color:#fff':''}">${stForms.acuerdo?'✓ Acuerdo activado':'Activar Acuerdo'}</button><button data-act="toggleForm" data-ftype="anamnesis" style="${stForms.anamnesis?'background:var(--ok);color:#fff':''}">${stForms.anamnesis?'✓ Anamnesis activada':'Activar Anamnesis'}</button></div><div class="edit-actions mt8"><button data-act="togglePause" style="${isPaused?'background:#e74c3c;color:#fff':'background:var(--light)'}">${isPaused?'⏸ Alumno PAUSADO · Tocá para activar':'⏸ Pausar alumno'}</button></div>`);
 
+  {
+    const planPaid=DB.students[active].planPaid||'';
+    const due=planDueInfo(planPaid);
+    let statusHTML;
+    if(!due) statusHTML=`<div class="plan-status none">Sin fecha de pago cargada · no se muestra ninguna alerta</div>`;
+    else if(due.status==='bad') statusHTML=`<div class="plan-status bad">🔴 El plan venció hace ${Math.abs(due.daysLeft)} día${Math.abs(due.daysLeft)===1?'':'s'}</div>`;
+    else if(due.status==='warn') statusHTML=`<div class="plan-status warn">🟠 ${due.daysLeft===0?'El plan vence hoy':'El plan vence en '+due.daysLeft+' día'+(due.daysLeft===1?'':'s')}</div>`;
+    else statusHTML=`<div class="plan-status ok">✓ Plan al día · vence el ${due.dueStr}</div>`;
+    SEC('plan','💳 Plan del alumno (vence a los 30 días)',`${statusHTML}<div class="fld"><label>Fecha del último pago</label><input type="date" class="plan-date-inp" id="planPaidInput" value="${esc(planPaid)}"></div><button class="plan-btn" data-act="savePlanDate">💾 Guardar fecha</button><button class="plan-btn" data-act="planToday" style="margin-top:8px;background:var(--ok)">✅ Marcar pago de hoy</button><div class="plan-hint">El plan dura 30 días desde la fecha cargada. Cuando ${esc(DB.students[active].name)} te pague de nuevo, tocá "Marcar pago de hoy" (o cargá la fecha manualmente) y el aviso se reinicia solo. Si dejás la fecha vacía, no se muestra ninguna alerta.</div>`);
+  }
+
   const duo=isDuo(), mm=membersOf();
   const head=document.createElement('div'); head.className='focus'; head.style.margin='4px 0 12px'; head.innerHTML=`Rutina de <b>${esc(DB.students[active].name)}</b>`; m.appendChild(head);
   routine().forEach((d,di)=>{
     const dayEl=document.createElement('details'); dayEl.className='edit-day tacc'; dayEl.dataset.day=di; dayEl.dataset.sec='day'+di; if(openSecs.has('day'+di)) dayEl.open=true;
-    let html=`<summary><h2>${esc(d.day)||('Día '+(di+1))} · ${d.ex.length} ej.</h2><span class="tchev">▾</span></summary><div class="tacc-body">`;
+    let html=`<summary><h2>${esc(d.day)||('Día '+(di+1))} · ${d.ex.length} ej.${dayTypeTag(d)?' '+dayTypeTag(d):''}</h2><span class="tchev">▾</span></summary><div class="tacc-body">`;
     html+=`<input class="dayname" value="${esc(d.day)}" placeholder="Nombre del día">`;
     const WD_OPTS=['','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
     html+=`<div class="fld mt8"><label>Día de la semana (para la agenda semanal, opcional)</label><select class="dayweek" data-field="wd">${WD_OPTS.map(w=>`<option value="${esc(w)}"${(d.wd||'')===w?' selected':''}>${w||'Sin asignar'}</option>`).join('')}</select></div>`;
+    html+=`<div class="fld mt8"><label>Tipo de día (opcional, para diferenciar por ejemplo Gimnasio de Funcional)</label><select class="daytype" data-field="type">${DAYTYPE_OPTS.map(o=>`<option value="${esc(o.v)}"${(d.type||'')===o.v?' selected':''}>${esc(o.l)}</option>`).join('')}</select></div>`;
     d.ex.forEach((ex,ei)=>{
       const isEditOpen=openEditEx===di*100+ei;
       const blk=isBlockRow(ex);
@@ -2556,7 +2721,7 @@ function renderEdit(){
   const bottom=document.createElement('div'); bottom.className='edit-bottom'; bottom.innerHTML=`<button class="save" data-act="saveRoutine">Guardar rutina</button>`; m.appendChild(bottom);
   const note=document.createElement('div'); note.className='note'; note.textContent="Los datos cargados se guardan por posición. Si reordenás o eliminás ejercicios con datos en curso, se corren. Cerrá la sesión o exportá un backup antes de reordenar."; m.appendChild(note);
 }
-function collectForm(){ const out=[]; document.querySelectorAll('.edit-day').forEach(dayEl=>{ const di=+dayEl.dataset.day; const dayName=(dayEl.querySelector('.dayname').value||'').trim()||('Día '+(di+1)); const wdEl=dayEl.querySelector('.dayweek'); const dayWd=wdEl?wdEl.value:''; const exes=[]; dayEl.querySelectorAll('.edit-ex').forEach(exEl=>{ const g=f=>{ const el=exEl.querySelector('[data-field="'+f+'"]'); return el?el.value:''; };
+function collectForm(){ const out=[]; document.querySelectorAll('.edit-day').forEach(dayEl=>{ const di=+dayEl.dataset.day; const dayName=(dayEl.querySelector('.dayname').value||'').trim()||('Día '+(di+1)); const wdEl=dayEl.querySelector('.dayweek'); const dayWd=wdEl?wdEl.value:''; const dtEl=dayEl.querySelector('.daytype'); const dayType=dtEl?dtEl.value:''; const exes=[]; dayEl.querySelectorAll('.edit-ex').forEach(exEl=>{ const g=f=>{ const el=exEl.querySelector('[data-field="'+f+'"]'); return el?el.value:''; };
       const blkbox=exEl.querySelector('.blkbox');
       if(blkbox&&blkbox.checked){
         const bTitle=(g('blkTitle')||'').trim()||'Bloque';
@@ -2572,7 +2737,7 @@ function collectForm(){ const out=[]; document.querySelectorAll('.edit-day').for
       let finalS=Math.max(1,parseInt(rawS)||1); let finalR=(g('r')||'').trim()||'—';
       const sParts=rawS.match(/(\d+)\s*[xX×]\s*(\d+)/g);
       if(sParts&&sParts.length>1){ let totalS=0; const repP=[]; sParts.forEach(function(p){ const m=p.match(/(\d+)\s*[xX×]\s*(\d+)/); if(m){ totalS+=parseInt(m[1]); repP.push(m[1]+'×'+m[2]); } }); finalS=totalS; finalR=repP.join(' + '); }
-      const obj={ n, s:finalS, r:finalR, w:(g('w')||'').trim()||'A definir', alt:(g('alt')||'').trim(), tip:(g('tip')||'').trim(), rest:(g('rest')||'').trim(), vid:YT(n||'ejercicio') }; const w2el=exEl.querySelector('[data-field="w2"]'); if(w2el) obj.w2=(w2el.value||'').trim()||'A definir'; exes.push(obj); }); out[di]={ day:dayName, ex:exes }; if(dayWd) out[di].wd=dayWd; }); return out; }
+      const obj={ n, s:finalS, r:finalR, w:(g('w')||'').trim()||'A definir', alt:(g('alt')||'').trim(), tip:(g('tip')||'').trim(), rest:(g('rest')||'').trim(), vid:YT(n||'ejercicio') }; const w2el=exEl.querySelector('[data-field="w2"]'); if(w2el) obj.w2=(w2el.value||'').trim()||'A definir'; exes.push(obj); }); out[di]={ day:dayName, ex:exes }; if(dayWd) out[di].wd=dayWd; if(dayType) out[di].type=dayType; }); return out; }
 function collectWeeks(){ const out=[]; document.querySelectorAll('.week-row').forEach(wr=>{ const g=f=>{ const el=wr.querySelector('[data-wf="'+f+'"]'); return el?el.value.trim():''; }; out.push({ t:g('t')||'S', n:g('n')||'', d:g('d')||'' }); }); return out.length?out:cp(DEFAULT_WEEKS); }
 function collectHealth(){ const sec=$('healthsec'); if(!sec) return DB.students[active].health; const g=sel=>{ const el=sec.querySelector(sel); return el?el.value:''; }; const enabled=g('[data-hf="enabled"]')==='on'; const leg=g('[data-hf="leg"]')==='on'; const tag=g('[data-hf="tag"]').trim(); const alarms=g('[data-hf="alarms"]').split(',').map(s=>s.trim()).filter(Boolean); const warning=g('[data-hf="warning"]').trim(); const rules=[]; sec.querySelectorAll('.hrule').forEach(rr=>{ const t=(rr.querySelector('[data-hf="rt"]').value||'').trim(); const d=(rr.querySelector('[data-hf="rd"]').value||'').trim(); if(t||d) rules.push({t,d}); }); return { enabled, tag, leg, alarms, warning, rules }; }
 function collectMembers(){ const el=$('membersfld'); if(!el) return DB.students[active].members; const arr=el.value.split(',').map(s=>s.trim()).filter(Boolean); return arr; }
@@ -2621,7 +2786,7 @@ async function renderReport(){
   for(const id of DB.order){ const s=DB.students[id]; const logs = id===active ? LOGS : safeParse(await Store.get('tafit:logs:'+id)||'[]',[]); const last=logs.length?logs[0]:null; let adh=0; if(last){ let plan=0,h=0; last.ex.forEach(x=>{ if(x.members){ x.members.forEach(mm=>mm.sets.forEach(st=>{ plan++; if(st.done) h++; })); } else { x.sets.forEach(st=>{ plan++; if(st.done) h++; }); } }); adh=plan?Math.round(h/plan*100):0; }
   const fa=s.forms&&s.forms.acuerdo?safeParse(await Store.get('tafit:form:acuerdo:'+id)||'{}',{}):{};
   const fn=s.forms&&s.forms.anamnesis?safeParse(await Store.get('tafit:form:anamnesis:'+id)||'{}',{}):{};
-  cards.push({ id, name:s.name, theme:s.theme, duo:s.members&&s.members.length>1, sessions:logs.length, last, week:last?(last.weekName||'—'):'—', adh, forms:s.forms||{}, fa, fn }); }
+  cards.push({ id, name:s.name, theme:s.theme, duo:s.members&&s.members.length>1, sessions:logs.length, last, week:last?(last.weekName||'—'):'—', adh, forms:s.forms||{}, fa, fn, planPaid:s.planPaid||'' }); }
   let html=`<div class="focus">Resumen de todos tus alumnos</div>`;
   /* Próximos cumpleaños (30 días): toma "Fecha de nacimiento" de Anamnesis o, si no está, de Acuerdo */
   const bdays=cards.map(c=>{
@@ -2648,14 +2813,20 @@ async function renderReport(){
   /* Alerta de inactividad: alumnos con 2+ días sin sesión */
   const inactivos=cards.filter(c=>{ if(!c.last) return true; return Math.floor((Date.now()-new Date(c.last.date).getTime())/86400000)>=2; });
   if(inactivos.length){ html+=`<div class="inact-block"><div class="inact-title">⚠ Alumnos sin entrenar (2+ días)</div><div class="inact-list">${inactivos.map(c=>{ const d=c.last?Math.floor((Date.now()-new Date(c.last.date).getTime())/86400000):999; return `<span class="inact-chip">${esc(c.name)} · ${d>=999?'nunca':(d+' días')}</span>`; }).join('')}</div></div>`; }
-  const renovar=cards.filter(c=>{ if(c.sessions<4) return false; return true; });
-  if(renovar.length){ html+=`<div class="renew-block"><div class="renew-title">🔄 Rutinas con 4+ semanas (considerar renovación)</div><div class="inact-list">${renovar.map(c=>`<span class="renew-chip">${esc(c.name)}</span>`).join('')}</div></div>`; }
+  /* Vencimiento de plan (30 días desde el último pago cargado en Editar) */
+  const dueInfo=cards.map(c=>({ c, due:planDueInfo(c.planPaid) })).filter(x=>x.due);
+  const vencidos=dueInfo.filter(x=>x.due.status==='bad').sort((a,b)=>a.due.daysLeft-b.due.daysLeft);
+  const porVencer=dueInfo.filter(x=>x.due.status==='warn').sort((a,b)=>a.due.daysLeft-b.due.daysLeft);
+  if(vencidos.length){ html+=`<div class="due-block vencido"><div class="due-title">🔴 Plan vencido</div>${vencidos.map(x=>`<div class="due-row"><span class="due-name">${esc(x.c.name)}</span><span class="due-chip">venció hace ${Math.abs(x.due.daysLeft)} día${Math.abs(x.due.daysLeft)===1?'':'s'}</span></div>`).join('')}</div>`; }
+  if(porVencer.length){ html+=`<div class="due-block porvencer"><div class="due-title">🟠 Por vencer esta semana</div>${porVencer.map(x=>`<div class="due-row"><span class="due-name">${esc(x.c.name)}</span><span class="due-chip">${x.due.daysLeft===0?'vence hoy':'vence en '+x.due.daysLeft+' día'+(x.due.daysLeft===1?'':'s')}</span></div>`).join('')}</div>`; }
   cards.forEach(c=>{ const flag=c.last&&c.last.health&&((c.last.health.alarms&&c.last.health.alarms.length)||c.last.health.pre==='warn'||c.last.health.post==='warn');
   let formBadges='';
   if(c.forms.acuerdo) formBadges+=c.fa._ts?'<span class="form-status done" style="margin:4px 4px 0 0">✓ Acuerdo</span>':'<span class="form-status pending" style="margin:4px 4px 0 0">⏳ Acuerdo</span>';
   if(c.forms.anamnesis) formBadges+=c.fn._ts?'<span class="form-status done" style="margin:4px 4px 0 0">✓ Anamnesis</span>':'<span class="form-status pending" style="margin:4px 4px 0 0">⏳ Anamnesis</span>';
   var daysSince=''; if(c.last){ var diff=Math.floor((Date.now()-new Date(c.last.date).getTime())/(1000*60*60*24)); if(diff>7) daysSince='<div class="inact">⚠ '+diff+' días sin entrenar</div>'; }
-  html+=`<div class="rep-card"><div class="rh"><span class="rn">${c.theme==='f'?'🌸 ':''}${c.duo?'👯 ':''}${esc(c.name)}</span><span class="rw">${esc(c.week)}</span></div><div class="rep-stats"><div><b>${c.sessions}</b><span>Sesiones</span></div><div><b>${c.last?fmtShort(c.last.date):'—'}</b><span>Última</span></div><div><b>${c.adh}%</b><span>Últ. sesión</span></div></div>${daysSince}${formBadges?'<div style="margin-top:4px">'+formBadges+'</div>':''}<div class="rep-last">${c.last?'Último: '+esc(c.last.dayName):'Sin sesiones registradas todavía.'}</div>${c.last&&c.last.obs?`<div class="rep-flag" style="background:#fdecea;color:#8a3327">📝 ${esc(c.last.obs)}</div>`:''}${flag?`<div class="rep-flag">⚕ Revisar pierna · antes: ${esc(c.last.health.pre||'—')} / después: ${esc(c.last.health.post||'—')}${(c.last.health.alarms&&c.last.health.alarms.length)?' · '+esc(c.last.health.alarms.join(', ')):''}</div>`:''}${c.last?`<div class="rep-adh"><i style="width:${c.adh}%"></i></div>`:''}</div>`; });
+  const due=planDueInfo(c.planPaid);
+  const planLine=due?`<div class="plan-line">Último pago: <b>${new Date(c.planPaid+'T00:00:00').toLocaleDateString('es-AR')}</b> · <span class="plan-${due.status}">${due.status==='bad'?'🔴 venció hace '+Math.abs(due.daysLeft)+' día'+(Math.abs(due.daysLeft)===1?'':'s'):due.status==='warn'?'🟠 '+(due.daysLeft===0?'vence hoy':'vence en '+due.daysLeft+' día'+(due.daysLeft===1?'':'s')):'✓ plan al día (vence '+due.dueStr+')'}</span></div>`:'';
+  html+=`<div class="rep-card"><div class="rh"><span class="rn">${c.theme==='f'?'🌸 ':''}${c.duo?'👯 ':''}${esc(c.name)}</span><span class="rw">${esc(c.week)}</span></div><div class="rep-stats"><div><b>${c.sessions}</b><span>Sesiones</span></div><div><b>${c.last?fmtShort(c.last.date):'—'}</b><span>Última</span></div><div><b>${c.adh}%</b><span>Últ. sesión</span></div></div>${daysSince}${planLine}${formBadges?'<div style="margin-top:4px">'+formBadges+'</div>':''}<div class="rep-last">${c.last?'Último: '+esc(c.last.dayName):'Sin sesiones registradas todavía.'}</div>${c.last&&c.last.obs?`<div class="rep-flag" style="background:#fdecea;color:#8a3327">📝 ${esc(c.last.obs)}</div>`:''}${flag?`<div class="rep-flag">⚕ Revisar pierna · antes: ${esc(c.last.health.pre||'—')} / después: ${esc(c.last.health.post||'—')}${(c.last.health.alarms&&c.last.health.alarms.length)?' · '+esc(c.last.health.alarms.join(', ')):''}</div>`:''}${c.last?`<div class="rep-adh"><i style="width:${c.adh}%"></i></div>`:''}</div>`; });
   m.innerHTML=html;
   /* Botón copiar informe semanal */
   var copyBtn=document.createElement('button'); copyBtn.className='copy-report'; copyBtn.dataset.act='copyReport'; copyBtn.textContent='📋 Copiar informe semanal para WhatsApp'; m.appendChild(copyBtn);
@@ -2735,6 +2906,8 @@ document.addEventListener('click',e=>{
     case 'saveForm': handleSaveForm(el.dataset.ftype); break;
     case 'toggleForm': toggleFormEnable(el.dataset.ftype); break;
     case 'togglePause': togglePause(); break;
+    case 'savePlanDate': savePlanDate(); break;
+    case 'planToday': planToday(); break;
     case 'formMember': member=+el.dataset.m; renderFormTab(el.dataset.ft); break;
     case 'photoMember': member=+el.dataset.m; renderPhotos(); break;
     case 'forceSync': toast('Sincronizando…'); location.reload(); break;
