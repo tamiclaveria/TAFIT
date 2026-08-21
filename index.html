@@ -2103,9 +2103,16 @@ function setsTable(ex,ei,mi,objetivo){
 }
 function renderApp(){
   const r=routine(), W=weeks(), members=membersOf(); const m=$('main'); m.innerHTML='';
-  /* Verificar si alumno está pausado */
-  if(DB.students[active].paused&&!trainer){
-    m.innerHTML='<div style="text-align:center;padding:40px 20px"><div style="font-size:48px;margin-bottom:16px">⏸</div><div style="font-size:18px;font-weight:700;color:var(--navy);margin-bottom:12px">Tu rutina está pausada por el momento</div><div style="font-size:14px;color:var(--mute);line-height:1.6">Contactá a tu profe para más información.</div>'+renderWhatsAppBtn()+'</div>';
+  /* Verificar si alumno está pausado a mano, o si se le venció el plan (30 días desde el
+     último pago cargado en Editar) — en ambos casos se le bloquea el acceso a la rutina
+     hasta que el profe la reactive o cargue el pago del mes siguiente. */
+  const planDue=planDueInfo(DB.students[active].planPaid);
+  const planExpired=!!(planDue&&planDue.status==='bad');
+  if((DB.students[active].paused||planExpired)&&!trainer){
+    const icon=planExpired&&!DB.students[active].paused?'🔒':'⏸';
+    const title=planExpired&&!DB.students[active].paused?'Tu plan venció':'Tu rutina está pausada por el momento';
+    const detail=planExpired&&!DB.students[active].paused?`Venció hace ${Math.abs(planDue.daysLeft)} día${Math.abs(planDue.daysLeft)===1?'':'s'}. Contactá a tu profe para renovarlo y seguir entrenando.`:'Contactá a tu profe para más información.';
+    m.innerHTML=`<div style="text-align:center;padding:40px 20px"><div style="font-size:48px;margin-bottom:16px">${icon}</div><div style="font-size:18px;font-weight:700;color:var(--navy);margin-bottom:12px">${esc(title)}</div><div style="font-size:14px;color:var(--mute);line-height:1.6">${esc(detail)}</div>${renderWhatsAppBtn()}</div>`;
     return;
   }
   if(member>=members.length) member=0;
@@ -2673,11 +2680,12 @@ function renderEdit(){
     const planPaid=DB.students[active].planPaid||'';
     const due=planDueInfo(planPaid);
     let statusHTML;
-    if(!due) statusHTML=`<div class="plan-status none">Sin fecha de pago cargada · no se muestra ninguna alerta</div>`;
-    else if(due.status==='bad') statusHTML=`<div class="plan-status bad">🔴 El plan venció hace ${Math.abs(due.daysLeft)} día${Math.abs(due.daysLeft)===1?'':'s'}</div>`;
+    const isManuallyPaused=!!DB.students[active].paused;
+    if(!due) statusHTML=`<div class="plan-status none">Sin fecha de pago cargada · no se muestra ninguna alerta ni se bloquea el acceso</div>`;
+    else if(due.status==='bad') statusHTML=`<div class="plan-status bad">🔴 El plan venció hace ${Math.abs(due.daysLeft)} día${Math.abs(due.daysLeft)===1?'':'s'}${isManuallyPaused?'':' · 🔒 el alumno ya no puede acceder a su rutina'}</div>`;
     else if(due.status==='warn') statusHTML=`<div class="plan-status warn">🟠 ${due.daysLeft===0?'El plan vence hoy':'El plan vence en '+due.daysLeft+' día'+(due.daysLeft===1?'':'s')}</div>`;
     else statusHTML=`<div class="plan-status ok">✓ Plan al día · vence el ${due.dueStr}</div>`;
-    SEC('plan','💳 Plan del alumno (vence a los 30 días)',`${statusHTML}<div class="fld"><label>Fecha del último pago</label><input type="date" class="plan-date-inp" id="planPaidInput" value="${esc(planPaid)}"></div><button class="plan-btn" data-act="savePlanDate">💾 Guardar fecha</button><button class="plan-btn" data-act="planToday" style="margin-top:8px;background:var(--ok)">✅ Marcar pago de hoy</button><div class="plan-hint">El plan dura 30 días desde la fecha cargada. Cuando ${esc(DB.students[active].name)} te pague de nuevo, tocá "Marcar pago de hoy" (o cargá la fecha manualmente) y el aviso se reinicia solo. Si dejás la fecha vacía, no se muestra ninguna alerta.</div>`);
+    SEC('plan','💳 Plan del alumno (vence a los 30 días)',`${statusHTML}<div class="fld"><label>Fecha del último pago</label><input type="date" class="plan-date-inp" id="planPaidInput" value="${esc(planPaid)}"></div><button class="plan-btn" data-act="savePlanDate">💾 Guardar fecha</button><button class="plan-btn" data-act="planToday" style="margin-top:8px;background:var(--ok)">✅ Marcar pago de hoy</button><div class="plan-hint">El plan dura 30 días desde la fecha cargada. Apenas se vence, la app le muestra al alumno una pantalla de "Tu plan venció" y no puede seguir entrenando hasta que renueve. Cuando ${esc(DB.students[active].name)} te pague de nuevo, tocá "Marcar pago de hoy" (o cargá la fecha manualmente) y se le desbloquea al instante. Si dejás la fecha vacía, no se muestra ninguna alerta ni se bloquea nada.</div>`);
   }
 
   const duo=isDuo(), mm=membersOf();
