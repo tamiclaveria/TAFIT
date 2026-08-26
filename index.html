@@ -1374,6 +1374,43 @@ function stuMauri(){ return { name:"Mauri", theme:"m", weeks:cp(DEFAULT_WEEKS), 
   ]},
 ] }; }
 
+/* Sofia Catalán: ya entrena fuerte y hace running, 2 días de gimnasio por semana,
+   plan de un mes. Día 2 (tren inferior) pensado para complementar el running sin
+   sobrecargar: volumen moderado, foco en técnica y en zonas que el running no trabaja
+   (glúteo, isquios, core), no en máximo impacto. */
+function stuSofiaCatalan(){ return { name:"Sofia Catalán", theme:"f", weeks:cp(DEFAULT_WEEKS), planPaid:todayISO(), routine:[
+  { day:"Día 1 · Tren Superior", ex:[
+    ex("Press banca con barra",4,"8-10","A definir","Press plano con mancuernas","Bajá controlado, no rebotes en el pecho.","90 s"),
+    ex("Remo con barra",4,"8-10","A definir","Remo en polea baja","Torso a 45°, espalda neutra, tirá con los codos.","90 s"),
+    ex("Press militar con mancuernas",3,"10","A definir","Press de hombros en máquina","Sentada o de pie, core firme, sin arquear la espalda.","75 s"),
+    ex("Jalón al pecho agarre cerrado",3,"10-12","A definir","Dominadas asistidas","Pecho arriba, llevá los codos hacia atrás y abajo.","75 s"),
+    ex("Press inclinado con mancuernas",3,"10-12","A definir","Press inclinado máquina","Banco a 30-45°, codos a 45° del torso.","75 s"),
+    ex("Remo unilateral con mancuerna",3,"10-12 c/lado","A definir","Remo en máquina","Apoyo en banco, codo pegado al cuerpo.","60 s"),
+    ex("Elevaciones laterales",3,"12-15","A definir","Elevación lateral en polea","Peso moderado, sin usar impulso.","45 s"),
+    ex("Curl con barra",3,"10-12","A definir","Curl con mancuernas","Codos pegados al cuerpo, sin balanceo.","60 s"),
+    ex("Extensión de tríceps en polea",3,"12-15","A definir","Patada de tríceps con mancuerna","Codos fijos, no los abras.","45 s"),
+    ex("Plancha abdominal",3,"40 s","Peso corporal","Plancha con toque de hombro","Cadera alineada, no hundas la lumbar.","45 s"),
+  ]},
+  { day:"Día 2 · Tren Inferior + Core", ex:[
+    ex("Sentadilla con barra",4,"8-10","A definir","Sentadilla goblet","Profundidad completa, rodillas alineadas con los pies.","120 s"),
+    ex("Peso muerto rumano",4,"10","A definir","Peso muerto con mancuernas","Espalda neutra, barra pegada a las piernas.","90 s"),
+    ex("Prensa 45°",3,"10-12","A definir","Sentadilla en Smith","No bloquees las rodillas al extender.","90 s"),
+    ex("Zancadas con mancuernas",3,"10 c/lado","A definir","Estocada búlgara","Paso amplio, torso erguido.","75 s"),
+    ex("Curl femoral acostado",3,"12","A definir","Curl femoral sentado","Flexioná completo, bajá controlando.","60 s"),
+    ex("Hip thrust",3,"12","A definir","Puente de glúteo","Apretá el glúteo arriba 1 segundo.","75 s"),
+    ex("Abducción de cadera en máquina",3,"15","A definir","Abductor con banda","Activación de glúteo medio, sin rebote.","45 s"),
+    ex("Gemelos de pie",4,"15","A definir","Gemelos en máquina","Rango completo de movimiento.","45 s"),
+    ex("Abdominales en polea",3,"15","A definir","Crunch con disco","Subí el torso desde el abdomen, sin tirar del cuello.","45 s"),
+  ]},
+] }; }
+
+/* Cande Espeche: alta como alumna, 2 días, rutina la carga Tami después a mano
+   desde Editar — por ahora solo un placeholder para que exista el perfil. */
+function stuCandeEspeche(){ return { name:"Cande Espeche", theme:"f", weeks:cp(DEFAULT_WEEKS), routine:[
+  {day:"Día 1",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]},
+  {day:"Día 2",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]},
+] }; }
+
 const FEM=new Set(['maria','sofia','valentina','martina','catalina','julieta','camila','lucia','florencia','agustina','micaela','rocio','daniela','gabriela','carla','paula','laura','andrea','romina','belen','ana','luciana','milagros','abril','antonella','brenda','carolina','cecilia','clara','denise','elena','emilia','eugenia','fernanda','guadalupe','ines','isabel','jimena','josefina','lara','lorena','magali','malena','marcela','melina','mora','natalia','nadia','noelia','ornella','pamela','patricia','pia','priscila','renata','sabrina','silvina','tamara','vanesa','vanina','veronica','victoria','yamila','zoe','aldana','ayelen','barbara','celeste','delfina','elisa','estefania','giuliana','ludmila','mia','olivia','salome','sol','trinidad','agostina','morena','luz','candela','jazmin','rosario','pilar','manuela','francisca','constanza','nati','caro','marti','jus','yesi','justine','yesica']);
 const MASC_A=new Set(['luca','elias','matias','tobias','jonas','jeremias','tomas','andres','nicolas','farias','dias']);
 function norm(s){ return (s||'').trim().toLowerCase().split(/\s+/)[0].normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
@@ -1865,8 +1902,14 @@ async function initFirebase(){
     try{ await fsDB.enablePersistence({synchronizeTabs:true}); }catch(e){}
     /* test de escritura (sin bloquear el arranque si no hay señal) */
     _pushRaw('tafit:ping','ok').then(ok=>{ if(ok){ updateSyncUI(true); flushPending(); } });
-    /* pull: cloud → local (solo si local no tiene) */
-    try{ const snap=await kvQuery().get(); snap.forEach(function(doc){ var k=doc.id,v=doc.data().v; if(shouldSync(k)&&v!=null){ try{ if(localStorage.getItem(k)!==v) localStorage.setItem(k,v); }catch(e){} } }); }catch(e){ console.warn('Pull:',e); }
+    /* pull: cloud → local (solo si local no tiene).
+       Ojo: esto solo actualizaba localStorage, pero el objeto DB en memoria (con el que
+       la app ya venía trabajando y renderizando desde el arranque) se quedaba con la
+       versión vieja. Si más tarde pasaba CUALQUIER guardado (aunque fuera de otro alumno),
+       se volvía a escribir esa versión vieja de DB encima de la nube, ya con fireSync
+       activo. Por eso también hay que actualizar DB acá, con la misma regla de "solo si
+       es igual o más nuevo" que usa reloadFromRemote(), antes de que fireSync se active. */
+    try{ const snap=await kvQuery().get(); let _studentsMerged=false; snap.forEach(function(doc){ var k=doc.id,v=doc.data().v; if(shouldSync(k)&&v!=null){ try{ if(localStorage.getItem(k)!==v){ localStorage.setItem(k,v); if(k==='tafit:students'){ var p=safeParse(v,null); if(p&&p.order&&p.order.length&&(!DB._ts||!p._ts||p._ts>=DB._ts)){ DB=p; _studentsMerged=true; } } } }catch(e){} } }); if(_studentsMerged){ try{ render(); }catch(e){} } }catch(e){ console.warn('Pull:',e); }
     /* push: local → cloud */
     await pushAllLocal();
     /* real-time listener */
@@ -1900,8 +1943,14 @@ async function initFirebase(){
   if(raw){ const p=safeParse(raw,null); if(p&&p.order&&p.order.length) DB=p; }
   if(!DB.order||!DB.order.length){ DB={ order:['omar'], students:{ omar:{ name:'Omar', routine:tmplOmar(), theme:'m' } }, settings:{pin:""}, _seed:{} }; }
   if(!DB.settings) DB.settings={pin:""};
+  /* Antes acá se guardaba (y se pisaba _ts) SIEMPRE al abrir la app, aunque no hubiera
+     cambios reales. Eso hacía que un dispositivo con datos viejos en caché terminara con
+     una marca de tiempo "más nueva" que la nube sin haber sincronizado todavía, y esa
+     copia vieja podía pisar rutinas reales de otros alumnos al sincronizar. Ahora solo se
+     guarda (y se marca como cambio real) si runSeeds() o el completado de valores por
+     defecto modificaron algo de verdad. */
+  const _dbBeforeSeeds=JSON.stringify(DB);
   runSeeds();
-  await saveDB();
 function runSeeds(){
   if(!DB._seed) DB._seed={};
   if(!DB._seed.delfina){ if(!DB.students['delfina']){ DB.students['delfina']=delfinaStudent(); DB.order.push('delfina'); } DB._seed.delfina=true; }
@@ -1928,6 +1977,8 @@ function runSeeds(){
   if(!DB._seed.cecilia){ if(!DB.students['cecilia']){ DB.students['cecilia']=stuCecilia(); DB.order.push('cecilia'); } DB._seed.cecilia=true; }
   if(!DB._seed.carina_duo){ const ca=DB.students['carina']; if(ca&&!ca.members){ ca.name='Carina / Lucía'; ca.members=['Carina','Lucía']; } DB._seed.carina_duo=true; }
   if(!DB._seed.mauri){ if(!DB.students['mauri']){ DB.students['mauri']=stuMauri(); DB.order.push('mauri'); } DB._seed.mauri=true; }
+  if(!DB._seed.sofiaCatalan){ if(!DB.students['sofia-catalan']){ DB.students['sofia-catalan']=stuSofiaCatalan(); DB.order.push('sofia-catalan'); } DB._seed.sofiaCatalan=true; }
+  if(!DB._seed.candeEspeche){ if(!DB.students['cande-espeche']){ DB.students['cande-espeche']=stuCandeEspeche(); DB.order.push('cande-espeche'); } DB._seed.candeEspeche=true; }
   /* Seed: Jus/Yesi Día 1 Semana 2 como completado */
   if(!DB._seed.jy_log_s2){
     const jyLogs=safeParse(localStorage.getItem('tafit:logs:jus-yesi')||'[]',[]);
@@ -1953,7 +2004,7 @@ function runSeeds(){
 }
 
   DB.order.forEach(id=>{ const s=DB.students[id]; if(!s.theme) s.theme=guessFem(s.name)?'f':'m'; if(!s.weeks) s.weeks=cp(DEFAULT_WEEKS); });
-  await saveDB();
+  if(JSON.stringify(DB)!==_dbBeforeSeeds) await saveDB();
   const lastA=await Store.get('tafit:active');
   /* URL params: ?a=alumnoId&lock=1 */
   const urlP=new URLSearchParams(window.location.search);
