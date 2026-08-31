@@ -2004,6 +2004,28 @@ function runSeeds(){
 }
 
   DB.order.forEach(id=>{ const s=DB.students[id]; if(!s.theme) s.theme=guessFem(s.name)?'f':'m'; if(!s.weeks) s.weeks=cp(DEFAULT_WEEKS); });
+
+  /* Actualización puntual (una sola vez): cargar la rutina real del Día 1 de Cande Espeche,
+     reemplazando el placeholder "Por asignar" con el que se creó su perfil. Solo se aplica
+     si ese día sigue siendo exactamente el placeholder, para no pisar nada si Tami ya lo
+     cargó a mano desde Editar. */
+  if(!DB._seed.candeDia1){
+    const ce=DB.students['cande-espeche'];
+    const d1=ce&&ce.routine&&ce.routine[0];
+    if(d1&&d1.ex&&d1.ex.length===1&&d1.ex[0].n==='Por asignar'){
+      d1.ex=[
+        ex("Hip thrust barra (abierto y cerrado)",3,"12/8","A definir","","",""),
+        ex("Abductores máquina",3,"15","A definir","","",""),
+        ex("Plancha con abducción de cadera",3,"20","A definir","","",""),
+        ex("Femoral sentada",3,"12","A definir","","",""),
+        ex("Peso muerto",3,"12","A definir","","",""),
+        ex("Gemelos parada",3,"12","A definir","","",""),
+        ex("Sentadilla sumo mancuernas",3,"15","A definir","","",""),
+      ];
+    }
+    DB._seed.candeDia1=true;
+  }
+
   if(JSON.stringify(DB)!==_dbBeforeSeeds) await saveDB();
   const lastA=await Store.get('tafit:active');
   /* URL params: ?a=alumnoId&lock=1 */
@@ -2086,17 +2108,18 @@ function renderChrome(){
   $('nav').innerHTML=tabs.map(([k,l])=>`<button data-act="tab" data-tab="${k}" class="${k===tab?'active':''}">${l}</button>`).join('');
 }
 function render(){
-  if(!trainer && (tab==='edit'||tab==='rep')) tab='app';
+  if(!trainer && (tab==='edit'||tab==='rep'||tab==='resumen')) tab='app';
   renderChrome();
   if(tab==='app') renderApp();
   else if(tab==='trans') renderTrans();
   else if(tab==='fotos') renderPhotos();
   else if(tab==='edit') renderEdit();
+  else if(tab==='resumen') renderResumen();
   else if(tab==='acuerdo') renderFormTab('acuerdo');
   else if(tab==='anamnesis') renderFormTab('anamnesis');
   else renderReport();
 }
-function setTab(t){ if(!trainer&&(t==='edit'||t==='rep')) return; tab=t; render(); }
+function setTab(t){ if(!trainer&&(t==='edit'||t==='rep'||t==='resumen')) return; tab=t; render(); }
 
 async function toggleTrainer(){
   if(locked) return;
@@ -2475,6 +2498,160 @@ function getMaxWeight(exName){
   return max;
 }
 
+/* Resumen del programa · tarjeta de cierre para compartir por WhatsApp.
+   Se calcula solo con datos reales de LOGS del alumno activo, no inventa nada. */
+function exWeightInLog(log,exName){
+  let max=null;
+  (log.ex||[]).forEach(function(x){
+    if(x.n!==exName) return;
+    const collect=function(sets){ (sets||[]).forEach(function(s){ const w=firstNum(s.w); if(w!=null&&w>0&&(max==null||w>max)) max=w; }); };
+    if(x.members) x.members.forEach(function(mm){ collect(mm.sets); });
+    else collect(x.sets);
+  });
+  return max;
+}
+function computeProgramSummary(){
+  const logsAsc=LOGS.slice().reverse(); /* LOGS viene de más nuevo a más viejo */
+  const sessions=LOGS.length;
+  const W=weeks(), totalWeeks=W.length;
+  let weeksCompleted=0;
+  W.forEach(function(w,wi){ if(weekDone(wi)) weeksCompleted++; });
+
+  let planTotal=0, doneTotal=0;
+  LOGS.forEach(function(log){ (log.ex||[]).forEach(function(x){
+    const collect=function(sets){ (sets||[]).forEach(function(s){ planTotal++; if(s.done) doneTotal++; }); };
+    if(x.members) x.members.forEach(function(mm){ collect(mm.sets); });
+    else collect(x.sets);
+  }); });
+  const completion=planTotal?Math.round(doneTotal/planTotal*100):0;
+
+  const names=[];
+  LOGS.forEach(function(log){ (log.ex||[]).forEach(function(x){ if(x.n&&names.indexOf(x.n)===-1) names.push(x.n); }); });
+  const prog=[];
+  names.forEach(function(n){
+    let first=null,last=null;
+    for(let i=0;i<logsAsc.length;i++){ const w=exWeightInLog(logsAsc[i],n); if(w!=null){ first=w; break; } }
+    for(let i=logsAsc.length-1;i>=0;i--){ const w=exWeightInLog(logsAsc[i],n); if(w!=null){ last=w; break; } }
+    if(first!=null&&last!=null&&first>0&&last>first) prog.push({ n, first, last, pct:Math.round((last-first)/first*100) });
+  });
+  prog.sort(function(a,b){ return b.pct-a.pct; });
+  const best=prog[0]||null;
+  const top=prog.slice(0,5);
+
+  const weekStats=W.map(function(w,wi){
+    const wLogs=LOGS.filter(function(l){ return +l.week===+wi; });
+    if(!wLogs.length) return { t:w.t, n:w.n, hasLogs:false, pct:0, complete:false };
+    let plan=0,done=0;
+    wLogs.forEach(function(log){ (log.ex||[]).forEach(function(x){
+      const collect=function(sets){ (sets||[]).forEach(function(s){ plan++; if(s.done) done++; }); };
+      if(x.members) x.members.forEach(function(mm){ collect(mm.sets); });
+      else collect(x.sets);
+    }); });
+    return { t:w.t, n:w.n, hasLogs:true, pct:plan?Math.round(done/plan*100):0, complete:weekDone(wi) };
+  });
+  let bestWeek=null;
+  weekStats.forEach(function(w){ if(w.hasLogs&&(!bestWeek||w.pct>bestWeek.pct)) bestWeek=w; });
+
+  const streak=getStreak();
+  const startDate=logsAsc.length?logsAsc[0].date:null;
+  const endDate=logsAsc.length?logsAsc[logsAsc.length-1].date:null;
+
+  const compByEx={};
+  LOGS.forEach(function(log){ (log.ex||[]).forEach(function(x){
+    if(!x.n) return;
+    if(!compByEx[x.n]) compByEx[x.n]={plan:0,done:0};
+    const collect=function(sets){ (sets||[]).forEach(function(s){ compByEx[x.n].plan++; if(s.done) compByEx[x.n].done++; }); };
+    if(x.members) x.members.forEach(function(mm){ collect(mm.sets); });
+    else collect(x.sets);
+  }); });
+  let improve=null;
+  Object.keys(compByEx).forEach(function(n){
+    const c=compByEx[n]; if(c.plan<3) return; /* muy pocos datos para sacar conclusiones */
+    const ratio=c.done/c.plan;
+    if(!improve||ratio<improve.ratio) improve={ n, ratio, pct:Math.round(ratio*100) };
+  });
+
+  return { sessions, totalWeeks, weeksCompleted, completion, best, top, improve, weekStats, bestWeek, streak, startDate, endDate };
+}
+function renderResumen(){
+  const m=$('main'); m.innerHTML='';
+  const s=DB.students[active];
+  const sum=computeProgramSummary();
+
+  const backBar=document.createElement('div'); backBar.className='focus'; backBar.style.margin='0 0 12px';
+  backBar.innerHTML=`<button data-act="backResumen" style="background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--steel)">← Volver a Editar</button>`;
+  m.appendChild(backBar);
+
+  if(!sum.sessions){
+    const empty=document.createElement('div'); empty.className='note'; empty.textContent=`${s.name} todavía no cerró ninguna sesión — el resumen se arma solo con datos reales de entrenamiento.`; m.appendChild(empty);
+    return;
+  }
+
+  const wrap=document.createElement('div');
+  wrap.style.cssText='max-width:390px;margin:0 auto;background:var(--white);border-radius:22px;overflow:hidden;box-shadow:0 12px 34px rgba(13,27,42,.18)';
+
+  let html=`<div style="background:linear-gradient(135deg,var(--navy),var(--steel));color:#fff;padding:26px 22px 22px;text-align:center">
+    <div style="font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;opacity:.85;margin-bottom:10px">Ta<b style="color:#7fd0ff">Fit</b></div>
+    <div style="font-size:40px;margin-bottom:6px">🏆</div>
+    <div style="font-size:20px;font-weight:800">¡${esc(s.name)} completó su programa!</div>
+    <div style="font-size:12.5px;opacity:.85;margin-top:5px">${sum.totalWeeks} semana${sum.totalWeeks===1?'':'s'} de entrenamiento${sum.startDate&&sum.endDate?' · '+fmtShort(sum.startDate)+' — '+fmtShort(sum.endDate):''}</div>
+  </div>
+  <div style="display:flex;border-bottom:1px solid var(--line)">
+    <div style="flex:1;text-align:center;padding:14px 4px;border-right:1px solid var(--line)"><div style="font-size:18px;font-weight:800;color:var(--navy)">${sum.sessions}</div><div style="font-size:9.5px;color:var(--mute);font-weight:700;text-transform:uppercase">Sesiones</div></div>
+    <div style="flex:1;text-align:center;padding:14px 4px;border-right:1px solid var(--line)"><div style="font-size:18px;font-weight:800;color:var(--navy)">${sum.weeksCompleted}/${sum.totalWeeks}</div><div style="font-size:9.5px;color:var(--mute);font-weight:700;text-transform:uppercase">Semanas</div></div>
+    <div style="flex:1;text-align:center;padding:14px 4px;border-right:1px solid var(--line)"><div style="font-size:18px;font-weight:800;color:var(--navy)">${sum.completion}%</div><div style="font-size:9.5px;color:var(--mute);font-weight:700;text-transform:uppercase">Cumplim.</div></div>
+    <div style="flex:1;text-align:center;padding:14px 4px"><div style="font-size:18px;font-weight:800;color:var(--navy)">${sum.streak>1?'🔥':''}${sum.streak}</div><div style="font-size:9.5px;color:var(--mute);font-weight:700;text-transform:uppercase">Racha</div></div>
+  </div>
+  <div style="padding:18px 20px">`;
+
+  if(sum.best){
+    html+=`<div style="font-size:11.5px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">⭐ Mejor logro</div>
+    <div style="background:#fcf3de;border:1.5px solid #f0d38a;border-radius:14px;padding:14px 16px;margin-bottom:14px">
+      <div style="font-weight:800;font-size:14px;color:#8a5a00;margin-bottom:4px">🏅 Récord del programa</div>
+      <div style="font-size:15px;font-weight:800;color:var(--navy);margin-bottom:2px">${esc(sum.best.n)}</div>
+      <div style="font-size:12.5px;color:#6b5217">Arrancó con ${fmt(sum.best.first)} y llegó a ${fmt(sum.best.last)} · +${sum.best.pct}% de mejora</div>
+    </div>`;
+  }
+
+  if(sum.top.length){
+    html+=`<div style="font-size:11.5px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">📈 Cómo progresó</div>`;
+    sum.top.forEach(function(p){
+      html+=`<div style="display:flex;align-items:center;justify-content:space-between;background:var(--light);border-radius:10px;padding:10px 13px;margin-bottom:8px"><span style="font-size:12.5px;font-weight:700">${esc(p.n)}</span><span style="font-size:12px;color:var(--accent);font-weight:800">${fmt(p.first)} → ${fmt(p.last)}</span></div>`;
+    });
+  }
+
+  if(sum.weekStats.length){
+    html+=`<div style="font-size:11.5px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 10px">📅 Constancia por semana</div>`;
+    sum.weekStats.forEach(function(w){
+      let label,color,bg;
+      if(!w.hasLogs){ label='Sin registrar'; color='#7a8794'; bg='#eef1f4'; }
+      else if(w.complete&&w.pct>=90){ label='✓ Completa'; color='#1e7e42'; bg='#e5f6ec'; }
+      else if(w.pct>=60){ label='Parcial · '+w.pct+'%'; color='#8a5a10'; bg='#fff6e8'; }
+      else { label='Floja · '+w.pct+'%'; color='#a13a3a'; bg='#fbe9e9'; }
+      const star=(sum.bestWeek&&w.hasLogs&&sum.bestWeek.t===w.t&&sum.bestWeek.n===w.n)?' ⭐':'';
+      html+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 2px"><span style="font-size:12.5px;font-weight:700;color:var(--ink)">${esc(w.t)} · ${esc(w.n)}${star}</span><span style="font-size:11.5px;font-weight:800;color:${color};background:${bg};border-radius:8px;padding:3px 9px">${label}</span></div>`;
+    });
+  }
+  html+=`</div>`;
+
+  if(sum.improve){
+    html+=`<div style="padding:0 20px 18px">
+      <div style="font-size:11.5px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">🎯 Para seguir mejorando</div>
+      <div style="background:#fff6e8;border:1.5px solid #f0d99a;border-radius:14px;padding:14px 16px">
+        <div style="font-weight:800;font-size:13px;color:#8a5a10;margin-bottom:6px">${esc(sum.improve.n)}</div>
+        <p style="margin:0;font-size:12.5px;color:#6b5217;line-height:1.55">Fue donde menos series completó de principio a fin (${sum.improve.pct}% de cumplimiento). Bajarle un poco el peso y sumar series completas antes de subir carga puede ayudar a afianzarlo.</p>
+      </div>
+    </div>`;
+  }
+
+  html+=`<div style="padding:16px 22px 22px;text-align:center;font-size:13px;color:var(--mute);line-height:1.6;border-top:1px solid var(--line)">¡Excelente trabajo, <b style="color:var(--navy)">${esc(s.name)}</b>! Hablá con tu profe para armar el próximo bloque 💪</div>`;
+
+  wrap.innerHTML=html;
+  m.appendChild(wrap);
+
+  const hint=document.createElement('div'); hint.className='note'; hint.textContent='Sacale una captura de pantalla a la tarjeta de arriba y mandásela por WhatsApp.'; m.appendChild(hint);
+}
+
 /* Modo oscuro */
 function toggleDarkMode(){ var app=$('app'); app.classList.toggle('dark'); var isDark=app.classList.contains('dark'); try{ localStorage.setItem('tafit:dark', isDark?'1':'0'); }catch(e){} $('darkbtn').textContent=isDark?'☀':'🌙'; }
 function initDarkMode(){ try{ if(localStorage.getItem('tafit:dark')==='1'){ $('app').classList.add('dark'); $('darkbtn').textContent='☀'; } }catch(e){} }
@@ -2739,6 +2916,8 @@ function renderEdit(){
     SEC('plan','💳 Plan del alumno (vence a los 30 días)',`${statusHTML}<div class="fld"><label>Fecha del último pago</label><input type="date" class="plan-date-inp" id="planPaidInput" value="${esc(planPaid)}"></div><button class="plan-btn" data-act="savePlanDate">💾 Guardar fecha</button><button class="plan-btn" data-act="planToday" style="margin-top:8px;background:var(--ok)">✅ Marcar pago de hoy</button><div class="plan-hint">El plan dura 30 días desde la fecha cargada. Apenas se vence, la app le muestra al alumno una pantalla de "Tu plan venció" y no puede seguir entrenando hasta que renueve. Cuando ${esc(DB.students[active].name)} te pague de nuevo, tocá "Marcar pago de hoy" (o cargá la fecha manualmente) y se le desbloquea al instante. Si dejás la fecha vacía, no se muestra ninguna alerta ni se bloquea nada.</div>`);
   }
 
+  SEC('resumen','🏆 Resumen del programa',`<p>Generá una tarjeta con el progreso de ${esc(DB.students[active].name)}: sesiones, semanas completadas, mejor logro y qué puede seguir mejorando. Se arma sola con sus datos reales de entrenamiento — ideal para sacarle captura y mandarla por WhatsApp cuando termina el programa.</p><div class="edit-actions"><button data-act="genResumen">🏆 Generar resumen</button></div>`);
+
   const duo=isDuo(), mm=membersOf();
   const head=document.createElement('div'); head.className='focus'; head.style.margin='4px 0 12px'; head.innerHTML=`Rutina de <b>${esc(DB.students[active].name)}</b>`; m.appendChild(head);
   routine().forEach((d,di)=>{
@@ -2965,6 +3144,8 @@ document.addEventListener('click',e=>{
     case 'saveForm': handleSaveForm(el.dataset.ftype); break;
     case 'toggleForm': toggleFormEnable(el.dataset.ftype); break;
     case 'togglePause': togglePause(); break;
+    case 'genResumen': tab='resumen'; render(); break;
+    case 'backResumen': tab='edit'; render(); break;
     case 'savePlanDate': savePlanDate(); break;
     case 'planToday': planToday(); break;
     case 'formMember': member=+el.dataset.m; renderFormTab(el.dataset.ft); break;
