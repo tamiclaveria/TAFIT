@@ -2026,6 +2026,27 @@ function runSeeds(){
     DB._seed.candeDia1=true;
   }
 
+  /* Actualización puntual (una sola vez): cargar la rutina real del Día 2 de Cande Espeche,
+     mismo criterio que el Día 1 — solo si sigue siendo exactamente el placeholder. */
+  if(!DB._seed.candeDia2){
+    const ce2=DB.students['cande-espeche'];
+    const d2=ce2&&ce2.routine&&ce2.routine[1];
+    if(d2&&d2.ex&&d2.ex.length===1&&d2.ex[0].n==='Por asignar'){
+      d2.ex=[
+        ex("Remo con mancuerna",3,"12","A definir","","",""),
+        ex("Bíceps",3,"12","A definir","","",""),
+        ex("Press francés con mancuernas",3,"10","A definir","","",""),
+        ex("Apertura mancuerna",3,"10","A definir","","",""),
+        ex("Flexiones en cajón",3,"8","A definir","","",""),
+        { n:"Circuito abdominal", s:3, r:'', w:'', alt:'', tip:'', rest:'', vid:'', blk:true, blkWork:0, blkRest:0, blkRounds:3 },
+        ex("Crunch en máquina",3,"12","A definir","","",""),
+        ex("Espinales máquina",3,"15","A definir","","",""),
+        ex("Plancha oblicuos",3,"15","A definir","","",""),
+      ];
+    }
+    DB._seed.candeDia2=true;
+  }
+
   if(JSON.stringify(DB)!==_dbBeforeSeeds) await saveDB();
   const lastA=await Store.get('tafit:active');
   /* URL params: ?a=alumnoId&lock=1 */
