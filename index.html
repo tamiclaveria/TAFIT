@@ -2047,6 +2047,23 @@ function runSeeds(){
     DB._seed.candeDia2=true;
   }
 
+  /* Actualización puntual (una sola vez): sumar el Día 3 de Cande Espeche (pierna/glúteo).
+     No se dieron series/reps específicas, así que se usó 3 series (mismo criterio que sus
+     otros días) con reps típicas de cada ejercicio; Tami puede ajustarlas desde Editar.
+     Solo se agrega si todavía tiene exactamente 2 días, para no duplicar si ya se lo sumó a mano. */
+  if(!DB._seed.candeDia3){
+    const ce3=DB.students['cande-espeche'];
+    if(ce3&&ce3.routine&&ce3.routine.length===2){
+      ce3.routine.push({ day:"Día 3", ex:[
+        ex("Sentadilla en Smith",3,"12","A definir","","",""),
+        ex("Patada de glúteo en polea",3,"15","A definir","","",""),
+        ex("Aductores",3,"15","A definir","","",""),
+        ex("Estocadas búlgaras",3,"10","A definir","","",""),
+      ]});
+    }
+    DB._seed.candeDia3=true;
+  }
+
   if(JSON.stringify(DB)!==_dbBeforeSeeds) await saveDB();
   const lastA=await Store.get('tafit:active');
   /* URL params: ?a=alumnoId&lock=1 */
