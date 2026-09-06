@@ -15,9 +15,11 @@
     --navy:#0D1B2A; --steel:#1B4F72; --accent:#2E86AB;
     --niebla:#7C93A6; --light:#E8F4F8; --white:#FFFFFF;
     --ink:#1B2733; --mute:#5C6B78; --line:#E1E8ED;
-    --card:#F5F8FB; --ok:#27AE60; --okbg:#E5F6EC; --warn:#C0392B;
+    --card:#F5F8FB; --ok:#27AE60; --okbg:#E5F6EC; --warn:#C0392B; --tint2:#DCEBF2;
+    --repBrand:#2E86AB; --repBrandDk:#1B4F72; --repTint:#E8F4F8; --repTint2:#DCEBF2; --repInk:#0D1B2A;
   }
-  #app.theme-f{ --navy:#241023; --steel:#6E2A52; --accent:#C04D86; --niebla:#B08AA0; --light:#FBEEF4; --card:#FAF3F7; }
+  #app.theme-f{ --navy:#241023; --steel:#6E2A52; --accent:#C04D86; --niebla:#B08AA0; --light:#FBEEF4; --card:#FAF3F7; --tint2:#F6DCEA;
+    --repBrand:#8B7DC1; --repBrandDk:#6B5B9A; --repTint:#F1EDF9; --repTint2:#E7DFF4; --repInk:#14101A; }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--navy);color:var(--ink);min-height:100vh}
   a{color:var(--accent)}
@@ -509,7 +511,49 @@
   .tabata-config label{font-size:10px;color:#7a8a9a;display:block;margin-bottom:4px}
   .tabata-config input{width:60px;text-align:center;padding:8px;border:1.5px solid #2a3a4a;border-radius:8px;background:#0d1b2a;color:#fff;font-size:16px;font-weight:700}
   .tabata-btn{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;margin-top:8px}
-  @media print{ header,nav,.seg,.weeks,.session-close,.edit-actions,.iconbtn,.lockbtn,.rest{display:none!important} body,#app,main{background:#fff} }
+  @media print{ header,nav,.seg,.weeks,.session-close,.edit-actions,.iconbtn,.lockbtn,.rest,.no-print{display:none!important} body,#app,main{background:#fff!important} #resumenCard{box-shadow:none!important;border-radius:0!important;max-width:100%!important} .icard{break-inside:avoid} }
+
+  /* Informe de Progreso · formato "tablero" (tarjetas con estadísticas, récords, ejercicios y gráficos) */
+  #resumenCard{max-width:420px;margin:0 auto}
+  .irep-head{background:linear-gradient(135deg,var(--repInk),var(--repBrand));color:#fff;border-radius:16px;padding:20px 20px 18px;margin-bottom:14px}
+  .rword{font-size:22px;font-weight:900;letter-spacing:-1px}
+  .rword span{font-weight:400}
+  .icard{background:#fff;border-radius:14px;padding:16px;margin:0 0 14px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+  #app.dark .icard{background:#182838}
+  .icard h3{font-size:13px;font-weight:800;color:var(--ink);margin:0 0 12px}
+  .istats{display:flex;gap:8px}
+  .istat{flex:1;border-radius:10px;padding:10px 6px;text-align:center}
+  .istat b{display:block;font-size:21px;font-weight:900}
+  .istat span{font-size:9.5px;font-weight:700}
+  .irec{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--light)}
+  .irec:last-child{border:none}
+  .irec .medal{font-size:22px}
+  .irec .name{font-weight:700;font-size:13px;color:var(--ink)}
+  .irec .chg{font-size:12px;color:var(--mute)}
+  .irec .chg b{color:var(--ok)}
+  .irec .diff{background:var(--okbg);color:var(--ok);font-weight:800;font-size:12px;padding:4px 10px;border-radius:8px;white-space:nowrap}
+  .iex{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--light)}
+  .iex:last-child{border:none}
+  .iex .tr{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+  .iex b{display:block;font-weight:600;font-size:12.5px;color:var(--ink)}
+  .iex small{color:var(--mute);font-size:10.5px}
+  .iex .w{font-weight:700;font-size:12.5px;padding:4px 9px;border-radius:8px;white-space:nowrap}
+  .iex .w.up{background:var(--okbg);color:var(--ok)}
+  .iex .w.down{background:#ffebee;color:#c62828}
+  .iex .w.same, .iex .w.none{background:var(--card);color:var(--mute)}
+  .prbadge{display:inline-block;font-size:9.5px;font-weight:800;color:#fff;background:linear-gradient(135deg,#f5a623,#e8580c);border-radius:6px;padding:1px 6px;margin-left:4px;vertical-align:middle}
+  .iex-acc{border-bottom:1px solid var(--light)}
+  .iex-acc:last-child{border-bottom:none}
+  .iex-acc summary{padding:10px 0!important;font-size:13px;font-weight:700;color:var(--ink)}
+  .iex-acc .tacc-body{padding:0 0 8px!important}
+  .iex-acc .iex:first-child{padding-top:2px}
+  .ichart-label{font-size:11px;color:var(--mute);font-weight:700;margin:12px 0 6px}
+  .ichart-label:first-of-type{margin-top:0}
+  .ichart{display:flex;align-items:flex-end;gap:4px;height:66px;margin-bottom:6px}
+  .ichart .bar{flex:1;display:flex;flex-direction:column;align-items:center;min-width:0}
+  .ichart .bar .v{font-size:8.5px;color:var(--mute);margin-bottom:2px;white-space:nowrap}
+  .ichart .bar .b{width:100%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--repBrand),var(--repBrandDk))}
+  .ichart .bar .wk{font-size:8.5px;color:var(--niebla);margin-top:2px}
 </style>
 </head>
 <body>
@@ -1520,7 +1564,7 @@ function viewExIcon(cat,name,ei){
 }
 
 let DB={ order:[], students:{}, settings:{pin:""}, _seed:{} };
-let active=null, CACHE={}, LOGS=[], NOTIFS=[];
+let active=null, CACHE={}, LOGS=[], NOTIFS=[], resumenCycleIdx=null;
 /* ==== Avisos internos: cuando un alumno cierra sesión, la profe ve un aviso (sin push, solo dentro de la app) ==== */
 async function loadNotifs(){ NOTIFS=safeParse(await Store.get('tafit:notifs')||'[]',[]); }
 async function pushNotif(entry){ NOTIFS.unshift(entry); if(NOTIFS.length>50) NOTIFS=NOTIFS.slice(0,50); await Store.set('tafit:notifs', JSON.stringify(NOTIFS)); }
@@ -2064,6 +2108,28 @@ function runSeeds(){
     DB._seed.candeDia3=true;
   }
 
+  /* Actualización puntual (una sola vez): sumar el Día 4 de Cande Espeche (pecho/espalda/
+     brazos + circuito abdominal). Solo se agrega si todavía tiene exactamente 3 días. */
+  if(!DB._seed.candeDia4){
+    const ce4=DB.students['cande-espeche'];
+    if(ce4&&ce4.routine&&ce4.routine.length===3){
+      ce4.routine.push({ day:"Día 4", ex:[
+        ex("Press pecho mancuerna o máquina",3,"10","A definir","","",""),
+        ex("Pull over mancuerna",3,"12","A definir","","",""),
+        ex("Remo cerrado máquina",3,"12","A definir","","",""),
+        ex("Dorsalera máquina",3,"12","A definir","","",""),
+        ex("Bíceps + hombro",3,"12","A definir","","",""),
+        ex("Tríceps copa",3,"12","A definir","","",""),
+        { n:"Circuito abdominal", s:3, r:'', w:'', alt:'', tip:'', rest:'', vid:'', blk:true, blkWork:0, blkRest:0, blkRounds:3 },
+        ex("Crunch paso pelota",3,"12","A definir","","",""),
+        ex("Inferiores con mancuernas",3,"10/15","A definir","","",""),
+        ex("Oblicuos en plancha",3,"15","A definir","","",""),
+        ex("Espinales c/banda",3,"15","A definir","","",""),
+      ]});
+    }
+    DB._seed.candeDia4=true;
+  }
+
   if(JSON.stringify(DB)!==_dbBeforeSeeds) await saveDB();
   const lastA=await Store.get('tafit:active');
   /* URL params: ?a=alumnoId&lock=1 */
@@ -2548,15 +2614,39 @@ function exWeightInLog(log,exName){
   });
   return max;
 }
-function computeProgramSummary(){
-  const logsAsc=LOGS.slice().reverse(); /* LOGS viene de más nuevo a más viejo */
-  const sessions=LOGS.length;
-  const W=weeks(), totalWeeks=W.length;
+/* Clasificación aproximada por grupo muscular a partir del nombre del ejercicio,
+   solo por palabras clave (no hay un campo de "grupo muscular" en los datos). */
+const MUSCLE_KEYWORDS=[
+  ['Piernas',/sentadilla|prensa|peso muerto|zancada|estocada|femoral|cu[aá]driceps|gemelo|hip thrust|aductor|abductor|b[uú]lgar|pierna/i],
+  ['Espalda',/espalda|remo|dorsal|jal[oó]n|pull.?over|vups|gironda/i],
+  ['Hombros',/hombro|press militar|arnold|volada|elevaci[oó]n|ment[oó]n/i],
+  ['Brazos',/b[ií]ceps|tr[ií]ceps|curl|press franc[eé]s|fondos|copa/i],
+  ['Pecho',/pecho|press de banca|press plano|inclinado|flexion(es)?/i],
+  ['Core',/abdomin|crunch|plancha|oblicuo|espinales|core|circuito/i],
+];
+function muscleGroupOf(name){
+  const n=name||'';
+  for(let i=0;i<MUSCLE_KEYWORDS.length;i++){ if(MUSCLE_KEYWORDS[i][1].test(n)) return MUSCLE_KEYWORDS[i][0]; }
+  return null;
+}
+function computeProgramSummary(cycleOverride){
+  /* Por defecto usa el ciclo actual del alumno (ver startNewCycle). Si se pasa cycleOverride
+     (desde el selector de ciclo del Informe), calcula todo para ESE ciclo puntual en cambio,
+     usando su propia rutina y semanas "congeladas" — sin tocar ni perder nada del historial. */
+  const st=DB.students[active];
+  const cyc=cycleOverride||{ start:st.cycleStart||null, end:null, routine:st.routine, weeksArr:st.weeks };
+  const LOGS_=LOGS.filter(function(l){ if(cyc.start&&l.date<cyc.start) return false; if(cyc.end&&l.date>=cyc.end) return false; return true; });
+  const R=cyc.routine||routine();
+  const weekDone_=function(wi){ return R.length>0 && R.every(function(d){ return LOGS_.some(function(l){ return +l.week===+wi && l.dayName===d.day; }); }); };
+
+  const logsAsc=LOGS_.slice().reverse(); /* LOGS viene de más nuevo a más viejo */
+  const sessions=LOGS_.length;
+  const W=cyc.weeksArr||weeks(), totalWeeks=W.length;
   let weeksCompleted=0;
-  W.forEach(function(w,wi){ if(weekDone(wi)) weeksCompleted++; });
+  W.forEach(function(w,wi){ if(weekDone_(wi)) weeksCompleted++; });
 
   let planTotal=0, doneTotal=0;
-  LOGS.forEach(function(log){ (log.ex||[]).forEach(function(x){
+  LOGS_.forEach(function(log){ (log.ex||[]).forEach(function(x){
     const collect=function(sets){ (sets||[]).forEach(function(s){ planTotal++; if(s.done) doneTotal++; }); };
     if(x.members) x.members.forEach(function(mm){ collect(mm.sets); });
     else collect(x.sets);
@@ -2564,20 +2654,45 @@ function computeProgramSummary(){
   const completion=planTotal?Math.round(doneTotal/planTotal*100):0;
 
   const names=[];
-  LOGS.forEach(function(log){ (log.ex||[]).forEach(function(x){ if(x.n&&names.indexOf(x.n)===-1) names.push(x.n); }); });
+  LOGS_.forEach(function(log){ (log.ex||[]).forEach(function(x){ if(x.n&&names.indexOf(x.n)===-1) names.push(x.n); }); });
   const prog=[];
   names.forEach(function(n){
     let first=null,last=null;
     for(let i=0;i<logsAsc.length;i++){ const w=exWeightInLog(logsAsc[i],n); if(w!=null){ first=w; break; } }
     for(let i=logsAsc.length-1;i>=0;i--){ const w=exWeightInLog(logsAsc[i],n); if(w!=null){ last=w; break; } }
-    if(first!=null&&last!=null&&first>0&&last>first) prog.push({ n, first, last, pct:Math.round((last-first)/first*100) });
+    if(first!=null&&last!=null&&first>0&&last>first){ prog.push({ n, first, last, pct:Math.round((last-first)/first*100), metric:'kg' }); return; }
+    /* Sin progreso de peso (o ejercicio sin carga: banda, peso corporal) — probamos con
+       repeticiones, así no queda vacío para alumnos que no levantan pesas pesadas. */
+    let rf=null,rl=null;
+    for(let i=0;i<logsAsc.length;i++){ const r=exFieldInLog(logsAsc[i],n,'r'); if(r!=null){ rf=r; break; } }
+    for(let i=logsAsc.length-1;i>=0;i--){ const r=exFieldInLog(logsAsc[i],n,'r'); if(r!=null){ rl=r; break; } }
+    if(rf!=null&&rl!=null&&rf>0&&rl>rf) prog.push({ n, first:rf, last:rl, pct:Math.round((rl-rf)/rf*100), metric:'reps' });
   });
   prog.sort(function(a,b){ return b.pct-a.pct; });
   const best=prog[0]||null;
   const top=prog.slice(0,5);
 
+  /* Agrupación por grupo muscular (a partir del nombre, ver MUSCLE_KEYWORDS) para
+     poder señalar el grupo más fuerte/con mejor evolución, no solo el ejercicio suelto. */
+  const groupProg={};
+  prog.forEach(function(p){
+    const g=muscleGroupOf(p.n); if(!g) return;
+    if(!groupProg[g]) groupProg[g]=[];
+    groupProg[g].push(p);
+  });
+  let bestGroup=null;
+  const muscleGroups=[];
+  Object.keys(groupProg).forEach(function(g){
+    const arr=groupProg[g];
+    const avgPct=Math.round(arr.reduce(function(a,p){ return a+p.pct; },0)/arr.length);
+    const top1=arr.slice().sort(function(a,b){ return b.pct-a.pct; })[0];
+    muscleGroups.push({ group:g, avgPct, count:arr.length, top:top1 });
+    if(!bestGroup||avgPct>bestGroup.avgPct) bestGroup={ group:g, avgPct, top:top1, count:arr.length };
+  });
+  muscleGroups.sort(function(a,b){ return b.avgPct-a.avgPct; });
+
   const weekStats=W.map(function(w,wi){
-    const wLogs=LOGS.filter(function(l){ return +l.week===+wi; });
+    const wLogs=LOGS_.filter(function(l){ return +l.week===+wi; });
     if(!wLogs.length) return { t:w.t, n:w.n, hasLogs:false, pct:0, complete:false };
     let plan=0,done=0;
     wLogs.forEach(function(log){ (log.ex||[]).forEach(function(x){
@@ -2585,7 +2700,7 @@ function computeProgramSummary(){
       if(x.members) x.members.forEach(function(mm){ collect(mm.sets); });
       else collect(x.sets);
     }); });
-    return { t:w.t, n:w.n, hasLogs:true, pct:plan?Math.round(done/plan*100):0, complete:weekDone(wi) };
+    return { t:w.t, n:w.n, hasLogs:true, pct:plan?Math.round(done/plan*100):0, complete:weekDone_(wi) };
   });
   let bestWeek=null;
   weekStats.forEach(function(w){ if(w.hasLogs&&(!bestWeek||w.pct>bestWeek.pct)) bestWeek=w; });
@@ -2595,7 +2710,7 @@ function computeProgramSummary(){
   const endDate=logsAsc.length?logsAsc[logsAsc.length-1].date:null;
 
   const compByEx={};
-  LOGS.forEach(function(log){ (log.ex||[]).forEach(function(x){
+  LOGS_.forEach(function(log){ (log.ex||[]).forEach(function(x){
     if(!x.n) return;
     if(!compByEx[x.n]) compByEx[x.n]={plan:0,done:0};
     const collect=function(sets){ (sets||[]).forEach(function(s){ compByEx[x.n].plan++; if(s.done) compByEx[x.n].done++; }); };
@@ -2606,88 +2721,402 @@ function computeProgramSummary(){
   Object.keys(compByEx).forEach(function(n){
     const c=compByEx[n]; if(c.plan<3) return; /* muy pocos datos para sacar conclusiones */
     const ratio=c.done/c.plan;
+    if(ratio>=1) return; /* 100% cumplido no es un área para mejorar */
     if(!improve||ratio<improve.ratio) improve={ n, ratio, pct:Math.round(ratio*100) };
   });
 
-  return { sessions, totalWeeks, weeksCompleted, completion, best, top, improve, weekStats, bestWeek, streak, startDate, endDate };
+  /* Mismo agrupamiento pero por cumplimiento de series, para detectar el grupo
+     muscular más flojo (no solo un ejercicio suelto) y sugerir foco concreto. */
+  const groupComp={};
+  Object.keys(compByEx).forEach(function(n){
+    const g=muscleGroupOf(n); if(!g) return;
+    const c=compByEx[n];
+    if(!groupComp[g]) groupComp[g]={ plan:0, done:0, exs:[] };
+    groupComp[g].plan+=c.plan; groupComp[g].done+=c.done; groupComp[g].exs.push(n);
+  });
+  let weakGroup=null;
+  Object.keys(groupComp).forEach(function(g){
+    const c=groupComp[g]; if(c.plan<3) return; /* muy pocos datos */
+    const ratio=c.done/c.plan;
+    if(ratio>=1) return; /* 100% cumplido no es un área para reforzar */
+    if(!weakGroup||ratio<weakGroup.ratio) weakGroup={ group:g, ratio, pct:Math.round(ratio*100), exs:c.exs };
+  });
+
+  /* Todos los ejercicios de la rutina actual, con el último peso registrado y la tendencia
+     (sube/baja/igual) contra el registro anterior — para la sección "Todos los ejercicios". */
+  const allEx=[];
+  R.forEach(function(d){
+    d.ex.forEach(function(ex){
+      if(isBlockRow(ex)||!ex.n) return;
+      if(allEx.some(function(a){ return a.n===ex.n; })) return; /* mismo ejercicio en 2 días: 1 sola fila */
+      const found=[];
+      for(let i=0;i<LOGS_.length&&found.length<2;i++){ const w=exWeightInLog(LOGS_[i],ex.n); if(w!=null) found.push(w); }
+      let trend='none', peso=null;
+      if(found.length){ peso=found[0]; trend = found.length>1 ? (found[0]>found[1]?'up':(found[0]<found[1]?'down':'same')) : 'same'; }
+      /* "Récord personal": el peso actual iguala o supera el máximo histórico de TODA la vida
+         del alumno con ese ejercicio (no solo este ciclo) — mismo criterio que el banner en vivo. */
+      const pr=peso!=null&&peso>0&&peso>=getMaxWeight(ex.n);
+      allEx.push({ n:ex.n, reps:ex.s+'×'+(ex.r||''), peso, trend, pr });
+    });
+  });
+
+  /* Series semanales de peso para las 1-2 mejores progresiones DE PESO (los progresos por
+     repeticiones no se grafican acá, mezclarían dos escalas distintas). Solo semanas con
+     datos reales (sin inventar/interpolar). */
+  const charts=top.filter(function(p){ return p.metric==='kg'; }).slice(0,2).map(function(p){
+    const series=[];
+    for(let wi=0; wi<totalWeeks; wi++){
+      const wLogs=LOGS_.filter(function(l){ return +l.week===wi; });
+      let max=null;
+      wLogs.forEach(function(l){ const w=exWeightInLog(l,p.n); if(w!=null&&(max==null||w>max)) max=w; });
+      if(max!=null) series.push({ label:(W[wi]&&W[wi].t)||('S'+(wi+1)), v:max });
+    }
+    return { n:p.n, series };
+  }).filter(function(c){ return c.series.length>=2; });
+
+  return { sessions, totalWeeks, weeksCompleted, completion, best, top, bestGroup, muscleGroups, improve, weakGroup, weekStats, bestWeek, streak, startDate, endDate, allEx, charts, dayCount:R.length, cyc:{start:cyc.start,end:cyc.end} };
 }
+function printResumen(){ window.print(); }
+/* Datos auto-generados del Informe de Evolución (todo calculado, nada manual):
+   asistencia/adherencia, checks de progreso, y una conclusión redactada sola. */
+function exFieldInLog(log,exName,field){
+  let max=null;
+  (log.ex||[]).forEach(function(x){
+    if(x.n!==exName) return;
+    const collect=function(sets){ (sets||[]).forEach(function(s){ const v=firstNum(s[field]); if(v!=null&&v>0&&(max==null||v>max)) max=v; }); };
+    if(x.members) x.members.forEach(function(mm){ collect(mm.sets); });
+    else collect(x.sets);
+  });
+  return max;
+}
+function sessionSetsDone(log){
+  let total=0;
+  (log.ex||[]).forEach(function(x){
+    const collect=function(sets){ (sets||[]).forEach(function(s){ if(s.done) total++; }); };
+    if(x.members) x.members.forEach(function(mm){ collect(mm.sets); });
+    else collect(x.sets);
+  });
+  return total;
+}
+/* Texto "50 kg → 70 kg" o, si el progreso fue por repeticiones (banda/peso corporal), "8 → 12 reps". */
+function fmtProg(p){ return p&&p.metric==='reps' ? (p.first+' → '+p.last+' reps') : (p?fmt(p.first)+' → '+fmt(p.last):''); }
+function computeInformeAuto(sum){
+  const plannedSessions=Math.max(1,sum.totalWeeks*Math.max(1,sum.dayCount||1));
+  const attendancePct=Math.min(100,Math.round(sum.sessions/plannedSessions*100));
+  let regularidad;
+  if(sum.streak>=3&&attendancePct>=80) regularidad='Constante · racha de '+sum.streak;
+  else if(attendancePct>=50) regularidad='Irregular';
+  else regularidad='Discontinua';
+
+  const cyc=sum.cyc||{start:null,end:null};
+  const LOGS_=LOGS.filter(function(l){ if(cyc.start&&l.date<cyc.start) return false; if(cyc.end&&l.date>=cyc.end) return false; return true; });
+  const logsAsc=LOGS_.slice().reverse();
+  const names=[]; LOGS_.forEach(function(log){ (log.ex||[]).forEach(function(x){ if(x.n&&names.indexOf(x.n)===-1) names.push(x.n); }); });
+  let repIncrease=false;
+  names.forEach(function(n){
+    let first=null,last=null;
+    for(let i=0;i<logsAsc.length;i++){ const r=exFieldInLog(logsAsc[i],n,'r'); if(r!=null){ first=r; break; } }
+    for(let i=logsAsc.length-1;i>=0;i--){ const r=exFieldInLog(logsAsc[i],n,'r'); if(r!=null){ last=r; break; } }
+    if(first!=null&&last!=null&&last>first) repIncrease=true;
+  });
+  const volumenIncrease=logsAsc.length>=2&&sessionSetsDone(logsAsc[logsAsc.length-1])>sessionSetsDone(logsAsc[0]);
+
+  const checks={ cargas:!!sum.best, reps:repIncrease, volumen:volumenIncrease, regularidad:(sum.streak>=3||attendancePct>=80) };
+
+  let qualifier;
+  if(attendancePct>=85&&sum.best&&sum.best.pct>=20) qualifier='sobresaliente';
+  else if(attendancePct>=70) qualifier='muy buena';
+  else if(attendancePct>=50) qualifier='buena';
+  else qualifier='en desarrollo';
+
+  const highlight=sum.bestGroup
+    ? 'el grupo muscular de '+sum.bestGroup.group+' (+'+sum.bestGroup.avgPct+'% de evolución promedio)'+(sum.bestGroup.top?', con su mayor salto en '+sum.bestGroup.top.n+' ('+fmtProg(sum.bestGroup.top)+')':'')+', además de '+sum.weeksCompleted+' de '+sum.totalWeeks+' semanas completadas'
+    : sum.best
+      ? 'su progreso en '+sum.best.n+' (+'+sum.best.pct+'%) y '+sum.weeksCompleted+' de '+sum.totalWeeks+' semanas completadas'
+      : sum.weeksCompleted+' de '+sum.totalWeeks+' semanas completadas';
+
+  const recommendation=sum.weakGroup
+    ? 'Se recomienda reforzar '+sum.weakGroup.group+' en el próximo bloque, donde el cumplimiento de series fue del '+sum.weakGroup.pct+'% — poniendo foco en '+sum.weakGroup.exs.slice(0,2).join(' y ')+'.'
+    : sum.improve
+      ? 'Se recomienda priorizar '+sum.improve.n+' en el próximo bloque, donde el cumplimiento de series fue más bajo ('+sum.improve.pct+'%).'
+      : 'Se recomienda continuar con el plan de entrenamiento, ajustando cargas según la evolución.';
+
+  const nextEvalStr=new Date(Date.now()+30*86400000).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
+
+  return { plannedSessions, attendancePct, regularidad, checks, qualifier, highlight, recommendation, nextEvalStr };
+}
+
+/* Compartir el Informe como imagen (sin pasar por PDF) — Canvas + Web Share API */
+function repColors(){
+  const t=(DB.students[active]&&DB.students[active].theme)||'m';
+  return t==='f'
+    ? { ink:'#14101A', brand:'#8B7DC1', brandDk:'#6B5B9A', tint:'#F1EDF9' }
+    : { ink:'#0D1B2A', brand:'#2E86AB', brandDk:'#1B4F72', tint:'#E8F4F8' };
+}
+function rr(ctx,x,y,w,h,r){
+  if(ctx.roundRect){ ctx.beginPath(); ctx.roundRect(x,y,w,h,r); return; }
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+function dataURLToBlob(dataUrl){
+  const parts=dataUrl.split(',');
+  const mime=parts[0].match(/:(.*?);/)[1];
+  const bin=atob(parts[1]);
+  const arr=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+  return new Blob([arr],{type:mime});
+}
+function shareWrapText(ctx,text,x,y,maxWidth,lineHeight){
+  const words=String(text).split(' ');
+  let line='', yy=y;
+  for(let i=0;i<words.length;i++){
+    const test=line+words[i]+' ';
+    if(ctx.measureText(test).width>maxWidth && line){ ctx.fillText(line,x,yy); line=words[i]+' '; yy+=lineHeight; }
+    else line=test;
+  }
+  ctx.fillText(line,x,yy);
+  return yy+lineHeight;
+}
+function buildShareCanvas(sum,inf){
+  const s=DB.students[active];
+  const col=repColors();
+  const weakName_=sum.weakGroup?sum.weakGroup.group:(sum.improve?sum.improve.n:null);
+  /* Alto adaptable: arranca en un mínimo prolijo y suma solo el espacio de las secciones que van a existir,
+     para que no quede un hueco vacío cuando el informe tiene pocos datos todavía. */
+  const W=1000;
+  let H=245+55+155; /* header + tarjeta + asistencia */
+  if(sum.top&&sum.top.length) H+=110;
+  if(sum.bestGroup) H+=110;
+  if(weakName_) H+=110;
+  H+=90; /* línea del calificador */
+  H+=190; /* firma + margen inferior */
+  H=Math.max(880,H);
+
+  const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+  const ctx=cv.getContext('2d');
+
+  const bg=ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,col.brandDk); bg.addColorStop(1,col.brand);
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  ctx.fillStyle='#fff'; ctx.textAlign='left';
+  ctx.font='700 44px system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
+  ctx.fillText('TAFIT', 60, 95);
+  ctx.font='400 22px system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
+  ctx.globalAlpha=0.9;
+  ctx.fillText('Informe de Progreso · '+s.name, 60, 132);
+  ctx.globalAlpha=1;
+
+  rr(ctx,50,175,W-100,H-175-70,26);
+  ctx.fillStyle='#fff'; ctx.fill();
+
+  let y=245;
+  ctx.fillStyle=col.ink; ctx.font='700 30px system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
+  ctx.fillText('📋 Asistencia', 90, y);
+  y+=55;
+
+  const tiles=[
+    { label:'Sesiones', val:String(sum.sessions) },
+    { label:'Adherencia', val:inf.attendancePct+'%' },
+    { label:'Racha', val:'🔥'+sum.streak }
+  ];
+  const gap=18, tileW=(W-180-gap*2)/3;
+  tiles.forEach(function(t,i){
+    const tx=90+i*(tileW+gap);
+    rr(ctx,tx,y,tileW,105,16); ctx.fillStyle=col.tint; ctx.fill();
+    ctx.fillStyle=col.brandDk; ctx.textAlign='center';
+    ctx.font='700 32px system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
+    ctx.fillText(t.val, tx+tileW/2, y+48);
+    ctx.font='600 15px system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
+    ctx.fillText(t.label, tx+tileW/2, y+80);
+    ctx.textAlign='left';
+  });
+  y+=155;
+
+  if(sum.top&&sum.top.length){
+    const p=sum.top[0];
+    ctx.fillStyle=col.ink; ctx.font='700 26px system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
+    ctx.fillText('🥇 Récord del período', 90, y); y+=42;
+    ctx.font='400 20px system-ui,-apple-system,Segoe UI,Roboto,sans-serif'; ctx.fillStyle='#444';
+    const chgTxt=p.metric==='reps' ? (p.n+': '+p.first+' → '+p.last+' reps (+'+p.pct+'%)') : (p.n+': '+fmt(p.first)+' → '+fmt(p.last)+' kg (+'+p.pct+'%)');
+    y=shareWrapText(ctx,chgTxt,90,y,W-260,28)+16;
+  }
+
+  if(sum.bestGroup){
+    ctx.fillStyle=col.ink; ctx.font='700 26px system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
+    ctx.fillText('💪 Mejor evolución', 90, y); y+=42;
+    ctx.font='400 20px system-ui,-apple-system,Segoe UI,Roboto,sans-serif'; ctx.fillStyle='#444';
+    y=shareWrapText(ctx,sum.bestGroup.group+' +'+sum.bestGroup.avgPct+'%',90,y,W-260,28)+16;
+  }
+
+  if(weakName_){
+    ctx.fillStyle=col.ink; ctx.font='700 26px system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
+    ctx.fillText('🎯 Área a reforzar', 90, y); y+=42;
+    ctx.font='400 20px system-ui,-apple-system,Segoe UI,Roboto,sans-serif'; ctx.fillStyle='#444';
+    y=shareWrapText(ctx,weakName_,90,y,W-260,28)+16;
+  }
+
+  ctx.fillStyle=col.brandDk; ctx.font='700 24px system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
+  ctx.fillText('Evolución '+inf.qualifier+' en este período', 90, y+10);
+
+  ctx.textAlign='right'; ctx.fillStyle=col.ink;
+  ctx.font='italic 400 26px Georgia,serif';
+  ctx.fillText('Tamara Claveria', W-90, H-125);
+  ctx.font='400 15px system-ui,-apple-system,Segoe UI,Roboto,sans-serif'; ctx.fillStyle='#888';
+  ctx.fillText('TAFIT · Entrenadora Personal', W-90, H-100);
+  ctx.textAlign='left';
+
+  return cv;
+}
+async function shareInforme(){
+  const cycles=studentCycles();
+  const cIdx=(resumenCycleIdx!=null&&resumenCycleIdx>=0&&resumenCycleIdx<cycles.length)?resumenCycleIdx:cycles.length-1;
+  const sum=computeProgramSummary(cycles[cIdx]);
+  if(!sum.sessions){ toast('Todavía no hay datos suficientes para compartir','warn'); return; }
+  const inf=computeInformeAuto(sum);
+  try{
+    const cv=buildShareCanvas(sum,inf);
+    const dataUrl=cv.toDataURL('image/png');
+    const blob=dataURLToBlob(dataUrl);
+    const fname='informe_'+(DB.students[active].name||'alumno').replace(/\s+/g,'_')+'.png';
+    const file=new File([blob], fname, { type:'image/png' });
+    if(navigator.canShare && navigator.canShare({ files:[file] })){
+      await navigator.share({ files:[file], title:'Informe de Progreso · '+DB.students[active].name });
+    } else {
+      const w=window.open(dataUrl,'_blank');
+      if(!w) toast('Mantené presionada la imagen para guardarla o compartirla','ok');
+    }
+  }catch(err){
+    if(err && err.name==='AbortError') return;
+    toast('No se pudo generar la imagen para compartir','warn');
+  }
+}
+
 function renderResumen(){
   const m=$('main'); m.innerHTML='';
   const s=DB.students[active];
-  const sum=computeProgramSummary();
+  const cycles=studentCycles();
+  const cIdx=(resumenCycleIdx!=null&&resumenCycleIdx>=0&&resumenCycleIdx<cycles.length)?resumenCycleIdx:cycles.length-1;
+  const sum=computeProgramSummary(cycles[cIdx]);
 
-  const backBar=document.createElement('div'); backBar.className='focus'; backBar.style.margin='0 0 12px';
-  backBar.innerHTML=`<button data-act="backResumen" style="background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--steel)">← Volver a Editar</button>`;
-  m.appendChild(backBar);
+  const topBar=document.createElement('div'); topBar.className='focus no-print'; topBar.style.margin='0 0 12px'; topBar.style.display='flex'; topBar.style.gap='8px'; topBar.style.flexWrap='wrap';
+  topBar.innerHTML=`<button data-act="backResumen" style="background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--steel)">← Volver a Editar</button>`;
+  m.appendChild(topBar);
+
+  if(cycles.length>1){
+    const selWrap=document.createElement('div'); selWrap.className='no-print'; selWrap.style.cssText='max-width:420px;margin:0 auto 12px';
+    selWrap.innerHTML=`<select data-chg="resumenCycle" style="width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:13px;font-weight:700">${cycles.map(function(c,i){
+      const rangeTxt=(c.start?fmtShort(c.start):'inicio')+' — '+(c.end?fmtShort(c.end):'hoy');
+      const lbl=(i===cycles.length-1?'📍 Ciclo actual':'📁 Ciclo '+(i+1))+' · '+rangeTxt;
+      return `<option value="${i}" ${i===cIdx?'selected':''}>${esc(lbl)}</option>`;
+    }).join('')}</select>`;
+    m.appendChild(selWrap);
+  }
 
   if(!sum.sessions){
-    const empty=document.createElement('div'); empty.className='note'; empty.textContent=`${s.name} todavía no cerró ninguna sesión — el resumen se arma solo con datos reales de entrenamiento.`; m.appendChild(empty);
+    const empty=document.createElement('div'); empty.className='note'; empty.textContent=`${s.name} todavía no cerró ninguna sesión — el informe se arma solo con datos reales de entrenamiento.`; m.appendChild(empty);
     return;
   }
 
-  const wrap=document.createElement('div');
-  wrap.style.cssText='max-width:390px;margin:0 auto;background:var(--white);border-radius:22px;overflow:hidden;box-shadow:0 12px 34px rgba(13,27,42,.18)';
+  const inf=computeInformeAuto(sum);
+  const rangeStr=sum.startDate&&sum.endDate?fmtShort(sum.startDate)+' — '+fmtShort(sum.endDate):'—';
+  const todayStr=new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
 
-  let html=`<div style="background:linear-gradient(135deg,var(--navy),var(--steel));color:#fff;padding:26px 22px 22px;text-align:center">
-    <div style="font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;opacity:.85;margin-bottom:10px">Ta<b style="color:#7fd0ff">Fit</b></div>
-    <div style="font-size:40px;margin-bottom:6px">🏆</div>
-    <div style="font-size:20px;font-weight:800">¡${esc(s.name)} completó su programa!</div>
-    <div style="font-size:12.5px;opacity:.85;margin-top:5px">${sum.totalWeeks} semana${sum.totalWeeks===1?'':'s'} de entrenamiento${sum.startDate&&sum.endDate?' · '+fmtShort(sum.startDate)+' — '+fmtShort(sum.endDate):''}</div>
-  </div>
-  <div style="display:flex;border-bottom:1px solid var(--line)">
-    <div style="flex:1;text-align:center;padding:14px 4px;border-right:1px solid var(--line)"><div style="font-size:18px;font-weight:800;color:var(--navy)">${sum.sessions}</div><div style="font-size:9.5px;color:var(--mute);font-weight:700;text-transform:uppercase">Sesiones</div></div>
-    <div style="flex:1;text-align:center;padding:14px 4px;border-right:1px solid var(--line)"><div style="font-size:18px;font-weight:800;color:var(--navy)">${sum.weeksCompleted}/${sum.totalWeeks}</div><div style="font-size:9.5px;color:var(--mute);font-weight:700;text-transform:uppercase">Semanas</div></div>
-    <div style="flex:1;text-align:center;padding:14px 4px;border-right:1px solid var(--line)"><div style="font-size:18px;font-weight:800;color:var(--navy)">${sum.completion}%</div><div style="font-size:9.5px;color:var(--mute);font-weight:700;text-transform:uppercase">Cumplim.</div></div>
-    <div style="flex:1;text-align:center;padding:14px 4px"><div style="font-size:18px;font-weight:800;color:var(--navy)">${sum.streak>1?'🔥':''}${sum.streak}</div><div style="font-size:9.5px;color:var(--mute);font-weight:700;text-transform:uppercase">Racha</div></div>
-  </div>
-  <div style="padding:18px 20px">`;
+  const bestLine=sum.bestGroup
+    ? { name:sum.bestGroup.group+' 💪', ex:sum.bestGroup.top?sum.bestGroup.top.n:null, pct:sum.bestGroup.avgPct }
+    : null;
+  const weakName=sum.weakGroup?sum.weakGroup.group:(sum.improve?sum.improve.n:null);
+  const trendIcon={up:'📈',down:'📉',same:'➡️',none:'➖'};
 
-  if(sum.best){
-    html+=`<div style="font-size:11.5px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">⭐ Mejor logro</div>
-    <div style="background:#fcf3de;border:1.5px solid #f0d38a;border-radius:14px;padding:14px 16px;margin-bottom:14px">
-      <div style="font-weight:800;font-size:14px;color:#8a5a00;margin-bottom:4px">🏅 Récord del programa</div>
-      <div style="font-size:15px;font-weight:800;color:var(--navy);margin-bottom:2px">${esc(sum.best.n)}</div>
-      <div style="font-size:12.5px;color:#6b5217">Arrancó con ${fmt(sum.best.first)} y llegó a ${fmt(sum.best.last)} · +${sum.best.pct}% de mejora</div>
+  const wrap=document.createElement('div'); wrap.id='resumenCard';
+  let html=`<div class="irep-head">
+      <div class="rword">TA<span>FIT</span></div>
+      <div style="font-size:13px;opacity:.85;margin-top:4px">Informe de Progreso</div>
+      <div style="font-size:11px;opacity:.7;margin-top:2px">📊 Resumen de tu evolución</div>
+    </div>
+    <div class="icard" style="display:flex;justify-content:space-between;align-items:center">
+      <div><div style="font-weight:800;font-size:15px;color:var(--ink)">📅 ${rangeStr}</div><div style="font-size:11px;color:var(--mute);margin-top:2px">${esc(s.name)} · informe del ${todayStr}</div></div>
+    </div>
+
+    <div class="icard">
+      <h3>📋 Asistencia</h3>
+      <div class="istats">
+        <div class="istat" style="background:#e8f5e9"><b style="color:#2e7d32">${sum.sessions}</b><span style="color:#388e3c">Sesiones</span></div>
+        <div class="istat" style="background:#fff3e0"><b style="color:#e65100">${inf.plannedSessions}</b><span style="color:#ef6c00">Planificadas</span></div>
+        <div class="istat" style="background:var(--repTint)"><b style="color:var(--repBrandDk)">${inf.attendancePct}%</b><span style="color:var(--repBrandDk)">Adherencia</span></div>
+        <div class="istat" style="background:#fff8e1"><b style="color:#f57f17">🔥${sum.streak}</b><span style="color:#f9a825">Racha</span></div>
+      </div>
     </div>`;
-  }
 
-  if(sum.top.length){
-    html+=`<div style="font-size:11.5px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">📈 Cómo progresó</div>`;
-    sum.top.forEach(function(p){
-      html+=`<div style="display:flex;align-items:center;justify-content:space-between;background:var(--light);border-radius:10px;padding:10px 13px;margin-bottom:8px"><span style="font-size:12.5px;font-weight:700">${esc(p.n)}</span><span style="font-size:12px;color:var(--accent);font-weight:800">${fmt(p.first)} → ${fmt(p.last)}</span></div>`;
-    });
-  }
-
-  if(sum.weekStats.length){
-    html+=`<div style="font-size:11.5px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 10px">📅 Constancia por semana</div>`;
-    sum.weekStats.forEach(function(w){
-      let label,color,bg;
-      if(!w.hasLogs){ label='Sin registrar'; color='#7a8794'; bg='#eef1f4'; }
-      else if(w.complete&&w.pct>=90){ label='✓ Completa'; color='#1e7e42'; bg='#e5f6ec'; }
-      else if(w.pct>=60){ label='Parcial · '+w.pct+'%'; color='#8a5a10'; bg='#fff6e8'; }
-      else { label='Floja · '+w.pct+'%'; color='#a13a3a'; bg='#fbe9e9'; }
-      const star=(sum.bestWeek&&w.hasLogs&&sum.bestWeek.t===w.t&&sum.bestWeek.n===w.n)?' ⭐':'';
-      html+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 2px"><span style="font-size:12.5px;font-weight:700;color:var(--ink)">${esc(w.t)} · ${esc(w.n)}${star}</span><span style="font-size:11.5px;font-weight:800;color:${color};background:${bg};border-radius:8px;padding:3px 9px">${label}</span></div>`;
-    });
+  const top3=sum.top.slice(0,3);
+  html+=`<div class="icard">
+      <h3>🏆 Récords del período</h3>`;
+  if(top3.length){
+    html+=top3.map(function(p,i){
+      const chgTxt=p.metric==='reps' ? `${p.first} → <b>${p.last} reps</b>` : `${fmt(p.first)} → <b>${fmt(p.last)}</b>`;
+      return `<div class="irec"><span class="medal">${i===0?'🥇':i===1?'🥈':'🥉'}</span><div style="flex:1"><div class="name">${esc(p.n)}</div><div class="chg">${chgTxt}</div></div><span class="diff">+${p.pct}%</span></div>`;
+    }).join('');
+  } else {
+    html+=`<div class="note" style="margin:0">Todavía no hay suficientes datos para marcar récords — seguí cargando sesiones.</div>`;
   }
   html+=`</div>`;
 
-  if(sum.improve){
-    html+=`<div style="padding:0 20px 18px">
-      <div style="font-size:11.5px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">🎯 Para seguir mejorando</div>
-      <div style="background:#fff6e8;border:1.5px solid #f0d99a;border-radius:14px;padding:14px 16px">
-        <div style="font-weight:800;font-size:13px;color:#8a5a10;margin-bottom:6px">${esc(sum.improve.n)}</div>
-        <p style="margin:0;font-size:12.5px;color:#6b5217;line-height:1.55">Fue donde menos series completó de principio a fin (${sum.improve.pct}% de cumplimiento). Bajarle un poco el peso y sumar series completas antes de subir carga puede ayudar a afianzarlo.</p>
-      </div>
+  if(sum.allEx.length){
+    /* Agrupados por grupo muscular (mismo clasificador que usa la Conclusión) y en acordeón,
+       para no tener que scrollear una lista larga de todos los ejercicios. */
+    const groupOrder=MUSCLE_KEYWORDS.map(function(k){ return k[0]; }).concat(['Otros']);
+    const byGroup={};
+    sum.allEx.forEach(function(e){ const g=muscleGroupOf(e.n)||'Otros'; if(!byGroup[g]) byGroup[g]=[]; byGroup[g].push(e); });
+    html+=`<div class="icard">
+      <h3>💪 Todos los ejercicios</h3>
+      ${groupOrder.filter(function(g){ return byGroup[g]&&byGroup[g].length; }).map(function(g){
+        const items=byGroup[g];
+        return `<details class="tacc iex-acc"><summary><span>${esc(g)} <small style="font-weight:600;color:var(--mute)">(${items.length})</small></span><span class="tchev">▾</span></summary><div class="tacc-body">${items.map(function(e){
+          const wTxt=e.peso!=null?fmt(e.peso):'—';
+          return `<div class="iex"><span class="tr">${trendIcon[e.trend]}</span><div style="flex:1"><b>${esc(e.n)}</b>${e.pr?' <span class="prbadge">🎉 PR</span>':''}<small>${esc(e.reps)}</small></div><span class="w ${e.trend}">${wTxt}</span></div>`;
+        }).join('')}</div></details>`;
+      }).join('')}
     </div>`;
   }
 
-  html+=`<div style="padding:16px 22px 22px;text-align:center;font-size:13px;color:var(--mute);line-height:1.6;border-top:1px solid var(--line)">¡Excelente trabajo, <b style="color:var(--navy)">${esc(s.name)}</b>! Hablá con tu profe para armar el próximo bloque 💪</div>`;
+  if(sum.charts.length){
+    html+=`<div class="icard"><h3>📈 Evolución de cargas</h3>`;
+    sum.charts.forEach(function(c){
+      const max=Math.max.apply(null,c.series.map(function(x){return x.v;}));
+      html+=`<div class="ichart-label">${esc(c.n)} (kg)</div><div class="ichart">${c.series.map(function(pt){
+        const h=Math.max(6,Math.round((pt.v/max)*45));
+        return `<div class="bar"><span class="v">${fmt(pt.v)}</span><div class="b" style="height:${h}px"></div><span class="wk">${esc(pt.label)}</span></div>`;
+      }).join('')}</div>`;
+    });
+    html+=`</div>`;
+  }
+
+  html+=`<div class="icard">
+      <h3>✅ Conclusión</h3>
+      <div style="font-size:12.5px;line-height:1.65;color:var(--ink);background:var(--repTint);padding:12px;border-radius:10px;margin-bottom:10px">
+        Evolución <b style="color:var(--repBrandDk)">${inf.qualifier}</b> en este período${bestLine?`, destacándose en <b>${esc(bestLine.name)}</b> (+${bestLine.pct}%${bestLine.ex?', con su mejor salto en '+esc(bestLine.ex):''})`:''}.
+        ${weakName?` Área a reforzar: <b>${esc(weakName)}</b>.`:''}
+      </div>
+      <div style="font-size:12.5px;line-height:1.6;color:var(--mute)">${inf.recommendation}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
+        <div style="font-size:10.5px;color:var(--mute)">📅 Próxima evaluación<br><b style="color:var(--ink)">${inf.nextEvalStr}</b></div>
+        <div style="text-align:right"><div style="font-family:'Brush Script MT',cursive;font-size:20px;color:var(--repBrandDk)">Tamara Claveria</div><div style="font-size:9.5px;color:var(--mute)">TAFIT · Entrenadora Personal</div></div>
+      </div>
+    </div>`;
 
   wrap.innerHTML=html;
   m.appendChild(wrap);
 
-  const hint=document.createElement('div'); hint.className='note'; hint.textContent='Sacale una captura de pantalla a la tarjeta de arriba y mandásela por WhatsApp.'; m.appendChild(hint);
+  const actions=document.createElement('div'); actions.className='no-print'; actions.style.cssText='display:flex;gap:8px;max-width:420px;margin:0 auto 6px';
+  actions.innerHTML=`<button data-act="shareInforme" style="flex:1;padding:13px;border-radius:12px;border:none;font-size:13px;font-weight:700;background:#25d366;color:#fff">💬 Compartir por WhatsApp</button><button data-act="printResumen" style="flex:1;padding:13px;border-radius:12px;border:none;font-size:13px;font-weight:700;background:var(--repBrandDk);color:#fff">📥 Descargar PDF</button>`;
+  m.appendChild(actions);
+
+  const hint=document.createElement('div'); hint.className='note no-print'; hint.style.cssText='max-width:420px;margin:0 auto'; hint.textContent='"Compartir por WhatsApp" genera una imagen del informe y abre directamente el panel para enviarla. "Descargar PDF" abre el diálogo de impresión de tu iPhone — desde ahí elegís "Guardar en Archivos".'; m.appendChild(hint);
 }
 
 /* Modo oscuro */
@@ -2787,29 +3216,81 @@ async function closeSession(){
 /* ===================== TRANSCRIPTA ===================== */
 function objLabel(ex){ const m=membersOf(); if(m.length>1){ const a=(ex.w&&ex.w!=='A definir')?ex.w:'—', b=(ex.w2&&ex.w2!=='A definir')?ex.w2:'—'; return `${esc(m[0])}: ${esc(a)}<br>${esc(m[1])}: ${esc(b)}`; } return esc(ex.w); }
 function setsLine(sets){ return sets.map(s=>`S${s.s}: ${s.w?esc(s.w)+'kg':'—'} × ${s.r?esc(s.r):'—'}${s.rir!==''?' · RIR '+esc(s.rir):''}`).join(' &nbsp;|&nbsp; '); }
-function renderTrans(){
-  const m=$('main'); m.innerHTML=''; const r=routine(), W=weeks();
-  const f=document.createElement('div'); f.className='focus'; f.innerHTML=`<b>${esc(DB.students[active].name)}</b> · rutina y registro de sesiones`; m.appendChild(f);
-  r.forEach(d=>{ const c=document.createElement('details'); c.className='tcard tacc'; c.innerHTML=`<summary><h2>${esc(d.day)}</h2><span class="tchev">▾</span></summary><div class="tacc-body">`+d.ex.map(ex=>`<div class="trow"><div class="tn">${esc(ex.n)}<small>${ex.alt?'alt: '+esc(ex.alt):''}${ex.rest?(ex.alt?' · ':'')+'⏱ '+esc(ex.rest):''}</small></div><div class="tv">${ex.s}×${esc(ex.r)}<br>${objLabel(ex)}</div></div>`).join('')+`</div>`; m.appendChild(c); });
-  const pc=document.createElement('details'); pc.className='tcard tacc'; pc.innerHTML=`<summary><h2>Progresión (${W.length} semanas)</h2><span class="tchev">▾</span></summary><div class="tacc-body prog-list">${W.map(w=>`<p><b>${esc(w.t)} · ${esc(w.n)}</b> — ${esc(w.d)}</p>`).join('')}</div>`; m.appendChild(pc);
-  const lc=document.createElement('div'); lc.className='tcard';
-  let body;
-  if(!LOGS.length) body=`<div class="empty">Todavía no hay sesiones registradas.<br>Cuando cierres una sesión en la pestaña App, aparece acá automáticamente.</div>`;
-  else body=LOGS.map((e,i)=>{
-    const exh=e.ex.map(x=>{
-      if(x.members){ const blocks=x.members.map(mm=>`<div class="lsets"><b>${esc(mm.name)}:</b> ${setsLine(mm.sets)}</div>`).join(''); return `<div class="log-ex"><div class="len">${esc(x.n)}</div>${blocks}</div>`; }
-      return `<div class="log-ex"><div class="len">${esc(x.n)}</div><div class="lsets">${setsLine(x.sets)}</div></div>`;
-    }).join('');
-    const obs=e.obs?`<div class="log-obs">📝 ${esc(e.obs)}</div>`:'';
-    let hh='';
-    if(e.health){ const fl=(e.health.alarms&&e.health.alarms.length)||e.health.pre==='warn'||e.health.post==='warn'; hh=`<div class="log-health ${fl?'flag':'ok'}">⚕ Pierna · antes: ${esc(e.health.pre||'—')} · después: ${esc(e.health.post||'—')}${(e.health.alarms&&e.health.alarms.length)?' · alarmas: '+esc(e.health.alarms.join(', ')):''}</div>`; }
-    const del=trainer?`<div class="log-del"><button data-act="delLog" data-i="${i}">eliminar</button></div>`:'';
-    return `<details class="log-entry"><summary><span class="le-day">${esc(e.dayName)}<small>${fmtDate(e.date)}</small></span><span class="le-meta">${esc(e.weekName||'')}${e.obs?'<br>📝 obs':''}${(e.health&&((e.health.alarms&&e.health.alarms.length)||e.health.pre==='warn'||e.health.post==='warn'))?'<br>⚕ revisar':''}</span></summary><div class="log-body">${exh}${obs}${hh}${del}</div></details>`;
+function logEntryHTML(e,i){
+  const exh=e.ex.map(x=>{
+    if(x.members){ const blocks=x.members.map(mm=>`<div class="lsets"><b>${esc(mm.name)}:</b> ${setsLine(mm.sets)}</div>`).join(''); return `<div class="log-ex"><div class="len">${esc(x.n)}</div>${blocks}</div>`; }
+    return `<div class="log-ex"><div class="len">${esc(x.n)}</div><div class="lsets">${setsLine(x.sets)}</div></div>`;
   }).join('');
-  lc.innerHTML=`<h2>Sesiones completadas (${LOGS.length})</h2>${body}`; m.appendChild(lc);
+  const obs=e.obs?`<div class="log-obs">📝 ${esc(e.obs)}</div>`:'';
+  let hh='';
+  if(e.health){ const fl=(e.health.alarms&&e.health.alarms.length)||e.health.pre==='warn'||e.health.post==='warn'; hh=`<div class="log-health ${fl?'flag':'ok'}">⚕ Pierna · antes: ${esc(e.health.pre||'—')} · después: ${esc(e.health.post||'—')}${(e.health.alarms&&e.health.alarms.length)?' · alarmas: '+esc(e.health.alarms.join(', ')):''}</div>`; }
+  const del=trainer?`<div class="log-del"><button data-act="delLog" data-i="${i}">eliminar</button></div>`:'';
+  return `<details class="log-entry"><summary><span class="le-day">${esc(e.dayName)}<small>${fmtDate(e.date)}</small></span><span class="le-meta">${esc(e.weekName||'')}${e.obs?'<br>📝 obs':''}${(e.health&&((e.health.alarms&&e.health.alarms.length)||e.health.pre==='warn'||e.health.post==='warn'))?'<br>⚕ revisar':''}</span></summary><div class="log-body">${exh}${obs}${hh}${del}</div></details>`;
+}
+function renderTrans(){
+  const m=$('main'); m.innerHTML='';
+  const f=document.createElement('div'); f.className='focus'; f.innerHTML=`<b>${esc(DB.students[active].name)}</b> · rutina y registro de sesiones`; m.appendChild(f);
+
+  const cycles=studentCycles();
+  const multi=cycles.length>1;
+
+  cycles.forEach(function(cycle,ci){
+    if(multi){
+      const rangeTxt=(cycle.start?fmtShort(cycle.start):'inicio')+' — '+(cycle.end?fmtShort(cycle.end):'hoy');
+      const lbl=document.createElement('div'); lbl.className='focus'; lbl.style.cssText='margin:20px 0 10px;font-weight:800;font-size:14px;background:var(--card);border-radius:10px';
+      lbl.innerHTML=`📁 Transcripta ${ci+1} · Rutina <span style="font-weight:600;color:var(--mute);font-size:12px">(${rangeTxt})</span>`;
+      m.appendChild(lbl);
+    }
+    const r=cycle.routine||[], W=cycle.weeksArr||DEFAULT_WEEKS;
+    r.forEach(d=>{ const c=document.createElement('details'); c.className='tcard tacc'; c.innerHTML=`<summary><h2>${esc(d.day)}</h2><span class="tchev">▾</span></summary><div class="tacc-body">`+d.ex.map(ex=>`<div class="trow"><div class="tn">${esc(ex.n)}<small>${ex.alt?'alt: '+esc(ex.alt):''}${ex.rest?(ex.alt?' · ':'')+'⏱ '+esc(ex.rest):''}</small></div><div class="tv">${ex.s}×${esc(ex.r)}<br>${objLabel(ex)}</div></div>`).join('')+`</div>`; m.appendChild(c); });
+
+    const pc=document.createElement('details'); pc.className='tcard tacc'; pc.innerHTML=`<summary><h2>Progresión (${W.length} semanas)</h2><span class="tchev">▾</span></summary><div class="tacc-body prog-list">${W.map(w=>`<p><b>${esc(w.t)} · ${esc(w.n)}</b> — ${esc(w.d)}</p>`).join('')}</div>`; m.appendChild(pc);
+
+    const cLogs=logsForCycle(cycle);
+    const lc=document.createElement('div'); lc.className='tcard';
+    let body;
+    if(!cLogs.length) body=`<div class="empty">Todavía no hay sesiones registradas${multi?' en este ciclo':''}.<br>Cuando cierres una sesión en la pestaña App, aparece acá automáticamente.</div>`;
+    else body=cLogs.map(function(o){ return logEntryHTML(o.e,o.i); }).join('');
+    lc.innerHTML=`<h2>Sesiones completadas (${cLogs.length})</h2>${body}`; m.appendChild(lc);
+  });
 }
 function fmtDate(iso){ const d=new Date(iso); return d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})+' · '+d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}); }
 async function delLog(i){ if(!await uiConfirm("¿Eliminar esta sesión del registro?")) return; LOGS.splice(i,1); await saveLogs(); renderTrans(); }
+/* Marca el inicio de un nuevo ciclo/programa: NO borra ni toca el historial (sigue completo en
+   Transcripta), solo guarda una fecha para que el Informe de Evolución de acá en más cuente
+   nada más que las sesiones del programa nuevo. */
+async function startNewCycle(){
+  const st=DB.students[active], name=st.name;
+  if(!await uiConfirm('¿Iniciar un nuevo ciclo para '+name+'? Su historial anterior NO se borra — sigue completo en Transcripta, dividido como "Transcripta 1", "Transcripta 2", etc. — pero el Informe de Evolución de ahora en más solo va a contar los datos desde hoy.')) return;
+  const now=new Date().toISOString();
+  /* Guarda una "foto" de la rutina que tenía hasta ahora (con sus fechas de inicio/fin) para
+     que Transcripta pueda seguir mostrando esa rutina vieja tal cual era, separada de la nueva. */
+  if(!st.cycleHistory) st.cycleHistory=[];
+  st.cycleHistory.push({ start:st.cycleStart||null, end:now, routine:cp(st.routine), weeks:cp(st.weeks) });
+  st.cycleStart=now;
+  await saveDB();
+  toast('✓ Nuevo ciclo iniciado para '+name,'ok');
+  renderEdit();
+}
+/* Lista los ciclos de un alumno (cada uno con su propia rutina "congelada" y rango de fechas).
+   Si nunca se usó "Iniciar nuevo ciclo", devuelve un solo ciclo con la rutina actual. */
+function studentCycles(){
+  const st=DB.students[active];
+  const hist=(st.cycleHistory||[]).map(function(c){ return { start:c.start||null, end:c.end||null, routine:c.routine, weeksArr:c.weeks }; });
+  hist.push({ start:st.cycleStart||null, end:null, routine:st.routine, weeksArr:st.weeks });
+  return hist;
+}
+/* Sesiones de LOGS que caen dentro del rango de un ciclo, conservando el índice real
+   dentro de LOGS (necesario para poder borrar una sesión puntual con delLog). */
+function logsForCycle(cycle){
+  const out=[];
+  LOGS.forEach(function(l,i){
+    if(cycle.start&&l.date<cycle.start) return;
+    if(cycle.end&&l.date>=cycle.end) return;
+    out.push({ e:l, i:i });
+  });
+  return out;
+}
 
 /* ===================== FOTOS ===================== */
 async function renderPhotos(){
@@ -2954,7 +3435,11 @@ function renderEdit(){
     SEC('plan','💳 Plan del alumno (vence a los 30 días)',`${statusHTML}<div class="fld"><label>Fecha del último pago</label><input type="date" class="plan-date-inp" id="planPaidInput" value="${esc(planPaid)}"></div><button class="plan-btn" data-act="savePlanDate">💾 Guardar fecha</button><button class="plan-btn" data-act="planToday" style="margin-top:8px;background:var(--ok)">✅ Marcar pago de hoy</button><div class="plan-hint">El plan dura 30 días desde la fecha cargada. Apenas se vence, la app le muestra al alumno una pantalla de "Tu plan venció" y no puede seguir entrenando hasta que renueve. Cuando ${esc(DB.students[active].name)} te pague de nuevo, tocá "Marcar pago de hoy" (o cargá la fecha manualmente) y se le desbloquea al instante. Si dejás la fecha vacía, no se muestra ninguna alerta ni se bloquea nada.</div>`);
   }
 
-  SEC('resumen','🏆 Resumen del programa',`<p>Generá una tarjeta con el progreso de ${esc(DB.students[active].name)}: sesiones, semanas completadas, mejor logro y qué puede seguir mejorando. Se arma sola con sus datos reales de entrenamiento — ideal para sacarle captura y mandarla por WhatsApp cuando termina el programa.</p><div class="edit-actions"><button data-act="genResumen">🏆 Generar resumen</button></div>`);
+  {
+    const cycleStart=DB.students[active].cycleStart;
+    const cycleInfo=cycleStart?`<div class="note" style="margin:0 0 10px">📍 Ciclo actual iniciado el ${fmtShort(cycleStart)} — el informe solo cuenta los datos desde esa fecha (el historial anterior sigue completo en Transcripta).</div>`:'';
+    SEC('resumen','🏆 Informe de Evolución',`<p>Generá el Informe de Evolución de ${esc(DB.students[active].name)}: asistencia, adherencia, progreso y una conclusión redactada sola con sus datos reales de entrenamiento. Lo podés descargar como PDF o compartirlo directo por WhatsApp.</p>${cycleInfo}<div class="edit-actions"><button data-act="genResumen">🏆 Generar informe</button><button data-act="newCycle" style="background:var(--card);border:1px solid var(--line);color:var(--steel)">🔄 Iniciar nuevo ciclo</button></div>`);
+  }
 
   const duo=isDuo(), mm=membersOf();
   const head=document.createElement('div'); head.className='focus'; head.style.margin='4px 0 12px'; head.innerHTML=`Rutina de <b>${esc(DB.students[active].name)}</b>`; m.appendChild(head);
@@ -3182,8 +3667,11 @@ document.addEventListener('click',e=>{
     case 'saveForm': handleSaveForm(el.dataset.ftype); break;
     case 'toggleForm': toggleFormEnable(el.dataset.ftype); break;
     case 'togglePause': togglePause(); break;
-    case 'genResumen': tab='resumen'; render(); break;
+    case 'genResumen': resumenCycleIdx=null; tab='resumen'; render(); break;
     case 'backResumen': tab='edit'; render(); break;
+    case 'printResumen': printResumen(); break;
+    case 'shareInforme': shareInforme(); break;
+    case 'newCycle': startNewCycle(); break;
     case 'savePlanDate': savePlanDate(); break;
     case 'planToday': planToday(); break;
     case 'formMember': member=+el.dataset.m; renderFormTab(el.dataset.ft); break;
@@ -3209,6 +3697,7 @@ document.addEventListener('click',e=>{
 document.addEventListener('change',e=>{
   const el=e.target.closest('[data-chg]'); if(el){ switch(el.dataset.chg){
     case 'switch': switchStudent(el.value); break;
+    case 'resumenCycle': resumenCycleIdx=+el.value; renderResumen(); break;
     case 'set': updSet(+el.dataset.i,+el.dataset.j,+(el.dataset.m||0),el.dataset.f,el.value); break;
     case 'dset': { const tr=el.closest('tr'); if(!tr) break; const inps=tr.querySelectorAll('[data-chg="dset"]'); const vals=[]; inps.forEach(inp=>vals.push(inp.value.trim())); updSet(+el.dataset.i,+el.dataset.j,+(el.dataset.m||0),'w',vals.join('/')); break; }
     case 'obs': updObs(el.value); break;
