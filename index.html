@@ -2162,7 +2162,29 @@ function runSeeds(){
   initDarkMode();
   whenFirebaseReady(24); /* espera a que carguen los scripts (defer) y arranca el sync */
   /* PWA: la app queda cacheada en el teléfono y abre al instante, con o sin señal */
-  try{ if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('./sw.js').catch(()=>{}); }catch(e){}
+  try{
+    if('serviceWorker' in navigator && location.protocol==='https:'){
+      const hadController=!!navigator.serviceWorker.controller;
+      let _swRefreshing=false;
+      navigator.serviceWorker.addEventListener('controllerchange', function(){
+        /* Cuando una versión nueva del Service Worker toma el control, recargamos una
+           sola vez para que se vea al toque. Si no hacemos esto, en un PWA agregado a la
+           pantalla de inicio del iPhone la actualización queda "lista" pero invisible
+           hasta que el usuario cierre y reabra la app varias veces — de ahí el reclamo de
+           "subí el zip nuevo pero no se actualiza". No recargamos en la instalación
+           inicial (cuando todavía no había ningún Service Worker controlando la página). */
+        if(_swRefreshing||!hadController) return;
+        _swRefreshing=true; location.reload();
+      });
+      navigator.serviceWorker.register('./sw.js').then(function(reg){
+        /* Un PWA standalone casi nunca revisa por su cuenta si hay una versión nueva.
+           Forzamos la revisión cada vez que la app vuelve a primer plano. */
+        const checkForUpdate=()=>{ reg.update().catch(()=>{}); };
+        if(document.visibilityState==='visible') checkForUpdate();
+        document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible') checkForUpdate(); });
+      }).catch(()=>{});
+    }
+  }catch(e){}
 })();
 function whenFirebaseReady(tries){
   if(typeof firebase!=='undefined'&&firebase.initializeApp){ initFirebase(); return; }
@@ -2825,7 +2847,17 @@ function computeProgramSummary(cycleOverride,memberName){
 
   return { sessions, totalWeeks, weeksCompleted, completion, best, top, bestGroup, muscleGroups, improve, weakGroup, weekStats, bestWeek, streak, startDate, endDate, allEx, charts, dayCount:R.length, cyc:{start:cyc.start,end:cyc.end} };
 }
-function printResumen(){ window.print(); }
+function printResumen(){
+  /* iOS no soporta window.print() dentro de un PWA agregado a la pantalla de inicio
+     (modo standalone) — no tira error, simplemente no hace nada, que es justo el reclamo
+     de "no me deja descargar el PDF". La única forma de que el diálogo de impresión
+     funcione ahí es abriendo el mismo enlace en Safari normal (no desde el ícono). */
+  if(isStandalone()&&isIOS()){
+    toast('Para descargar el PDF abrí este mismo enlace en Safari (no desde el ícono de la app) y tocá "Descargar PDF" ahí','warn');
+    return;
+  }
+  window.print();
+}
 /* Datos auto-generados del Informe de Evolución (todo calculado, nada manual):
    asistencia/adherencia, checks de progreso, y una conclusión redactada sola. */
 function exFieldInLog(log,exName,field,memberName){
