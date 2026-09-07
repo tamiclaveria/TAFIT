@@ -2244,10 +2244,15 @@ function renderChrome(){
   if(hasAnamnesis) formTabs.push(['anamnesis','Anamnesis']);
   /* "Informe" para el alumno: mismo toggle que Acuerdo/Anamnesis (st.forms.informe),
      activable desde Editar. Ojo: apunta a 'resumen' (SU Informe de Evolución), nunca a
-     'rep' (el panel del profe con el resumen de TODOS los alumnos). */
+     'rep' (el panel del profe con el resumen de TODOS los alumnos). Tiene que aparecer en
+     CUALQUIER vista de alumno: tanto por el enlace bloqueado (?a=..&lock=1) como por el
+     modo "Alumno" con PIN desde el mismo celular (el botón 🔒) — antes solo se agregaba en
+     el primero, por eso a veces no le aparecía a un alumno aunque ya estuviera activado. */
   const lockedTabs=[['app','App'],['trans','Transcripta']];
   if(hasInforme) lockedTabs.push(['resumen','Informe']);
-  const tabs = locked ? lockedTabs.concat(formTabs) : trainer ? [['app','App'],['trans','Transcripta'],['fotos','Fotos'],['edit','Editar'],['rep','Informe']].concat(formTabs) : [['app','App'],['trans','Transcripta'],['fotos','Fotos']].concat(formTabs);
+  const unlockedStudentTabs=[['app','App'],['trans','Transcripta'],['fotos','Fotos']];
+  if(hasInforme) unlockedStudentTabs.push(['resumen','Informe']);
+  const tabs = locked ? lockedTabs.concat(formTabs) : trainer ? [['app','App'],['trans','Transcripta'],['fotos','Fotos'],['edit','Editar'],['rep','Informe']].concat(formTabs) : unlockedStudentTabs.concat(formTabs);
   $('nav').innerHTML=tabs.map(([k,l])=>`<button data-act="tab" data-tab="${k}" class="${k===tab?'active':''}">${l}</button>`).join('');
 }
 /* El alumno puede entrar a SU Informe de Evolución (tab 'resumen') solo si Tami lo activó
@@ -2257,7 +2262,7 @@ function informeEnabledForStudent(){ const s=DB.students[active]; return !!(s&&s
 function render(){
   if(!trainer){
     if(tab==='edit'||tab==='rep') tab='app';
-    else if(tab==='resumen'&&!(locked&&informeEnabledForStudent())) tab='app';
+    else if(tab==='resumen'&&!informeEnabledForStudent()) tab='app';
   }
   renderChrome();
   if(tab==='app') renderApp();
@@ -2272,7 +2277,7 @@ function render(){
 function setTab(t){
   if(!trainer){
     if(t==='edit'||t==='rep') return;
-    if(t==='resumen'&&!(locked&&informeEnabledForStudent())) return;
+    if(t==='resumen'&&!informeEnabledForStudent()) return;
   }
   tab=t; render();
 }
