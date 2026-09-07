@@ -267,6 +267,17 @@
   .session-close.ready{background:var(--ok)}
 
   .tcard{background:#fff;border-radius:14px;padding:16px;margin-bottom:14px;border:1px solid var(--line)}
+  /* Bloque grande que agrupa TODA una Transcripta (rutina + progresión + sesiones) para
+     poder plegarla entera — así el ciclo viejo no obliga a scrollear kilómetros para
+     llegar al ciclo actual. */
+  details.tcycle{margin-bottom:18px;border-radius:16px;border:1.5px solid var(--line);background:var(--card)}
+  details.tcycle summary.tcycle-sum{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 16px}
+  details.tcycle summary.tcycle-sum::-webkit-details-marker{display:none}
+  details.tcycle summary.tcycle-sum b{font-size:14px;color:var(--navy)}
+  details.tcycle summary.tcycle-sum small{display:block;font-weight:600;color:var(--mute);font-size:11.5px;margin-top:2px}
+  details.tcycle .tchev{color:var(--niebla);font-size:14px;transition:transform .2s;flex:none}
+  details.tcycle[open] .tchev{transform:rotate(180deg)}
+  details.tcycle .tcycle-body{padding:0 12px 14px}
   details.tacc{padding:0}
   details.tacc summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:14px 16px}
   details.tacc summary::-webkit-details-marker{display:none}
@@ -2763,11 +2774,15 @@ function computeProgramSummary(cycleOverride,memberName){
       for(let i=0;i<LOGS_.length&&found.length<2;i++){ const w=exWeightInLog(LOGS_[i],ex.n,memberName); if(w!=null) found.push(w); }
       let trend='none', peso=null;
       if(found.length){ peso=found[0]; trend = found.length>1 ? (found[0]>found[1]?'up':(found[0]<found[1]?'down':'same')) : 'same'; }
-      /* "Récord personal": el peso actual iguala o supera el máximo histórico de TODA la vida
-         del alumno (o de ese integrante puntual) con ese ejercicio — mismo criterio que el
-         banner en vivo. */
-      const pr=peso!=null&&peso>0&&peso>=getMaxWeight(ex.n,memberName);
-      allEx.push({ n:ex.n, reps:ex.s+'×'+(ex.r||''), peso, trend, pr });
+      /* Peso inicial: el primer registro de este ejercicio DENTRO de este período/ciclo
+         (orden cronológico ascendente, ver logsAsc más arriba). */
+      let first=null;
+      for(let i=0;i<logsAsc.length;i++){ const w=exWeightInLog(logsAsc[i],ex.n,memberName); if(w!=null){ first=w; break; } }
+      /* Peso máximo: el récord histórico de TODA la vida del alumno (o de ese integrante
+         puntual) con ese ejercicio, sin importar el ciclo — mismo criterio que el "🎉 PR". */
+      const max=getMaxWeight(ex.n,memberName);
+      const pr=peso!=null&&peso>0&&peso>=max;
+      allEx.push({ n:ex.n, reps:ex.s+'×'+(ex.r||''), peso, first, max, trend, pr });
     });
   });
 
@@ -3108,7 +3123,13 @@ function renderResumen(){
         const items=byGroup[g];
         return `<details class="tacc iex-acc"><summary><span>${esc(g)} <small style="font-weight:600;color:var(--mute)">(${items.length})</small></span><span class="tchev">▾</span></summary><div class="tacc-body">${items.map(function(e){
           const wTxt=e.peso!=null?fmt(e.peso):'—';
-          return `<div class="iex"><span class="tr">${trendIcon[e.trend]}</span><div style="flex:1"><b>${esc(e.n)}</b>${e.pr?' <span class="prbadge">🎉 PR</span>':''}<small>${esc(e.reps)}</small></div><span class="w ${e.trend}">${wTxt}</span></div>`;
+          /* Peso inicial (con qué arrancó este ciclo) y peso máximo (récord histórico),
+             como referencia rápida junto al peso actual — sin tener que ir a buscarlos. */
+          const statBits=[];
+          if(e.first!=null) statBits.push('inicial '+fmt(e.first));
+          if(e.max>0) statBits.push('máx '+fmt(e.max));
+          const statsTxt=statBits.length?' · '+statBits.join(' · '):'';
+          return `<div class="iex"><span class="tr">${trendIcon[e.trend]}</span><div style="flex:1"><b>${esc(e.n)}</b>${e.pr?' <span class="prbadge">🎉 PR</span>':''}<small>${esc(e.reps)}${esc(statsTxt)}</small></div><span class="w ${e.trend}">${wTxt}</span></div>`;
         }).join('')}</div></details>`;
       }).join('')}
     </div>`;
@@ -3263,25 +3284,39 @@ function renderTrans(){
 
   const cycles=studentCycles();
   const multi=cycles.length>1;
+  const lastIdx=cycles.length-1;
 
-  cycles.forEach(function(cycle,ci){
-    if(multi){
-      const rangeTxt=(cycle.start?fmtShort(cycle.start):'inicio')+' — '+(cycle.end?fmtShort(cycle.end):'hoy');
-      const lbl=document.createElement('div'); lbl.className='focus'; lbl.style.cssText='margin:20px 0 10px;font-weight:800;font-size:14px;background:var(--card);border-radius:10px';
-      lbl.innerHTML=`📁 Transcripta ${ci+1} · Rutina <span style="font-weight:600;color:var(--mute);font-size:12px">(${rangeTxt})</span>`;
-      m.appendChild(lbl);
-    }
+  /* El ciclo actual va SIEMPRE arriba y abierto. Los ciclos cerrados (Transcriptas viejas)
+     van debajo, plegados por defecto — así no hay que scrollear todo un ciclo viejo (a
+     veces de meses) para llegar a lo de hoy. La numeración "Transcripta N" respeta el
+     orden cronológico real (1 = la más vieja) aunque visualmente se muestren al revés. */
+  cycles.map(function(cycle,ci){ return {cycle:cycle,ci:ci}; }).reverse().forEach(function(o){
+    const cycle=o.cycle, ci=o.ci, isCurrent=(ci===lastIdx);
     const r=cycle.routine||[], W=cycle.weeksArr||DEFAULT_WEEKS;
-    r.forEach(d=>{ const c=document.createElement('details'); c.className='tcard tacc'; c.innerHTML=`<summary><h2>${esc(d.day)}</h2><span class="tchev">▾</span></summary><div class="tacc-body">`+d.ex.map(ex=>`<div class="trow"><div class="tn">${esc(ex.n)}<small>${ex.alt?'alt: '+esc(ex.alt):''}${ex.rest?(ex.alt?' · ':'')+'⏱ '+esc(ex.rest):''}</small></div><div class="tv">${ex.s}×${esc(ex.r)}<br>${objLabel(ex)}</div></div>`).join('')+`</div>`; m.appendChild(c); });
 
-    const pc=document.createElement('details'); pc.className='tcard tacc'; pc.innerHTML=`<summary><h2>Progresión (${W.length} semanas)</h2><span class="tchev">▾</span></summary><div class="tacc-body prog-list">${W.map(w=>`<p><b>${esc(w.t)} · ${esc(w.n)}</b> — ${esc(w.d)}</p>`).join('')}</div>`; m.appendChild(pc);
+    let inner='';
+    r.forEach(d=>{ inner+=`<details class="tcard tacc"><summary><h2>${esc(d.day)}</h2><span class="tchev">▾</span></summary><div class="tacc-body">`+d.ex.map(ex=>`<div class="trow"><div class="tn">${esc(ex.n)}<small>${ex.alt?'alt: '+esc(ex.alt):''}${ex.rest?(ex.alt?' · ':'')+'⏱ '+esc(ex.rest):''}</small></div><div class="tv">${ex.s}×${esc(ex.r)}<br>${objLabel(ex)}</div></div>`).join('')+`</div></details>`; });
+
+    inner+=`<details class="tcard tacc"><summary><h2>Progresión (${W.length} semanas)</h2><span class="tchev">▾</span></summary><div class="tacc-body prog-list">${W.map(w=>`<p><b>${esc(w.t)} · ${esc(w.n)}</b> — ${esc(w.d)}</p>`).join('')}</div></details>`;
 
     const cLogs=logsForCycle(cycle);
-    const lc=document.createElement('div'); lc.className='tcard';
     let body;
     if(!cLogs.length) body=`<div class="empty">Todavía no hay sesiones registradas${multi?' en este ciclo':''}.<br>Cuando cierres una sesión en la pestaña App, aparece acá automáticamente.</div>`;
-    else body=cLogs.map(function(o){ return logEntryHTML(o.e,o.i); }).join('');
-    lc.innerHTML=`<h2>Sesiones completadas (${cLogs.length})</h2>${body}`; m.appendChild(lc);
+    else body=cLogs.map(function(o2){ return logEntryHTML(o2.e,o2.i); }).join('');
+    inner+=`<div class="tcard"><h2>Sesiones completadas (${cLogs.length})</h2>${body}</div>`;
+
+    if(!multi){
+      /* Un solo ciclo (caso normal, todavía no se usó "Iniciar nuevo ciclo"): se ve
+         exactamente igual que siempre, sin encabezado ni nada plegado de más. */
+      m.insertAdjacentHTML('beforeend', inner);
+      return;
+    }
+
+    const rangeTxt=(cycle.start?fmtShort(cycle.start):'inicio')+' — '+(cycle.end?fmtShort(cycle.end):'hoy');
+    const lbl=(isCurrent?'📍 Transcripta '+(ci+1)+' · Rutina actual':'📁 Transcripta '+(ci+1)+' · Rutina');
+    const wrap=document.createElement('details'); wrap.className='tcycle'; wrap.open=isCurrent;
+    wrap.innerHTML=`<summary class="tcycle-sum"><div><b>${lbl}</b><small>${esc(rangeTxt)}</small></div><span class="tchev">▾</span></summary><div class="tcycle-body">${inner}</div>`;
+    m.appendChild(wrap);
   });
 }
 function fmtDate(iso){ const d=new Date(iso); return d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})+' · '+d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}); }
