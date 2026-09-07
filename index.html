@@ -1564,7 +1564,7 @@ function viewExIcon(cat,name,ei){
 }
 
 let DB={ order:[], students:{}, settings:{pin:""}, _seed:{} };
-let active=null, CACHE={}, LOGS=[], NOTIFS=[], resumenCycleIdx=null;
+let active=null, CACHE={}, LOGS=[], NOTIFS=[], resumenCycleIdx=null, resumenMemberIdx=null;
 /* ==== Avisos internos: cuando un alumno cierra sesión, la profe ve un aviso (sin push, solo dentro de la app) ==== */
 async function loadNotifs(){ NOTIFS=safeParse(await Store.get('tafit:notifs')||'[]',[]); }
 async function pushNotif(entry){ NOTIFS.unshift(entry); if(NOTIFS.length>50) NOTIFS=NOTIFS.slice(0,50); await Store.set('tafit:notifs', JSON.stringify(NOTIFS)); }
@@ -2514,11 +2514,12 @@ function paintTabata(){
 
 /* Banner de instalación PWA */
 /* Racha de entrenamiento */
-function getStreak(){
-  if(!LOGS.length) return 0;
+function getStreak(memberName){
+  var L=memberName?LOGS.filter(function(l){ return logHasMember(l,memberName); }):LOGS;
+  if(!L.length) return 0;
   var streak=1;
-  for(var i=0;i<LOGS.length-1;i++){
-    var d1=new Date(LOGS[i].date), d2=new Date(LOGS[i+1].date);
+  for(var i=0;i<L.length-1;i++){
+    var d1=new Date(L[i].date), d2=new Date(L[i+1].date);
     var diff=Math.floor((d1-d2)/(1000*60*60*24));
     if(diff<=3) streak++; else break;
   }
@@ -2592,25 +2593,37 @@ function lastFor(exName,forName){
   }
   return null;
 }
-function getMaxWeight(exName){
+/* Junta las series de un ejercicio, filtrando por integrante en cuentas dúo/grupo
+   (para Informe individual). Si memberName es null/undefined, junta TODOS los
+   integrantes (comportamiento de siempre, usado en vivo durante la sesión). */
+function collectMemberSets(x,memberName,cb){
+  if(x.members){
+    if(memberName){ const me=x.members.find(function(mm){ return mm.name===memberName; }); if(me) (me.sets||[]).forEach(cb); }
+    else { x.members.forEach(function(mm){ (mm.sets||[]).forEach(cb); }); }
+  } else { (x.sets||[]).forEach(cb); }
+}
+/* ¿Este log tiene algo cargado por ese integrante puntual? (para no contarle a Nati
+   una sesión donde solo entrenó Caro, y viceversa). Alumno individual: siempre true. */
+function logHasMember(log,memberName){
+  if(!memberName) return true;
+  return (log.ex||[]).some(function(x){ return x.members && x.members.some(function(mm){ return mm.name===memberName; }); });
+}
+function getMaxWeight(exName,memberName){
   let max=0;
   LOGS.forEach(function(log){ log.ex.forEach(function(x){
     if(x.n!==exName) return;
-    if(x.members){ x.members.forEach(function(mm){ mm.sets.forEach(function(s){ var w=firstNum(s.w); if(w&&w>max) max=w; }); }); }
-    else if(x.sets){ x.sets.forEach(function(s){ var w=firstNum(s.w); if(w&&w>max) max=w; }); }
+    collectMemberSets(x,memberName,function(s){ var w=firstNum(s.w); if(w&&w>max) max=w; });
   }); });
   return max;
 }
 
 /* Resumen del programa · tarjeta de cierre para compartir por WhatsApp.
    Se calcula solo con datos reales de LOGS del alumno activo, no inventa nada. */
-function exWeightInLog(log,exName){
+function exWeightInLog(log,exName,memberName){
   let max=null;
   (log.ex||[]).forEach(function(x){
     if(x.n!==exName) return;
-    const collect=function(sets){ (sets||[]).forEach(function(s){ const w=firstNum(s.w); if(w!=null&&w>0&&(max==null||w>max)) max=w; }); };
-    if(x.members) x.members.forEach(function(mm){ collect(mm.sets); });
-    else collect(x.sets);
+    collectMemberSets(x,memberName,function(s){ const w=firstNum(s.w); if(w!=null&&w>0&&(max==null||w>max)) max=w; });
   });
   return max;
 }
@@ -2629,13 +2642,16 @@ function muscleGroupOf(name){
   for(let i=0;i<MUSCLE_KEYWORDS.length;i++){ if(MUSCLE_KEYWORDS[i][1].test(n)) return MUSCLE_KEYWORDS[i][0]; }
   return null;
 }
-function computeProgramSummary(cycleOverride){
+function computeProgramSummary(cycleOverride,memberName){
   /* Por defecto usa el ciclo actual del alumno (ver startNewCycle). Si se pasa cycleOverride
      (desde el selector de ciclo del Informe), calcula todo para ESE ciclo puntual en cambio,
-     usando su propia rutina y semanas "congeladas" — sin tocar ni perder nada del historial. */
+     usando su propia rutina y semanas "congeladas" — sin tocar ni perder nada del historial.
+     memberName (dúos/grupos): si viene, TODO el informe se calcula solo con lo que cargó
+     ESE integrante — sesiones, récords, cumplimiento — sin mezclarlo con sus compañeros. */
   const st=DB.students[active];
   const cyc=cycleOverride||{ start:st.cycleStart||null, end:null, routine:st.routine, weeksArr:st.weeks };
-  const LOGS_=LOGS.filter(function(l){ if(cyc.start&&l.date<cyc.start) return false; if(cyc.end&&l.date>=cyc.end) return false; return true; });
+  let LOGS_=LOGS.filter(function(l){ if(cyc.start&&l.date<cyc.start) return false; if(cyc.end&&l.date>=cyc.end) return false; return true; });
+  if(memberName) LOGS_=LOGS_.filter(function(l){ return logHasMember(l,memberName); });
   const R=cyc.routine||routine();
   const weekDone_=function(wi){ return R.length>0 && R.every(function(d){ return LOGS_.some(function(l){ return +l.week===+wi && l.dayName===d.day; }); }); };
 
@@ -2647,9 +2663,7 @@ function computeProgramSummary(cycleOverride){
 
   let planTotal=0, doneTotal=0;
   LOGS_.forEach(function(log){ (log.ex||[]).forEach(function(x){
-    const collect=function(sets){ (sets||[]).forEach(function(s){ planTotal++; if(s.done) doneTotal++; }); };
-    if(x.members) x.members.forEach(function(mm){ collect(mm.sets); });
-    else collect(x.sets);
+    collectMemberSets(x,memberName,function(s){ planTotal++; if(s.done) doneTotal++; });
   }); });
   const completion=planTotal?Math.round(doneTotal/planTotal*100):0;
 
@@ -2658,14 +2672,14 @@ function computeProgramSummary(cycleOverride){
   const prog=[];
   names.forEach(function(n){
     let first=null,last=null;
-    for(let i=0;i<logsAsc.length;i++){ const w=exWeightInLog(logsAsc[i],n); if(w!=null){ first=w; break; } }
-    for(let i=logsAsc.length-1;i>=0;i--){ const w=exWeightInLog(logsAsc[i],n); if(w!=null){ last=w; break; } }
+    for(let i=0;i<logsAsc.length;i++){ const w=exWeightInLog(logsAsc[i],n,memberName); if(w!=null){ first=w; break; } }
+    for(let i=logsAsc.length-1;i>=0;i--){ const w=exWeightInLog(logsAsc[i],n,memberName); if(w!=null){ last=w; break; } }
     if(first!=null&&last!=null&&first>0&&last>first){ prog.push({ n, first, last, pct:Math.round((last-first)/first*100), metric:'kg' }); return; }
     /* Sin progreso de peso (o ejercicio sin carga: banda, peso corporal) — probamos con
        repeticiones, así no queda vacío para alumnos que no levantan pesas pesadas. */
     let rf=null,rl=null;
-    for(let i=0;i<logsAsc.length;i++){ const r=exFieldInLog(logsAsc[i],n,'r'); if(r!=null){ rf=r; break; } }
-    for(let i=logsAsc.length-1;i>=0;i--){ const r=exFieldInLog(logsAsc[i],n,'r'); if(r!=null){ rl=r; break; } }
+    for(let i=0;i<logsAsc.length;i++){ const r=exFieldInLog(logsAsc[i],n,'r',memberName); if(r!=null){ rf=r; break; } }
+    for(let i=logsAsc.length-1;i>=0;i--){ const r=exFieldInLog(logsAsc[i],n,'r',memberName); if(r!=null){ rl=r; break; } }
     if(rf!=null&&rl!=null&&rf>0&&rl>rf) prog.push({ n, first:rf, last:rl, pct:Math.round((rl-rf)/rf*100), metric:'reps' });
   });
   prog.sort(function(a,b){ return b.pct-a.pct; });
@@ -2696,16 +2710,14 @@ function computeProgramSummary(cycleOverride){
     if(!wLogs.length) return { t:w.t, n:w.n, hasLogs:false, pct:0, complete:false };
     let plan=0,done=0;
     wLogs.forEach(function(log){ (log.ex||[]).forEach(function(x){
-      const collect=function(sets){ (sets||[]).forEach(function(s){ plan++; if(s.done) done++; }); };
-      if(x.members) x.members.forEach(function(mm){ collect(mm.sets); });
-      else collect(x.sets);
+      collectMemberSets(x,memberName,function(s){ plan++; if(s.done) done++; });
     }); });
     return { t:w.t, n:w.n, hasLogs:true, pct:plan?Math.round(done/plan*100):0, complete:weekDone_(wi) };
   });
   let bestWeek=null;
   weekStats.forEach(function(w){ if(w.hasLogs&&(!bestWeek||w.pct>bestWeek.pct)) bestWeek=w; });
 
-  const streak=getStreak();
+  const streak=getStreak(memberName);
   const startDate=logsAsc.length?logsAsc[0].date:null;
   const endDate=logsAsc.length?logsAsc[logsAsc.length-1].date:null;
 
@@ -2713,9 +2725,7 @@ function computeProgramSummary(cycleOverride){
   LOGS_.forEach(function(log){ (log.ex||[]).forEach(function(x){
     if(!x.n) return;
     if(!compByEx[x.n]) compByEx[x.n]={plan:0,done:0};
-    const collect=function(sets){ (sets||[]).forEach(function(s){ compByEx[x.n].plan++; if(s.done) compByEx[x.n].done++; }); };
-    if(x.members) x.members.forEach(function(mm){ collect(mm.sets); });
-    else collect(x.sets);
+    collectMemberSets(x,memberName,function(s){ compByEx[x.n].plan++; if(s.done) compByEx[x.n].done++; });
   }); });
   let improve=null;
   Object.keys(compByEx).forEach(function(n){
@@ -2750,12 +2760,13 @@ function computeProgramSummary(cycleOverride){
       if(isBlockRow(ex)||!ex.n) return;
       if(allEx.some(function(a){ return a.n===ex.n; })) return; /* mismo ejercicio en 2 días: 1 sola fila */
       const found=[];
-      for(let i=0;i<LOGS_.length&&found.length<2;i++){ const w=exWeightInLog(LOGS_[i],ex.n); if(w!=null) found.push(w); }
+      for(let i=0;i<LOGS_.length&&found.length<2;i++){ const w=exWeightInLog(LOGS_[i],ex.n,memberName); if(w!=null) found.push(w); }
       let trend='none', peso=null;
       if(found.length){ peso=found[0]; trend = found.length>1 ? (found[0]>found[1]?'up':(found[0]<found[1]?'down':'same')) : 'same'; }
       /* "Récord personal": el peso actual iguala o supera el máximo histórico de TODA la vida
-         del alumno con ese ejercicio (no solo este ciclo) — mismo criterio que el banner en vivo. */
-      const pr=peso!=null&&peso>0&&peso>=getMaxWeight(ex.n);
+         del alumno (o de ese integrante puntual) con ese ejercicio — mismo criterio que el
+         banner en vivo. */
+      const pr=peso!=null&&peso>0&&peso>=getMaxWeight(ex.n,memberName);
       allEx.push({ n:ex.n, reps:ex.s+'×'+(ex.r||''), peso, trend, pr });
     });
   });
@@ -2768,7 +2779,7 @@ function computeProgramSummary(cycleOverride){
     for(let wi=0; wi<totalWeeks; wi++){
       const wLogs=LOGS_.filter(function(l){ return +l.week===wi; });
       let max=null;
-      wLogs.forEach(function(l){ const w=exWeightInLog(l,p.n); if(w!=null&&(max==null||w>max)) max=w; });
+      wLogs.forEach(function(l){ const w=exWeightInLog(l,p.n,memberName); if(w!=null&&(max==null||w>max)) max=w; });
       if(max!=null) series.push({ label:(W[wi]&&W[wi].t)||('S'+(wi+1)), v:max });
     }
     return { n:p.n, series };
@@ -2779,28 +2790,24 @@ function computeProgramSummary(cycleOverride){
 function printResumen(){ window.print(); }
 /* Datos auto-generados del Informe de Evolución (todo calculado, nada manual):
    asistencia/adherencia, checks de progreso, y una conclusión redactada sola. */
-function exFieldInLog(log,exName,field){
+function exFieldInLog(log,exName,field,memberName){
   let max=null;
   (log.ex||[]).forEach(function(x){
     if(x.n!==exName) return;
-    const collect=function(sets){ (sets||[]).forEach(function(s){ const v=firstNum(s[field]); if(v!=null&&v>0&&(max==null||v>max)) max=v; }); };
-    if(x.members) x.members.forEach(function(mm){ collect(mm.sets); });
-    else collect(x.sets);
+    collectMemberSets(x,memberName,function(s){ const v=firstNum(s[field]); if(v!=null&&v>0&&(max==null||v>max)) max=v; });
   });
   return max;
 }
-function sessionSetsDone(log){
+function sessionSetsDone(log,memberName){
   let total=0;
   (log.ex||[]).forEach(function(x){
-    const collect=function(sets){ (sets||[]).forEach(function(s){ if(s.done) total++; }); };
-    if(x.members) x.members.forEach(function(mm){ collect(mm.sets); });
-    else collect(x.sets);
+    collectMemberSets(x,memberName,function(s){ if(s.done) total++; });
   });
   return total;
 }
 /* Texto "50 kg → 70 kg" o, si el progreso fue por repeticiones (banda/peso corporal), "8 → 12 reps". */
 function fmtProg(p){ return p&&p.metric==='reps' ? (p.first+' → '+p.last+' reps') : (p?fmt(p.first)+' → '+fmt(p.last):''); }
-function computeInformeAuto(sum){
+function computeInformeAuto(sum,memberName){
   const plannedSessions=Math.max(1,sum.totalWeeks*Math.max(1,sum.dayCount||1));
   const attendancePct=Math.min(100,Math.round(sum.sessions/plannedSessions*100));
   let regularidad;
@@ -2809,17 +2816,18 @@ function computeInformeAuto(sum){
   else regularidad='Discontinua';
 
   const cyc=sum.cyc||{start:null,end:null};
-  const LOGS_=LOGS.filter(function(l){ if(cyc.start&&l.date<cyc.start) return false; if(cyc.end&&l.date>=cyc.end) return false; return true; });
+  let LOGS_=LOGS.filter(function(l){ if(cyc.start&&l.date<cyc.start) return false; if(cyc.end&&l.date>=cyc.end) return false; return true; });
+  if(memberName) LOGS_=LOGS_.filter(function(l){ return logHasMember(l,memberName); });
   const logsAsc=LOGS_.slice().reverse();
   const names=[]; LOGS_.forEach(function(log){ (log.ex||[]).forEach(function(x){ if(x.n&&names.indexOf(x.n)===-1) names.push(x.n); }); });
   let repIncrease=false;
   names.forEach(function(n){
     let first=null,last=null;
-    for(let i=0;i<logsAsc.length;i++){ const r=exFieldInLog(logsAsc[i],n,'r'); if(r!=null){ first=r; break; } }
-    for(let i=logsAsc.length-1;i>=0;i--){ const r=exFieldInLog(logsAsc[i],n,'r'); if(r!=null){ last=r; break; } }
+    for(let i=0;i<logsAsc.length;i++){ const r=exFieldInLog(logsAsc[i],n,'r',memberName); if(r!=null){ first=r; break; } }
+    for(let i=logsAsc.length-1;i>=0;i--){ const r=exFieldInLog(logsAsc[i],n,'r',memberName); if(r!=null){ last=r; break; } }
     if(first!=null&&last!=null&&last>first) repIncrease=true;
   });
-  const volumenIncrease=logsAsc.length>=2&&sessionSetsDone(logsAsc[logsAsc.length-1])>sessionSetsDone(logsAsc[0]);
+  const volumenIncrease=logsAsc.length>=2&&sessionSetsDone(logsAsc[logsAsc.length-1],memberName)>sessionSetsDone(logsAsc[0],memberName);
 
   const checks={ cargas:!!sum.best, reps:repIncrease, volumen:volumenIncrease, regularidad:(sum.streak>=3||attendancePct>=80) };
 
@@ -2882,7 +2890,15 @@ function shareWrapText(ctx,text,x,y,maxWidth,lineHeight){
   ctx.fillText(line,x,yy);
   return yy+lineHeight;
 }
-function buildShareCanvas(sum,inf){
+/* Para dúos/grupos: a quién le corresponde el Informe que se está viendo ahora mismo.
+   idx/name quedan en null si el alumno es individual (no hay nada que elegir). */
+function resumenMember(){
+  const mm=membersOf();
+  if(mm.length<=1) return { idx:0, name:null, mm };
+  const idx=(resumenMemberIdx!=null&&resumenMemberIdx>=0&&resumenMemberIdx<mm.length)?resumenMemberIdx:Math.min(Math.max(member,0),mm.length-1);
+  return { idx, name:mm[idx], mm };
+}
+function buildShareCanvas(sum,inf,displayName){
   const s=DB.students[active];
   const col=repColors();
   const weakName_=sum.weakGroup?sum.weakGroup.group:(sum.improve?sum.improve.n:null);
@@ -2909,7 +2925,7 @@ function buildShareCanvas(sum,inf){
   ctx.fillText('TAFIT', 60, 95);
   ctx.font='400 22px system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
   ctx.globalAlpha=0.9;
-  ctx.fillText('Informe de Progreso · '+s.name, 60, 132);
+  ctx.fillText('Informe de Progreso · '+(displayName||s.name), 60, 132);
   ctx.globalAlpha=1;
 
   rr(ctx,50,175,W-100,H-175-70,26);
@@ -2976,17 +2992,19 @@ function buildShareCanvas(sum,inf){
 async function shareInforme(){
   const cycles=studentCycles();
   const cIdx=(resumenCycleIdx!=null&&resumenCycleIdx>=0&&resumenCycleIdx<cycles.length)?resumenCycleIdx:cycles.length-1;
-  const sum=computeProgramSummary(cycles[cIdx]);
+  const rm=resumenMember();
+  const sum=computeProgramSummary(cycles[cIdx],rm.name);
   if(!sum.sessions){ toast('Todavía no hay datos suficientes para compartir','warn'); return; }
-  const inf=computeInformeAuto(sum);
+  const inf=computeInformeAuto(sum,rm.name);
+  const displayName=rm.name||DB.students[active].name;
   try{
-    const cv=buildShareCanvas(sum,inf);
+    const cv=buildShareCanvas(sum,inf,displayName);
     const dataUrl=cv.toDataURL('image/png');
     const blob=dataURLToBlob(dataUrl);
-    const fname='informe_'+(DB.students[active].name||'alumno').replace(/\s+/g,'_')+'.png';
+    const fname='informe_'+(displayName||'alumno').replace(/\s+/g,'_')+'.png';
     const file=new File([blob], fname, { type:'image/png' });
     if(navigator.canShare && navigator.canShare({ files:[file] })){
-      await navigator.share({ files:[file], title:'Informe de Progreso · '+DB.students[active].name });
+      await navigator.share({ files:[file], title:'Informe de Progreso · '+displayName });
     } else {
       const w=window.open(dataUrl,'_blank');
       if(!w) toast('Mantené presionada la imagen para guardarla o compartirla','ok');
@@ -3002,11 +3020,23 @@ function renderResumen(){
   const s=DB.students[active];
   const cycles=studentCycles();
   const cIdx=(resumenCycleIdx!=null&&resumenCycleIdx>=0&&resumenCycleIdx<cycles.length)?resumenCycleIdx:cycles.length-1;
-  const sum=computeProgramSummary(cycles[cIdx]);
+  const rm=resumenMember();
+  const sum=computeProgramSummary(cycles[cIdx],rm.name);
+  const displayName=rm.name||s.name;
 
   const topBar=document.createElement('div'); topBar.className='focus no-print'; topBar.style.margin='0 0 12px'; topBar.style.display='flex'; topBar.style.gap='8px'; topBar.style.flexWrap='wrap';
   topBar.innerHTML=`<button data-act="backResumen" style="background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--steel)">← Volver a Editar</button>`;
   m.appendChild(topBar);
+
+  if(rm.mm.length>1){
+    /* Dúo/grupo: el Informe es SIEMPRE de una persona a la vez — nunca mezcla series
+       de dos integrantes distintos en el mismo récord/adherencia. */
+    const memWrap=document.createElement('div'); memWrap.className='no-print'; memWrap.style.cssText='max-width:420px;margin:0 auto 10px';
+    memWrap.innerHTML=`<select data-chg="resumenMember" style="width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:13px;font-weight:700">${rm.mm.map(function(mn,i){
+      return `<option value="${i}" ${i===rm.idx?'selected':''}>👤 ${esc(mn)}</option>`;
+    }).join('')}</select>`;
+    m.appendChild(memWrap);
+  }
 
   if(cycles.length>1){
     const selWrap=document.createElement('div'); selWrap.className='no-print'; selWrap.style.cssText='max-width:420px;margin:0 auto 12px';
@@ -3019,11 +3049,11 @@ function renderResumen(){
   }
 
   if(!sum.sessions){
-    const empty=document.createElement('div'); empty.className='note'; empty.textContent=`${s.name} todavía no cerró ninguna sesión — el informe se arma solo con datos reales de entrenamiento.`; m.appendChild(empty);
+    const empty=document.createElement('div'); empty.className='note'; empty.textContent=`${displayName} todavía no cerró ninguna sesión — el informe se arma solo con datos reales de entrenamiento.`; m.appendChild(empty);
     return;
   }
 
-  const inf=computeInformeAuto(sum);
+  const inf=computeInformeAuto(sum,rm.name);
   const rangeStr=sum.startDate&&sum.endDate?fmtShort(sum.startDate)+' — '+fmtShort(sum.endDate):'—';
   const todayStr=new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
 
@@ -3040,7 +3070,7 @@ function renderResumen(){
       <div style="font-size:11px;opacity:.7;margin-top:2px">📊 Resumen de tu evolución</div>
     </div>
     <div class="icard" style="display:flex;justify-content:space-between;align-items:center">
-      <div><div style="font-weight:800;font-size:15px;color:var(--ink)">📅 ${rangeStr}</div><div style="font-size:11px;color:var(--mute);margin-top:2px">${esc(s.name)} · informe del ${todayStr}</div></div>
+      <div><div style="font-weight:800;font-size:15px;color:var(--ink)">📅 ${rangeStr}</div><div style="font-size:11px;color:var(--mute);margin-top:2px">${esc(displayName)}${rm.name?' · entrena con '+esc(rm.mm.filter(function(n){return n!==rm.name;}).join(', ')):''} · informe del ${todayStr}</div></div>
     </div>
 
     <div class="icard">
@@ -3667,7 +3697,7 @@ document.addEventListener('click',e=>{
     case 'saveForm': handleSaveForm(el.dataset.ftype); break;
     case 'toggleForm': toggleFormEnable(el.dataset.ftype); break;
     case 'togglePause': togglePause(); break;
-    case 'genResumen': resumenCycleIdx=null; tab='resumen'; render(); break;
+    case 'genResumen': resumenCycleIdx=null; resumenMemberIdx=null; tab='resumen'; render(); break;
     case 'backResumen': tab='edit'; render(); break;
     case 'printResumen': printResumen(); break;
     case 'shareInforme': shareInforme(); break;
@@ -3698,6 +3728,7 @@ document.addEventListener('change',e=>{
   const el=e.target.closest('[data-chg]'); if(el){ switch(el.dataset.chg){
     case 'switch': switchStudent(el.value); break;
     case 'resumenCycle': resumenCycleIdx=+el.value; renderResumen(); break;
+    case 'resumenMember': resumenMemberIdx=+el.value; renderResumen(); break;
     case 'set': updSet(+el.dataset.i,+el.dataset.j,+(el.dataset.m||0),el.dataset.f,el.value); break;
     case 'dset': { const tr=el.closest('tr'); if(!tr) break; const inps=tr.querySelectorAll('[data-chg="dset"]'); const vals=[]; inps.forEach(inp=>vals.push(inp.value.trim())); updSet(+el.dataset.i,+el.dataset.j,+(el.dataset.m||0),'w',vals.join('/')); break; }
     case 'obs': updObs(el.value); break;

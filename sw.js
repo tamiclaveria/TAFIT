@@ -1,6 +1,6 @@
 /* TaFit · Service Worker v8
    Cachea la app y los scripts para que abra al instante, con o sin señal. */
-const CACHE = 'tafit-v8-49';
+const CACHE = 'tafit-v8-50';
 const ASSETS = [
   './',
   './index.html',
