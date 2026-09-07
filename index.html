@@ -2281,6 +2281,10 @@ async function deleteStudent(id){ if(DB.order.length<=1){ toast("Tiene que queda
 }
 async function setTheme(v){ DB.students[active].theme=v; await saveDB(); render(); }
 async function toggleFormEnable(type){ const st=DB.students[active]; if(!st.forms) st.forms={}; st.forms[type]=!st.forms[type]; await saveDB(); renderEdit(); }
+/* Qué ciclo puntual (1, 2, 3…) queda autorizado para que el alumno vea en SU Informe.
+   Es un valor fijo elegido por la Profe — no se re-acomoda solo cuando se abre un ciclo
+   nuevo, así ella decide cuándo pasarlo a mostrar el ciclo siguiente. */
+async function saveInformeCycle(idx){ const st=DB.students[active]; if(!st.forms) st.forms={}; st.forms.informeCycle=idx; await saveDB(); toast('✓ Ciclo autorizado para su Informe','ok'); renderEdit(); }
 async function togglePause(){ DB.students[active].paused=!DB.students[active].paused; await saveDB(); toast(DB.students[active].paused?'Alumno pausado ✓':'Alumno activado ✓','ok'); renderEdit(); }
 async function savePlanDate(){ const el=$('planPaidInput'); const v=el?el.value:''; DB.students[active].planPaid=v; await saveDB(); toast(v?'Fecha de pago guardada ✓':'Fecha de pago borrada ✓','ok'); renderEdit(); }
 async function planToday(){ DB.students[active].planPaid=todayISO(); await saveDB(); toast('Pago de hoy registrado ✓','ok'); renderEdit(); }
@@ -3053,7 +3057,15 @@ function renderResumen(){
   const m=$('main'); m.innerHTML='';
   const s=DB.students[active];
   const cycles=studentCycles();
-  const cIdx=(resumenCycleIdx!=null&&resumenCycleIdx>=0&&resumenCycleIdx<cycles.length)?resumenCycleIdx:cycles.length-1;
+  /* La Profe navega libremente entre ciclos con el selector. El alumno NO elige — ve
+     siempre el ciclo puntual que la Profe autorizó al activarle el Informe (útil, por
+     ejemplo, para seguir mostrándole su ciclo anterior ya completo mientras el nuevo
+     recién arranca sin sesiones todavía). Si no autorizó ninguno en particular, ve el
+     ciclo actual por defecto. */
+  const authIdx=(s.forms&&s.forms.informeCycle!=null)?s.forms.informeCycle:null;
+  const cIdx=trainer
+    ? ((resumenCycleIdx!=null&&resumenCycleIdx>=0&&resumenCycleIdx<cycles.length)?resumenCycleIdx:cycles.length-1)
+    : ((authIdx!=null&&authIdx>=0&&authIdx<cycles.length)?authIdx:cycles.length-1);
   const rm=resumenMember();
   const sum=computeProgramSummary(cycles[cIdx],rm.name);
   const displayName=rm.name||s.name;
@@ -3072,7 +3084,7 @@ function renderResumen(){
     m.appendChild(memWrap);
   }
 
-  if(cycles.length>1){
+  if(trainer&&cycles.length>1){
     const selWrap=document.createElement('div'); selWrap.className='no-print'; selWrap.style.cssText='max-width:420px;margin:0 auto 12px';
     selWrap.innerHTML=`<select data-chg="resumenCycle" style="width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:13px;font-weight:700">${cycles.map(function(c,i){
       const rangeTxt=(c.start?fmtShort(c.start):'inicio')+' — '+(c.end?fmtShort(c.end):'hoy');
@@ -3505,7 +3517,21 @@ function renderEdit(){
 
   const stForms=(DB.students[active].forms)||{};
   const isPaused=DB.students[active].paused;
-  SEC('forms',`Formularios de ${esc(DB.students[active].name)}`,`<p style="font-size:13px;color:var(--mute);margin-bottom:12px">Activá los formularios que este alumno debe completar, o dejá que vea su propio Informe de Evolución. Le aparecen como pestañas en su link.</p><div class="edit-actions"><button data-act="toggleForm" data-ftype="acuerdo" style="${stForms.acuerdo?'background:var(--ok);color:#fff':''}">${stForms.acuerdo?'✓ Acuerdo activado':'Activar Acuerdo'}</button><button data-act="toggleForm" data-ftype="anamnesis" style="${stForms.anamnesis?'background:var(--ok);color:#fff':''}">${stForms.anamnesis?'✓ Anamnesis activada':'Activar Anamnesis'}</button><button data-act="toggleForm" data-ftype="informe" style="${stForms.informe?'background:var(--ok);color:#fff':''}">${stForms.informe?'✓ Informe visible para el alumno':'Mostrarle su Informe de Evolución'}</button></div><div class="edit-actions mt8"><button data-act="togglePause" style="${isPaused?'background:#e74c3c;color:#fff':'background:var(--light)'}">${isPaused?'⏸ Alumno PAUSADO · Tocá para activar':'⏸ Pausar alumno'}</button></div>`);
+  /* Si el alumno tiene más de un ciclo (usó "Iniciar nuevo ciclo" alguna vez), la Profe
+     elige CUÁL de esos ciclos autoriza a ver en su Informe — el alumno no puede cambiarlo.
+     Útil, por ejemplo, para seguir mostrándole el ciclo anterior (ya con datos y récords)
+     mientras el nuevo recién arranca sin sesiones todavía. */
+  const cyclesForForms=studentCycles();
+  const informeCycleSel=(stForms.informe&&cyclesForForms.length>1)?(function(){
+    const curSel=(stForms.informeCycle!=null&&stForms.informeCycle>=0&&stForms.informeCycle<cyclesForForms.length)?stForms.informeCycle:cyclesForForms.length-1;
+    const opts=cyclesForForms.map(function(c,i){
+      const rangeTxt=(c.start?fmtShort(c.start):'inicio')+' — '+(c.end?fmtShort(c.end):'hoy');
+      const lbl=(i===cyclesForForms.length-1?'📍 Ciclo actual':'📁 Ciclo '+(i+1))+' · '+rangeTxt;
+      return `<option value="${i}" ${i===curSel?'selected':''}>${esc(lbl)}</option>`;
+    }).join('');
+    return `<div class="fld mt8"><label>¿Qué ciclo puede ver ${esc(DB.students[active].name)} en su Informe?</label><select data-chg="informeCycle">${opts}</select></div>`;
+  })():'';
+  SEC('forms',`Formularios de ${esc(DB.students[active].name)}`,`<p style="font-size:13px;color:var(--mute);margin-bottom:12px">Activá los formularios que este alumno debe completar, o dejá que vea su propio Informe de Evolución. Le aparecen como pestañas en su link.</p><div class="edit-actions"><button data-act="toggleForm" data-ftype="acuerdo" style="${stForms.acuerdo?'background:var(--ok);color:#fff':''}">${stForms.acuerdo?'✓ Acuerdo activado':'Activar Acuerdo'}</button><button data-act="toggleForm" data-ftype="anamnesis" style="${stForms.anamnesis?'background:var(--ok);color:#fff':''}">${stForms.anamnesis?'✓ Anamnesis activada':'Activar Anamnesis'}</button><button data-act="toggleForm" data-ftype="informe" style="${stForms.informe?'background:var(--ok);color:#fff':''}">${stForms.informe?'✓ Informe visible para el alumno':'Mostrarle su Informe de Evolución'}</button></div>${informeCycleSel}<div class="edit-actions mt8"><button data-act="togglePause" style="${isPaused?'background:#e74c3c;color:#fff':'background:var(--light)'}">${isPaused?'⏸ Alumno PAUSADO · Tocá para activar':'⏸ Pausar alumno'}</button></div>`);
 
   {
     const planPaid=DB.students[active].planPaid||'';
@@ -3782,6 +3808,7 @@ document.addEventListener('change',e=>{
   const el=e.target.closest('[data-chg]'); if(el){ switch(el.dataset.chg){
     case 'switch': switchStudent(el.value); break;
     case 'resumenCycle': resumenCycleIdx=+el.value; renderResumen(); break;
+    case 'informeCycle': saveInformeCycle(+el.value); break;
     case 'resumenMember': resumenMemberIdx=+el.value; renderResumen(); break;
     case 'set': updSet(+el.dataset.i,+el.dataset.j,+(el.dataset.m||0),el.dataset.f,el.value); break;
     case 'dset': { const tr=el.closest('tr'); if(!tr) break; const inps=tr.querySelectorAll('[data-chg="dset"]'); const vals=[]; inps.forEach(inp=>vals.push(inp.value.trim())); updSet(+el.dataset.i,+el.dataset.j,+(el.dataset.m||0),'w',vals.join('/')); break; }
