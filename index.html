@@ -2216,14 +2216,27 @@ function renderChrome(){
   const st=DB.students[active]||{};
   const hasAcuerdo=st.forms&&st.forms.acuerdo;
   const hasAnamnesis=st.forms&&st.forms.anamnesis;
+  const hasInforme=st.forms&&st.forms.informe;
   const formTabs=[];
   if(hasAcuerdo) formTabs.push(['acuerdo','Acuerdo']);
   if(hasAnamnesis) formTabs.push(['anamnesis','Anamnesis']);
-  const tabs = locked ? [['app','App'],['trans','Transcripta']].concat(formTabs) : trainer ? [['app','App'],['trans','Transcripta'],['fotos','Fotos'],['edit','Editar'],['rep','Informe']].concat(formTabs) : [['app','App'],['trans','Transcripta'],['fotos','Fotos']].concat(formTabs);
+  /* "Informe" para el alumno: mismo toggle que Acuerdo/Anamnesis (st.forms.informe),
+     activable desde Editar. Ojo: apunta a 'resumen' (SU Informe de Evolución), nunca a
+     'rep' (el panel del profe con el resumen de TODOS los alumnos). */
+  const lockedTabs=[['app','App'],['trans','Transcripta']];
+  if(hasInforme) lockedTabs.push(['resumen','Informe']);
+  const tabs = locked ? lockedTabs.concat(formTabs) : trainer ? [['app','App'],['trans','Transcripta'],['fotos','Fotos'],['edit','Editar'],['rep','Informe']].concat(formTabs) : [['app','App'],['trans','Transcripta'],['fotos','Fotos']].concat(formTabs);
   $('nav').innerHTML=tabs.map(([k,l])=>`<button data-act="tab" data-tab="${k}" class="${k===tab?'active':''}">${l}</button>`).join('');
 }
+/* El alumno puede entrar a SU Informe de Evolución (tab 'resumen') solo si Tami lo activó
+   para él/ella desde Editar (mismo interruptor que Acuerdo/Anamnesis). 'edit' y 'rep' (el
+   panel del profe con TODOS los alumnos) siguen siendo siempre exclusivos de la Profe. */
+function informeEnabledForStudent(){ const s=DB.students[active]; return !!(s&&s.forms&&s.forms.informe); }
 function render(){
-  if(!trainer && (tab==='edit'||tab==='rep'||tab==='resumen')) tab='app';
+  if(!trainer){
+    if(tab==='edit'||tab==='rep') tab='app';
+    else if(tab==='resumen'&&!(locked&&informeEnabledForStudent())) tab='app';
+  }
   renderChrome();
   if(tab==='app') renderApp();
   else if(tab==='trans') renderTrans();
@@ -2234,7 +2247,13 @@ function render(){
   else if(tab==='anamnesis') renderFormTab('anamnesis');
   else renderReport();
 }
-function setTab(t){ if(!trainer&&(t==='edit'||t==='rep'||t==='resumen')) return; tab=t; render(); }
+function setTab(t){
+  if(!trainer){
+    if(t==='edit'||t==='rep') return;
+    if(t==='resumen'&&!(locked&&informeEnabledForStudent())) return;
+  }
+  tab=t; render();
+}
 
 async function toggleTrainer(){
   if(locked) return;
@@ -3040,7 +3059,7 @@ function renderResumen(){
   const displayName=rm.name||s.name;
 
   const topBar=document.createElement('div'); topBar.className='focus no-print'; topBar.style.margin='0 0 12px'; topBar.style.display='flex'; topBar.style.gap='8px'; topBar.style.flexWrap='wrap';
-  topBar.innerHTML=`<button data-act="backResumen" style="background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--steel)">← Volver a Editar</button>`;
+  topBar.innerHTML=`<button data-act="backResumen" style="background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--steel)">${trainer?'← Volver a Editar':'← Volver'}</button>`;
   m.appendChild(topBar);
 
   if(rm.mm.length>1){
@@ -3486,7 +3505,7 @@ function renderEdit(){
 
   const stForms=(DB.students[active].forms)||{};
   const isPaused=DB.students[active].paused;
-  SEC('forms',`Formularios de ${esc(DB.students[active].name)}`,`<p style="font-size:13px;color:var(--mute);margin-bottom:12px">Activá los formularios que este alumno debe completar. Le aparecen como pestañas en su link.</p><div class="edit-actions"><button data-act="toggleForm" data-ftype="acuerdo" style="${stForms.acuerdo?'background:var(--ok);color:#fff':''}">${stForms.acuerdo?'✓ Acuerdo activado':'Activar Acuerdo'}</button><button data-act="toggleForm" data-ftype="anamnesis" style="${stForms.anamnesis?'background:var(--ok);color:#fff':''}">${stForms.anamnesis?'✓ Anamnesis activada':'Activar Anamnesis'}</button></div><div class="edit-actions mt8"><button data-act="togglePause" style="${isPaused?'background:#e74c3c;color:#fff':'background:var(--light)'}">${isPaused?'⏸ Alumno PAUSADO · Tocá para activar':'⏸ Pausar alumno'}</button></div>`);
+  SEC('forms',`Formularios de ${esc(DB.students[active].name)}`,`<p style="font-size:13px;color:var(--mute);margin-bottom:12px">Activá los formularios que este alumno debe completar, o dejá que vea su propio Informe de Evolución. Le aparecen como pestañas en su link.</p><div class="edit-actions"><button data-act="toggleForm" data-ftype="acuerdo" style="${stForms.acuerdo?'background:var(--ok);color:#fff':''}">${stForms.acuerdo?'✓ Acuerdo activado':'Activar Acuerdo'}</button><button data-act="toggleForm" data-ftype="anamnesis" style="${stForms.anamnesis?'background:var(--ok);color:#fff':''}">${stForms.anamnesis?'✓ Anamnesis activada':'Activar Anamnesis'}</button><button data-act="toggleForm" data-ftype="informe" style="${stForms.informe?'background:var(--ok);color:#fff':''}">${stForms.informe?'✓ Informe visible para el alumno':'Mostrarle su Informe de Evolución'}</button></div><div class="edit-actions mt8"><button data-act="togglePause" style="${isPaused?'background:#e74c3c;color:#fff':'background:var(--light)'}">${isPaused?'⏸ Alumno PAUSADO · Tocá para activar':'⏸ Pausar alumno'}</button></div>`);
 
   {
     const planPaid=DB.students[active].planPaid||'';
@@ -3733,7 +3752,7 @@ document.addEventListener('click',e=>{
     case 'toggleForm': toggleFormEnable(el.dataset.ftype); break;
     case 'togglePause': togglePause(); break;
     case 'genResumen': resumenCycleIdx=null; resumenMemberIdx=null; tab='resumen'; render(); break;
-    case 'backResumen': tab='edit'; render(); break;
+    case 'backResumen': tab=trainer?'edit':'app'; render(); break;
     case 'printResumen': printResumen(); break;
     case 'shareInforme': shareInforme(); break;
     case 'newCycle': startNewCycle(); break;
