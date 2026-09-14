@@ -1265,6 +1265,64 @@ function stuGrupo5(){ return { name:"Grupo 5", theme:"f", members:["M.Marta","Me
 ] }; }
 
 /* ---- Sofi / Marti (dúo, 3 días) ---- */
+function stuLolaAnto(){ return { name:"Lola / Anto", theme:"f", members:["Lola","Anto"], weeks:cp(WEEKS6), routine:[
+  {day:"Día 1", ex:[
+    exD("Crunch con disco",3,"15/20","A definir","A definir","","","45 s"),
+    exD("Espinales con banda",3,"15/20","A definir","A definir","","","45 s"),
+    exD("Plancha oblicuos",3,"15/20","A definir","A definir","","","45 s"),
+    exD("Inferiores",3,"15/20","A definir","A definir","","","45 s"),
+    exD("Sentadilla con barra",3,"12","A definir","A definir","","","90 s"),
+    exD("Máquina de cuádriceps",3,"12","A definir","A definir","","","60 s"),
+    exD("Aductores",3,"12","A definir","A definir","","","60 s"),
+    exD("Sentadilla isométrica",3,"12","A definir","A definir","","","60 s"),
+    exD("Press de pecho máquina",3,"12","A definir","A definir","","","90 s"),
+    exD("Apertura mancuerna",3,"12","A definir","A definir","","","60 s"),
+    exD("Bíceps martillo mancuerna",3,"12","A definir","A definir","","","60 s"),
+    exD("Bíceps barra",3,"12","A definir","A definir","","","60 s"),
+  ]},
+  {day:"Día 2", ex:[
+    exD("Sit up con disco",3,"15/20","A definir","A definir","","","45 s"),
+    exD("Hollow rock hold",3,"15/20","A definir","A definir","","","45 s"),
+    exD("Espinales superman sostenido",3,"15/20","A definir","A definir","","","45 s"),
+    exD("Bicicleta abdominal",3,"15/20","A definir","A definir","","","45 s"),
+    exD("Hip thrust con barra",3,"12","A definir","A definir","","","90 s"),
+    exD("Búlgaras",3,"12","A definir","A definir","","","90 s"),
+    exD("Patada glúteo polea",3,"12","A definir","A definir","","","60 s"),
+    exD("Abductores máquina",3,"12","A definir","A definir","","","60 s"),
+    exD("Remo máquina",3,"12","A definir","A definir","","","90 s"),
+    exD("Dorsalera supina",3,"12","A definir","A definir","","","90 s"),
+    exD("Tríceps polea barra",3,"12","A definir","A definir","","","60 s"),
+    exD("Press francés mancuerna",3,"12","A definir","A definir","","","60 s"),
+  ]},
+  {day:"Día 3", ex:[
+    exD("Plancha baja",3,"30 s","A definir","A definir","","","30 s"),
+    exD("Plancha lateral",3,"30 s","A definir","A definir","","","30 s"),
+    exD("Tijeras",3,"12","A definir","A definir","","","30 s"),
+    exD("Espinales en T",3,"12","A definir","A definir","","","30 s"),
+    exD("Peso muerto mancuernas",3,"12","A definir","A definir","","","90 s"),
+    exD("Máquina de isquios",3,"12","A definir","A definir","","","60 s"),
+    exD("Gemelos parada",3,"12","A definir","A definir","","","45 s"),
+    exD("Isquios con mancuerna",3,"12","A definir","A definir","","","60 s"),
+    exD("Volada lateral mancuernas",3,"12","A definir","A definir","","","60 s"),
+    exD("Volada frontal mancuernas",3,"12","A definir","A definir","","","60 s"),
+    exD("Press de hombros máquina",3,"12","A definir","A definir","","","90 s"),
+  ]},
+] }; }
+/* Progresión semanal de Lola/Anto (semanas 2 a 6, solo ejercicios "main" — los 4
+   abdominales de cada día, primeros 4 índices, se mantienen siempre igual). Se guarda
+   como overrides por semana, el mismo mecanismo que usa Editar cuando la Profe cambia
+   "Series" para una semana puntual — no toca la rutina base. */
+function lolaAntoWeekOverrides(){
+  const prog={1:{s:4,r:"1×12 + 3×10"},2:{s:4,r:"2×10 + 2×8"},3:{s:4,r:"8"},4:{s:4,r:"2×12 + 2×8"},5:{s:4,r:"12"}};
+  const nAbs=4, nMainByDay=[8,8,7];
+  const out={_wMigrated:true};
+  nMainByDay.forEach(function(nMain,di){
+    Object.keys(prog).forEach(function(wi){
+      for(let ei=nAbs; ei<nAbs+nMain; ei++){ out['wo_w'+wi+'_'+di+'_'+ei]=Object.assign({},prog[wi]); }
+    });
+  });
+  return out;
+}
 function stuSofiMarti(){ return { name:"Sofi / Marti", theme:"f", members:["Sofi","Marti"], weeks:cp(DEFAULT_WEEKS), routine:[
   {day:"Día 1", ex:[
     ex("Sentadilla goblet",4,"12","A definir","Sentadilla con barra","Disco o mancuerna al pecho, bajá controlada con la espalda erguida.","75 s"),
@@ -2044,6 +2102,18 @@ async function initFirebase(){
      defecto modificaron algo de verdad. */
   const _dbBeforeSeeds=JSON.stringify(DB);
   runSeeds();
+  /* Progresión semanal de Lola/Anto (semanas 2-6): vive en su CACHE (Store
+     'tafit:data:lola-anto'), separado de DB, así que no se puede sembrar dentro de
+     runSeeds() — se hace acá, una sola vez, mezclando con lo que ya haya (nunca pisa
+     series reales que hayan cargado). */
+  if(!DB._seed.lolaAntoProg){
+    DB._seed.lolaAntoProg=true;
+    try{
+      const existingProg=safeParse(await Store.get('tafit:data:lola-anto')||'{}',{});
+      const mergedProg=Object.assign({},lolaAntoWeekOverrides(),existingProg);
+      await Store.set('tafit:data:lola-anto',JSON.stringify(mergedProg));
+    }catch(e){}
+  }
 function runSeeds(){
   if(!DB._seed) DB._seed={};
   if(!DB._seed.delfina){ if(!DB.students['delfina']){ DB.students['delfina']=delfinaStudent(); DB.order.push('delfina'); } DB._seed.delfina=true; }
@@ -2072,6 +2142,11 @@ function runSeeds(){
   if(!DB._seed.mauri){ if(!DB.students['mauri']){ DB.students['mauri']=stuMauri(); DB.order.push('mauri'); } DB._seed.mauri=true; }
   if(!DB._seed.sofiaCatalan){ if(!DB.students['sofia-catalan']){ DB.students['sofia-catalan']=stuSofiaCatalan(); DB.order.push('sofia-catalan'); } DB._seed.sofiaCatalan=true; }
   if(!DB._seed.candeEspeche){ if(!DB.students['cande-espeche']){ DB.students['cande-espeche']=stuCandeEspeche(); DB.order.push('cande-espeche'); } DB._seed.candeEspeche=true; }
+  /* Lola/Anto: se crean por código (no por backup) para que queden garantizadas pase lo
+     que pase — si alguna vez desaparecieran de la base por cualquier motivo, este seed las
+     vuelve a crear solo, en el próximo dispositivo que abra la app, igual que con
+     Delfina/Martín/Joni/etc. arriba. */
+  if(!DB._seed.lolaAnto){ if(!DB.students['lola-anto']){ DB.students['lola-anto']=stuLolaAnto(); DB.order.push('lola-anto'); } DB._seed.lolaAnto=true; }
   /* Seed: Jus/Yesi Día 1 Semana 2 como completado */
   if(!DB._seed.jy_log_s2){
     const jyLogs=safeParse(localStorage.getItem('tafit:logs:jus-yesi')||'[]',[]);
