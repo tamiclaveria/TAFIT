@@ -1633,6 +1633,12 @@ function viewExIcon(cat,name,ei){
 }
 
 let DB={ order:[], students:{}, settings:{pin:""}, _seed:{} };
+/* Foto de "lo último que este dispositivo sabe que está sincronizado con la nube" —
+   se usa en saveDB() para saber, alumno por alumno, si ESTE dispositivo lo tocó de
+   verdad desde la última sincronización, o si sigue exactamente igual a como lo cargó
+   (y por lo tanto no hay que pisar lo que haya en el servidor con esta copia). */
+let _syncBaseline=null;
+function setSyncBaseline(){ try{ _syncBaseline=JSON.stringify({students:DB.students,settings:DB.settings}); }catch(e){} }
 let active=null, CACHE={}, LOGS=[], NOTIFS=[], resumenCycleIdx=null, resumenMemberIdx=null;
 /* ==== Avisos internos: cuando un alumno cierra sesión, la profe ve un aviso (sin push, solo dentro de la app) ==== */
 async function loadNotifs(){ NOTIFS=safeParse(await Store.get('tafit:notifs')||'[]',[]); }
@@ -1720,37 +1726,78 @@ function membersOf(){ const s=DB.students[active]; return (s.members&&s.members.
 function isDuo(){ return membersOf().length>1; }
 
 async function saveDB(force){
-  /* Protección contra pisadas: si otro celular guardó una rutina más nueva mientras este
-     todavía tenía cargada una versión vieja en memoria (por ejemplo, quedó con la app
-     abierta desde antes), antes NO había ningún chequeo al guardar — el último que
-     guardaba ganaba siempre, sin importar cuál versión era la más nueva de verdad. Eso fue
-     lo que pisó "Hip thrust cerrado" de Sofi/Marti y borró a Lola/Anto. Ahora, si hay
-     Firestore disponible, consultamos el servidor (no el caché local) ANTES de guardar: si
-     alguien guardó algo más nuevo mientras tanto, adoptamos esa versión y avisamos, en vez
-     de pisarla a ciegas. Si no hay señal, seguimos guardando como siempre (offline-first) —
-     sin conexión no hay forma de detectar el conflicto igual.
-     'force=true' se usa SOLO al importar un backup: ahí la Profe está restaurando a
-     propósito una versión puntual (que puede traer un _ts viejo, de cuando se exportó), así
-     que el chequeo de "¿hay algo más nuevo?" no aplica — si aplicara, cualquier guardado de
-     cualquier otro alumno hecho después de exportar el backup hacía que la importación se
-     descartara sola en silencio, pisando la restauración con lo viejo (esto fue lo que le
-     pasó a Lola/Anto al importar: "lo subo y desaparece"). */
-  if(fsDB&&!force){
+  /* Protección contra pisadas — historia completa:
+     v1 (sin chequeo): el último dispositivo que guardaba pisaba TODO el objeto DB entero
+     (todos los alumnos juntos en un solo documento), sin importar si su copia era vieja.
+     Eso pisó "Hip thrust cerrado" de Sofi/Marti y borró a Lola/Anto.
+     v2 (chequeo global + force): antes de guardar se comparaba un _ts general contra el
+     servidor, y si el servidor era "más nuevo" se descartaba TODO el guardado local. Pero
+     como cualquier guardado de CUALQUIER alumno actualiza ese mismo _ts general, esto
+     rechazaba guardados legítimos de un alumno solo porque OTRO alumno se había guardado
+     después en otro lado — eso fue lo que hizo que importar un backup se autodescartara
+     ("lo subo y desaparece"), y se parchó con 'force' para las importaciones.
+     v3 (esta versión — merge por alumno): en vez de aceptar o rechazar TODO el documento
+     en bloque, se compara alumno por alumno contra el servidor. Si ESTE dispositivo no
+     tocó a un alumno desde la última vez que sincronizó (sigue exactamente igual a como lo
+     cargó), se respeta lo que haya en el servidor para ese alumno — puede ser más nuevo,
+     por ejemplo un cambio hecho desde otro celular. Solo se escribe la versión local del
+     alumno que realmente se editó en este dispositivo. Así, guardar un cambio en un alumno
+     nunca puede volver a pisar el trabajo reciente de otro — ni siquiera con un dispositivo
+     que tenía la app abierta desde hace rato con datos desactualizados. Esto reemplaza al
+     chequeo global de v2, así que ya no hace falta rechazar ni descartar guardados enteros;
+     'force' se mantiene solo por compatibilidad con quien la llama, pero ya no cambia el
+     comportamiento: el merge por alumno es siempre seguro, incluso al importar un backup
+     (los alumnos que trae el backup se guardan tal cual se importaron; los que el backup no
+     conoce —por ejemplo si se sumó un alumno nuevo después de exportarlo— se conservan). */
+  if(fsDB){
     try{
       const snap=await fsDB.collection('kv').doc('tafit:students').get({source:'server'});
       if(snap.exists){
         const remote=safeParse(snap.data().v,null);
-        if(remote&&remote._ts&&DB._ts&&remote._ts>DB._ts){
-          DB=remote;
-          try{ localStorage.setItem('tafit:students',JSON.stringify(DB)); }catch(e){}
-          toast('⚠ Alguien guardó un cambio más nuevo mientras tanto — se actualizó la vista. Si hacía falta, repetí tu cambio.','warn');
-          render();
-          return;
+        if(remote&&remote.students){
+          const base=safeParse(_syncBaseline,null);
+          const baseStudents=(base&&base.students)||{};
+          const mergedStudents={};
+          const ids=new Set(Object.keys(DB.students||{}).concat(Object.keys(remote.students||{})));
+          ids.forEach(id=>{
+            const localHas=DB.students&&Object.prototype.hasOwnProperty.call(DB.students,id);
+            const remoteHas=Object.prototype.hasOwnProperty.call(remote.students,id);
+            if(localHas&&!remoteHas){ mergedStudents[id]=DB.students[id]; return; }
+            if(!localHas&&remoteHas){ mergedStudents[id]=remote.students[id]; return; }
+            /* está en los dos lados. Si este dispositivo ni siquiera tenía a este alumno
+               en su última sincronización conocida (por ejemplo: recién abre la app y su
+               caché local venía incompleta, y runSeeds() lo volvió a crear de cero con la
+               rutina "de fábrica" del código), NO podemos asumir que el valor local es un
+               cambio real — es casi seguro una recreación desde el molde original, y el
+               servidor ya tenía una versión real (con ediciones hechas desde otro
+               dispositivo). En ese caso, el servidor manda siempre. Recién si este
+               dispositivo YA conocía a este alumno y su copia cambió de verdad respecto a
+               eso, confiamos en que es una edición real y priorizamos lo local. */
+            const hadInBaseline=Object.prototype.hasOwnProperty.call(baseStudents,id);
+            if(!hadInBaseline){ mergedStudents[id]=remote.students[id]; return; }
+            const unchanged=JSON.stringify(DB.students[id])===JSON.stringify(baseStudents[id]);
+            mergedStudents[id]=unchanged?remote.students[id]:DB.students[id];
+          });
+          const mergedOrder=(DB.order||[]).filter(id=>mergedStudents[id]);
+          (remote.order||[]).forEach(id=>{ if(mergedStudents[id]&&mergedOrder.indexOf(id)===-1) mergedOrder.push(id); });
+          Object.keys(mergedStudents).forEach(id=>{ if(mergedOrder.indexOf(id)===-1) mergedOrder.push(id); });
+          const settingsUnchanged=JSON.stringify(DB.settings)===JSON.stringify(base&&base.settings);
+          const seedKeys=new Set(Object.keys(remote._seed||{}).concat(Object.keys(DB._seed||{})));
+          const mergedSeed={};
+          seedKeys.forEach(k=>{ mergedSeed[k]=!!(remote._seed&&remote._seed[k])||!!(DB._seed&&DB._seed[k]); });
+          DB={
+            order:mergedOrder,
+            students:mergedStudents,
+            settings:(settingsUnchanged&&remote.settings)?remote.settings:DB.settings,
+            _seed:mergedSeed,
+          };
         }
       }
-    }catch(e){ /* sin señal u otro error: seguimos con el guardado normal */ }
+    }catch(e){ /* sin señal u otro error: seguimos con el guardado normal (offline-first) */ }
   }
-  DB._ts=Date.now(); await Store.set('tafit:students', JSON.stringify(DB));
+  DB._ts=Date.now();
+  await Store.set('tafit:students', JSON.stringify(DB));
+  setSyncBaseline();
 }
 async function saveData(){ await Store.set('tafit:data:'+active, JSON.stringify(CACHE)); }
 async function saveLogs(){ await Store.set('tafit:logs:'+active, JSON.stringify(LOGS)); }
@@ -2034,7 +2081,7 @@ async function pushAllLocal(){ if(!fsDB) return; let keys;
   if(locked&&active){ keys=myKeys(); }
   else { keys=['tafit:students']; DB.order.forEach(id=>{ keys.push('tafit:data:'+id,'tafit:logs:'+id,'tafit:form:acuerdo:'+id,'tafit:form:anamnesis:'+id); const s=DB.students[id]; if(s&&s.members&&s.members.length>1){ for(let mi=0;mi<s.members.length;mi++){ keys.push('tafit:form:acuerdo:'+id+':'+mi,'tafit:form:anamnesis:'+id+':'+mi); } } }); }
   for(const k of keys){ try{ const v=localStorage.getItem(k); if(v&&v!=='{}'&&v!=='[]'&&v!=='""') await cloudPush(k,v); }catch(e){} } }
-async function reloadFromRemote(){ try{ const raw=await Store.get('tafit:students'); if(raw){ const p=safeParse(raw,null); if(p&&p.order&&p.order.length){ if(!DB._ts||!p._ts||p._ts>=DB._ts) DB=p; } } if(urlLockPending){ await tryResolveLockedLink(); return; } if(DB.students[active]){ CACHE=safeParse(await Store.get('tafit:data:'+active)||'{}',{}); migrateLegacyWeeks(); const remoteLogs=safeParse(await Store.get('tafit:logs:'+active)||'[]',[]); LOGS=mergeLogs(LOGS,remoteLogs); } render(); }catch(e){} }
+async function reloadFromRemote(){ try{ const raw=await Store.get('tafit:students'); if(raw){ const p=safeParse(raw,null); if(p&&p.order&&p.order.length){ if(!DB._ts||!p._ts||p._ts>=DB._ts){ DB=p; setSyncBaseline(); } } } if(urlLockPending){ await tryResolveLockedLink(); return; } if(DB.students[active]){ CACHE=safeParse(await Store.get('tafit:data:'+active)||'{}',{}); migrateLegacyWeeks(); const remoteLogs=safeParse(await Store.get('tafit:logs:'+active)||'[]',[]); LOGS=mergeLogs(LOGS,remoteLogs); } render(); }catch(e){} }
 function updateSyncUI(on){ $('clouddot').className='dot'+(on?' on':''); $('cloudlbl').textContent=on?'Sincronizado':(Store.ls?'En este dispositivo':'Solo esta sesión'); }
 function myKeys(){ /* claves que necesita una alumna con link bloqueado */
   return ['tafit:students','tafit:data:'+active,'tafit:logs:'+active,'tafit:form:acuerdo:'+active,'tafit:form:anamnesis:'+active];
@@ -2060,7 +2107,7 @@ async function initFirebase(){
        se volvía a escribir esa versión vieja de DB encima de la nube, ya con fireSync
        activo. Por eso también hay que actualizar DB acá, con la misma regla de "solo si
        es igual o más nuevo" que usa reloadFromRemote(), antes de que fireSync se active. */
-    try{ const snap=await kvQuery().get(); let _studentsMerged=false; snap.forEach(function(doc){ var k=doc.id,v=doc.data().v; if(shouldSync(k)&&v!=null){ try{ if(localStorage.getItem(k)!==v){ localStorage.setItem(k,v); if(k==='tafit:students'){ var p=safeParse(v,null); if(p&&p.order&&p.order.length&&(!DB._ts||!p._ts||p._ts>=DB._ts)){ DB=p; _studentsMerged=true; } } } }catch(e){} } }); if(_studentsMerged){ try{ if(urlLockPending) await tryResolveLockedLink(); else render(); }catch(e){} } else if(urlLockPending){ try{ await tryResolveLockedLink(); }catch(e){} } }catch(e){ console.warn('Pull:',e); }
+    try{ const snap=await kvQuery().get(); let _studentsMerged=false; snap.forEach(function(doc){ var k=doc.id,v=doc.data().v; if(shouldSync(k)&&v!=null){ try{ if(localStorage.getItem(k)!==v){ localStorage.setItem(k,v); if(k==='tafit:students'){ var p=safeParse(v,null); if(p&&p.order&&p.order.length&&(!DB._ts||!p._ts||p._ts>=DB._ts)){ DB=p; setSyncBaseline(); _studentsMerged=true; } } } }catch(e){} } }); if(_studentsMerged){ try{ if(urlLockPending) await tryResolveLockedLink(); else render(); }catch(e){} } else if(urlLockPending){ try{ await tryResolveLockedLink(); }catch(e){} } }catch(e){ console.warn('Pull:',e); }
     /* push: local → cloud */
     await pushAllLocal();
     /* real-time listener */
@@ -2094,6 +2141,11 @@ async function initFirebase(){
   if(raw){ const p=safeParse(raw,null); if(p&&p.order&&p.order.length) DB=p; }
   if(!DB.order||!DB.order.length){ DB={ order:['omar'], students:{ omar:{ name:'Omar', routine:tmplOmar(), theme:'m' } }, settings:{pin:""}, _seed:{} }; }
   if(!DB.settings) DB.settings={pin:""};
+  /* Referencia de "lo que este dispositivo cargó de su caché local" — se usa en saveDB()
+     para distinguir alumnos que runSeeds() (abajo) cree o corrija de verdad, de alumnos
+     que este dispositivo nunca tocó (y por lo tanto no debe pisar si el servidor tiene algo
+     más nuevo para ellos). */
+  setSyncBaseline();
   /* Antes acá se guardaba (y se pisaba _ts) SIEMPRE al abrir la app, aunque no hubiera
      cambios reales. Eso hacía que un dispositivo con datos viejos en caché terminara con
      una marca de tiempo "más nueva" que la nube sin haber sincronizado todavía, y esa
@@ -2168,6 +2220,37 @@ function runSeeds(){
       }
     }
     DB._seed.jy_log_s2=true;
+  }
+
+  /* Restauración puntual (una sola vez, 15/09): un dispositivo con la caché local
+     incompleta volvió a crear a Joni y a Sofía Catalán desde cero con su rutina
+     'de fábrica' del código (la de antes de cualquier edición), pisando sin querer
+     la rutina real que Tami había cargado a mano — a Joni se le perdió además el
+     ciclo iniciado el 07/09 (con su historial) y a Sofía el informe de su plan
+     pagado. Ya se corrigió la causa (guardar ahora hace un merge alumno por alumno
+     en vez de pisar el documento entero), y esto restaura el último estado bueno
+     conocido (backup del 11/09). Solo se aplica si el alumno TODAVÍA tiene
+     exactamente la rutina de fábrica — si Tami ya volvió a cargar algo distinto a
+     mano antes de que este parche llegue a su celular, no se toca nada. */
+  if(!DB._seed.joniRestore20260915){
+    const jnR=DB.students['joni-puebla'];
+    if(jnR&&!jnR.cycleHistory&&jnR.routine&&jnR.routine[0]&&jnR.routine[0].ex&&jnR.routine[0].ex[0]&&jnR.routine[0].ex[0].n==='Press plano barra'){
+      try{
+        const jnRestore=JSON.parse('{"routine": [{"day": "Día 1", "ex": [{"n": "Press plano barra (sostener 2\'\' abajo)", "s": 4, "r": "1×15 + 3×12", "w": "A definir", "alt": "", "tip": "Pausa activa entre series: flexiones × 8", "rest": "", "vid": "https://www.youtube.com/results?search_query=Press%20plano%20barra%20(sostener%202\'\'%20abajo)%20t%C3%A9cnica%20ejercicio"}, {"n": "Apertura inclinada con mancuerna", "s": 4, "r": "1×15 + 3×12", "w": "A definir", "alt": "", "tip": "Pausa activa entre series: plancha alta con rotación de hombro", "rest": "", "vid": "https://www.youtube.com/results?search_query=Apertura%20inclinada%20con%20mancuerna%20t%C3%A9cnica%20ejercicio"}, {"n": "Bíceps banco Scott", "s": 4, "r": "12", "w": "A definir", "alt": "", "tip": "Pausa activa entre series: bíceps isométrico 10\'\'", "rest": "", "vid": "https://www.youtube.com/results?search_query=B%C3%ADceps%20banco%20Scott%20t%C3%A9cnica%20ejercicio"}, {"n": "Bíceps martillo inclinado", "s": 4, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=B%C3%ADceps%20martillo%20inclinado%20t%C3%A9cnica%20ejercicio"}, {"n": "Volada lateral con mancuerna", "s": 4, "r": "1×15 + 3×12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Volada%20lateral%20con%20mancuerna%20t%C3%A9cnica%20ejercicio"}, {"n": "Pistol squat en cajón", "s": 4, "r": "15", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Pistol%20squat%20en%20caj%C3%B3n%20t%C3%A9cnica%20ejercicio"}, {"n": "Máquina cuádriceps", "s": 4, "r": "10", "w": "A definir", "alt": "", "tip": "Subís con una pierna, volvés con las dos.", "rest": "", "vid": "https://www.youtube.com/results?search_query=M%C3%A1quina%20cu%C3%A1driceps%20t%C3%A9cnica%20ejercicio"}]}, {"day": "Día 2", "ex": [{"n": "Dorsalera agarre cerrado", "s": 4, "r": "1×15 + 3×12", "w": "A definir", "alt": "", "tip": "Pausa activa entre series: remo cerrado en TRX × 8", "rest": "", "vid": "https://www.youtube.com/results?search_query=Dorsalera%20agarre%20cerrado%20t%C3%A9cnica%20ejercicio"}, {"n": "Remo barra Smith", "s": 4, "r": "1×15 + 3×12", "w": "A definir", "alt": "", "tip": "Pausa activa entre series: remo supino isométrico con mancuernas 15-20\'\'", "rest": "", "vid": "https://www.youtube.com/results?search_query=Remo%20barra%20Smith%20t%C3%A9cnica%20ejercicio"}, {"n": "Press cerrado (tríceps)", "s": 4, "r": "1×15 + 3×12", "w": "A definir", "alt": "", "tip": "Pausa activa entre series: flexiones diamante × 6-8", "rest": "", "vid": "https://www.youtube.com/results?search_query=Press%20cerrado%20(tr%C3%ADceps)%20t%C3%A9cnica%20ejercicio"}, {"n": "Press francés con barra", "s": 4, "r": "1×15 + 3×12", "w": "A definir", "alt": "", "tip": "Pausa activa entre series: fondos isométricos 10-15\'\'", "rest": "", "vid": "https://www.youtube.com/results?search_query=Press%20franc%C3%A9s%20con%20barra%20t%C3%A9cnica%20ejercicio"}, {"n": "Peso muerto unilateral con mancuerna", "s": 4, "r": "1×15 + 3×12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Peso%20muerto%20unilateral%20con%20mancuerna%20t%C3%A9cnica%20ejercicio"}, {"n": "Volada posterior con mancuerna", "s": 4, "r": "1×15 + 3×12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Volada%20posterior%20con%20mancuerna%20t%C3%A9cnica%20ejercicio"}, {"n": "Aductor máquina", "s": 4, "r": "15", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Aductor%20m%C3%A1quina%20t%C3%A9cnica%20ejercicio"}, {"n": "Abductor máquina", "s": 4, "r": "15", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Abductor%20m%C3%A1quina%20t%C3%A9cnica%20ejercicio"}]}], "cycleHistory": [{"start": null, "end": "2026-09-07T15:43:34.813Z", "routine": [{"day": "Día 1", "ex": [{"n": "Press plano barra", "s": 4, "r": "10", "w": "A definir", "alt": "Press plano con mancuernas", "tip": "Omóplatos retraídos, bajá al esternón controlando, sin rebotar.", "rest": "90 s", "vid": "https://www.youtube.com/results?search_query=Press%20plano%20barra%20t%C3%A9cnica%20ejercicio"}, {"n": "Bíceps curl sentado", "s": 4, "r": "10", "w": "A definir", "alt": "Curl de pie con barra", "tip": "Sentado, codos apoyados en las rodillas, subí controlado.", "rest": "60 s", "vid": "https://www.youtube.com/results?search_query=B%C3%ADceps%20curl%20sentado%20t%C3%A9cnica%20ejercicio"}, {"n": "Apertura máquina", "s": 4, "r": "10", "w": "A definir", "alt": "Aperturas con mancuernas", "tip": "Codos levemente flexionados, sentí el estiramiento del pectoral.", "rest": "60 s", "vid": "https://www.youtube.com/results?search_query=Apertura%20m%C3%A1quina%20t%C3%A9cnica%20ejercicio"}, {"n": "Bíceps barra", "s": 4, "r": "10", "w": "A definir", "alt": "Curl con barra Z", "tip": "Codos pegados al cuerpo y quietos, subí sin balancear la espalda.", "rest": "60 s", "vid": "https://www.youtube.com/results?search_query=B%C3%ADceps%20barra%20t%C3%A9cnica%20ejercicio"}, {"n": "Volada lateral polea", "s": 4, "r": "8-10", "w": "A definir", "alt": "Elevación lateral con mancuerna", "tip": "Brazo casi extendido, subí controlado hasta la altura del hombro.", "rest": "60 s", "vid": "https://www.youtube.com/results?search_query=Volada%20lateral%20polea%20t%C3%A9cnica%20ejercicio"}, {"n": "Peso muerto unilateral", "s": 4, "r": "10-12", "w": "A definir", "alt": "Peso muerto rumano", "tip": "Una pierna atrás, bajá controlado manteniendo la espalda recta.", "rest": "75 s", "vid": "https://www.youtube.com/results?search_query=Peso%20muerto%20unilateral%20t%C3%A9cnica%20ejercicio"}, {"n": "Abductores máquina", "s": 4, "r": "12-15", "w": "A definir", "alt": "Abductor con banda", "tip": "Sentate erguida, abrí las piernas controlando, sin rebote.", "rest": "60 s", "vid": "https://www.youtube.com/results?search_query=Abductores%20m%C3%A1quina%20t%C3%A9cnica%20ejercicio"}, {"n": "Máquina cuádriceps", "s": 4, "r": "10-12", "w": "A definir", "alt": "Extensión de cuádriceps", "tip": "Extendé completo arriba, bajá controlando sin soltar.", "rest": "60 s", "vid": "https://www.youtube.com/results?search_query=M%C3%A1quina%20cu%C3%A1driceps%20t%C3%A9cnica%20ejercicio"}]}, {"day": "Día 2", "ex": [{"n": "Remo Lachine", "s": 4, "r": "10", "w": "A definir", "alt": "Remo en polea baja", "tip": "Pecho apoyado, llevá los codos atrás apretando escápulas.", "rest": "75 s", "vid": "https://www.youtube.com/results?search_query=Remo%20Lachine%20t%C3%A9cnica%20ejercicio"}, {"n": "Flexiones tríceps", "s": 4, "r": "al fallo", "w": "Peso corporal", "alt": "Fondos en paralelas", "tip": "Series al fallo.", "rest": "75 s", "vid": "https://www.youtube.com/results?search_query=Flexiones%20tr%C3%ADceps%20t%C3%A9cnica%20ejercicio"}, {"n": "Dorsalera amplia", "s": 4, "r": "10", "w": "A definir", "alt": "Jalón al pecho agarre abierto", "tip": "Agarre abierto, pecho arriba, bajá la barra al mentón sin tirones.", "rest": "75 s", "vid": "https://www.youtube.com/results?search_query=Dorsalera%20amplia%20t%C3%A9cnica%20ejercicio"}, {"n": "Press hombro máquina", "s": 4, "r": "10", "w": "A definir", "alt": "Press militar con mancuernas", "tip": "Codos a 90°, empujá vertical sin arquear la espalda.", "rest": "75 s", "vid": "https://www.youtube.com/results?search_query=Press%20hombro%20m%C3%A1quina%20t%C3%A9cnica%20ejercicio"}, {"n": "Patada tríceps polea", "s": 4, "r": "10", "w": "A definir", "alt": "Patada de tríceps con mancuerna", "tip": "Torso inclinado, codo fijo, extendé completo atrás.", "rest": "60 s", "vid": "https://www.youtube.com/results?search_query=Patada%20tr%C3%ADceps%20polea%20t%C3%A9cnica%20ejercicio"}, {"n": "Pull over polea", "s": 4, "r": "10", "w": "A definir", "alt": "Pull over con mancuerna", "tip": "Brazos casi extendidos, llevá la barra hacia abajo con el dorsal.", "rest": "60 s", "vid": "https://www.youtube.com/results?search_query=Pull%20over%20polea%20t%C3%A9cnica%20ejercicio"}, {"n": "Hip thrust abierta y cerrada", "s": 4, "r": "10+10", "w": "A definir", "alt": "Hip thrust en máquina", "tip": "A = abierta, C = cerrada.", "rest": "90 s", "vid": "https://www.youtube.com/results?search_query=Hip%20thrust%20abierta%20y%20cerrada%20t%C3%A9cnica%20ejercicio"}, {"n": "Aductores máquina", "s": 4, "r": "12-15", "w": "A definir", "alt": "Aductor con banda", "tip": "Sentate erguida, cerrá las piernas controlando, sin rebote.", "rest": "60 s", "vid": "https://www.youtube.com/results?search_query=Aductores%20m%C3%A1quina%20t%C3%A9cnica%20ejercicio"}]}, {"day": "Día 3 · Popurrí", "ex": [{"n": "Dominadas", "s": 4, "r": "al fallo", "w": "Peso corporal", "alt": "Jalón supino en polea", "tip": "Series al fallo.", "rest": "90 s", "vid": "https://www.youtube.com/results?search_query=Dominadas%20t%C3%A9cnica%20ejercicio"}, {"n": "Estocada c/ lanzamiento lateral", "s": 4, "r": "15/lado", "w": "A definir", "alt": "Estocada con rotación", "tip": "Combiná la estocada con rotación del torso. Controlá el equilibrio.", "rest": "75 s", "vid": "https://www.youtube.com/results?search_query=Estocada%20c%2F%20lanzamiento%20lateral%20t%C3%A9cnica%20ejercicio"}, {"n": "Step up en cajón", "s": 4, "r": "12", "w": "A definir", "alt": "Step up al cajón con mancuerna", "tip": "Pisá firme con toda la planta, empujá con la pierna de arriba sin impulso.", "rest": "60 s", "vid": "https://www.youtube.com/results?search_query=Step%20up%20en%20caj%C3%B3n%20t%C3%A9cnica%20ejercicio"}, {"n": "Barquito c/ disco", "s": 4, "r": "40 s", "w": "A definir", "alt": "V-ups", "tip": "Isométrico: 40 segundos por serie.", "rest": "45 s", "vid": "https://www.youtube.com/results?search_query=Barquito%20c%2F%20disco%20t%C3%A9cnica%20ejercicio"}, {"n": "Press inclinado mancuerna", "s": 4, "r": "10", "w": "A definir", "alt": "Press inclinado en Smith", "tip": "Banco a 30°, codos a 45°, sentí el estiramiento del pectoral abajo.", "rest": "75 s", "vid": "https://www.youtube.com/results?search_query=Press%20inclinado%20mancuerna%20t%C3%A9cnica%20ejercicio"}, {"n": "Crunch abdominal banco", "s": 4, "r": "20", "w": "Peso corporal", "alt": "Crunch en colchoneta", "tip": "Subí con el abdomen, no con el cuello. Controlá la bajada.", "rest": "45 s", "vid": "https://www.youtube.com/results?search_query=Crunch%20abdominal%20banco%20t%C3%A9cnica%20ejercicio"}, {"n": "Sentadilla goblet", "s": 4, "r": "15", "w": "A definir", "alt": "Sentadilla con barra", "tip": "Disco o mancuerna al pecho, bajá controlada con la espalda erguida.", "rest": "75 s", "vid": "https://www.youtube.com/results?search_query=Sentadilla%20goblet%20t%C3%A9cnica%20ejercicio"}, {"n": "Tríceps copa", "s": 4, "r": "10", "w": "A definir", "alt": "Tríceps en polea", "tip": "Codos apuntando al techo, bajá detrás de la cabeza controlando.", "rest": "60 s", "vid": "https://www.youtube.com/results?search_query=Tr%C3%ADceps%20copa%20t%C3%A9cnica%20ejercicio"}, {"n": "Volada posterior máquina", "s": 4, "r": "10", "w": "A definir", "alt": "Pájaro con mancuerna", "tip": "Pecho apoyado, llevá los brazos atrás apretando las escápulas.", "rest": "60 s", "vid": "https://www.youtube.com/results?search_query=Volada%20posterior%20m%C3%A1quina%20t%C3%A9cnica%20ejercicio"}, {"n": "Bíceps martillo", "s": 4, "r": "10", "w": "A definir", "alt": "Curl martillo en polea", "tip": "Agarre neutro (palmas enfrentadas), codos quietos.", "rest": "60 s", "vid": "https://www.youtube.com/results?search_query=B%C3%ADceps%20martillo%20t%C3%A9cnica%20ejercicio"}]}], "weeks": [{"t": "S1", "n": "Adaptación", "d": "Cargas cómodas, foco en técnica y rango."}, {"t": "S2", "n": "Sumás reps", "d": "Mismo peso, una repe más por serie."}, {"t": "S3", "n": "Subís carga", "d": "Un poco más de peso, volvés a las reps base."}, {"t": "S4", "n": "Volumen", "d": "Sumá una serie si la técnica está fina."}, {"t": "S5", "n": "Intensidad", "d": "Más cerca del esfuerzo real, RIR 2."}, {"t": "S6", "n": "Pico / Test", "d": "Buscá tu mejor serie de la etapa."}]}], "cycleStart": "2026-09-07T15:43:34.813Z", "forms": {"informe": true, "informeCycle": 0}}');
+        jnR.routine=jnRestore.routine; jnR.cycleHistory=jnRestore.cycleHistory; jnR.cycleStart=jnRestore.cycleStart; jnR.forms=jnRestore.forms;
+      }catch(e){}
+    }
+    DB._seed.joniRestore20260915=true;
+  }
+  if(!DB._seed.sofiaCatalanRestore20260915){
+    const scR=DB.students['sofia-catalan'];
+    if(scR&&scR.routine&&scR.routine[0]&&scR.routine[0].ex&&scR.routine[0].ex[0]&&scR.routine[0].ex[0].n==='Press banca con barra'){
+      try{
+        const scRestore=JSON.parse('{"routine": [{"day": "Día 1", "ex": [{"n": "Estocadas búlgaras", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Estocadas%20b%C3%BAlgaras%20t%C3%A9cnica%20ejercicio"}, {"n": "Abdominales pase de pelota", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Abdominales%20pase%20de%20pelota%20t%C3%A9cnica%20ejercicio"}, {"n": "Peso muerto con mancuernas", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Peso%20muerto%20con%20mancuernas%20t%C3%A9cnica%20ejercicio"}, {"n": "Abductor máquina", "s": 3, "r": "15", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Abductor%20m%C3%A1quina%20t%C3%A9cnica%20ejercicio"}, {"n": "Volada lateral con mancuerna", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Volada%20lateral%20con%20mancuerna%20t%C3%A9cnica%20ejercicio"}, {"n": "Máquina de isquiotibiales", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=M%C3%A1quina%20de%20isquiotibiales%20t%C3%A9cnica%20ejercicio"}, {"n": "Remo con barra", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Remo%20con%20barra%20t%C3%A9cnica%20ejercicio"}, {"n": "Subida al cajón con rebote", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "Ejercicio extra — sumalo si te queda tiempo/energía en la sesión.", "rest": "", "vid": "https://www.youtube.com/results?search_query=Subida%20al%20caj%C3%B3n%20con%20rebote%20t%C3%A9cnica%20ejercicio"}, {"n": "Peso muerto + estocada combinados", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "Ejercicio extra — sumalo si te queda tiempo/energía en la sesión.", "rest": "", "vid": "https://www.youtube.com/results?search_query=Peso%20muerto%20%2B%20estocada%20combinados%20t%C3%A9cnica%20ejercicio"}]}, {"day": "Día 2", "ex": [{"n": "Hip thrust", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Hip%20thrust%20t%C3%A9cnica%20ejercicio"}, {"n": "Tríceps soga en polea", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Tr%C3%ADceps%20soga%20en%20polea%20t%C3%A9cnica%20ejercicio"}, {"n": "Step up en Smith", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Step%20up%20en%20Smith%20t%C3%A9cnica%20ejercicio"}, {"n": "Press de pecho en step", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Press%20de%20pecho%20en%20step%20t%C3%A9cnica%20ejercicio"}, {"n": "Aductor máquina", "s": 3, "r": "15", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Aductor%20m%C3%A1quina%20t%C3%A9cnica%20ejercicio"}, {"n": "Press francés", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Press%20franc%C3%A9s%20t%C3%A9cnica%20ejercicio"}, {"n": "Press de pecho en máquina", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Press%20de%20pecho%20en%20m%C3%A1quina%20t%C3%A9cnica%20ejercicio"}, {"n": "Press de hombros", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Press%20de%20hombros%20t%C3%A9cnica%20ejercicio"}, {"n": "Sprint con banda", "s": 4, "r": "30 s", "w": "A definir", "alt": "", "tip": "Ejercicio extra — sumalo si te queda tiempo/energía en la sesión.", "rest": "", "vid": "https://www.youtube.com/results?search_query=Sprint%20con%20banda%20t%C3%A9cnica%20ejercicio"}, {"n": "Subo-bajo en step", "s": 4, "r": "30 s", "w": "A definir", "alt": "", "tip": "Ejercicio extra — sumalo si te queda tiempo/energía en la sesión.", "rest": "", "vid": "https://www.youtube.com/results?search_query=Subo-bajo%20en%20step%20t%C3%A9cnica%20ejercicio"}]}, {"day": "Día 3", "ex": [{"n": "Sentadilla sumo", "s": 3, "r": "15", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Sentadilla%20sumo%20t%C3%A9cnica%20ejercicio"}, {"n": "Abdominales tijera", "s": 3, "r": "15", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Abdominales%20tijera%20t%C3%A9cnica%20ejercicio"}, {"n": "Máquina de cuádriceps", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=M%C3%A1quina%20de%20cu%C3%A1driceps%20t%C3%A9cnica%20ejercicio"}, {"n": "Patada de glúteo en máquina", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Patada%20de%20gl%C3%BAteo%20en%20m%C3%A1quina%20t%C3%A9cnica%20ejercicio"}, {"n": "Remo en máquina", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Remo%20en%20m%C3%A1quina%20t%C3%A9cnica%20ejercicio"}, {"n": "Sentadilla abro y cierro con salto en step", "s": 3, "r": "10/10", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Sentadilla%20abro%20y%20cierro%20con%20salto%20en%20step%20t%C3%A9cnica%20ejercicio"}, {"n": "Plancha subo-bajo en step", "s": 3, "r": "10/10", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Plancha%20subo-bajo%20en%20step%20t%C3%A9cnica%20ejercicio"}]}], "weeks": [{"t": "S1", "n": "Base", "d": "Afianzá la técnica con el peso actual. Series controladas."}, {"t": "S2", "n": "Volumen", "d": "Sumá 1–2 reps por serie, mismo peso."}, {"t": "S3", "n": "Carga", "d": "Subí el peso, volvés a las reps base."}, {"t": "S4", "n": "Pico", "d": "Más carga y más reps, semana fuerte."}], "planPaid": "2026-09-07"}');
+        scR.routine=scRestore.routine; scR.weeks=scRestore.weeks; scR.planPaid=scRestore.planPaid;
+      }catch(e){}
+    }
+    DB._seed.sofiaCatalanRestore20260915=true;
   }
 }
 
