@@ -1524,6 +1524,11 @@ function stuCandeEspeche(){ return { name:"Cande Espeche", theme:"f", weeks:cp(D
   {day:"Día 2",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]},
 ] }; }
 
+function stuLuciaCaruso(){ return { name:"Lucia Caruso", theme:"f", weeks:cp(DEFAULT_WEEKS), forms:{anamnesis:true}, routine:[
+  {day:"Día 1",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]},
+  {day:"Día 2",ex:[ex("Por asignar",4,"12","A definir","","Rutina pendiente de asignar.","")]},
+] }; }
+
 const FEM=new Set(['maria','sofia','valentina','martina','catalina','julieta','camila','lucia','florencia','agustina','micaela','rocio','daniela','gabriela','carla','paula','laura','andrea','romina','belen','ana','luciana','milagros','abril','antonella','brenda','carolina','cecilia','clara','denise','elena','emilia','eugenia','fernanda','guadalupe','ines','isabel','jimena','josefina','lara','lorena','magali','malena','marcela','melina','mora','natalia','nadia','noelia','ornella','pamela','patricia','pia','priscila','renata','sabrina','silvina','tamara','vanesa','vanina','veronica','victoria','yamila','zoe','aldana','ayelen','barbara','celeste','delfina','elisa','estefania','giuliana','ludmila','mia','olivia','salome','sol','trinidad','agostina','morena','luz','candela','jazmin','rosario','pilar','manuela','francisca','constanza','nati','caro','marti','jus','yesi','justine','yesica']);
 const MASC_A=new Set(['luca','elias','matias','tobias','jonas','jeremias','tomas','andres','nicolas','farias','dias']);
 function norm(s){ return (s||'').trim().toLowerCase().split(/\s+/)[0].normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
@@ -2194,6 +2199,7 @@ function runSeeds(){
   if(!DB._seed.mauri){ if(!DB.students['mauri']){ DB.students['mauri']=stuMauri(); DB.order.push('mauri'); } DB._seed.mauri=true; }
   if(!DB._seed.sofiaCatalan){ if(!DB.students['sofia-catalan']){ DB.students['sofia-catalan']=stuSofiaCatalan(); DB.order.push('sofia-catalan'); } DB._seed.sofiaCatalan=true; }
   if(!DB._seed.candeEspeche){ if(!DB.students['cande-espeche']){ DB.students['cande-espeche']=stuCandeEspeche(); DB.order.push('cande-espeche'); } DB._seed.candeEspeche=true; }
+  if(!DB._seed.luciaCaruso){ if(!DB.students['lucia-caruso']){ DB.students['lucia-caruso']=stuLuciaCaruso(); DB.order.push('lucia-caruso'); } DB._seed.luciaCaruso=true; }
   /* Lola/Anto: se crean por código (no por backup) para que queden garantizadas pase lo
      que pase — si alguna vez desaparecieran de la base por cualquier motivo, este seed las
      vuelve a crear solo, en el próximo dispositivo que abra la app, igual que con
