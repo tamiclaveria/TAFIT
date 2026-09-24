@@ -1353,6 +1353,85 @@ function sofiMartiDay3(){ return {day:"Día 3", ex:[
   ex("Abductores en máquina",3,"15","A definir","Abductor con banda","Abrí las piernas controlando, apretá afuera.","60 s"),
 ] }; }
 
+/* ---- Sofi / Marti — ciclo nuevo (24/09/2026, rutina de 3 días transcripta a mano por la
+   profe, con progresión de series/reps ya definida semana a semana S1-S6). La base de cada
+   ejercicio (lo que se ve en "routine") son los valores de S1; las semanas S2-S6 viven como
+   overrides en CACHE (sofiMartiCycle2WeekOverrides), igual que la progresión de Lola/Anto. */
+function sofiMartiCycle2Day1(){ return {day:"Día 1", ex:[
+  ex("Hip thrust",3,"10 + 20\" sostener arriba + 6-8","A definir","","",""),
+  ex("Press de hombro barra",3,"10","A definir","","",""),
+  ex("Peso muerto unilateral mancuerna",3,"12","A definir","","",""),
+  ex("Bíceps inclinado mancuerna",3,"12","A definir","","",""),
+  ex("Sentadilla sumo mancuerna",4,"15","A definir","","",""),
+  ex("Curl femoral c/banda",3,"15","A definir","","",""),
+  ex("Remo bajo máquina",3,"15","A definir","","",""),
+  ex("Bíceps polea barrita",3,"12","A definir","","",""),
+] }; }
+function sofiMartiCycle2Day2(){ return {day:"Día 2", ex:[
+  ex("Sentadilla cajón",3,"15","A definir","","",""),
+  ex("Prensa 45°",3,"15","A definir","","",""),
+  ex("Fondos paralelos",3,"12","A definir","","",""),
+  ex("Press francés mancuerna",3,"12","A definir","","",""),
+  ex("Apertura máquina",3,"12","A definir","","",""),
+  ex("Aductores",3,"15 + 15 pulsos","A definir","","",""),
+  ex("Press inclinado barra",3,"12","A definir","","",""),
+  ex("Máquina cuádriceps",3,"15","A definir","","",""),
+] }; }
+function sofiMartiCycle2Day3(){ return {day:"Día 3", ex:[
+  ex("Step up Smith",3,"15","A definir","","",""),
+  ex("Volada lateral inclinado",3,"12","A definir","","",""),
+  ex("Dominadas",3,"al fallo","Peso corporal","","",""),
+  ex("Flexiones",3,"al fallo","Peso corporal","","",""),
+  ex("Búlgara",3,"15","A definir","","",""),
+  ex("Máquina de femoral",3,"15","A definir","","",""),
+  ex("Prensa",3,"15","A definir","","",""),
+  ex("Abductores",3,"15 + 15 pulsos","A definir","","",""),
+] }; }
+/* Progresión semanal S2-S6 (índices de semana 1 a 5 — S1 vive en la rutina base de arriba).
+   Transcripta a mano de las fotos de la libreta; algunos valores puntuales quedaron marcados
+   como dudosos en el resumen que le mandé a la profe para que los confirme en la demo. */
+function sofiMartiCycle2WeekOverrides(){
+  const days=[
+    [ /* Día 1 */
+      {1:{s:3,r:'12 + 20" sostener arriba + 6-8'},2:{s:3,r:'12 + 15" sostener arriba'},3:{s:3,r:'15 + 15" sostener arriba'},4:{s:3,r:'15 + 20" sostener arriba + 6-8'},5:{s:3,r:'15'}},
+      {1:{s:3,r:'10'},2:{s:3,r:'1×10 + 2×8'},3:{s:3,r:'8'},4:{s:3,r:'1×8 + 2×6'},5:{s:3,r:'6'}},
+      {1:{s:3,r:'12'},2:{s:3,r:'1×12 + 2×10'},3:{s:3,r:'10'},4:{s:3,r:'1×10 + 2×8'},5:{s:3,r:'8'}},
+      {1:{s:3,r:'12'},2:{s:3,r:'1×12 + 2×10'},3:{s:3,r:'10'},4:{s:3,r:'1×10 + 2×8'},5:{s:3,r:'8'}},
+      {1:{s:4,r:'15'},2:{s:3,r:'drop set 15/10/8'},3:{s:3,r:'drop set 15/10/8'},4:{s:4,r:'20'},5:{s:4,r:'20'}},
+      {1:{s:3,r:'15'},2:{s:3,r:'15 + disco'},3:{s:3,r:'15 + disco'},4:{s:3,r:'15 + disco'},5:{s:3,r:'15 + disco'}},
+      {1:{s:3,r:'15'},2:{s:3,r:'12'},3:{s:3,r:'12'},4:{s:3,r:'10'},5:{s:3,r:'10'}},
+      {1:{s:3,r:'12'},2:{s:3,r:'10'},3:{s:3,r:'8'},4:{s:3,r:'8'},5:{s:3,r:'6'}},
+    ],
+    [ /* Día 2 */
+      {1:{s:3,r:'12'},2:{s:3,r:'2×12 + 1×10'},3:{s:3,r:'10'},4:{s:3,r:'2×10 + 1×8'},5:{s:3,r:'8'}},
+      {1:{s:3,r:'15'},2:{s:3,r:'1×15 + 2×12'},3:{s:3,r:'12'},4:{s:3,r:'10'},5:{s:3,r:'1×10 + 2×8'}},
+      {1:{s:3,r:'12'},2:{s:3,r:'6/10 c/lastre'},3:{s:3,r:'6/10 c/lastre'},4:{s:3,r:'12/15'},5:{s:3,r:'12/15'}},
+      {1:{s:3,r:'12'},2:{s:3,r:'1×12 + 2×10'},3:{s:3,r:'10'},4:{s:3,r:'1×10 + 2×8'},5:{s:3,r:'8'}},
+      {1:{s:3,r:'12'},2:{s:3,r:'15'},3:{s:3,r:'15'},4:{s:3,r:'1×12 + 2×10'},5:{s:3,r:'10'}},
+      {1:{s:3,r:'15 + 15 pulsos'},2:{s:3,r:'drop set 15/10/8'},3:{s:3,r:'drop set 15/10/8'},4:{s:3,r:'15'},5:{s:3,r:'15'}},
+      {1:{s:3,r:'12'},2:{s:3,r:'1×12 + 2×10'},3:{s:3,r:'10'},4:{s:3,r:'1×10 + 2×8'},5:{s:3,r:'8'}},
+      {1:{s:3,r:'15'},2:{s:3,r:'1×15 + 2×12'},3:{s:3,r:'12'},4:{s:3,r:'drop set 15/10/8'},5:{s:3,r:'drop set 15/10/6'}},
+    ],
+    [ /* Día 3 */
+      {1:{s:3,r:'15'},2:{s:3,r:'1×15 + 2×12'},3:{s:3,r:'12'},4:{s:3,r:'12'},5:{s:3,r:'10'}},
+      {1:{s:3,r:'12'},2:{s:3,r:'1×12 + 2×8'},3:{s:3,r:'8'},4:{s:3,r:'10'},5:{s:3,r:'10'}},
+      {1:{s:3,r:'al fallo'},2:{s:3,r:'c/lastre'},3:{s:3,r:'en negativo c/lastre'},4:{s:3,r:'al fallo'},5:{s:3,r:'al fallo'}},
+      {1:{s:3,r:'al fallo'},2:{s:3,r:'al fallo c/pausa'},3:{s:3,r:'al fallo c/step'},4:{s:3,r:'al fallo laterales'},5:{s:3,r:'al fallo'}},
+      {1:{s:3,r:'15'},2:{s:3,r:'12 + 8 saltos'},3:{s:3,r:'10 + 8 saltos'},4:{s:3,r:'drop set 12/8/6'},5:{s:3,r:'drop set 12/8/6'}},
+      {1:{s:3,r:'15'},2:{s:3,r:'1×15 + 2×12'},3:{s:3,r:'12'},4:{s:3,r:'drop set 15/10/6'},5:{s:3,r:'drop set 15/10/6'}},
+      {1:{s:3,r:'15'},2:{s:3,r:'1×15 + 2×12'},3:{s:3,r:'12'},4:{s:3,r:'8'},5:{s:3,r:'10'}},
+      {1:{s:3,r:'15 + 15 pulsos'},2:{s:3,r:'drop set 15/10/8'},3:{s:3,r:'drop set 15/10/8'},4:{s:3,r:'15'},5:{s:3,r:'20'}},
+    ],
+  ];
+  const out={_wMigrated:true};
+  days.forEach(function(dayExs,di){
+    dayExs.forEach(function(wk,ei){
+      Object.keys(wk).forEach(function(wi){ out['wo_w'+wi+'_'+di+'_'+ei]=Object.assign({},wk[wi]); });
+    });
+  });
+  return out;
+}
+
 /* ---- Jus / Yesi (dúo, 2 días) ---- */
 function stuJusYesi(){ return { name:"Jus / Yesi", theme:"f", members:["Jus","Yesi"], weeks:cp(DEFAULT_WEEKS), routine:[
   {day:"Día 1", ex:[
@@ -2171,6 +2250,33 @@ async function initFirebase(){
       await Store.set('tafit:data:lola-anto',JSON.stringify(mergedProg));
     }catch(e){}
   }
+  /* Limpieza única de la CACHE vieja de Joni: el 07/09 se le reinició el ciclo (rutina
+     nueva) pero los overrides semanales (wo_w2.._wo_w5..) del ciclo ANTERIOR quedaron
+     pisando el Día 2 (entre otros) desde la semana 3 en adelante — por eso aparecía un
+     ejercicio que ya no es parte de su rutina actual ("Remo Ladmine"). A partir de ahora
+     "Iniciar nuevo ciclo" limpia la CACHE sola (ver startNewCycle), pero esto arregla el
+     caso de Joni que ya había reiniciado su ciclo antes de que existiera ese arreglo. Solo
+     se sacan las claves "wo_" (overrides semanales de ejercicio) — nunca se tocan sus
+     sesiones ya registradas ni los pesos/reps que ya cargó. */
+  if(!DB._seed.joniCacheClean20260924){
+    DB._seed.joniCacheClean20260924=true;
+    try{
+      const jc=safeParse(await Store.get('tafit:data:joni-puebla')||'{}',{});
+      let changed=false;
+      Object.keys(jc).forEach(function(k){ if(k.indexOf('wo_')===0){ delete jc[k]; changed=true; } });
+      if(changed) await Store.set('tafit:data:joni-puebla',JSON.stringify(jc));
+    }catch(e){}
+  }
+  /* CACHE del ciclo nuevo de Sofi/Marti: reemplaza la CACHE vieja (overrides del ciclo
+     anterior, ya archivado arriba en cycleHistory) por la progresión semanal S2-S6 de la
+     rutina nueva. Como el ciclo recién arranca hoy, no hay progreso de la sesión actual que
+     preservar — la CACHE anterior queda igual de "stale" que la de Joni si no se limpia. */
+  if(!DB._seed.sofiMartiCacheClean20260924){
+    DB._seed.sofiMartiCacheClean20260924=true;
+    try{
+      await Store.set('tafit:data:sofi-marti',JSON.stringify(sofiMartiCycle2WeekOverrides()));
+    }catch(e){}
+  }
 function runSeeds(){
   if(!DB._seed) DB._seed={};
   if(!DB._seed.delfina){ if(!DB.students['delfina']){ DB.students['delfina']=delfinaStudent(); DB.order.push('delfina'); } DB._seed.delfina=true; }
@@ -2184,6 +2290,26 @@ function runSeeds(){
   if(!DB._seed.flor){ if(!DB.students['flor']){ DB.students['flor']=stuFlor(); DB.order.push('flor'); } DB._seed.flor=true; }
   if(!DB._seed.cintia){ if(!DB.students['cintia']){ DB.students['cintia']=stuCintia(); DB.order.push('cintia'); } DB._seed.cintia=true; }
   if(!DB._seed.sm_d3){ const sm=DB.students['sofi-marti']; if(sm&&sm.routine){ if(!sm.routine.find(d=>/Día 2/.test(d.day))) sm.routine.splice(1,0,sofiMartiDay2()); if(!sm.routine.find(d=>/Día 3/.test(d.day))) sm.routine.push(sofiMartiDay3()); } DB._seed.sm_d3=true; }
+  /* Ciclo nuevo de Sofi/Marti (24/09/2026): la rutina vieja queda archivada en cycleHistory
+     (sigue completa en Transcripta) y entra la rutina nueva de 3 días. cycleStart se reinicia
+     para que el Informe de Evolución cuente desde ahora. La CACHE (overrides semanales) se
+     limpia y se siembra aparte, fuera de runSeeds() — ver sofiMartiCacheClean20260924 más abajo. */
+  if(!DB._seed.sofiMartiNewCycle20260924){
+    const sm2=DB.students['sofi-marti'];
+    if(sm2){
+      if(!sm2.cycleHistory) sm2.cycleHistory=[];
+      const now2=new Date().toISOString();
+      sm2.cycleHistory.push({ start:sm2.cycleStart||null, end:now2, routine:cp(sm2.routine), weeks:cp(sm2.weeks) });
+      sm2.routine=[ sofiMartiCycle2Day1(), sofiMartiCycle2Day2(), sofiMartiCycle2Day3() ];
+      /* La rutina vieja usaba DEFAULT_WEEKS (solo 4 semanas: S1-S4), pero la progresión
+         nueva que mandó la profe viene detallada S1 a S6 — sin este cambio las semanas 5 y
+         6 (y sus overrides) quedarían sembradas en CACHE pero inalcanzables, porque no
+         habría pestaña de semana para llegar a ellas. */
+      sm2.weeks=cp(WEEKS6);
+      sm2.cycleStart=now2;
+    }
+    DB._seed.sofiMartiNewCycle20260924=true;
+  }
   if(!DB._seed.fede){ if(!DB.students['fede-del-sol']){ DB.students['fede-del-sol']=stuFede(); DB.order.push('fede-del-sol'); } DB._seed.fede=true; }
   if(!DB._seed.grupo5){ if(!DB.students['grupo-5']){ DB.students['grupo-5']=stuGrupo5(); DB.order.push('grupo-5'); } DB._seed.grupo5=true; }
   if(!DB._seed.adriana){ if(!DB.students['adriana-x']){ DB.students['adriana-x']=stuAdrianaX(); DB.order.push('adriana-x'); } DB._seed.adriana=true; }
@@ -2489,6 +2615,22 @@ async function tryResolveLockedLink(){
   if(!found) found=DB.order.find(id=>DB.students[id].name.toLowerCase().includes(urlLockA.toLowerCase()));
   if(found){ active=found; locked=true; trainer=false; urlLockPending=false; await loadStudent(); render(); }
 }
+/* Pantalla de bloqueo (pausada a mano, o plan vencido) para CUALQUIER pestaña que vea
+   una alumna — no solo la pestaña App. Antes esto vivía solo dentro de renderApp(), así
+   que una alumna pausada/suspendida podía seguir viendo su rutina completa entrando por
+   Transcripta, Fotos o Informe con solo tocar esas pestañas. Ahora se chequea acá, antes
+   de despachar a CUALQUIER renderer de pestaña, así que queda bloqueada en todas. */
+function renderBlockedIfNeeded(){
+  const st=DB.students[active]; if(!st) return false;
+  const planDue=planDueInfo(st.planPaid);
+  const planExpired=!!(planDue&&planDue.status==='bad');
+  if(!(st.paused||planExpired)) return false;
+  const icon=planExpired&&!st.paused?'🔒':'⏸';
+  const title=planExpired&&!st.paused?'Tu plan venció':'Tu rutina está pausada por el momento';
+  const detail=planExpired&&!st.paused?`Venció hace ${Math.abs(planDue.daysLeft)} día${Math.abs(planDue.daysLeft)===1?'':'s'}. Contactá a tu profe para renovarlo y seguir entrenando.`:'Contactá a tu profe para más información.';
+  const m=$('main'); m.innerHTML=`<div style="text-align:center;padding:40px 20px"><div style="font-size:48px;margin-bottom:16px">${icon}</div><div style="font-size:18px;font-weight:700;color:var(--navy);margin-bottom:12px">${esc(title)}</div><div style="font-size:14px;color:var(--mute);line-height:1.6">${esc(detail)}</div>${renderWhatsAppBtn()}</div>`;
+  return true;
+}
 function render(){
   if(urlLockPending){ renderLinkPending(); return; }
   if(urlLockFailed){ renderLinkFailed(); return; }
@@ -2497,6 +2639,7 @@ function render(){
     else if(tab==='resumen'&&!informeEnabledForStudent()) tab='app';
   }
   renderChrome();
+  if(!trainer && renderBlockedIfNeeded()) return;
   if(tab==='app') renderApp();
   else if(tab==='trans') renderTrans();
   else if(tab==='fotos') renderPhotos();
@@ -2869,7 +3012,22 @@ function pickWeek(i){
   week=i; savePos(); renderApp();
 }
 /* Una semana está completa cuando cada día de la rutina tiene su sesión cerrada en esa semana */
-function weekDone(wi){ const r=routine(); return r.length>0 && r.every(function(d){ return LOGS.some(function(l){ return +l.week===+wi && l.dayName===d.day; }); }); }
+/* Cuenta una semana como "completada" solo con sesiones cerradas DESPUÉS de que arrancó
+   el ciclo actual (st.cycleStart). Sin este corte, sesiones viejas de un ciclo anterior
+   (mismo índice de semana / mismo nombre de día, por coincidencia de posición) hacían que
+   el desbloqueo progresivo de semanas se saltee de más — por eso una alumna con acceso
+   manual limitado a la semana 3 terminaba viendo todas las semanas igual. */
+function weekDone(wi){
+  const r=routine(); if(r.length===0) return false;
+  const st=DB.students[active];
+  const cutoff=(st&&st.cycleStart)?Date.parse(st.cycleStart):0;
+  return r.every(function(d){ return LOGS.some(function(l){
+    if(+l.week!==+wi || l.dayName!==d.day) return false;
+    if(!cutoff) return true;
+    const t=l.date?Date.parse(l.date):0;
+    return !isNaN(t) && t>=cutoff;
+  }); });
+}
 /* Para alumnas: la semana i se desbloquea SOLO al completar TODOS los días de la anterior. La profe ve todo. */
 function wkLocked(i){ if(trainer) return false; const unlockW=(DB.students[active]&&DB.students[active].unlockWeek)||0; if(i<=unlockW) return false; return i>0 && !weekDone(i-1); }
 function pickMember(i){ member=i; openEx=-1; savePos(); renderApp(); }
@@ -3633,6 +3791,14 @@ async function startNewCycle(){
   if(!st.cycleHistory) st.cycleHistory=[];
   st.cycleHistory.push({ start:st.cycleStart||null, end:now, routine:cp(st.routine), weeks:cp(st.weeks) });
   st.cycleStart=now;
+  /* La CACHE (overrides semanales de la profe + los pesos/reps que se van cargando en la
+     sesión en curso) está indexada por POSICIÓN (semana/día/índice de ejercicio), no por
+     ejercicio en sí. Si la rutina nueva tiene otros ejercicios en esas mismas posiciones,
+     dejar la CACHE vieja hace que se mezclen datos de la rutina anterior con la nueva (por
+     ej. un día mostrando de golpe el ejercicio viejo a partir de cierta semana). El LOGS
+     (historial de sesiones cerradas, lo que se ve en Transcripta) NO se toca acá. */
+  CACHE={};
+  await saveData();
   await saveDB();
   toast('✓ Nuevo ciclo iniciado para '+name,'ok');
   renderEdit();
