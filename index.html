@@ -10,16 +10,21 @@
 <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiVGFGaXQgYnkgVGFtYXJhIENsYXZlcmlhIiwic2hvcnRfbmFtZSI6IlRGIiwiZGVzY3JpcHRpb24iOiJUdSBydXRpbmEgZGUgZW50cmVuYW1pZW50byBwZXJzb25hbGl6YWRhIiwic3RhcnRfdXJsIjoiLi8iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMGQxYjJhIiwidGhlbWVfY29sb3IiOiIjMGQxYjJhIiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCw8c3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDE5MiAxOTInPjxyZWN0IHdpZHRoPScxOTInIGhlaWdodD0nMTkyJyByeD0nMzInIGZpbGw9JyMwZDFiMmEnLz48dGV4dCB4PSc5NicgeT0nMTI1JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmaWxsPScjZmZmJyBmb250LXNpemU9Jzc4JyBmb250LXdlaWdodD0nOTAwJyBmb250LWZhbWlseT0nc3lzdGVtLXVpJz5URjwvdGV4dD48dGV4dCB4PSc5NicgeT0nMTYwJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmaWxsPScjNWRhNGU2JyBmb250LXNpemU9JzE0JyBmb250LWZhbWlseT0nc3lzdGVtLXVpJz5ieSBUYW1hcmEgQy48L3RleHQ+PC9zdmc+Iiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='36' fill='%230d1b2a'/><text x='90' y='115' text-anchor='middle' fill='white' font-size='72' font-weight='900' font-family='system-ui'>TF</text><text x='90' y='148' text-anchor='middle' fill='%235da4e6' font-size='13' font-family='system-ui'>by Tamara C.</text></svg>">
 <title>TaFit · Entrenamiento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 <style>
   :root{
     --navy:#0D1B2A; --steel:#1B4F72; --accent:#2E86AB;
     --niebla:#7C93A6; --light:#E8F4F8; --white:#FFFFFF;
     --ink:#1B2733; --mute:#5C6B78; --line:#E1E8ED;
     --card:#F5F8FB; --ok:#27AE60; --okbg:#E5F6EC; --warn:#C0392B; --tint2:#DCEBF2;
-    --repBrand:#2E86AB; --repBrandDk:#1B4F72; --repTint:#E8F4F8; --repTint2:#DCEBF2; --repInk:#0D1B2A;
+    --repBrand:#2E86AB; --repBrandDk:#1B4F72; --repTint:#E8F4F8; --repTint2:#DCEBF2; --repInk:#0D1B2A; --repTintDk:#132738;
   }
+  /* Tema rosa/bordó (alumnas): mismo look "tablero TaFit" del tema azul, en la paleta de marca
+     bordó/rosa (antes era lila, se alinea ahora con la estética de marca de TaFit). */
   #app.theme-f{ --navy:#241023; --steel:#6E2A52; --accent:#C04D86; --niebla:#B08AA0; --light:#FBEEF4; --card:#FAF3F7; --tint2:#F6DCEA;
-    --repBrand:#8B7DC1; --repBrandDk:#6B5B9A; --repTint:#F1EDF9; --repTint2:#E7DFF4; --repInk:#14101A; }
+    --repBrand:#B8285A; --repBrandDk:#7A1638; --repTint:#FBEAEF; --repTint2:#F3D3DE; --repInk:#2D0B1B; --repTintDk:#241019; }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--navy);color:var(--ink);min-height:100vh}
   a{color:var(--accent)}
@@ -105,10 +110,20 @@
   .ex .meta{font-size:12px;color:var(--mute);margin:4px 0 2px 30px}
   .ex .alt{font-size:12px;color:var(--niebla);margin:0 0 0 30px}
   .ex .alt b{color:var(--mute);font-weight:700}
+  .alt-tap{cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px}
   .chips{margin:9px 0 0 30px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   .rest{font-size:12px;font-weight:700;color:var(--steel);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 11px;cursor:pointer}
   .rest:hover{border-color:var(--accent)}
-  .vid{font-size:12px;font-weight:700;text-decoration:none;color:var(--accent)}
+  .vid{font-size:12px;font-weight:700;text-decoration:none;color:var(--accent);background:none;border:none;padding:0;font-family:inherit;cursor:pointer}
+  /* Modal de video: se abre adentro de la app en vez de salir a YouTube, cuando el ejercicio tiene un video puntual cargado */
+  .vid-modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:9999;padding:16px}
+  .vid-modal-ov.show{display:flex}
+  .vid-modal{background:#000;border-radius:14px;overflow:hidden;width:100%;max-width:520px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+  .vid-modal-top{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#161616;color:#fff}
+  .vid-modal-top span{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .vid-modal-top button{background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:4px 8px;flex:none}
+  .vid-modal-body{position:relative;width:100%;aspect-ratio:16/9}
+  .vid-modal-body iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
   .tip{font-size:12px;color:var(--steel);background:var(--light);border-radius:9px;padding:9px 11px;margin:9px 0 0 30px;line-height:1.45}
   /* ---- Técnica en acordeón: cerrado por defecto para no alargar la tarjeta ---- */
   .tipacc{border:1.5px solid var(--line);border-radius:9px;overflow:hidden;background:var(--card);margin:9px 0 0 30px}
@@ -222,6 +237,14 @@
   .week-row2:last-child{border-bottom:none}
   .week-row2 b{flex:none;width:78px;color:var(--steel)}
   .week-row2 span{color:var(--mute)}
+  .panel-block{background:var(--navy);border-radius:14px;padding:16px;margin-bottom:16px}
+  .panel-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:12px}
+  .panel-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+  .panel-stat{text-align:center}
+  .panel-stat b{display:block;font-size:20px;color:#fff;line-height:1.1}
+  .panel-stat span{display:block;font-size:9.5px;color:rgba(255,255,255,.7);margin-top:2px;line-height:1.3}
+  .panel-line{font-size:11.5px;color:rgba(255,255,255,.85);margin-top:6px;line-height:1.5}
+  .panel-line.warn{color:#ffd7a8}
   #app.dark .inact-block{background:#2a1616;border-color:#5a2a2a}
   #app.dark .renew-block{background:#16202a;border-color:#2a4a6a}
   #app.dark .bday-block{background:#241626;border-color:#5a2a5a}
@@ -255,6 +278,24 @@
   .plan-date-inp{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:9px;font-size:14px;color:var(--ink);background:#fff;margin-bottom:12px}
   .plan-btn{width:100%;padding:12px;border:none;border-radius:10px;background:var(--accent);color:#fff;font-weight:800;font-size:13px;cursor:pointer}
   .plan-hint{font-size:11.5px;color:var(--mute);margin-top:10px;line-height:1.5}
+
+  /* Pagos */
+  .pago-block{border-radius:12px;padding:14px 16px;margin-bottom:14px}
+  .pago-block.vencido{background:#fef3f2;border:1.5px solid #fca5a5}
+  .pago-block.porvencer{background:#fff8ec;border:1.5px solid #fbd38d}
+  .pago-block.aldia{background:var(--okbg);border:1.5px solid #9adbb5}
+  .pago-block.sinreg{background:var(--light);border:1.5px solid var(--line)}
+  .pago-title{font-size:13px;font-weight:700;margin-bottom:8px}
+  .pago-block.vencido .pago-title{color:#991b1b}
+  .pago-block.porvencer .pago-title{color:#92600a}
+  .pago-block.aldia .pago-title{color:#1b7a43}
+  .pago-block.sinreg .pago-title{color:var(--mute)}
+  .pago-row{display:flex;align-items:center;flex-wrap:wrap;justify-content:space-between;gap:8px;background:rgba(255,255,255,.55);border-radius:8px;padding:8px 10px;margin-bottom:6px}
+  .pago-row:last-child{margin-bottom:0}
+  .pago-name{font-weight:700;color:var(--ink);font-size:13px;flex:1 1 auto}
+  .pago-status{font-size:11.5px;color:var(--mute);flex:0 0 auto}
+  .pago-wa{border:none;background:#25d366;color:#fff;font-size:11.5px;font-weight:700;padding:6px 10px;border-radius:7px;cursor:pointer;text-decoration:none;flex:0 0 auto}
+  #app.dark .pago-row{background:rgba(255,255,255,.06)}
   #app.dark .due-block.vencido{background:#2a1616;border-color:#5a2a2a}
   #app.dark .due-block.porvencer{background:#2a2416;border-color:#5a4a2a}
   #app.dark .due-row{background:rgba(255,255,255,.06)}
@@ -366,6 +407,52 @@
   .stu-row .ren{background:var(--light);color:var(--steel)}
   .stu-row .del{background:#fdecea;color:var(--warn)}
 
+  /* Biblioteca de ejercicios */
+  .lib-row{display:flex;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--light)}
+  .lib-row:last-child{border-bottom:none}
+  .lib-row .ln{flex:1;min-width:0}
+  .lib-row .ln .nm{font-size:14px;font-weight:600;color:var(--navy)}
+  .lib-row .ln .gp{font-size:11px;font-weight:700;color:var(--accent);margin-right:6px}
+  .lib-row .ln .tp{font-size:11px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lib-row button{padding:7px 10px;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0}
+  .lib-row .edb{background:var(--light);color:var(--steel)}
+  .lib-row .delb{background:#fdecea;color:var(--warn)}
+  .lib-edit-row{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px;margin:6px 0}
+  .lib-groups{display:flex;flex-wrap:wrap;gap:6px}
+  .lib-gchk{display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--steel);background:var(--light);border:1px solid var(--line);border-radius:20px;padding:6px 11px;cursor:pointer;user-select:none}
+  .lib-gchk input{margin:0;accent-color:var(--accent)}
+  .lib-gchk.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .lib-gchk:has(input:checked){background:var(--accent);color:#fff;border-color:var(--accent)}
+  .libpick{margin-bottom:8px;width:100%}
+  .libsave-btn{background:var(--light);color:var(--steel);border:none;border-radius:8px;padding:7px 10px;font-size:11px;font-weight:700;cursor:pointer;margin-top:6px}
+
+  /* Asistencia */
+  .asis-nav{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:10px}
+  .asis-nav button{border:none;background:var(--light);color:var(--steel);border-radius:8px;width:32px;height:32px;font-size:14px;font-weight:700;cursor:pointer;flex:none}
+  .asis-nav b{font-size:13px;color:var(--navy);text-align:center;line-height:1.3}
+  .asis-summary{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-bottom:14px;font-size:12px;font-weight:700}
+  .asis-summary .ok{color:var(--ok)}
+  .asis-summary .bad{color:var(--warn)}
+  .asis-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+  .asis-dow{text-align:center;font-size:10px;font-weight:700;color:var(--niebla);padding-bottom:4px}
+  .asis-cell{aspect-ratio:1;border:1px solid var(--line);background:#fff;border-radius:8px;font-size:12px;font-weight:600;color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+  .asis-cell.today{border-color:var(--accent);border-width:2px}
+  .asis-cell.p{background:var(--okbg);color:#1b7a43;border-color:var(--ok)}
+  .asis-cell.a{background:#fdecea;color:#96281f;border-color:var(--warn)}
+  .asis-cell small{font-size:9px}
+  .asis-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+  .asis-row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer}
+  .asis-row.p{background:var(--okbg);border-color:var(--ok)}
+  .asis-row.a{background:#fdecea;border-color:var(--warn)}
+  .asis-rn{font-weight:700;font-size:14px;color:var(--ink)}
+  .asis-rchip{font-size:12px;font-weight:700;color:var(--mute)}
+  .asis-row.p .asis-rchip{color:#1b7a43}
+  .asis-row.a .asis-rchip{color:#96281f}
+  .asis-drill{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:6px}
+  .asis-drill label{display:block;font-size:11px;font-weight:700;color:var(--mute);margin-bottom:6px}
+  .asis-drill select{padding:8px;border-radius:8px;border:1px solid var(--line)}
+  .asis-drill button{border:none;background:var(--accent);color:#fff;border-radius:8px;padding:0 14px;font-weight:700;font-size:12px;cursor:pointer}
+
   .rep-card{background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:12px;border:1px solid var(--line)}
   .rep-card .rh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
   .rep-card .rh .rn{font-size:16px;font-weight:800;color:var(--navy)}
@@ -471,7 +558,14 @@
   .welcome-box button{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:12px 24px;font-size:14px;font-weight:700;cursor:pointer}
   .dark-toggle{font-size:11px;cursor:pointer;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:4px 10px;color:var(--mute)}
   /* Dark mode */
-  #app.dark{--navy:#e0e6ed;--steel:#8a9ab0;--accent:#5da4e6;--ok:#4caf93;--warn:#e05555;--mute:#7a8a9a;--line:#253545;--bg:#111d2b;--light:#182838;--card:#182838;--niebla:#253545}
+  /* --ink es el color de texto "principal" en TODA la app (nombres, títulos de tarjeta, valores).
+     Antes solo se redefinían acá los demás tokens del tema oscuro y --ink se quedaba con su
+     valor casi negro de siempre — por eso varios textos quedaban invisibles en modo oscuro
+     (texto oscuro sobre tarjeta oscura): nombres en Asistencia, títulos del Informe, etc.
+     Los pocos lugares que ya tenían su propio color fijo para modo oscuro (con selector más
+     específico, ej. #app.dark .plan-date-inp) siguen ganando por especificidad, así que este
+     cambio no les toca nada. */
+  #app.dark{--navy:#e0e6ed;--steel:#8a9ab0;--accent:#5da4e6;--ok:#4caf93;--warn:#e05555;--ink:#e0e6ed;--mute:#7a8a9a;--line:#253545;--bg:#111d2b;--light:#182838;--card:#182838;--niebla:#253545}
   #app.dark .ex{background:#182838;border-color:#253545}
   #app.dark .form-inp{background:#111d2b;border-color:#253545;color:#e0e6ed}
   #app.dark .form-sec{border-color:#253545}
@@ -484,6 +578,13 @@
   #app.dark .edit-section{background:#182838;border-color:#253545}
   #app.dark .tcard{background:#182838;border-color:#253545}
   #app.dark .rep-card{background:#182838;border-color:#253545}
+  #app.dark .asis-row{background:#182838;border-color:#253545}
+  #app.dark .asis-cell{background:#182838;border-color:#253545;color:#e0e6ed}
+  #app.dark .asis-drill{background:#182838;border-color:#253545}
+  #app.dark .pago-block.vencido{background:#2a1616;border-color:#5a2a2a}
+  #app.dark .pago-block.porvencer{background:#2a2416;border-color:#5a4a2a}
+  #app.dark .pago-block.aldia{background:#16281f;border-color:#2a5a3f}
+  #app.dark .pago-block.sinreg{background:#182838;border-color:#253545}
   #app.dark input,#app.dark select,#app.dark textarea{background:#111d2b;border-color:#253545;color:#e0e6ed}
   #app.dark .welcome-box{background:#182838}
   #app.dark .welcome-box h2{color:#e0e6ed}
@@ -565,6 +666,80 @@
   .ichart .bar .v{font-size:8.5px;color:var(--mute);margin-bottom:2px;white-space:nowrap}
   .ichart .bar .b{width:100%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--repBrand),var(--repBrandDk))}
   .ichart .bar .wk{font-size:8.5px;color:var(--niebla);margin-top:2px}
+
+  /* ===== Marca TaFit para el Informe de Progreso: tipografía serif para los títulos + tarjetas
+     "tablero", como la referencia visual que mandó Tami. Los colores siguen viniendo de las
+     variables --rep* de siempre (azul para tema por defecto, bordó/rosa para #app.theme-f más
+     arriba) para que cada alumno mantenga SU color — esto solo cambia la tipografía y la forma
+     de las tarjetas, no fuerza un color único para todos. Todo escapado a esta sola pantalla
+     — #resumenCard/.icard/etc siguen siendo los mismos, así el resto de la app no se toca. */
+  .tafit-report .rword{ font-family:'Playfair Display',Georgia,serif; font-weight:900; }
+  .tafit-report .icard h3{ font-family:'Playfair Display',Georgia,serif; font-weight:900; font-size:15px; }
+  .tafit-report .istat b{ font-family:'Playfair Display',Georgia,serif; }
+  .week-card{ background:linear-gradient(160deg,var(--repInk),var(--repBrandDk)); color:#fff; }
+  .week-eyebrow{ font-size:10px; font-weight:800; letter-spacing:1.5px; color:rgba(255,255,255,.75); margin-bottom:6px; }
+  .week-headline{ font-family:'Playfair Display',Georgia,serif; font-weight:900; font-size:26px; margin-bottom:14px; }
+  .week-headline small{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-weight:600; font-size:13px; opacity:.8; }
+  .week-strip{ display:flex; gap:6px; margin-bottom:12px; }
+  .week-day{ flex:1; aspect-ratio:1; border-radius:10px; background:rgba(255,255,255,.1); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; font-size:11px; font-weight:700; }
+  .week-day.on{ background:var(--repBrand); }
+  .week-day.today{ box-shadow:0 0 0 2px #fff inset; }
+  .week-day i{ font-style:normal; font-size:10px; }
+  .week-list{ display:flex; flex-direction:column; gap:8px; }
+  .week-item{ display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.1); border-radius:10px; padding:9px 11px; font-size:12.5px; }
+  .week-item i{ font-style:normal; background:var(--repBrand); color:#fff; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; flex:none; }
+  .week-item b{ flex:1; font-weight:700; }
+  .week-item span{ color:rgba(255,255,255,.7); font-size:11px; }
+  .week-empty{ font-size:12px; color:rgba(255,255,255,.75); }
+  .prog-card{ text-align:center; }
+  .prog-card h3{ text-align:left; }
+  .prog-ex-name{ font-weight:800; font-size:13px; color:var(--repBrandDk); text-align:left; margin:-4px 0 6px; }
+  .prog-stats{ display:flex; gap:10px; margin-top:10px; }
+  .prog-stat{ flex:1; background:var(--repTint); border-radius:10px; padding:10px 6px; }
+  .prog-stat b{ display:block; font-family:'Playfair Display',Georgia,serif; font-weight:900; font-size:19px; color:var(--repBrandDk); }
+  .prog-stat span{ font-size:9.5px; font-weight:700; color:var(--repBrandDk); opacity:.8; }
+  #app.dark .week-item{ background:rgba(255,255,255,.08); }
+  #app.dark .prog-stat{ background:var(--repTintDk); }
+  .rep-signature{ color:var(--repBrandDk); }
+  #app.dark .rep-signature{ color:var(--repBrand); }
+  /* "Tu progreso" desplegable — para no alargar tanto el scroll del informe. Cerrado por
+     defecto; al imprimir/descargar PDF se fuerza abierto (ver @media print) para que el
+     gráfico no falte en el PDF ni en la imagen. */
+  details.prog-card{ padding:16px; cursor:default; }
+  details.prog-card summary{ list-style:none; cursor:pointer; display:flex; justify-content:space-between; align-items:center; }
+  details.prog-card summary::-webkit-details-marker{ display:none; }
+  details.prog-card summary h3{ margin:0; }
+  details.prog-card .tchev{ color:var(--niebla); font-size:14px; transition:transform .2s; flex:none; }
+  details.prog-card[open] .tchev{ transform:rotate(180deg); }
+  details.prog-card .prog-body{ margin-top:14px; }
+  @media print{
+    details.prog-card .prog-body{ display:block!important; }
+    details.prog-card .tchev{ display:none!important; }
+  }
+
+  /* ===== Tarjeta "tablero" TaFit, reutilizable en toda la app (Rutina de hoy, Transcripta,
+     Asistencia, Pagos) — mismo lenguaje visual que "Tu semana"/"Tu progreso" del Informe:
+     degradé bordó/azul según el tema del alumno + título en serif. Vive en las variables
+     --rep* de siempre, así que ya respeta el tema de cada alumno sin nada extra. No toca los
+     colores funcionales (verde=ok, rojo/naranja=alerta) — esos siguen siendo los mismos. */
+  .rep-hero{ background:linear-gradient(160deg,var(--repInk),var(--repBrandDk)); color:#fff; border-radius:14px; padding:16px; margin-bottom:12px; }
+  .rep-hero-eyebrow{ font-size:10px; font-weight:800; letter-spacing:1.5px; color:rgba(255,255,255,.75); margin-bottom:6px; }
+  .rep-hero-title{ font-family:'Playfair Display',Georgia,serif; font-weight:900; font-size:21px; line-height:1.25; }
+  .rep-hero-title.sm{ font-size:16px; }
+  .rep-hero-title small{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-weight:600; font-size:12px; opacity:.85; display:block; margin-top:2px; }
+  .rep-hero-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .rep-hero-nav{ border:none; background:rgba(255,255,255,.16); color:#fff; border-radius:8px; width:30px; height:30px; font-size:14px; font-weight:700; cursor:pointer; flex:none; }
+  .rep-hero-chips{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; font-size:11.5px; font-weight:700; }
+  .rep-hero-chip{ background:rgba(255,255,255,.15); border-radius:20px; padding:4px 10px; }
+  .rep-hero-quote{ font-size:12.5px; opacity:.9; margin-top:10px; line-height:1.5; }
+  .rep-hero-stats{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+  .rep-hero-stat{ flex:1; min-width:64px; background:rgba(255,255,255,.14); border-radius:10px; padding:8px 6px; text-align:center; }
+  .rep-hero-stat b{ display:block; font-family:'Playfair Display',Georgia,serif; font-weight:900; font-size:18px; }
+  .rep-hero-stat span{ font-size:9px; font-weight:700; opacity:.85; }
+  .rep-hero-stat.ok b{ color:#8fe3ae; }
+  .rep-hero-stat.bad b{ color:#ffaba0; }
+  .rep-hero-stat.warn b{ color:#ffcf7a; }
+  .tcard summary h2,details.tcycle summary.tcycle-sum b{ font-family:'Playfair Display',Georgia,serif; font-weight:900; }
 </style>
 </head>
 <body>
@@ -661,6 +836,42 @@ const WEEKS_JY=[
 function ex(n,s,r,w,alt,tip,rest){ return { n, s, r, w, alt:alt||"", tip:tip||"", rest:rest||"", vid:YT(n) }; }
 function exD(n,s,r,wA,wB,alt,tip,rest){ const e=ex(n,s,r,wA,alt,tip,rest); e.w2=wB; return e; }
 function YT(n){ return "https://www.youtube.com/results?search_query="+encodeURIComponent((n||"ejercicio")+" técnica ejercicio"); }
+/* ==== Ver técnica sin salir de la app ====
+   YouTube no permite embeber su página de resultados de búsqueda (solo videos puntuales vía /embed/ID),
+   así que: si el link es un video puntual (watch?v=, youtu.be/, shorts/) lo mostramos en un modal adentro
+   de la app; si es un link de búsqueda genérico (el que se arma solo con YT(nombre)), no hay forma de
+   embeberlo y se abre YouTube afuera, como hasta ahora. Cuando cargás un video puntual (en la Biblioteca
+   o en el ejercicio de la rutina) queda todo adentro de la app. */
+function extractYouTubeId(url){
+  if(!url) return null;
+  let m=String(url).match(/[?&]v=([A-Za-z0-9_-]{6,})/); if(m) return m[1];
+  m=String(url).match(/youtu\.be\/([A-Za-z0-9_-]{6,})/); if(m) return m[1];
+  m=String(url).match(/youtube\.com\/shorts\/([A-Za-z0-9_-]{6,})/); if(m) return m[1];
+  m=String(url).match(/youtube\.com\/embed\/([A-Za-z0-9_-]{6,})/); if(m) return m[1];
+  return null;
+}
+function playVideo(url,name){
+  const id=extractYouTubeId(url);
+  if(id) openVideoModal(id,name);
+  else window.open(url,'_blank','noopener');
+}
+function openVideoModal(id,name){
+  let ov=$('vidModalOv');
+  if(!ov){
+    ov=document.createElement('div'); ov.id='vidModalOv'; ov.className='vid-modal-ov';
+    ov.innerHTML='<div class="vid-modal"><div class="vid-modal-top"><span id="vidModalTitle"></span><button type="button" data-act="closeVideo" aria-label="Cerrar">✕</button></div><div class="vid-modal-body" id="vidModalBody"></div></div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click',function(e){ if(e.target===ov) closeVideoModal(); });
+  }
+  const t=$('vidModalTitle'); if(t) t.textContent=name||'Técnica';
+  const b=$('vidModalBody'); if(b) b.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+id+'?rel=0&playsinline=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+  ov.classList.add('show');
+}
+function closeVideoModal(){
+  const ov=$('vidModalOv'); if(!ov) return;
+  ov.classList.remove('show');
+  const b=$('vidModalBody'); if(b) b.innerHTML=''; /* corta el video al cerrar */
+}
 const BK=l=>"🔗 Bloque "+l+" · apareado";
 
 /* ==== Bloque / circuito: cartel de sección, no un "ejercicio" con peso y series ====
@@ -1716,7 +1927,12 @@ function viewExIcon(cat,name,ei){
   $('lb').classList.add('show');
 }
 
-let DB={ order:[], students:{}, settings:{pin:""}, _seed:{} };
+let DB={ order:[], students:{}, settings:{pin:""}, _seed:{}, exLib:[] };
+/* Grupos musculares para clasificar la biblioteca de ejercicios. Un ejercicio puede tener uno o más
+   (ej: estocada con bíceps → Piernas + Brazos). "groups" es el campo nuevo (array); "group" (string)
+   se mantiene por compatibilidad con ejercicios cargados antes de este cambio. */
+const EXLIB_GROUPS=['Pecho','Espalda','Piernas','Glúteos','Hombros','Brazos','Core','Cardio','Otro'];
+function groupsOf(it){ if(it.groups&&it.groups.length) return it.groups; return it.group?[it.group]:['Otro']; }
 /* Foto de "lo último que este dispositivo sabe que está sincronizado con la nube" —
    se usa en saveDB() para saber, alumno por alumno, si ESTE dispositivo lo tocó de
    verdad desde la última sincronización, o si sigue exactamente igual a como lo cargó
@@ -1747,6 +1963,12 @@ let openEditEx=-1; /* acordeón en Editar */
 let day=0, week=0, member=0, tab='app', trainer=false, saveTimer=null, restInt=null, restLeft=0;
 /* secciones de Editar abiertas (para que no se cierren al re-renderizar) */
 let openSecs=new Set();
+/* Biblioteca de ejercicios: texto de búsqueda y qué ítem está en edición inline. */
+let libFilter='', libEditId=null;
+/* Asistencia: por defecto, planilla del día con todos los alumnos. 'mes' = calendario mensual de un solo alumno (drill-down). */
+const _asisNow=new Date();
+let asisY=_asisNow.getFullYear(), asisM=_asisNow.getMonth();
+let asisMode='dia', asisDayISO=dstr(_asisNow.getFullYear(),_asisNow.getMonth(),_asisNow.getDate()), asisMesId=null;
 document.addEventListener('toggle',e=>{ const d=e.target; if(d&&d.matches&&d.matches('details[data-sec]')){ if(d.open) openSecs.add(d.dataset.sec); else openSecs.delete(d.dataset.sec); } },true);
 
 const $=id=>document.getElementById(id);
@@ -2225,6 +2447,7 @@ async function initFirebase(){
   if(raw){ const p=safeParse(raw,null); if(p&&p.order&&p.order.length) DB=p; }
   if(!DB.order||!DB.order.length){ DB={ order:['omar'], students:{ omar:{ name:'Omar', routine:tmplOmar(), theme:'m' } }, settings:{pin:""}, _seed:{} }; }
   if(!DB.settings) DB.settings={pin:""};
+  if(!DB.exLib) DB.exLib=[];
   /* Referencia de "lo que este dispositivo cargó de su caché local" — se usa en saveDB()
      para distinguir alumnos que runSeeds() (abajo) cree o corrija de verdad, de alumnos
      que este dispositivo nunca tocó (y por lo tanto no debe pisar si el servidor tiene algo
@@ -2588,7 +2811,7 @@ function renderChrome(){
   if(hasInforme) lockedTabs.push(['resumen','Informe']);
   const unlockedStudentTabs=[['app','App'],['trans','Transcripta'],['fotos','Fotos']];
   if(hasInforme) unlockedStudentTabs.push(['resumen','Informe']);
-  const tabs = locked ? lockedTabs.concat(formTabs) : trainer ? [['app','App'],['trans','Transcripta'],['fotos','Fotos'],['edit','Editar'],['rep','Informe']].concat(formTabs) : unlockedStudentTabs.concat(formTabs);
+  const tabs = locked ? lockedTabs.concat(formTabs) : trainer ? [['app','App'],['trans','Transcripta'],['fotos','Fotos'],['asis','Asistencia'],['pagos','Pagos'],['edit','Editar'],['rep','Informe']].concat(formTabs) : unlockedStudentTabs.concat(formTabs);
   $('nav').innerHTML=tabs.map(([k,l])=>`<button data-act="tab" data-tab="${k}" class="${k===tab?'active':''}">${l}</button>`).join('');
 }
 /* El alumno puede entrar a SU Informe de Evolución (tab 'resumen') solo si Tami lo activó
@@ -2635,7 +2858,7 @@ function render(){
   if(urlLockPending){ renderLinkPending(); return; }
   if(urlLockFailed){ renderLinkFailed(); return; }
   if(!trainer){
-    if(tab==='edit'||tab==='rep') tab='app';
+    if(tab==='edit'||tab==='rep'||tab==='asis'||tab==='pagos') tab='app';
     else if(tab==='resumen'&&!informeEnabledForStudent()) tab='app';
   }
   renderChrome();
@@ -2643,6 +2866,8 @@ function render(){
   if(tab==='app') renderApp();
   else if(tab==='trans') renderTrans();
   else if(tab==='fotos') renderPhotos();
+  else if(tab==='asis') renderAsistencia();
+  else if(tab==='pagos') renderPagos();
   else if(tab==='edit') renderEdit();
   else if(tab==='resumen') renderResumen();
   else if(tab==='acuerdo') renderFormTab('acuerdo');
@@ -2651,7 +2876,7 @@ function render(){
 }
 function setTab(t){
   if(!trainer){
-    if(t==='edit'||t==='rep') return;
+    if(t==='edit'||t==='rep'||t==='asis'||t==='pagos') return;
     if(t==='resumen'&&!informeEnabledForStudent()) return;
   }
   tab=t; render();
@@ -2690,6 +2915,7 @@ async function saveInformeCycle(idx){ const st=DB.students[active]; if(!st.forms
 async function togglePause(){ DB.students[active].paused=!DB.students[active].paused; await saveDB(); toast(DB.students[active].paused?'Alumno pausado ✓':'Alumno activado ✓','ok'); renderEdit(); }
 async function savePlanDate(){ const el=$('planPaidInput'); const v=el?el.value:''; DB.students[active].planPaid=v; await saveDB(); toast(v?'Fecha de pago guardada ✓':'Fecha de pago borrada ✓','ok'); renderEdit(); }
 async function planToday(){ DB.students[active].planPaid=todayISO(); await saveDB(); toast('Pago de hoy registrado ✓','ok'); renderEdit(); }
+async function saveTelefono(){ const el=$('planTelInput'); const v=el?el.value.trim():''; DB.students[active].telefono=v; await saveDB(); toast(v?'Teléfono guardado ✓':'Teléfono borrado ✓','ok'); renderEdit(); }
 
 /* ===================== APP ===================== */
 function objFor(ex,mi){ return mi===0 ? ex.w : (ex.w2||ex.w); }
@@ -2731,26 +2957,27 @@ function renderApp(){
   }
   if(member>=members.length) member=0;
   const f=document.createElement('div'); f.className='focus'; f.innerHTML=`<b>${esc(isDuo()?members[member]:DB.students[active].name)}</b> · cargá peso, reps y RIR de cada serie`; m.appendChild(f);
-  /* Mini dashboard motivacional */
+  /* Tarjeta "tablero" del día: mismo look bordó/azul del Informe (degradé + serif), con el
+     día de hoy, la racha/días sin entrenar como chips, y la frase motivacional del día.
+     Reemplaza lo que antes eran dos bloques separados (mini-dash + motiv-banner) — misma
+     info, un solo golpe de vista arriba de todo. */
   {
     const streak=getStreak();
     const lastLog=LOGS.length?LOGS[0]:null;
     const ds=lastLog?Math.floor((Date.now()-new Date(lastLog.date).getTime())/86400000):999;
-    let dashItems=[];
-    dashItems.push('📅 Hoy te toca: <b>'+esc(r[day].day)+'</b>'+(dayTypeTag(r[day])?' '+dayTypeTag(r[day]):''));
-    if(streak>=2) dashItems.push('🔥 '+streak+' sesiones seguidas');
-    if(ds>=2&&ds<999) dashItems.push('⏰ '+ds+' días sin entrenar');
-    const dash=document.createElement('div'); dash.className='mini-dash'; dash.innerHTML=dashItems.join(' · '); m.appendChild(dash);
-  }
-  /* Frases motivacionales */
-  {
+    let chips=[];
+    if(streak>=2) chips.push('🔥 '+streak+' sesiones seguidas');
+    if(ds>=2&&ds<999) chips.push('⏰ '+ds+' días sin entrenar');
     const FA=["Cada serie te acerca a la mejor versión de vos 💪","Hoy vas a romperla. Confiá en tu proceso 🔥","No importa la velocidad, importa no frenar ✨","Sos más fuerte de lo que creés. ¡Dale con todo! 💥","Sudar es tu cuerpo aplaudiéndote 👏","Hoy es el día que tu futuro yo te va a agradecer 🌟","La disciplina le gana a la motivación. Y acá estás 🏆","Tu cuerpo puede, tu mente tiene que saberlo 🧠💪","Cada rep cuenta. Cada sesión suma. ¡Vamos! 🚀","No compitas con nadie, solo con quien eras ayer 💜"];
     const FV=["¡Te extrañamos en el gym! Volvé que tu cuerpo lo necesita 💪","Dos días sin entrenar… ¡Dale que podés! 🔥","Tu rutina te espera. Un entreno corto es mejor que ninguno ✨","¡Volvé a la acción! Recordá por qué empezaste 💥","Tu progreso no se pierde, solo se pausa. ¡Retomemos! 🌟"];
     const doy=Math.floor((Date.now()-new Date(new Date().getFullYear(),0,0))/86400000);
-    const lastLog=LOGS.length?LOGS[0]:null;
-    const ds=lastLog?Math.floor((Date.now()-new Date(lastLog.date).getTime())/86400000):999;
     const frase=ds>=2?FV[doy%FV.length]:FA[doy%FA.length];
-    const mb=document.createElement('div'); mb.className='motiv-banner'; mb.textContent=frase; m.appendChild(mb);
+    const hero=document.createElement('div'); hero.className='rep-hero';
+    hero.innerHTML=`<div class="rep-hero-eyebrow">📅 HOY</div>
+      <div class="rep-hero-title">${esc(r[day].day)}${dayTypeTag(r[day])?' '+dayTypeTag(r[day]):''}</div>
+      ${chips.length?`<div class="rep-hero-chips">${chips.map(c=>`<span class="rep-hero-chip">${c}</span>`).join('')}</div>`:''}
+      <div class="rep-hero-quote">${esc(frase)}</div>`;
+    m.appendChild(hero);
   }
   const seg=document.createElement('div'); seg.className='seg'; seg.innerHTML=r.map((d,i)=>`<button data-act="pickDay" data-i="${i}" class="${i===day?'sel':''}">${esc(d.day.split('·')[0].trim())}${d.type?`<i class="daytag daytag-${esc(d.type)}">${d.type==='gym'?'🏋️':'🎒'}</i>`:''}</button>`).join(''); m.appendChild(seg);
   /* Barra de progreso de ejercicios */
@@ -2802,10 +3029,10 @@ function renderApp(){
       html+=`<div class="quick-edit"><div class="qe-title">✏ Edición rápida</div><div class="form-grid"><div class="form-field full"><div class="form-lbl">Ejercicio</div><input class="form-inp" value="${esc(ex.n)}" data-chg="qedit" data-ei="${ei}" data-f="n"></div><div class="form-field"><div class="form-lbl">Series</div><input class="form-inp" value="${esc(ex.s)}" data-chg="qedit" data-ei="${ei}" data-f="s"></div><div class="form-field"><div class="form-lbl">Reps</div><input class="form-inp" value="${esc(ex.r)}" data-chg="qedit" data-ei="${ei}" data-f="r"></div><div class="form-field"><div class="form-lbl">Peso obj.</div><input class="form-inp" value="${esc(ex.w)}" data-chg="qedit" data-ei="${ei}" data-f="w"></div><div class="form-field"><div class="form-lbl">Descanso</div><input class="form-inp" value="${esc(ex.rest)}" data-chg="qedit" data-ei="${ei}" data-f="rest"></div><div class="form-field full"><div class="form-lbl">Observación / Técnica</div><textarea class="form-inp" data-chg="qedit" data-ei="${ei}" data-f="tip" placeholder="Ej: rodillas semi rígidas, no bloquear codos...">${esc(ex.tip||'')}</textarea></div></div></div>`;
     }
     html+=`<div class="meta">${ex.s} series · objetivo ${esc(ex.r)} reps${(obj&&obj!=='A definir')?' · '+esc(obj):''}</div>`;
-    if(ex.alt) html+=`<div class="alt"><b>Alternativo:</b> ${esc(ex.alt)}</div>`;
+    if(ex.alt) html+=`<div class="alt"><b>Alternativo:</b> <span class="alt-tap" data-act="playVideo" data-url="${esc(ex.altVid||YT(ex.alt))}" data-name="${esc(ex.alt)}">🎬 ${esc(ex.alt)}</span></div>`;
     html+=tipAccordionHTML(tipFor(ex),!(ex.tip&&ex.tip.trim()));
     const restChip = `<span class="rest" data-act="rest" data-sec="${restSec(ex.rest)||60}">⏱ Descanso ${ex.rest?esc(ex.rest):'60 s'}</span>`;
-    html+=`<div class="chips">${restChip}<a class="vid" href="${esc(ex.vid||YT(ex.n))}" target="_blank" rel="noopener">▶ Ver técnica</a>${waExLink(ex.n)}</div>`;
+    html+=`<div class="chips">${restChip}<button type="button" class="vid" data-act="playVideo" data-url="${esc(ex.vid||YT(ex.n))}" data-name="${esc(ex.n)}">▶ Ver técnica</button>${waExLink(ex.n)}</div>`;
     const last=lastFor(ex.n);
     if(last) html+=`<div class="lastw"><b>📈 Última vez (${fmtShort(last.date)}):</b> ${setsLine(last.sets)}</div>`;
     html+=setsTable(ex,ei,selMi,obj);
@@ -3229,7 +3456,7 @@ function computeProgramSummary(cycleOverride,memberName){
   /* Series semanales de peso para las 1-2 mejores progresiones DE PESO (los progresos por
      repeticiones no se grafican acá, mezclarían dos escalas distintas). Solo semanas con
      datos reales (sin inventar/interpolar). */
-  const charts=top.filter(function(p){ return p.metric==='kg'; }).slice(0,2).map(function(p){
+  const charts=prog.filter(function(p){ return p.metric==='kg'; }).slice(0,3).map(function(p){
     const series=[];
     for(let wi=0; wi<totalWeeks; wi++){
       const wLogs=LOGS_.filter(function(l){ return +l.week===wi; });
@@ -3237,10 +3464,30 @@ function computeProgramSummary(cycleOverride,memberName){
       wLogs.forEach(function(l){ const w=exWeightInLog(l,p.n,memberName); if(w!=null&&(max==null||w>max)) max=w; });
       if(max!=null) series.push({ label:(W[wi]&&W[wi].t)||('S'+(wi+1)), v:max });
     }
-    return { n:p.n, series };
+    let exSessions=0;
+    LOGS_.forEach(function(l){ if(exWeightInLog(l,p.n,memberName)!=null) exSessions++; });
+    return { n:p.n, series, exSessions };
   }).filter(function(c){ return c.series.length>=2; });
 
-  return { sessions, totalWeeks, weeksCompleted, completion, best, top, bestGroup, muscleGroups, improve, weakGroup, weekStats, bestWeek, streak, startDate, endDate, allEx, charts, dayCount:R.length, cyc:{start:cyc.start,end:cyc.end} };
+  /* "Tu semana": lunes a domingo de la semana calendario actual, comparado contra los días de
+     rutina por semana (dayCount) — para el cartel "X de Y entrenamientos" y la tira de días.
+     Si el ciclo que se está mirando no es el actual (ej. un ciclo ya cerrado), simplemente da 0,
+     no inventa nada. Usa localDateOf() para no confundir el día en sesiones cerradas de noche. */
+  const now2=new Date(); now2.setHours(0,0,0,0);
+  const dow2=(now2.getDay()+6)%7; /* lunes=0 */
+  const monday=new Date(now2); monday.setDate(now2.getDate()-dow2);
+  const WD_SHORT=['L','M','X','J','V','S','D'];
+  const todayISO2=dstr(now2.getFullYear(),now2.getMonth(),now2.getDate());
+  const thisWeekDays=[];
+  for(let i=0;i<7;i++){
+    const d=new Date(monday); d.setDate(monday.getDate()+i);
+    const dISO=dstr(d.getFullYear(),d.getMonth(),d.getDate());
+    const dayLogs=LOGS_.filter(function(l){ return localDateOf(l.date)===dISO; });
+    thisWeekDays.push({ label:WD_SHORT[i], date:dISO, trained:dayLogs.length>0, isToday:dISO===todayISO2, dayNames:dayLogs.map(function(l){return l.dayName;}) });
+  }
+  const thisWeek={ days:thisWeekDays, trainedCount:thisWeekDays.filter(function(d){return d.trained;}).length, totalDays:R.length };
+
+  return { sessions, totalWeeks, weeksCompleted, completion, best, top, bestGroup, muscleGroups, improve, weakGroup, weekStats, bestWeek, streak, startDate, endDate, allEx, charts, thisWeek, dayCount:R.length, cyc:{start:cyc.start,end:cyc.end} };
 }
 function printResumen(){
   /* iOS no soporta window.print() dentro de un PWA agregado a la pantalla de inicio
@@ -3272,6 +3519,31 @@ function sessionSetsDone(log,memberName){
 }
 /* Texto "50 kg → 70 kg" o, si el progreso fue por repeticiones (banda/peso corporal), "8 → 12 reps". */
 function fmtProg(p){ return p&&p.metric==='reps' ? (p.first+' → '+p.last+' reps') : (p?fmt(p.first)+' → '+fmt(p.last):''); }
+/* Gráfico de línea con puntos para "Tu progreso" (evolución de kg por semana). Nada de librerías:
+   un SVG chico con path de línea + área degradada + puntos, en los colores del reporte (var(--rep*)
+   así hereda el color que tenga #tafit-report en ese momento). */
+function lineChartSVG(series){
+  const W=280,H=118,padL=8,padR=8,padT=16,padB=20;
+  const vals=series.map(function(p){return p.v;});
+  const min=Math.min.apply(null,vals), max=Math.max.apply(null,vals);
+  const range=(max-min)||1;
+  const n=series.length;
+  const stepX=n>1?(W-padL-padR)/(n-1):0;
+  const pts=series.map(function(p,i){
+    const x=padL+stepX*i;
+    const y=padT+(H-padT-padB)*(1-((p.v-min)/range));
+    return {x:x,y:y,v:p.v,label:p.label};
+  });
+  const linePath=pts.map(function(p,i){ return (i===0?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1); }).join(' ');
+  const areaPath=linePath+' L'+pts[pts.length-1].x.toFixed(1)+','+(H-padB)+' L'+pts[0].x.toFixed(1)+','+(H-padB)+' Z';
+  const dots=pts.map(function(p,i){ const anchor=(i===0)?'start':(i===n-1)?'end':'middle'; const tx=(i===0)?Math.max(0,p.x-1):(i===n-1)?Math.min(W,p.x+1):p.x; return '<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="3.5" fill="var(--repBrand)" stroke="#fff" stroke-width="1.5"/><text x="'+tx.toFixed(1)+'" y="'+(p.y-8).toFixed(1)+'" font-size="8.5" font-weight="700" fill="var(--repBrandDk)" text-anchor="'+anchor+'">'+fmt(p.v)+'</text>'; }).join('');
+  const labels=pts.map(function(p){ return '<text x="'+p.x.toFixed(1)+'" y="'+(H-5)+'" font-size="8.5" fill="var(--mute)" text-anchor="middle">'+esc(p.label)+'</text>'; }).join('');
+  return '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg">'
+    +'<defs><linearGradient id="progGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--repBrand)" stop-opacity="0.30"/><stop offset="100%" stop-color="var(--repBrand)" stop-opacity="0"/></linearGradient></defs>'
+    +'<path d="'+areaPath+'" fill="url(#progGrad)"/>'
+    +'<path d="'+linePath+'" fill="none" stroke="var(--repBrand)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>'
+    +dots+labels+'</svg>';
+}
 function computeInformeAuto(sum,memberName){
   const plannedSessions=Math.max(1,sum.totalWeeks*Math.max(1,sum.dayCount||1));
   const attendancePct=Math.min(100,Math.round(sum.sessions/plannedSessions*100));
@@ -3321,9 +3593,13 @@ function computeInformeAuto(sum,memberName){
 
 /* Compartir el Informe como imagen (sin pasar por PDF) — Canvas + Web Share API */
 function repColors(){
-  const t=(DB.students[active]&&DB.students[active].theme)||'m';
-  return t==='f'
-    ? { ink:'#14101A', brand:'#8B7DC1', brandDk:'#6B5B9A', tint:'#F1EDF9' }
+  /* La imagen compartida por WhatsApp usa la misma paleta que el Informe en pantalla para
+     ESE alumno: bordó/rosa para tema rosa, azul para tema por defecto — así los alumnos
+     varones mantienen su color azul también en la imagen que se comparte. */
+  const st=DB.students[active];
+  const isF=st&&st.theme==='f';
+  return isF
+    ? { ink:'#2D0B1B', brand:'#B8285A', brandDk:'#7A1638', tint:'#FBEAEF' }
     : { ink:'#0D1B2A', brand:'#2E86AB', brandDk:'#1B4F72', tint:'#E8F4F8' };
 }
 function rr(ctx,x,y,w,h,r){
@@ -3536,6 +3812,7 @@ function renderResumen(){
   const weakName=sum.weakGroup?sum.weakGroup.group:(sum.improve?sum.improve.n:null);
   const trendIcon={up:'📈',down:'📉',same:'➡️',none:'➖'};
 
+  const reportWrap=document.createElement('div'); reportWrap.className='tafit-report'; m.appendChild(reportWrap);
   const wrap=document.createElement('div'); wrap.id='resumenCard';
   let html=`<div class="irep-head">
       <div class="rword">TA<span>FIT</span></div>
@@ -3544,6 +3821,17 @@ function renderResumen(){
     </div>
     <div class="icard" style="display:flex;justify-content:space-between;align-items:center">
       <div><div style="font-weight:800;font-size:15px;color:var(--ink)">📅 ${rangeStr}</div><div style="font-size:11px;color:var(--mute);margin-top:2px">${esc(displayName)}${rm.name?' · entrena con '+esc(rm.mm.filter(function(n){return n!==rm.name;}).join(', ')):''} · informe del ${todayStr}</div></div>
+    </div>
+
+    <div class="icard week-card">
+      <div class="week-eyebrow">TU SEMANA</div>
+      <div class="week-headline">${sum.thisWeek.trainedCount} de ${sum.thisWeek.totalDays}<small> entrenamientos</small></div>
+      <div class="week-strip">${sum.thisWeek.days.map(function(d){
+        return `<div class="week-day${d.trained?' on':''}${d.isToday?' today':''}"><span>${esc(d.label)}</span>${d.trained?'<i>✓</i>':''}</div>`;
+      }).join('')}</div>
+      ${sum.thisWeek.trainedCount?`<div class="week-list">${sum.thisWeek.days.filter(function(d){return d.trained;}).map(function(d){
+        return `<div class="week-item"><i>✓</i><b>${esc((d.dayNames[0]||'Entrenamiento'))}</b><span>${esc(d.date.split('-').reverse().slice(0,2).join('/'))}</span></div>`;
+      }).join('')}</div>`:`<div class="week-empty">Todavía no registró ningún entrenamiento esta semana.</div>`}
     </div>
 
     <div class="icard">
@@ -3594,38 +3882,43 @@ function renderResumen(){
   }
 
   if(sum.charts.length){
-    html+=`<div class="icard"><h3>📈 Evolución de cargas</h3>`;
-    sum.charts.forEach(function(c){
-      const max=Math.max.apply(null,c.series.map(function(x){return x.v;}));
-      html+=`<div class="ichart-label">${esc(c.n)} (kg)</div><div class="ichart">${c.series.map(function(pt){
-        const h=Math.max(6,Math.round((pt.v/max)*45));
-        return `<div class="bar"><span class="v">${fmt(pt.v)}</span><div class="b" style="height:${h}px"></div><span class="wk">${esc(pt.label)}</span></div>`;
-      }).join('')}</div>`;
+    html+=`<details class="icard prog-card"><summary><h3>📈 Tu progreso</h3><span class="tchev">▾</span></summary><div class="prog-body">`;
+    sum.charts.forEach(function(c,ci){
+      const first=c.series[0].v, last=c.series[c.series.length-1].v;
+      const delta=last-first;
+      html+=`<div class="prog-item"${ci>0?' style="margin-top:18px;padding-top:14px;border-top:1px solid var(--repTint2)"':''}>
+        <div class="prog-ex-name">${esc(c.n)}</div>
+        ${lineChartSVG(c.series)}
+        <div class="prog-stats">
+          <div class="prog-stat"><b>${delta>=0?'+':''}${fmt(delta)}</b><span>en ${c.series.length} semana${c.series.length===1?'':'s'}</span></div>
+          <div class="prog-stat"><b>${c.exSessions}</b><span>entrenamiento${c.exSessions===1?'':'s'}</span></div>
+        </div>
+      </div>`;
     });
-    html+=`</div>`;
+    html+=`</div></details>`;
   }
 
   html+=`<div class="icard">
       <h3>✅ Conclusión</h3>
-      <div style="font-size:12.5px;line-height:1.65;color:var(--ink);background:var(--repTint);padding:12px;border-radius:10px;margin-bottom:10px">
+      <div style="font-size:12.5px;line-height:1.65;color:var(--repInk);background:var(--repTint);padding:12px;border-radius:10px;margin-bottom:10px">
         Evolución <b style="color:var(--repBrandDk)">${inf.qualifier}</b> en este período${bestLine?`, destacándose en <b>${esc(bestLine.name)}</b> (+${bestLine.pct}%${bestLine.ex?', con su mejor salto en '+esc(bestLine.ex):''})`:''}.
         ${weakName?` Área a reforzar: <b>${esc(weakName)}</b>.`:''}
       </div>
       <div style="font-size:12.5px;line-height:1.6;color:var(--mute)">${inf.recommendation}</div>
       <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
         <div style="font-size:10.5px;color:var(--mute)">📅 Próxima evaluación<br><b style="color:var(--ink)">${inf.nextEvalStr}</b></div>
-        <div style="text-align:right"><div style="font-family:'Brush Script MT',cursive;font-size:20px;color:var(--repBrandDk)">Tamara Claveria</div><div style="font-size:9.5px;color:var(--mute)">TAFIT · Entrenadora Personal</div></div>
+        <div style="text-align:right"><div class="rep-signature" style="font-family:'Brush Script MT',cursive;font-size:20px">Tamara Claveria</div><div style="font-size:9.5px;color:var(--mute)">TAFIT · Entrenadora Personal</div></div>
       </div>
     </div>`;
 
   wrap.innerHTML=html;
-  m.appendChild(wrap);
+  reportWrap.appendChild(wrap);
 
   const actions=document.createElement('div'); actions.className='no-print'; actions.style.cssText='display:flex;gap:8px;max-width:420px;margin:0 auto 6px';
   actions.innerHTML=`<button data-act="shareInforme" style="flex:1;padding:13px;border-radius:12px;border:none;font-size:13px;font-weight:700;background:#25d366;color:#fff">💬 Compartir por WhatsApp</button><button data-act="printResumen" style="flex:1;padding:13px;border-radius:12px;border:none;font-size:13px;font-weight:700;background:var(--repBrandDk);color:#fff">📥 Descargar PDF</button>`;
-  m.appendChild(actions);
+  reportWrap.appendChild(actions);
 
-  const hint=document.createElement('div'); hint.className='note no-print'; hint.style.cssText='max-width:420px;margin:0 auto'; hint.textContent='"Compartir por WhatsApp" genera una imagen del informe y abre directamente el panel para enviarla. "Descargar PDF" abre el diálogo de impresión de tu iPhone — desde ahí elegís "Guardar en Archivos".'; m.appendChild(hint);
+  const hint=document.createElement('div'); hint.className='note no-print'; hint.style.cssText='max-width:420px;margin:0 auto'; hint.textContent='"Compartir por WhatsApp" genera una imagen del informe y abre directamente el panel para enviarla. "Descargar PDF" abre el diálogo de impresión de tu iPhone — desde ahí elegís "Guardar en Archivos".'; reportWrap.appendChild(hint);
 }
 
 /* Modo oscuro */
@@ -3738,11 +4031,14 @@ function logEntryHTML(e,i){
 }
 function renderTrans(){
   const m=$('main'); m.innerHTML='';
-  const f=document.createElement('div'); f.className='focus'; f.innerHTML=`<b>${esc(DB.students[active].name)}</b> · rutina y registro de sesiones`; m.appendChild(f);
-
   const cycles=studentCycles();
   const multi=cycles.length>1;
   const lastIdx=cycles.length-1;
+  const hero=document.createElement('div'); hero.className='rep-hero';
+  hero.innerHTML=`<div class="rep-hero-eyebrow">📖 TRANSCRIPTA</div>
+    <div class="rep-hero-title">${esc(DB.students[active].name)}</div>
+    <div class="rep-hero-quote">Rutina y registro de sesiones${multi?` · ${cycles.length} ciclos`:''}</div>`;
+  m.appendChild(hero);
 
   /* El ciclo actual va SIEMPRE arriba y abierto. Los ciclos cerrados (Transcriptas viejas)
      van debajo, plegados por defecto — así no hay que scrollear todo un ciclo viejo (a
@@ -3926,9 +4222,59 @@ function renderEdit(){
     DB.order.map(id=>{ const s=DB.students[id]; const duo=s.members&&s.members.length>1; return `<div class="stu-row"><span class="sn">${esc(s.name)}</span><span class="tg">${s.theme==='f'?'🌸':'🔵'}${duo?' 👯':''}${s.health&&s.health.enabled?' ⚕':''}</span><button class="ren" data-act="renameStudent" data-id="${esc(id)}">Renombrar</button><button class="del" data-act="deleteStudent" data-id="${esc(id)}">Eliminar</button></div>`; }).join('')+
     `<div class="edit-actions mt8"><button data-act="addStudent">+ Agregar alumno / dúo</button></div>`);
 
+  {
+    const q=libFilter.trim().toLowerCase();
+    const items=exLibList().filter(function(it){ return !q || (it.n||'').toLowerCase().includes(q) || groupsOf(it).join(' ').toLowerCase().includes(q); });
+    /* Cada ejercicio aparece UNA sola vez, agrupado bajo el primero de sus grupos musculares
+       (puede tener varios, ej: Piernas + Brazos); los demás grupos se ven como texto en la fila. */
+    const byGroup={};
+    items.forEach(function(it){ const g=groupsOf(it)[0]; (byGroup[g]=byGroup[g]||[]).push(it); });
+    const groupChecksHTML=function(selected,namePrefix){
+      return `<div class="lib-groups">${EXLIB_GROUPS.map(function(gg){ const on=selected.indexOf(gg)>-1; return `<label class="lib-gchk${on?' on':''}"><input type="checkbox" data-lf="groups" value="${esc(gg)}" ${on?'checked':''}>${esc(gg)}</label>`; }).join('')}</div>`;
+    };
+    let listHtml='';
+    if(!exLibList().length){
+      listHtml='<p style="font-size:13px;color:var(--mute)">Todavía no cargaste ningún ejercicio. Agregá el primero acá abajo, o desde cualquier rutina tocá "💾 Guardar en la biblioteca" en un ejercicio ya cargado.</p>';
+    } else if(!items.length){
+      listHtml='<p style="font-size:13px;color:var(--mute)">Ningún ejercicio coincide con la búsqueda.</p>';
+    } else {
+      EXLIB_GROUPS.forEach(function(g){
+        const arr=byGroup[g]; if(!arr||!arr.length) return;
+        listHtml+=`<label class="lib-glabel" style="font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--steel);margin:12px 0 4px;display:block">${esc(g)} (${arr.length})</label>`;
+        arr.forEach(function(it){
+          if(libEditId===it.id){
+            listHtml+=`<div class="lib-edit-row" data-id="${esc(it.id)}">
+              <div class="fld"><label>Nombre</label><input data-lf="n" value="${esc(it.n)}"></div>
+              <div class="fld mt8"><label>Grupo muscular (elegí uno o más)</label>${groupChecksHTML(groupsOf(it),'e')}</div>
+              <div class="fld mt8"><label>Alternativo</label><input data-lf="alt" value="${esc(it.alt||'')}"></div>
+              <div class="fld mt8"><label>Técnica / tip</label><textarea data-lf="tip">${esc(it.tip||'')}</textarea></div>
+              <div class="fld mt8"><label>Video (link de YouTube puntual, opcional)</label><input data-lf="vid" value="${esc(it.vid||'')}" placeholder="https://youtu.be/…"></div>
+              <div class="edit-actions mt8"><button data-act="saveLibEx" data-id="${esc(it.id)}">Guardar</button><button data-act="editLibEx" data-id="${esc(it.id)}" style="background:var(--card);color:var(--steel)">Cancelar</button></div>
+            </div>`;
+          } else {
+            const gr=groupsOf(it);
+            listHtml+=`<div class="lib-row"><div class="ln"><div class="nm">${esc(it.n)}</div>${gr.length>1?`<div class="gp">${gr.map(esc).join(' · ')}</div>`:''}<div class="tp">${esc(it.tip||it.alt||'')}</div></div><button class="edb" data-act="editLibEx" data-id="${esc(it.id)}">Editar</button><button class="delb" data-act="delLibEx" data-id="${esc(it.id)}">Eliminar</button></div>`;
+          }
+        });
+      });
+    }
+    const libHtml=`<p>Cargá cada ejercicio una sola vez (nombre, uno o más grupos musculares y técnica) y después elegilo de una lista al armar cualquier rutina, en vez de retipearlo cada vez.</p>
+      <div class="fld"><input id="libSearchInp" data-chg="libSearch" value="${esc(libFilter)}" placeholder="Buscar por nombre o grupo…"></div>
+      ${listHtml}
+      <label style="font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--steel);margin:14px 0 4px;display:block">+ Agregar ejercicio nuevo</label>
+      <div class="fld"><label>Nombre</label><input id="libNewN" placeholder="Ej: Estocada con bíceps"></div>
+      <div class="fld mt8" id="libNewGroups"><label>Grupo muscular (elegí uno o más)</label>${groupChecksHTML([],'n')}</div>
+      <div class="fld mt8"><label>Alternativo</label><input id="libNewAlt" placeholder="Alternativo (opcional)"></div>
+      <div class="fld mt8"><label>Técnica / tip</label><textarea id="libNewTip" placeholder="Punto clave a tener en cuenta"></textarea></div>
+      <div class="fld mt8"><label>Video (link de YouTube puntual, opcional)</label><input id="libNewVid" placeholder="https://youtu.be/…"></div>
+      <p class="mt8" style="font-size:11px;color:var(--mute);line-height:1.5">Si pegás acá un video puntual (no una búsqueda), se va a ver adentro de la app en cualquier rutina donde elijas este ejercicio de la biblioteca.</p>
+      <div class="edit-actions mt8"><button data-act="addLibEx">+ Agregar a la biblioteca</button></div>`;
+    SEC('exlib',`📚 Biblioteca de ejercicios (${exLibList().length})`,libHtml);
+  }
+
   SEC('backup','Respaldo de datos',`<p>El guardado automático va a <b>${Store.where==='nube'?'la nube de Claude':Store.where==='dispositivo'?'este dispositivo':'memoria temporal'}</b>. El backup incluye alumnos, rutinas y sesiones (las fotos no entran por su tamaño).</p><div class="edit-actions"><button data-act="export">⬇ Exportar backup</button><label class="impbtn">⬆ Importar backup<input type="file" accept="application/json" data-chg="import" hidden></label></div>`);
 
-  SEC('members',`Integrantes de ${esc(DB.students[active].name)}`,`<p>Si entrenan en dúo, poné los dos nombres separados por coma (1.º = primera columna). Cada una registra sus series y su RM por separado.</p><div class="fld"><input id="membersfld" value="${esc(membersOf().join(', '))}" placeholder="Nati, Caro"></div><div class="edit-bottom mt8"><button class="save" data-act="saveMembers">Guardar integrantes</button></div>`);
+  SEC('members',`Integrantes de ${esc(DB.students[active].name)}`,`<p>Si entrenan en dúo, poné los dos nombres separados por coma (1.º = primera columna). Cada una registra sus series y su RM por separado.</p><div class="fld"><input id="membersfld" value="${esc(membersOf().join(', '))}" placeholder="Nati, Caro"></div><div class="edit-bottom mt8"><button class="save" data-act="saveMembers">Guardar integrantes</button></div><div class="fld mt8"><label>Fecha de nacimiento (para el aviso de cumpleaños)</label><input type="date" id="fechaNacInput" value="${esc(DB.students[active].fechaNac||'')}"></div><button class="plan-btn" data-act="saveFechaNac">💾 Guardar fecha de nacimiento</button><p class="mt8" style="font-size:11.5px;color:var(--mute);line-height:1.5">Cargala directamente acá: no hace falta esperar a que el alumno complete el formulario de Acuerdo o Anamnesis para que te avise de su cumple en Informe.</p>`);
 
   const unlockW=DB.students[active].unlockWeek||0;
   let wkHtml=`<p>Cada alumno puede tener su propia progresión.</p>`;
@@ -3977,7 +4323,7 @@ function renderEdit(){
     else if(due.status==='bad') statusHTML=`<div class="plan-status bad">🔴 El plan venció hace ${Math.abs(due.daysLeft)} día${Math.abs(due.daysLeft)===1?'':'s'}${isManuallyPaused?'':' · 🔒 el alumno ya no puede acceder a su rutina'}</div>`;
     else if(due.status==='warn') statusHTML=`<div class="plan-status warn">🟠 ${due.daysLeft===0?'El plan vence hoy':'El plan vence en '+due.daysLeft+' día'+(due.daysLeft===1?'':'s')}</div>`;
     else statusHTML=`<div class="plan-status ok">✓ Plan al día · vence el ${due.dueStr}</div>`;
-    SEC('plan','💳 Plan del alumno (vence a los 30 días)',`${statusHTML}<div class="fld"><label>Fecha del último pago</label><input type="date" class="plan-date-inp" id="planPaidInput" value="${esc(planPaid)}"></div><button class="plan-btn" data-act="savePlanDate">💾 Guardar fecha</button><button class="plan-btn" data-act="planToday" style="margin-top:8px;background:var(--ok)">✅ Marcar pago de hoy</button><div class="plan-hint">El plan dura 30 días desde la fecha cargada. Apenas se vence, la app le muestra al alumno una pantalla de "Tu plan venció" y no puede seguir entrenando hasta que renueve. Cuando ${esc(DB.students[active].name)} te pague de nuevo, tocá "Marcar pago de hoy" (o cargá la fecha manualmente) y se le desbloquea al instante. Si dejás la fecha vacía, no se muestra ninguna alerta ni se bloquea nada.</div>`);
+    SEC('plan','💳 Plan del alumno (vence a los 30 días)',`${statusHTML}<div class="fld"><label>Fecha del último pago</label><input type="date" class="plan-date-inp" id="planPaidInput" value="${esc(planPaid)}"></div><button class="plan-btn" data-act="savePlanDate">💾 Guardar fecha</button><button class="plan-btn" data-act="planToday" style="margin-top:8px;background:var(--ok)">✅ Marcar pago de hoy</button><div class="plan-hint">El plan dura 30 días desde la fecha cargada. Apenas se vence, la app le muestra al alumno una pantalla de "Tu plan venció" y no puede seguir entrenando hasta que renueve. Cuando ${esc(DB.students[active].name)} te pague de nuevo, tocá "Marcar pago de hoy" (o cargá la fecha manualmente) y se le desbloquea al instante. Si dejás la fecha vacía, no se muestra ninguna alerta ni se bloquea nada.</div><div class="fld mt8"><label>Teléfono para recordatorios de pago (con código de país)</label><input id="planTelInput" value="${esc(DB.students[active].telefono||'')}" placeholder="5492612345678"></div><button class="plan-btn" data-act="saveTelefono">💾 Guardar teléfono</button><div class="plan-hint">Se usa para el botón "Recordar por WhatsApp" de la pestaña Pagos. Si no lo cargás acá, te lo va a pedir la primera vez que lo uses.</div>`);
   }
 
   {
@@ -4012,11 +4358,16 @@ function renderEdit(){
           <div class="note mt8" style="padding:0;text-align:left;font-size:11px">Si dejás Trabajo/Descanso en blanco, el cartel muestra solo la descripción (sin botón de temporizador).</div>
         </div>
         <div class="old-fields${blk?' hidden':''}">
+        <select class="libpick" data-chg="libPick" data-i="${di}" data-j="${ei}">${exLibOptionsHTML()}</select>
         <div class="fld"><label>Ejercicio</label><input data-field="n" value="${esc(blk?blockTitleClean(ex):ex.n)}" placeholder="Nombre"></div>
         <div class="row3 mt8"><div class="fld"><label>Series</label><input data-field="s" inputmode="numeric" value="${esc(ex.s)}"></div><div class="fld"><label>Reps</label><input data-field="r" value="${esc(ex.r)}"></div><div class="fld"><label>Peso obj.${duo?' ('+esc(mm[0])+')':''}</label><input data-field="w" value="${esc(ex.w)}"></div></div>
         ${duo?`<div class="fld mt8"><label>Peso obj. (${esc(mm[1])})</label><input data-field="w2" value="${esc(ex.w2||'')}"></div>`:''}
         <div class="row2 mt8"><div class="fld"><label>Descanso</label><input data-field="rest" value="${esc(ex.rest)}" placeholder="90 s"></div><div class="fld"><label>Variante / Alternativo</label><input data-field="alt" value="${esc(ex.alt)}" placeholder="Alternativo"></div></div>
         <div class="fld mt8"><label>Tip / técnica</label><textarea data-field="tip" placeholder="Punto clave a tener en cuenta (una por línea)">${esc(ex.tip)}</textarea></div>
+        <div class="fld mt8"><label>Video del ejercicio (link de YouTube puntual, opcional)</label><input data-field="vid" value="${esc(ex.vid&&!/results\?search_query/.test(ex.vid)?ex.vid:'')}" placeholder="https://youtu.be/…"></div>
+        <div class="fld mt8"><label>Video del alternativo (opcional)</label><input data-field="altVid" value="${esc(ex.altVid||'')}" placeholder="https://youtu.be/…"></div>
+        <p class="mt8" style="font-size:11px;color:var(--mute);line-height:1.5">Si pegás un link puntual (no una búsqueda), "Ver técnica" lo muestra adentro de la app, sin salir a YouTube. Si lo dejás vacío, se abre una búsqueda en YouTube como hasta ahora.</p>
+        <button type="button" class="libsave-btn" data-act="saveExToLib" data-i="${di}" data-j="${ei}">💾 Guardar este ejercicio en la biblioteca</button>
         </div>
         <button class="delx" data-act="removeEx" data-i="${di}" data-j="${ei}">Eliminar ejercicio</button>
         </div></div>`; });
@@ -4043,7 +4394,8 @@ function collectForm(){ const out=[]; document.querySelectorAll('.edit-day').for
       let finalS=Math.max(1,parseInt(rawS)||1); let finalR=(g('r')||'').trim()||'—';
       const sParts=rawS.match(/(\d+)\s*[xX×]\s*(\d+)/g);
       if(sParts&&sParts.length>1){ let totalS=0; const repP=[]; sParts.forEach(function(p){ const m=p.match(/(\d+)\s*[xX×]\s*(\d+)/); if(m){ totalS+=parseInt(m[1]); repP.push(m[1]+'×'+m[2]); } }); finalS=totalS; finalR=repP.join(' + '); }
-      const obj={ n, s:finalS, r:finalR, w:(g('w')||'').trim()||'A definir', alt:(g('alt')||'').trim(), tip:(g('tip')||'').trim(), rest:(g('rest')||'').trim(), vid:YT(n||'ejercicio') }; const w2el=exEl.querySelector('[data-field="w2"]'); if(w2el) obj.w2=(w2el.value||'').trim()||'A definir'; exes.push(obj); }); out[di]={ day:dayName, ex:exes }; if(dayWd) out[di].wd=dayWd; if(dayType) out[di].type=dayType; }); return out; }
+      const vidManual=(g('vid')||'').trim();
+      const obj={ n, s:finalS, r:finalR, w:(g('w')||'').trim()||'A definir', alt:(g('alt')||'').trim(), tip:(g('tip')||'').trim(), rest:(g('rest')||'').trim(), vid:vidManual||YT(n||'ejercicio'), altVid:(g('altVid')||'').trim() }; const w2el=exEl.querySelector('[data-field="w2"]'); if(w2el) obj.w2=(w2el.value||'').trim()||'A definir'; exes.push(obj); }); out[di]={ day:dayName, ex:exes }; if(dayWd) out[di].wd=dayWd; if(dayType) out[di].type=dayType; }); return out; }
 function collectWeeks(){ const out=[]; document.querySelectorAll('.week-row').forEach(wr=>{ const g=f=>{ const el=wr.querySelector('[data-wf="'+f+'"]'); return el?el.value.trim():''; }; out.push({ t:g('t')||'S', n:g('n')||'', d:g('d')||'' }); }); return out.length?out:cp(DEFAULT_WEEKS); }
 function collectHealth(){ const sec=$('healthsec'); if(!sec) return DB.students[active].health; const g=sel=>{ const el=sec.querySelector(sel); return el?el.value:''; }; const enabled=g('[data-hf="enabled"]')==='on'; const leg=g('[data-hf="leg"]')==='on'; const tag=g('[data-hf="tag"]').trim(); const alarms=g('[data-hf="alarms"]').split(',').map(s=>s.trim()).filter(Boolean); const warning=g('[data-hf="warning"]').trim(); const rules=[]; sec.querySelectorAll('.hrule').forEach(rr=>{ const t=(rr.querySelector('[data-hf="rt"]').value||'').trim(); const d=(rr.querySelector('[data-hf="rd"]').value||'').trim(); if(t||d) rules.push({t,d}); }); return { enabled, tag, leg, alarms, warning, rules }; }
 function collectMembers(){ const el=$('membersfld'); if(!el) return DB.students[active].members; const arr=el.value.split(',').map(s=>s.trim()).filter(Boolean); return arr; }
@@ -4083,7 +4435,246 @@ async function saveRoutine(){ syncFromForms(); await saveDB(); toast("Rutina gua
 async function saveWeeks(){ syncFromForms(); await saveDB(); toast("Semanas guardadas ✓",'ok'); renderEdit(); }
 async function saveHealth(){ syncFromForms(); await saveDB(); toast("Salud/seguridad guardada ✓",'ok'); renderEdit(); }
 async function saveMembers(){ syncFromForms(); await saveDB(); toast("Integrantes guardados ✓",'ok'); renderEdit(); }
+async function saveFechaNac(){ const el=$('fechaNacInput'); const v=el?el.value:''; DB.students[active].fechaNac=v; await saveDB(); toast(v?'Fecha de nacimiento guardada ✓':'Fecha de nacimiento borrada ✓','ok'); renderEdit(); }
 async function setPin(){ const np=((await uiPrompt(DB.settings.pin?"Nuevo PIN de profe:":"Creá un PIN de profe:", DB.settings.pin||''))||'').trim(); if(!np) return; DB.settings.pin=np; await saveDB(); toast("PIN guardado ✓",'ok'); renderEdit(); }
+
+/* ===================== BIBLIOTECA DE EJERCICIOS =====================
+   Catálogo global (no por alumno) de ejercicios reutilizables: nombre, grupo muscular,
+   técnica/tip y alternativo. Vive en DB.exLib (se sincroniza solo, junto con el resto de
+   DB, porque es parte del mismo documento). El peso/series/reps de cada semana siguen
+   siendo propios de cada rutina — la biblioteca solo evita retipear nombre/técnica. */
+function exLibList(){ return DB.exLib||[]; }
+function exLibOptionsHTML(){
+  /* cada ejercicio aparece una sola vez, bajo el primero de sus grupos musculares */
+  const groups={};
+  exLibList().forEach(function(it){ const g=groupsOf(it)[0]; (groups[g]=groups[g]||[]).push(it); });
+  let html='<option value="">📚 Elegir de la biblioteca…</option>';
+  EXLIB_GROUPS.forEach(function(g){
+    const items=groups[g]; if(!items||!items.length) return;
+    html+='<optgroup label="'+esc(g)+'">'+items.map(function(it){ return '<option value="'+esc(it.id)+'">'+esc(it.n)+'</option>'; }).join('')+'</optgroup>';
+  });
+  return html;
+}
+async function addLibEx(){
+  const n=($('libNewN')&&$('libNewN').value||'').trim();
+  if(!n){ toast('Poné un nombre para el ejercicio','warn'); return; }
+  const box=$('libNewGroups');
+  const groups=box?Array.prototype.slice.call(box.querySelectorAll('input[type=checkbox]:checked')).map(function(c){ return c.value; }):[];
+  const alt=($('libNewAlt')&&$('libNewAlt').value||'').trim();
+  const tip=($('libNewTip')&&$('libNewTip').value||'').trim();
+  const vid=($('libNewVid')&&$('libNewVid').value||'').trim();
+  if(!DB.exLib) DB.exLib=[];
+  DB.exLib.push({ id:slug(n)+'-'+Date.now(), n, groups:groups.length?groups:['Otro'], alt, tip, vid });
+  await saveDB();
+  toast('Ejercicio agregado a la biblioteca ✓','ok');
+  renderEdit();
+}
+function editLibEx(id){ libEditId=(libEditId===id)?null:id; renderEdit(); }
+async function saveLibEx(id){
+  const it=exLibList().find(function(x){ return x.id===id; }); if(!it) return;
+  const row=document.querySelector('.lib-edit-row[data-id="'+id+'"]'); if(!row) return;
+  const g=f=>{ const el=row.querySelector('[data-lf="'+f+'"]'); return el?el.value:''; };
+  it.n=(g('n')||'').trim()||it.n;
+  const groups=Array.prototype.slice.call(row.querySelectorAll('input[type=checkbox][data-lf="groups"]:checked')).map(function(c){ return c.value; });
+  it.groups=groups.length?groups:['Otro'];
+  delete it.group;
+  it.alt=(g('alt')||'').trim();
+  it.tip=(g('tip')||'').trim();
+  it.vid=(g('vid')||'').trim();
+  await saveDB();
+  libEditId=null;
+  toast('Ejercicio actualizado ✓','ok');
+  renderEdit();
+}
+async function delLibEx(id){
+  if(!await uiConfirm('¿Eliminar este ejercicio de la biblioteca? No afecta a las rutinas que ya lo estén usando, solo lo saca de la lista para elegir.')) return;
+  DB.exLib=exLibList().filter(function(x){ return x.id!==id; });
+  await saveDB();
+  toast('Eliminado de la biblioteca','ok');
+  renderEdit();
+}
+/* Toma lo que la profe ya tiene tipeado para un ejercicio de una rutina (nombre/alt/tip,
+   leídos en vivo del formulario, no hace falta guardar la rutina primero) y lo manda a la
+   biblioteca como ejercicio nuevo, para no tener que retipearlo la próxima vez. */
+async function saveExToLib(di,ei){
+  const exEl=document.querySelectorAll('.edit-day')[di]; if(!exEl) return;
+  const box=exEl.querySelectorAll('.edit-ex')[ei]; if(!box) return;
+  const g=f=>{ const el=box.querySelector('[data-field="'+f+'"]'); return el?el.value:''; };
+  const n=(g('n')||'').trim();
+  if(!n){ toast('Ese ejercicio no tiene nombre todavía','warn'); return; }
+  if(!DB.exLib) DB.exLib=[];
+  const vidManual=(g('vid')||'').trim();
+  DB.exLib.push({ id:slug(n)+'-'+Date.now(), n, groups:['Otro'], alt:(g('alt')||'').trim(), tip:(g('tip')||'').trim(), vid:vidManual });
+  await saveDB();
+  toast('Guardado en la biblioteca ✓ · asignale un grupo muscular desde "Biblioteca de ejercicios"','ok');
+}
+
+/* ===================== ASISTENCIA =====================
+   Calendario simple por alumno: presente / ausente, separado de si completó o no la
+   rutina (eso ya lo cuenta Transcripta). Vive en st.attendance como mapa "AAAA-MM-DD" ->
+   'p' (presente) / 'a' (ausente); sin marcar = no existe la clave. */
+function pad2(n){ return n<10?'0'+n:''+n; }
+function dstr(y,m,d){ return y+'-'+pad2(m+1)+'-'+pad2(d); }
+/* log.date guarda un ISO completo en UTC (new Date().toISOString()); para compararlo contra un
+   día calendario LOCAL (ej. "hoy") hay que pasarlo por Date y leer año/mes/día locales — comparar
+   el string ISO tal cual, o cortarlo con .slice(0,10), da el día equivocado en sesiones cerradas
+   de noche (Argentina es UTC-3: un cierre después de las 21h ya cae en el día UTC siguiente). */
+function localDateOf(iso){ const d=new Date(iso); return dstr(d.getFullYear(),d.getMonth(),d.getDate()); }
+const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DIAS_LARGOS=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+function isoAddDays(iso,delta){ const [y,mo,d]=iso.split('-').map(Number); const dt=new Date(y,mo-1,d); dt.setDate(dt.getDate()+delta); return dstr(dt.getFullYear(),dt.getMonth(),dt.getDate()); }
+function isoLabel(iso){ const [y,mo,d]=iso.split('-').map(Number); const dt=new Date(y,mo-1,d); return DIAS_LARGOS[dt.getDay()]+' '+d+' de '+MESES[mo-1].toLowerCase(); }
+function asisPrevMonth(){ asisM--; if(asisM<0){ asisM=11; asisY--; } renderAsistencia(); }
+function asisNextMonth(){ asisM++; if(asisM>11){ asisM=0; asisY++; } renderAsistencia(); }
+function asisPrevDay(){ asisDayISO=isoAddDays(asisDayISO,-1); renderAsistencia(); }
+function asisNextDay(){ asisDayISO=isoAddDays(asisDayISO,1); renderAsistencia(); }
+function asisGoToday(){ asisDayISO=dstr(_asisNow.getFullYear(),_asisNow.getMonth(),_asisNow.getDate()); renderAsistencia(); }
+function asisOpenMes(id){ if(!id) return; asisMesId=id; const now=new Date(); asisY=now.getFullYear(); asisM=now.getMonth(); asisMode='mes'; renderAsistencia(); }
+function asisBackToDia(){ asisMode='dia'; renderAsistencia(); }
+async function toggleAttendance(id,dateStr){
+  const st=DB.students[id]; if(!st) return;
+  if(!st.attendance) st.attendance={};
+  const cur=st.attendance[dateStr];
+  if(!cur) st.attendance[dateStr]='p';
+  else if(cur==='p') st.attendance[dateStr]='a';
+  else delete st.attendance[dateStr];
+  await saveDB();
+  renderAsistencia();
+}
+function renderAsistencia(){
+  const m=$('main'); m.innerHTML='';
+  if(!trainer){ renderApp(); return; }
+  if(asisMode==='mes') return renderAsistenciaMes();
+  return renderAsistenciaDia();
+}
+/* Vista principal: planilla del día con TODOS los alumnos, para marcar sin entrar uno por uno. */
+function renderAsistenciaDia(){
+  const m=$('main');
+  const todayStr=dstr(_asisNow.getFullYear(),_asisNow.getMonth(),_asisNow.getDate());
+  const isToday=asisDayISO===todayStr;
+  const ids=DB.order.filter(id=>DB.students[id]);
+  let pCount=0,aCount=0;
+  ids.forEach(id=>{ const st=DB.students[id]; const s=(st.attendance||{})[asisDayISO]; if(s==='p') pCount++; else if(s==='a') aCount++; });
+  const sinCount=ids.length-pCount-aCount;
+  const hero=document.createElement('div'); hero.className='rep-hero';
+  hero.innerHTML=`<div class="rep-hero-eyebrow">📋 ASISTENCIA</div>
+    <div class="rep-hero-row">
+      <button type="button" class="rep-hero-nav" data-act="asisPrevDay">◀</button>
+      <div class="rep-hero-title sm" style="text-align:center;flex:1">${isToday?'Hoy · ':''}${esc(isoLabel(asisDayISO))}</div>
+      <button type="button" class="rep-hero-nav" data-act="asisNextDay">▶</button>
+    </div>
+    <div class="rep-hero-stats">
+      <div class="rep-hero-stat ok"><b>${pCount}</b><span>Presente${pCount===1?'':'s'}</span></div>
+      <div class="rep-hero-stat bad"><b>${aCount}</b><span>Ausente${aCount===1?'':'s'}</span></div>
+      <div class="rep-hero-stat"><b>${sinCount}</b><span>Sin marcar</span></div>
+    </div>`;
+  m.appendChild(hero);
+  if(!isToday){ const tb=document.createElement('button'); tb.className='asis-todaybtn'; tb.dataset.act='asisGoToday'; tb.textContent='Ir a hoy'; tb.style.cssText='display:block;margin:0 auto 10px;border:none;background:var(--light);color:var(--steel);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer'; m.appendChild(tb); }
+  const list=document.createElement('div'); list.className='asis-list';
+  ids.forEach(id=>{
+    const st=DB.students[id];
+    const status=(st.attendance||{})[asisDayISO];
+    const row=document.createElement('div');
+    row.className='asis-row'+(status==='p'?' p':status==='a'?' a':'');
+    row.dataset.act='toggleAttend'; row.dataset.id=id; row.dataset.date=asisDayISO;
+    const chip=status==='p'?'✓ Presente':status==='a'?'✕ Ausente':'Sin marcar';
+    row.innerHTML=`<span class="asis-rn">${st.theme==='f'?'🌸 ':''}${st.members&&st.members.length>1?'👯 ':''}${esc(st.name)}</span><span class="asis-rchip">${chip}</span>`;
+    list.appendChild(row);
+  });
+  m.appendChild(list);
+  const hint=document.createElement('div'); hint.className='note'; hint.textContent='Tocá un alumno para marcarlo: primero presente, después ausente, de nuevo para dejarlo sin marcar.'; m.appendChild(hint);
+  /* drill-down opcional: calendario mensual de un alumno puntual */
+  const drill=document.createElement('div'); drill.className='asis-drill';
+  const opts=ids.map(id=>`<option value="${id}">${esc(DB.students[id].name)}</option>`).join('');
+  drill.innerHTML=`<label>Ver calendario mensual de un alumno</label><div style="display:flex;gap:8px"><select id="asisDrillSel" style="flex:1">${opts}</select><button data-act="asisOpenMes">Ver mes</button></div>`;
+  m.appendChild(drill);
+}
+/* Vista secundaria: calendario mensual de UN alumno (drill-down manual, no es la vista principal). */
+function renderAsistenciaMes(){
+  const m=$('main');
+  const st=DB.students[asisMesId]; if(!st){ asisMode='dia'; return renderAsistenciaDia(); }
+  const back=document.createElement('button'); back.dataset.act='asisBackToDia'; back.textContent='← Volver a todos'; back.style.cssText='border:none;background:none;color:var(--accent);font-weight:700;font-size:13px;cursor:pointer;margin-bottom:10px'; m.appendChild(back);
+  const f=document.createElement('div'); f.className='focus'; f.innerHTML=`<b>${esc(st.name)}</b> · calendario mensual`; m.appendChild(f);
+  const att=st.attendance||{};
+  const first=new Date(asisY,asisM,1);
+  const startOffset=(first.getDay()+6)%7; /* lunes=0 */
+  const daysInMonth=new Date(asisY,asisM+1,0).getDate();
+  let pCount=0,aCount=0;
+  Object.keys(att).forEach(function(k){ if(k.slice(0,7)===(asisY+'-'+pad2(asisM+1))){ if(att[k]==='p') pCount++; else if(att[k]==='a') aCount++; } });
+  const nav=document.createElement('div'); nav.className='asis-nav';
+  nav.innerHTML=`<button data-act="asisPrev">◀</button><b>${MESES[asisM]} ${asisY}</b><button data-act="asisNext">▶</button>`;
+  m.appendChild(nav);
+  const sum=document.createElement('div'); sum.className='asis-summary'; sum.innerHTML=`<span class="ok">✓ ${pCount} presente${pCount===1?'':'s'}</span><span class="bad">✕ ${aCount} ausente${aCount===1?'':'s'}</span>`;
+  m.appendChild(sum);
+  const grid=document.createElement('div'); grid.className='asis-grid';
+  ['L','M','X','J','V','S','D'].forEach(function(w){ const h=document.createElement('div'); h.className='asis-dow'; h.textContent=w; grid.appendChild(h); });
+  for(let i=0;i<startOffset;i++){ grid.appendChild(document.createElement('div')); }
+  const todayStr=dstr(_asisNow.getFullYear(),_asisNow.getMonth(),_asisNow.getDate());
+  for(let d=1; d<=daysInMonth; d++){
+    const ds=dstr(asisY,asisM,d);
+    const status=att[ds];
+    const cell=document.createElement('button');
+    cell.className='asis-cell'+(status==='p'?' p':status==='a'?' a':'')+(ds===todayStr?' today':'');
+    cell.dataset.act='toggleAttend'; cell.dataset.id=asisMesId; cell.dataset.date=ds;
+    cell.innerHTML=`${d}${status==='p'?'<small>✓</small>':status==='a'?'<small>✕</small>':''}`;
+    grid.appendChild(cell);
+  }
+  m.appendChild(grid);
+  const hint=document.createElement('div'); hint.className='note'; hint.textContent='Tocá un día para marcarlo: primero presente, después ausente, de nuevo para dejarlo sin marcar.'; m.appendChild(hint);
+}
+
+/* ===================== PAGOS ===================== */
+/* Vista global: todos los alumnos y su estado de pago en una sola pantalla, sin entrar uno por uno. */
+function waMsgFor(st,due){
+  if(due&&due.status==='bad') return `Hola ${st.name}! Te escribo de TAFIT porque tu plan venció hace ${Math.abs(due.daysLeft)} día${Math.abs(due.daysLeft)===1?'':'s'}. ¿Podemos coordinar el pago para que sigas entrenando sin cortes? Gracias 💪`;
+  if(due&&due.status==='warn') return `Hola ${st.name}! Te aviso que tu plan de TAFIT ${due.daysLeft===0?'vence hoy':'vence en '+due.daysLeft+' día'+(due.daysLeft===1?'':'s')}. Cuando puedas coordinamos el pago para renovarlo 😊`;
+  return `Hola ${st.name}! Te escribo de TAFIT para coordinar tu pago.`;
+}
+async function waReminder(id){
+  const st=DB.students[id]; if(!st) return;
+  let tel=st.telefono;
+  if(!tel){
+    const v=(await uiPrompt('No tenés cargado el teléfono de '+st.name+'. Ingresalo (con código de país, ej: 5492612345678):'))||'';
+    tel=v.trim(); if(!tel) return;
+    st.telefono=tel; await saveDB();
+  }
+  const due=planDueInfo(st.planPaid);
+  const msg=waMsgFor(st,due);
+  window.open('https://wa.me/'+tel.replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(msg),'_blank');
+}
+function pagoRowHTML(id,due){
+  const st=DB.students[id];
+  const waHref=st.telefono?('https://wa.me/'+st.telefono.replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(waMsgFor(st,due))):null;
+  const btn=waHref?`<a class="pago-wa" href="${waHref}" target="_blank" rel="noopener">💬 Recordar</a>`:`<button class="pago-wa" data-act="waReminder" data-id="${id}">💬 Recordar</button>`;
+  const statusTxt=due?(due.status==='bad'?'🔴 venció hace '+Math.abs(due.daysLeft)+' día'+(Math.abs(due.daysLeft)===1?'':'s'):due.status==='warn'?'🟠 '+(due.daysLeft===0?'vence hoy':'vence en '+due.daysLeft+' día'+(due.daysLeft===1?'':'s')):'✓ vence el '+due.dueStr):'— sin fecha de pago cargada';
+  return `<div class="pago-row"><span class="pago-name">${st.theme==='f'?'🌸 ':''}${st.members&&st.members.length>1?'👯 ':''}${esc(st.name)}</span><span class="pago-status">${statusTxt}</span>${btn}</div>`;
+}
+function renderPagos(){
+  const m=$('main');
+  const ids=DB.order.filter(id=>DB.students[id]);
+  const rows=ids.map(id=>({id, due:planDueInfo(DB.students[id].planPaid)}));
+  const vencidos=rows.filter(r=>r.due&&r.due.status==='bad').sort((a,b)=>a.due.daysLeft-b.due.daysLeft);
+  const porVencer=rows.filter(r=>r.due&&r.due.status==='warn').sort((a,b)=>a.due.daysLeft-b.due.daysLeft);
+  const alDia=rows.filter(r=>r.due&&r.due.status==='ok').sort((a,b)=>a.due.daysLeft-b.due.daysLeft);
+  const sinReg=rows.filter(r=>!r.due);
+  /* Nota: antes esta pantalla armaba un <div class="focus"> con appendChild y DESPUÉS pisaba
+     todo #main con m.innerHTML=html — ese título nunca llegaba a verse. Ahora la tarjeta
+     resumen va DENTRO del mismo string que se asigna a innerHTML, así no se pierde. */
+  let heroHtml=`<div class="rep-hero"><div class="rep-hero-eyebrow">💳 PAGOS</div><div class="rep-hero-title">Estado de pago</div>
+    <div class="rep-hero-stats">
+      <div class="rep-hero-stat bad"><b>${vencidos.length}</b><span>Vencidos</span></div>
+      <div class="rep-hero-stat warn"><b>${porVencer.length}</b><span>Por vencer</span></div>
+      <div class="rep-hero-stat ok"><b>${alDia.length}</b><span>Al día</span></div>
+    </div></div>`;
+  let html='';
+  if(vencidos.length) html+=`<div class="pago-block vencido"><div class="pago-title">🔴 Vencidos (${vencidos.length})</div>${vencidos.map(r=>pagoRowHTML(r.id,r.due)).join('')}</div>`;
+  if(porVencer.length) html+=`<div class="pago-block porvencer"><div class="pago-title">🟠 Por vencer (${porVencer.length})</div>${porVencer.map(r=>pagoRowHTML(r.id,r.due)).join('')}</div>`;
+  if(alDia.length) html+=`<div class="pago-block aldia"><div class="pago-title">✓ Al día (${alDia.length})</div>${alDia.map(r=>pagoRowHTML(r.id,r.due)).join('')}</div>`;
+  if(sinReg.length) html+=`<div class="pago-block sinreg"><div class="pago-title">— Sin fecha de pago cargada (${sinReg.length})</div>${sinReg.map(r=>pagoRowHTML(r.id,r.due)).join('')}</div>`;
+  if(!html) html='<div class="empty">No hay alumnos todavía.</div>';
+  m.innerHTML=heroHtml+html;
+  const hint=document.createElement('div'); hint.className='note'; hint.textContent='"Recordar" abre WhatsApp con un mensaje ya escrito. Si un alumno no tiene teléfono cargado, te lo va a pedir la primera vez (después queda guardado en Editar → Plan del alumno).'; m.appendChild(hint);
+}
 
 /* ===================== INFORME ===================== */
 async function renderReport(){
@@ -4092,11 +4683,23 @@ async function renderReport(){
   for(const id of DB.order){ const s=DB.students[id]; const logs = id===active ? LOGS : safeParse(await Store.get('tafit:logs:'+id)||'[]',[]); const last=logs.length?logs[0]:null; let adh=0; if(last){ let plan=0,h=0; last.ex.forEach(x=>{ if(x.members){ x.members.forEach(mm=>mm.sets.forEach(st=>{ plan++; if(st.done) h++; })); } else { x.sets.forEach(st=>{ plan++; if(st.done) h++; }); } }); adh=plan?Math.round(h/plan*100):0; }
   const fa=s.forms&&s.forms.acuerdo?safeParse(await Store.get('tafit:form:acuerdo:'+id)||'{}',{}):{};
   const fn=s.forms&&s.forms.anamnesis?safeParse(await Store.get('tafit:form:anamnesis:'+id)||'{}',{}):{};
-  cards.push({ id, name:s.name, theme:s.theme, duo:s.members&&s.members.length>1, sessions:logs.length, last, week:last?(last.weekName||'—'):'—', adh, forms:s.forms||{}, fa, fn, planPaid:s.planPaid||'' }); }
+  const todayLocal=dstr(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
+  const weekAgoTs=Date.now()-6*86400000;
+  const trainedToday=logs.some(l=>localDateOf(l.date)===todayLocal);
+  const trainedWeek=logs.some(l=>new Date(l.date).getTime()>=weekAgoTs);
+  cards.push({ id, name:s.name, theme:s.theme, duo:s.members&&s.members.length>1, sessions:logs.length, last, week:last?(last.weekName||'—'):'—', adh, forms:s.forms||{}, fa, fn, planPaid:s.planPaid||'', paused:!!s.paused, trainedToday, trainedWeek, attendedToday:!!(s.attendance&&s.attendance[todayLocal]), fechaNac:s.fechaNac||'' }); }
   let html=`<div class="focus">Resumen de todos tus alumnos</div>`;
-  /* Próximos cumpleaños (30 días): toma "Fecha de nacimiento" de Anamnesis o, si no está, de Acuerdo */
+  /* Panel del día: alumnos activos, quién entrenó hoy/esta semana, a quién le falta marcar asistencia hoy. Todo de un vistazo, sin entrar alumno por alumno. */
+  { const activos=cards.filter(c=>!c.paused);
+    const hoyNombres=activos.filter(c=>c.trainedToday).map(c=>c.name);
+    const semanaCount=activos.filter(c=>c.trainedWeek).length;
+    const sinMarcar=activos.filter(c=>!c.attendedToday).map(c=>c.name);
+    html+=`<div class="panel-block"><div class="panel-title">📋 Resumen de hoy</div><div class="panel-stats"><div class="panel-stat"><b>${activos.length}</b><span>Alumnos activos</span></div><div class="panel-stat"><b>${hoyNombres.length}</b><span>Entrenaron hoy</span></div><div class="panel-stat"><b>${semanaCount}</b><span>Entrenaron esta semana</span></div><div class="panel-stat"><b>${sinMarcar.length}</b><span>Sin marcar asistencia hoy</span></div></div>${hoyNombres.length?`<div class="panel-line">✓ Hoy entrenaron: ${hoyNombres.map(esc).join(', ')}</div>`:''}${sinMarcar.length?`<div class="panel-line warn">Falta marcar asistencia hoy: ${sinMarcar.map(esc).join(', ')}</div>`:''}</div>`;
+  }
+  /* Próximos cumpleaños (30 días): toma la fecha cargada directo por la profe en Editar → Integrantes;
+     si no está, busca en el formulario de Anamnesis o, si no está, en el de Acuerdo (por si el alumno ya lo completó). */
   const bdays=cards.map(c=>{
-    const raw=(c.fn&&c.fn.fecha_nac)||(c.fa&&c.fa.fecha_nac)||'';
+    const raw=c.fechaNac||(c.fn&&c.fn.fecha_nac)||(c.fa&&c.fa.fecha_nac)||'';
     const md=parseFechaNac(raw);
     if(!md) return null;
     const days=daysUntilBirthday(md.m,md.d);
@@ -4163,7 +4766,7 @@ function renderMercadoPago(){
 
 /* ===================== BACKUP ===================== */
 async function exportData(){ const p={ _app:'TaFit', _v:6, exported:new Date().toISOString(), db:DB, data:{}, logs:{} }; for(const id of DB.order){ p.data[id]=safeParse(await Store.get('tafit:data:'+id)||'{}',{}); p.logs[id]=safeParse(await Store.get('tafit:logs:'+id)||'[]',[]); } const blob=new Blob([JSON.stringify(p,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='TaFit-backup-'+new Date().toISOString().slice(0,10)+'.json'; a.click(); URL.revokeObjectURL(url); toast("Backup descargado ✓",'ok'); }
-function importData(e){ const f=e.target.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=async()=>{ try{ const p=JSON.parse(rd.result); if(!p.db||!p.db.order) throw 0; DB=p.db; if(!DB.settings) DB.settings={pin:""}; if(!DB._seed) DB._seed={}; DB.order.forEach(id=>{ const s=DB.students[id]; if(!s.theme) s.theme=guessFem(s.name)?'f':'m'; if(!s.weeks) s.weeks=cp(DEFAULT_WEEKS); }); await saveDB(true); for(const id of DB.order){ if(p.data&&p.data[id]) await Store.set('tafit:data:'+id,JSON.stringify(p.data[id])); if(p.logs&&p.logs[id]) await Store.set('tafit:logs:'+id,JSON.stringify(p.logs[id])); } if(!DB.students[active]) active=DB.order[0]; await Store.set('tafit:active',active); await loadStudent(); render(); toast("Backup importado ✓",'ok'); }catch(err){ toast("El archivo no es un backup válido",'warn'); } e.target.value=''; }; rd.readAsText(f); }
+function importData(e){ const f=e.target.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=async()=>{ try{ const p=JSON.parse(rd.result); if(!p.db||!p.db.order) throw 0; DB=p.db; if(!DB.settings) DB.settings={pin:""}; if(!DB._seed) DB._seed={}; if(!DB.exLib) DB.exLib=[]; DB.order.forEach(id=>{ const s=DB.students[id]; if(!s.theme) s.theme=guessFem(s.name)?'f':'m'; if(!s.weeks) s.weeks=cp(DEFAULT_WEEKS); }); await saveDB(true); for(const id of DB.order){ if(p.data&&p.data[id]) await Store.set('tafit:data:'+id,JSON.stringify(p.data[id])); if(p.logs&&p.logs[id]) await Store.set('tafit:logs:'+id,JSON.stringify(p.logs[id])); } if(!DB.students[active]) active=DB.order[0]; await Store.set('tafit:active',active); await loadStudent(); render(); toast("Backup importado ✓",'ok'); }catch(err){ toast("El archivo no es un backup válido",'warn'); } e.target.value=''; }; rd.readAsText(f); }
 
 /* ===================== EVENTOS DELEGADOS ===================== */
 document.addEventListener('click',e=>{
@@ -4208,6 +4811,7 @@ document.addEventListener('click',e=>{
     case 'saveUnlockWeek': { const sel=$('unlockWeekSel'); if(sel){ DB.students[active].unlockWeek=+sel.value; saveDB(); toast('Desbloqueo guardado ✓ · ya puede entrar a esa semana','ok'); } break; }
     case 'saveHealth': saveHealth(); break;
     case 'saveMembers': saveMembers(); break;
+    case 'saveFechaNac': saveFechaNac(); break;
     case 'setPin': setPin(); break;
     case 'saveForm': handleSaveForm(el.dataset.ftype); break;
     case 'toggleForm': toggleFormEnable(el.dataset.ftype); break;
@@ -4219,6 +4823,10 @@ document.addEventListener('click',e=>{
     case 'newCycle': startNewCycle(); break;
     case 'savePlanDate': savePlanDate(); break;
     case 'planToday': planToday(); break;
+    case 'saveTelefono': saveTelefono(); break;
+    case 'waReminder': waReminder(el.dataset.id); break;
+    case 'playVideo': playVideo(el.dataset.url, el.dataset.name); break;
+    case 'closeVideo': closeVideoModal(); break;
     case 'formMember': member=+el.dataset.m; renderFormTab(el.dataset.ft); break;
     case 'photoMember': member=+el.dataset.m; renderPhotos(); break;
     case 'forceSync': toast('Sincronizando…'); location.reload(); break;
@@ -4237,6 +4845,19 @@ document.addEventListener('click',e=>{
     case 'tabataStart': startTabata(); break;
     case 'tabataStop': stopTabata(); break;
     case 'tabataClose': closeTabata(); break;
+    case 'addLibEx': addLibEx(); break;
+    case 'editLibEx': editLibEx(id); break;
+    case 'saveLibEx': saveLibEx(id); break;
+    case 'delLibEx': delLibEx(id); break;
+    case 'saveExToLib': saveExToLib(i,j); break;
+    case 'asisPrev': asisPrevMonth(); break;
+    case 'asisNext': asisNextMonth(); break;
+    case 'asisPrevDay': asisPrevDay(); break;
+    case 'asisNextDay': asisNextDay(); break;
+    case 'asisGoToday': asisGoToday(); break;
+    case 'asisBackToDia': asisBackToDia(); break;
+    case 'asisOpenMes': { const sel=$('asisDrillSel'); asisOpenMes(sel?sel.value:null); break; }
+    case 'toggleAttend': toggleAttendance(el.dataset.id, el.dataset.date); break;
   }
 });
 document.addEventListener('change',e=>{
@@ -4271,12 +4892,54 @@ document.addEventListener('change',e=>{
       break; }
     case 'import': importData(e); break;
     case 'blkToggle': { const box=el.closest('.edit-ex'); if(box){ const on=el.checked; const nf=box.querySelector('.new-fields'), of=box.querySelector('.old-fields'); if(nf) nf.classList.toggle('hidden',!on); if(of) of.classList.toggle('hidden',on); } break; }
+    case 'libPick': {
+      /* Autocompleta nombre/alternativo/técnica del ejercicio con lo cargado en la
+         biblioteca, sin re-renderizar (para no perder lo que se esté tipeando en otros
+         ejercicios de la misma rutina que todavía no se guardó). Series/reps/peso quedan
+         intactos: eso sigue siendo propio de cada rutina, no de la biblioteca. */
+      const it=exLibList().find(function(x){ return x.id===el.value; });
+      const box=el.closest('.edit-ex');
+      if(it&&box){
+        const nEl=box.querySelector('[data-field="n"]'); if(nEl) nEl.value=it.n;
+        const altEl=box.querySelector('[data-field="alt"]'); if(altEl) altEl.value=it.alt||'';
+        const tipEl=box.querySelector('[data-field="tip"]'); if(tipEl) tipEl.value=it.tip||'';
+        const vidEl=box.querySelector('[data-field="vid"]'); if(vidEl) vidEl.value=it.vid||'';
+        const hdrName=box.querySelector('.ex-hdr-name'); if(hdrName) hdrName.textContent=it.n;
+      }
+      el.value='';
+      break;
+    }
   } }
   /* yesno reveal toggle */
   const yn=e.target.closest('[data-ftype="yesno"]');
   if(yn){ const fk=yn.getAttribute('data-fk'); document.querySelectorAll('[data-reveal="'+fk+'"]').forEach(function(el2){ el2.style.display=yn.value==='si'?'':'none'; }); }
 });
-document.addEventListener('input',e=>{ const el=e.target.closest('[data-chg="obs"]'); if(el) updObs(el.value); });
+document.addEventListener('input',e=>{
+  const el=e.target.closest('[data-chg="obs"]'); if(el) updObs(el.value);
+  const libEl=e.target.closest('[data-chg="libSearch"]');
+  if(libEl){
+    libFilter=libEl.value;
+    /* Filtra en vivo sin re-renderizar todo el formulario (así no se pierde el foco del
+       input de búsqueda mientras se tipea) — oculta/muestra directamente los grupos y filas
+       ya dibujados, y esconde también la etiqueta de grupo si le quedan 0 filas visibles. */
+    const sec=libEl.closest('.tacc-body'); if(!sec) return;
+    const q=libFilter.trim().toLowerCase();
+    let curLabel=null, curVisible=0;
+    Array.from(sec.children).forEach(function(child){
+      if(child.tagName==='LABEL'&&child.classList.contains('lib-glabel')){
+        if(curLabel) curLabel.style.display=curVisible>0?'':'none';
+        curLabel=child; curVisible=0; child.style.display='';
+        return;
+      }
+      if(child.classList&&(child.classList.contains('lib-row')||child.classList.contains('lib-edit-row'))){
+        const show=!q||(child.textContent||'').toLowerCase().includes(q);
+        child.style.display=show?'':'none';
+        if(show) curVisible++;
+      }
+    });
+    if(curLabel) curLabel.style.display=curVisible>0?'':'none';
+  }
+});
 $('lb').addEventListener('click',()=>$('lb').classList.remove('show'));
 $('mok').addEventListener('click',()=>_modalClose(true));
 $('mcancel').addEventListener('click',()=>_modalClose(false));
