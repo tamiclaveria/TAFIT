@@ -795,6 +795,7 @@
 /* ====================================================================
    TaFit · multi-alumno · v8 (Firebase sync + offline + dúos por pestaña + timer manual)
    ==================================================================== */
+const APP_VERSION='v8-74'; /* mantener igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión */
 let fireSync=()=>{},fireDel=()=>{};
 let _fromRemote=false;
 const DEVICE_ID=(()=>{ try{ let id=localStorage.getItem('tafit:devid'); if(!id){ id='d_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); localStorage.setItem('tafit:devid',id); } return id; }catch(e){ return 'd_'+Math.random().toString(36).slice(2,10); } })();
@@ -4495,7 +4496,7 @@ function renderEdit(){
         autoBackupList.map(b=>`<button data-act="restoreBackupUI" data-date="${b.date}">🛟 Restaurar del ${fmtShort(b.exported||b.date)} · ${b.students} alumnos</button>`).join('')+
         `</div>`;
     }
-    SEC('backup','Respaldo de datos',`<p>El guardado automático va a <b>${Store.where==='nube'?'la nube de Claude':Store.where==='dispositivo'?'este dispositivo':'memoria temporal'}</b>. El backup incluye alumnos, rutinas y sesiones (las fotos no entran por su tamaño).</p><div class="edit-actions"><button data-act="export">⬇ Exportar backup</button><label class="impbtn">⬆ Importar backup<input type="file" accept="application/json" data-chg="import" hidden></label></div><hr class="mt8" style="border:none;border-top:1px solid var(--line)"><h3 class="mt8" style="font-size:13px">🛟 Backups automáticos (últimos 7 días)</h3>${autoBackupHtml}`);
+    SEC('backup','Respaldo de datos',`<p>El guardado automático va a <b>${Store.where==='nube'?'la nube de Claude':Store.where==='dispositivo'?'este dispositivo':'memoria temporal'}</b>. El backup incluye alumnos, rutinas y sesiones (las fotos no entran por su tamaño).</p><div class="edit-actions"><button data-act="export">⬇ Exportar backup</button><label class="impbtn">⬆ Importar backup<input type="file" accept="application/json" data-chg="import" hidden></label></div><hr class="mt8" style="border:none;border-top:1px solid var(--line)"><h3 class="mt8" style="font-size:13px">🛟 Backups automáticos (últimos 7 días)</h3>${autoBackupHtml}<hr class="mt8" style="border:none;border-top:1px solid var(--line)"><h3 class="mt8" style="font-size:13px">📲 Versión de la app</h3><p style="font-size:11.5px;color:var(--mute)">Este dispositivo tiene <b>${APP_VERSION}</b>. Si subiste un zip nuevo a GitHub y no se ve el cambio, tocá este botón en vez de cerrar y abrir la app varias veces.</p><div class="edit-actions"><button data-act="checkUpdate">🔄 Buscar actualización ahora</button></div>`);
   }
 
   SEC('members',`Integrantes de ${esc(DB.students[active].name)}`,`<p>Si entrenan en dúo, poné los dos nombres separados por coma (1.º = primera columna). Cada una registra sus series y su RM por separado.</p><div class="fld"><input id="membersfld" value="${esc(membersOf().join(', '))}" placeholder="Nati, Caro"></div><div class="edit-bottom mt8"><button class="save" data-act="saveMembers">Guardar integrantes</button></div><div class="fld mt8"><label>Fecha de nacimiento (para el aviso de cumpleaños)</label><input type="date" id="fechaNacInput" value="${esc(DB.students[active].fechaNac||'')}"></div><button class="plan-btn" data-act="saveFechaNac">💾 Guardar fecha de nacimiento</button><p class="mt8" style="font-size:11.5px;color:var(--mute);line-height:1.5">Cargala directamente acá: no hace falta esperar a que el alumno complete el formulario de Acuerdo o Anamnesis para que te avise de su cumple en Informe.</p>`);
@@ -5023,6 +5024,21 @@ document.addEventListener('click',e=>{
     case 'export': exportData(); break;
     case 'loadAutoBackups': autoBackupLoading=true; renderEdit(); listAutoBackups().then(function(list){ autoBackupList=list; autoBackupLoading=false; renderEdit(); }); break;
     case 'restoreBackupUI': (async function(){ const dateISO=el.dataset.date; if(!await uiConfirm('¿Restaurar el backup del '+fmtShort(dateISO)+'? Esto reemplaza los datos actuales de TODOS los alumnos por los de ese día.')) return; toast('Restaurando…'); const ok=await restoreAutoBackup(dateISO); if(ok){ toast('Backup restaurado ✓','ok'); render(); } else toast('No se pudo restaurar ese backup','warn'); })(); break;
+    case 'checkUpdate': (async function(){
+      try{
+        if(!('serviceWorker' in navigator)){ toast('Este navegador no soporta actualización automática','warn'); return; }
+        toast('Buscando actualización…');
+        const reg=await navigator.serviceWorker.getRegistration();
+        if(!reg){ toast('No se encontró el service worker','warn'); return; }
+        await reg.update();
+        /* si hay una versión nueva, sw.js activa solo (skipWaiting) y el listener de
+           controllerchange más arriba recarga la página sola apenas toma el control —
+           por eso acá no hace falta recargar a mano, solo avisar si no encontró nada. */
+        setTimeout(function(){
+          if(!(reg.installing||reg.waiting)) toast('Ya tenés la última versión ('+APP_VERSION+') ✓','ok');
+        },1500);
+      }catch(e){ toast('No se pudo revisar (¿hay señal?)','warn'); }
+    })(); break;
     case 'addEx': addEx(i); break;
     case 'removeEx': removeEx(i,j); break;
     case 'moveEx': e.stopPropagation(); moveEx(+el.dataset.i,+el.dataset.j,+el.dataset.dir); break;
