@@ -1,6 +1,6 @@
 /* TaFit · Service Worker v8
    Cachea la app y los scripts para que abra al instante, con o sin señal. */
-const CACHE = 'tafit-v8-74';
+const CACHE = 'tafit-v8-78';
 const ASSETS = [
   './',
   './index.html',
@@ -21,6 +21,17 @@ self.addEventListener('activate', e => {
     caches.keys()
       .then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
+  );
+});
+
+/* al tocar el recordatorio, enfoca la app si ya está abierta o abre una pestaña nueva */
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      for (const c of list) { if ('focus' in c) return c.focus(); }
+      if (self.clients.openWindow) return self.clients.openWindow('./');
+    })
   );
 });
 

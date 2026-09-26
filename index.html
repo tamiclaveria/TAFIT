@@ -60,8 +60,11 @@
   .namestatic{flex:1;padding:11px 12px;border-radius:11px;background:#fff;color:var(--navy);font-size:15px;font-weight:700}
   .iconbtn{background:var(--steel);border:none;color:#fff;border-radius:11px;padding:0 14px;font-size:18px;font-weight:700;cursor:pointer}
   .iconbtn:hover{background:var(--accent)}
-  nav{display:flex;background:var(--steel)}
-  nav button{flex:1;padding:12px 3px;border:none;background:transparent;color:#cfe0ea;font-size:12px;font-weight:700;letter-spacing:.2px;cursor:pointer;border-bottom:3px solid transparent}
+  nav{display:flex;background:var(--steel);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  nav::-webkit-scrollbar{display:none}
+  nav button{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 13px 9px;border:none;background:transparent;color:#cfe0ea;font-weight:700;letter-spacing:.2px;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
+  nav .navico{font-size:16px;line-height:1}
+  nav .navlbl{font-size:10.5px;line-height:1}
   nav button.active{color:#fff;border-bottom-color:var(--accent);background:rgba(255,255,255,.06)}
   main{flex:1;padding:16px 14px 40px}
   .focus{font-size:13px;color:var(--mute);margin-bottom:12px;text-align:center}
@@ -206,6 +209,13 @@
   .ios-step{text-align:center;font-size:11px;opacity:.9}
   .ios-step .step-icon{font-size:22px;margin-bottom:4px}
   .streak-badge{background:linear-gradient(135deg,#f39c12,#e74c3c);color:#fff;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:center;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px}
+  .records-card{background:linear-gradient(135deg,#fff8ec,#fef0d5);border:1.5px solid #fbd38d;border-radius:12px;padding:10px 14px;margin-bottom:8px}
+  #app.dark .records-card{background:linear-gradient(135deg,#2a2416,#241f14);border-color:#5a4a2a}
+  .records-title{font-size:13px;font-weight:700;color:#92600a;margin-bottom:6px}
+  #app.dark .records-title{color:#e0b060}
+  .record-row{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--ink);padding:4px 0}
+  .record-row small{color:var(--mute);font-weight:400}
+  .record-row button{background:none;border:none;font-size:16px;cursor:pointer;padding:2px 6px;flex:none}
   .weight-cmp{font-size:11px;color:var(--ok);font-weight:600;margin-top:2px}
   .weight-cmp.down{color:var(--warn)}
   .weight-cmp.same{color:var(--mute)}
@@ -795,7 +805,7 @@
 /* ====================================================================
    TaFit · multi-alumno · v8 (Firebase sync + offline + dúos por pestaña + timer manual)
    ==================================================================== */
-const APP_VERSION='v8-74'; /* mantener igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión */
+const APP_VERSION='v8-78'; /* mantener igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión */
 let fireSync=()=>{},fireDel=()=>{};
 let _fromRemote=false;
 const DEVICE_ID=(()=>{ try{ let id=localStorage.getItem('tafit:devid'); if(!id){ id='d_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); localStorage.setItem('tafit:devid',id); } return id; }catch(e){ return 'd_'+Math.random().toString(36).slice(2,10); } })();
@@ -1947,6 +1957,52 @@ async function pushNotif(entry){ NOTIFS.unshift(entry); if(NOTIFS.length>50) NOT
 function notifSeenTs(){ try{ return +(localStorage.getItem('tafit:notifs:seen')||0); }catch(e){ return 0; } }
 function unseenNotifs(){ const ts=notifSeenTs(); return NOTIFS.filter(n=>new Date(n.date).getTime()>ts); }
 function markNotifsSeen(){ try{ localStorage.setItem('tafit:notifs:seen', String(Date.now())); }catch(e){} renderChrome(); }
+/* ==== Recordatorios del sistema (26/09/2026) ====
+   Primera versión de "notificaciones": como la app vive en GitHub Pages sin servidor
+   propio, no podemos mandar avisos que lleguen con la app CERRADA (eso necesitaría
+   Firebase Cloud Functions + plan pago). Lo que sí podemos hacer sin nada de eso: en
+   cuanto la profe ABRE la app, si ya activó el permiso del navegador, se le muestra una
+   notificación real del sistema (aparece igual que cualquier otra app) resumiendo lo que
+   tiene pendiente — pagos vencidos/por vencer y avisos sin leer. Como máximo una vez por
+   día por celular, para no ser invasivo. */
+function notifsSupported(){ return typeof Notification!=='undefined' && 'serviceWorker' in navigator; }
+async function requestNotifPermission(){
+  if(!notifsSupported()){ toast('Este navegador no soporta notificaciones','warn'); return; }
+  try{
+    const perm=await Notification.requestPermission();
+    if(perm==='granted'){
+      toast('Notificaciones activadas ✓','ok');
+      const reg=await navigator.serviceWorker.getRegistration();
+      if(reg) reg.showNotification('TaFit',{body:'Listo — acá vas a ver tus avisos pendientes cada vez que abras la app.',icon:'./icon-f.png',badge:'./icon-f.png'});
+    } else if(perm==='denied'){
+      toast('Quedaron bloqueadas. Se activan desde los permisos del sitio en el navegador.','warn');
+    }
+    renderEdit();
+  }catch(e){ toast('No se pudo activar','warn'); }
+}
+function lastReminderShownDate(){ try{ return localStorage.getItem('tafit:notif:lastShown')||''; }catch(e){ return ''; } }
+function markReminderShownToday(){ try{ localStorage.setItem('tafit:notif:lastShown', todayISO()); }catch(e){} }
+async function checkDailyReminders(){
+  try{
+    if(locked||!trainer) return; /* esto es para la profe, no para el alumno */
+    if(!notifsSupported()||Notification.permission!=='granted') return;
+    if(lastReminderShownDate()===todayISO()) return; /* ya se mostró hoy en este celular */
+    const ids=DB.order.filter(id=>DB.students[id]);
+    const rows=ids.map(id=>planDueInfo(DB.students[id].planPaid));
+    const vencidos=rows.filter(d=>d&&d.status==='bad').length;
+    const porVencer=rows.filter(d=>d&&d.status==='warn').length;
+    const avisos=unseenNotifs().length;
+    const partes=[];
+    if(vencidos) partes.push('💳 '+vencidos+' pago'+(vencidos===1?'':'s')+' vencido'+(vencidos===1?'':'s'));
+    if(porVencer) partes.push('🟠 '+porVencer+' por vencer');
+    if(avisos) partes.push('🔔 '+avisos+' aviso'+(avisos===1?'':'s')+' nuevo'+(avisos===1?'':'s'));
+    if(!partes.length) return; /* nada pendiente, no molestamos */
+    const reg=await navigator.serviceWorker.getRegistration();
+    if(!reg) return;
+    await reg.showNotification('TaFit',{body:partes.join(' · '),icon:'./icon-f.png',badge:'./icon-f.png',tag:'tafit-daily'});
+    markReminderShownToday();
+  }catch(e){}
+}
 function renderNotifList(){
   const el=$('notifList');
   if(!NOTIFS.length){ el.innerHTML='<div class="empty">Todavía no hay avisos. Acá vas a ver cuándo un alumno cierra una sesión.</div>'; return; }
@@ -2928,6 +2984,7 @@ function runSeeds(){
   await loadNotifs();
   render();
   initDarkMode();
+  checkDailyReminders();
   whenFirebaseReady(24); /* espera a que carguen los scripts (defer) y arranca el sync */
   /* PWA: la app queda cacheada en el teléfono y abre al instante, con o sin señal */
   try{
@@ -3021,7 +3078,16 @@ function renderChrome(){
   const unlockedStudentTabs=[['app','App'],['trans','Transcripta'],['fotos','Fotos']];
   if(hasInforme) unlockedStudentTabs.push(['resumen','Informe']);
   const tabs = locked ? lockedTabs.concat(formTabs) : trainer ? [['app','App'],['trans','Transcripta'],['fotos','Fotos'],['asis','Asistencia'],['pagos','Pagos'],['edit','Editar'],['rep','Informe']].concat(formTabs) : unlockedStudentTabs.concat(formTabs);
-  $('nav').innerHTML=tabs.map(([k,l])=>`<button data-act="tab" data-tab="${k}" class="${k===tab?'active':''}">${l}</button>`).join('');
+  /* un ícono chiquito arriba de cada palabra ayuda a distinguirlas de un vistazo sin
+     tener que leer letra por letra — sobre todo con varias pestañas juntas (profe). */
+  const NAV_ICONS={app:'💪',trans:'📖',fotos:'📸',asis:'📋',pagos:'💰',edit:'✏️',rep:'📊',resumen:'📊',acuerdo:'📄',anamnesis:'📝'};
+  $('nav').innerHTML=tabs.map(([k,l])=>`<button data-act="tab" data-tab="${k}" class="${k===tab?'active':''}"><span class="navico">${NAV_ICONS[k]||''}</span><span class="navlbl">${l}</span></button>`).join('');
+  /* con varias pestañas (App/Transcripta/Fotos/Asistencia/Pagos/Editar/Informe) para la
+     profe no entran todas cómodas en la pantalla de un celular sin achicar mucho la letra
+     — ahora el nav se puede deslizar horizontalmente (overflow-x), y esto centra la
+     pestaña activa a la vista cada vez que se cambia, para que nunca quede escondida. */
+  const activeBtn=$('nav').querySelector('button.active');
+  if(activeBtn) activeBtn.scrollIntoView({block:'nearest',inline:'center'});
 }
 /* El alumno puede entrar a SU Informe de Evolución (tab 'resumen') solo si Tami lo activó
    para él/ella desde Editar (mismo interruptor que Acuerdo/Anamnesis). 'edit' y 'rep' (el
@@ -3196,6 +3262,8 @@ function renderApp(){
   const warmup=document.createElement('div'); warmup.className='warmup-banner'; warmup.innerHTML='🔥 <b>Entrada en calor:</b> movilidad articular / bici / cinta / elíptico'; m.appendChild(warmup);
   /* Racha */
   showStreak(m);
+  /* Récords guardados */
+  showRecords(m);
   /* Banner de instalación */
   showInstallBanner(m);
   if(isDuo()){ const ms=document.createElement('div'); ms.className='seg mseg'; ms.innerHTML=members.map((mn,mi)=>`<button data-act="pickMember" data-i="${mi}" class="${mi===member?'sel':''}">👤 ${esc(mn)}</button>`).join(''); m.appendChild(ms); }
@@ -3402,6 +3470,23 @@ function showStreak(container){
   if(s<2) return;
   var div=document.createElement('div'); div.className='streak-badge';
   div.innerHTML='🔥 '+s+' sesiones consecutivas · ¡No pierdas la racha!';
+  container.appendChild(div);
+}
+/* Lista de récords guardados (ver saveNewRecord) — muestra los últimos 3 del
+   alumno/integrante activo, con un botón para compartir cada uno como tarjeta. */
+function showRecords(container){
+  const st=DB.students[active]; if(!st||!st.records||!st.records.length) return;
+  const mm=membersOf();
+  const curMember=(isDuo()&&mm[member])?mm[member]:null;
+  const list=st.records.filter(r=>!isDuo()||r.memberName===curMember).slice(0,3);
+  if(!list.length) return;
+  const div=document.createElement('div'); div.className='records-card';
+  let html='<div class="records-title">🏆 Tus récords</div>';
+  list.forEach(r=>{
+    const realIdx=st.records.indexOf(r);
+    html+=`<div class="record-row"><span>${esc(r.ex)} — <b>${fmt(r.weight)}</b> <small>(antes ${fmt(r.prevWeight)})</small></span><button data-act="shareRecord" data-idx="${realIdx}" title="Compartir">📤</button></div>`;
+  });
+  div.innerHTML=html;
   container.appendChild(div);
 }
 /* Comparativa de peso con sesión anterior */
@@ -3964,6 +4049,82 @@ async function shareInforme(){
     toast('No se pudo generar la imagen para compartir','warn');
   }
 }
+/* Tarjeta chiquita y directa para UN récord puntual (a diferencia del Informe completo,
+   que necesita varias semanas de datos) — pensada para compartir apenas pasa, en el
+   momento en que más entusiasmo hay. Misma paleta/firma que el resto de las tarjetas. */
+function buildRecordCard(rec,displayName){
+  const col=repColors();
+  const W=1000,H=1000;
+  const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+  const ctx=cv.getContext('2d');
+  const bg=ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,col.brandDk); bg.addColorStop(1,col.brand);
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  ctx.textAlign='center';
+  ctx.font='700 40px system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
+  ctx.fillStyle='#fff'; ctx.globalAlpha=.85;
+  ctx.fillText('TAFIT', W/2, 110);
+  ctx.globalAlpha=1;
+
+  ctx.font='140px system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
+  ctx.fillText('🏆', W/2, 330);
+
+  ctx.font='700 54px system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
+  ctx.fillText('¡NUEVO RÉCORD!', W/2, 420);
+
+  rr(ctx,90,480,W-180,260,26);
+  ctx.fillStyle='#fff'; ctx.fill();
+  ctx.fillStyle=col.ink; ctx.font='700 34px system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
+  shareWrapCenter(ctx,rec.ex,W/2,545,W-260,40);
+  ctx.font='700 64px system-ui,-apple-system,Segoe UI,Roboto,sans-serif'; ctx.fillStyle=col.brandDk;
+  ctx.fillText(fmt(rec.prevWeight)+' → '+fmt(rec.weight), W/2, 680);
+
+  ctx.font='400 26px system-ui,-apple-system,Segoe UI,Roboto,sans-serif'; ctx.fillStyle='#fff'; ctx.globalAlpha=.9;
+  ctx.fillText(String(displayName||''), W/2, 800);
+  ctx.globalAlpha=1;
+
+  ctx.font='italic 400 26px Georgia,serif'; ctx.fillStyle='#fff';
+  ctx.fillText('Tamara Claveria', W/2, H-90);
+  ctx.font='400 15px system-ui,-apple-system,Segoe UI,Roboto,sans-serif'; ctx.globalAlpha=.85;
+  ctx.fillText('TAFIT · Entrenadora Personal', W/2, H-65);
+  ctx.globalAlpha=1;
+  ctx.textAlign='left';
+  return cv;
+}
+function shareWrapCenter(ctx,text,cx,y,maxWidth,lineHeight){
+  const words=String(text).split(' ');
+  let line='', lines=[];
+  for(let i=0;i<words.length;i++){
+    const test=line+words[i]+' ';
+    if(ctx.measureText(test).width>maxWidth && line){ lines.push(line.trim()); line=words[i]+' '; }
+    else line=test;
+  }
+  lines.push(line.trim());
+  const startY=y-(lines.length-1)*lineHeight/2;
+  lines.forEach((l,i)=>ctx.fillText(l,cx,startY+i*lineHeight));
+}
+async function shareRecord(idx){
+  const st=DB.students[active]; const rec=st&&st.records&&st.records[idx];
+  if(!rec){ toast('No encontré ese récord','warn'); return; }
+  const displayName=rec.memberName||st.name;
+  try{
+    const cv=buildRecordCard(rec,displayName);
+    const dataUrl=cv.toDataURL('image/png');
+    const blob=dataURLToBlob(dataUrl);
+    const fname='record_'+(displayName||'alumno').replace(/\s+/g,'_')+'.png';
+    const file=new File([blob], fname, { type:'image/png' });
+    if(navigator.canShare && navigator.canShare({ files:[file] })){
+      await navigator.share({ files:[file], title:'¡Nuevo récord! · '+displayName });
+    } else {
+      const w=window.open(dataUrl,'_blank');
+      if(!w) toast('Mantené presionada la imagen para guardarla o compartirla','ok');
+    }
+  }catch(err){
+    if(err && err.name==='AbortError') return;
+    toast('No se pudo generar la imagen para compartir','warn');
+  }
+}
 
 function renderResumen(){
   const m=$('main'); m.innerHTML='';
@@ -4170,8 +4331,24 @@ function showWelcome(){
   document.body.appendChild(div);
 }
 function updSet(ei,si,mi,f,v){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CACHE[k][f]=v; CACHE[k]._w=week; CACHE[k]._w=week; const box=$('rm-'+ei+'-'+mi); if(box) box.innerHTML=rmHTML(ei,mi); queueSave();
-  /* Celebración de nuevo récord */
-  if(f==='w'&&v){ const exName=routine()[day].ex[ei]?routine()[day].ex[ei].n:''; const maxW=getMaxWeight(exName); const cur=firstNum(v); if(cur&&cur>0&&maxW>0&&cur>maxW){ showRecord(exName,maxW,cur); } }
+  /* Celebración de nuevo récord — ya existía el cartel de 5 segundos; ahora además
+     queda GUARDADO en el alumno (st.records) para poder verlo después en "🏆 Mis
+     récords" y compartirlo como tarjeta cuando quiera, no solo en el momento. */
+  if(f==='w'&&v){ const exName=routine()[day].ex[ei]?routine()[day].ex[ei].n:''; const maxW=getMaxWeight(exName); const cur=firstNum(v); if(cur&&cur>0&&maxW>0&&cur>maxW){ showRecord(exName,maxW,cur); saveNewRecord(exName,maxW,cur,mi); } }
+}
+function saveNewRecord(exName,oldW,newW,mi){
+  const st=DB.students[active]; if(!st) return;
+  if(!st.records) st.records=[];
+  const mm=membersOf(); const memberName=(isDuo()&&mm[mi])?mm[mi]:null;
+  /* evita duplicar el mismo récord si updSet dispara varias veces seguidas (ej: el
+     usuario sigue tipeando dígitos del mismo número) — nos quedamos con el más alto
+     del mismo ejercicio/integrante en los últimos 2 minutos. */
+  const now=Date.now();
+  const dup=st.records.find(r=>r.ex===exName&&r.memberName==memberName&&(now-Date.parse(r.date))<120000);
+  if(dup){ if(newW>dup.weight){ dup.weight=newW; dup.date=new Date().toISOString(); } }
+  else { st.records.unshift({ex:exName,memberName,weight:newW,prevWeight:oldW,date:new Date().toISOString()}); }
+  if(st.records.length>40) st.records=st.records.slice(0,40);
+  saveDB();
 }
 function showRecord(name,old,now){ var existing=document.querySelector('.record-banner'); if(existing) existing.remove(); var div=document.createElement('div'); div.className='record-banner'; div.textContent='🏆 ¡Nuevo récord en '+name+'! '+old+' kg → '+now+' kg'; var main=$('main'); if(main) main.insertBefore(div,main.firstChild); setTimeout(function(){if(div.parentNode) div.remove();},5000); }
 function updObs(v){ CACHE[OBSK()]=v; queueSave(); }
@@ -4497,6 +4674,20 @@ function renderEdit(){
         `</div>`;
     }
     SEC('backup','Respaldo de datos',`<p>El guardado automático va a <b>${Store.where==='nube'?'la nube de Claude':Store.where==='dispositivo'?'este dispositivo':'memoria temporal'}</b>. El backup incluye alumnos, rutinas y sesiones (las fotos no entran por su tamaño).</p><div class="edit-actions"><button data-act="export">⬇ Exportar backup</button><label class="impbtn">⬆ Importar backup<input type="file" accept="application/json" data-chg="import" hidden></label></div><hr class="mt8" style="border:none;border-top:1px solid var(--line)"><h3 class="mt8" style="font-size:13px">🛟 Backups automáticos (últimos 7 días)</h3>${autoBackupHtml}<hr class="mt8" style="border:none;border-top:1px solid var(--line)"><h3 class="mt8" style="font-size:13px">📲 Versión de la app</h3><p style="font-size:11.5px;color:var(--mute)">Este dispositivo tiene <b>${APP_VERSION}</b>. Si subiste un zip nuevo a GitHub y no se ve el cambio, tocá este botón en vez de cerrar y abrir la app varias veces.</p><div class="edit-actions"><button data-act="checkUpdate">🔄 Buscar actualización ahora</button></div>`);
+  }
+
+  if(trainer&&!locked){
+    let notifHtml;
+    if(!notifsSupported()){
+      notifHtml=`<p style="font-size:11.5px;color:var(--mute)">Este navegador no soporta notificaciones.</p>`;
+    } else if(Notification.permission==='granted'){
+      notifHtml=`<p style="font-size:11.5px;color:var(--ok)">✓ Activadas en este dispositivo. Cada vez que abras la app (máximo una vez por día) te avisa si hay pagos vencidos/por vencer o avisos sin leer.</p>`;
+    } else if(Notification.permission==='denied'){
+      notifHtml=`<p style="font-size:11.5px;color:var(--mute)">Las bloqueaste en algún momento. Para activarlas de nuevo hay que habilitarlas a mano desde los permisos del sitio, en la configuración del navegador (tocando el candado o los tres puntitos de arriba).</p>`;
+    } else {
+      notifHtml=`<p style="font-size:11.5px;color:var(--mute)">Te avisa (como cualquier notificación del celular) cuando abrís la app y hay pagos vencidos/por vencer o avisos sin leer. Todavía no llegan con la app cerrada — eso es un paso más adelante.</p><div class="edit-actions"><button data-act="enableNotifs">🔔 Activar notificaciones</button></div>`;
+    }
+    SEC('notifs','🔔 Notificaciones', notifHtml);
   }
 
   SEC('members',`Integrantes de ${esc(DB.students[active].name)}`,`<p>Si entrenan en dúo, poné los dos nombres separados por coma (1.º = primera columna). Cada una registra sus series y su RM por separado.</p><div class="fld"><input id="membersfld" value="${esc(membersOf().join(', '))}" placeholder="Nati, Caro"></div><div class="edit-bottom mt8"><button class="save" data-act="saveMembers">Guardar integrantes</button></div><div class="fld mt8"><label>Fecha de nacimiento (para el aviso de cumpleaños)</label><input type="date" id="fechaNacInput" value="${esc(DB.students[active].fechaNac||'')}"></div><button class="plan-btn" data-act="saveFechaNac">💾 Guardar fecha de nacimiento</button><p class="mt8" style="font-size:11.5px;color:var(--mute);line-height:1.5">Cargala directamente acá: no hace falta esperar a que el alumno complete el formulario de Acuerdo o Anamnesis para que te avise de su cumple en Informe.</p>`);
@@ -5039,6 +5230,8 @@ document.addEventListener('click',e=>{
         },1500);
       }catch(e){ toast('No se pudo revisar (¿hay señal?)','warn'); }
     })(); break;
+    case 'enableNotifs': requestNotifPermission(); break;
+    case 'shareRecord': shareRecord(+el.dataset.idx); break;
     case 'addEx': addEx(i); break;
     case 'removeEx': removeEx(i,j); break;
     case 'moveEx': e.stopPropagation(); moveEx(+el.dataset.i,+el.dataset.j,+el.dataset.dir); break;
