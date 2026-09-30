@@ -416,6 +416,7 @@
   .stu-row button{padding:7px 10px;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer}
   .stu-row .ren{background:var(--light);color:var(--steel)}
   .stu-row .del{background:#fdecea;color:var(--warn)}
+  .stu-row .lnk{background:var(--okbg,#E5F6EC);color:var(--ok)}
 
   /* Biblioteca de ejercicios */
   .lib-row{display:flex;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--light)}
@@ -805,7 +806,7 @@
 /* ====================================================================
    TaFit · multi-alumno · v8 (Firebase sync + offline + dúos por pestaña + timer manual)
    ==================================================================== */
-const APP_VERSION='v8-80'; /* mantener igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión */
+const APP_VERSION='v8-81'; /* mantener igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión */
 let fireSync=()=>{},fireDel=()=>{};
 let _fromRemote=false;
 const DEVICE_ID=(()=>{ try{ let id=localStorage.getItem('tafit:devid'); if(!id){ id='d_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); localStorage.setItem('tafit:devid',id); } return id; }catch(e){ return 'd_'+Math.random().toString(36).slice(2,10); } })();
@@ -4555,6 +4556,25 @@ async function clearRoutineForFormsOnly(){
   toast('✓ '+name+' queda solo con formularios','ok');
   renderEdit();
 }
+/* Genera el link directo de un alumno (con lock=1) y lo comparte o copia,
+   para no tener que pedirlo/buscarlo por WhatsApp. */
+async function copyStudentLink(id){
+  const st=DB.students[id]; if(!st) return;
+  const url=location.origin+location.pathname+'?a='+encodeURIComponent(id)+'&lock=1';
+  const shareData={ title:'TaFit · '+st.name, text:'Hola '+st.name+'! Acá está tu link de TaFit 💪', url:url };
+  try{
+    if(navigator.share && navigator.canShare && navigator.canShare(shareData)){
+      await navigator.share(shareData);
+      return;
+    }
+  }catch(e){ if(e&&e.name==='AbortError') return; }
+  try{
+    await navigator.clipboard.writeText(url);
+    toast('Link de '+st.name+' copiado ✓','ok');
+  }catch(e){
+    uiPrompt('Copiá el link de '+st.name+':', url);
+  }
+}
 /* Lista los ciclos de un alumno (cada uno con su propia rutina "congelada" y rango de fechas).
    Si nunca se usó "Iniciar nuevo ciclo", devuelve un solo ciclo con la rutina actual. */
 function studentCycles(){
@@ -4675,7 +4695,7 @@ function renderEdit(){
   SEC('pin','Acceso de profe',`<p>Solo vos (con el PIN) editás y agregás. Los alumnos solo ven App, Transcripta y Fotos, registran sus series y dejan observaciones.</p><div class="edit-actions"><button data-act="setPin">${DB.settings.pin?'Cambiar PIN':'Crear PIN'}</button><button data-act="lock">🔒 Bloquear (modo alumno)</button></div><div class="fld mt8"><label>WhatsApp del profe (con código de país, ej: 5492612345678)</label><input id="wafld" value="${esc(DB.settings.whatsapp||'')}" placeholder="5492612345678"></div><div class="fld mt8"><label>Link de Mercado Pago (para cobros)</label><input id="mpfld" value="${esc(DB.settings.mercadopago||'')}" placeholder="https://mpago.la/tu-link"></div><div class="edit-actions mt8"><button data-act="saveWa">Guardar</button></div>`);
 
   SEC('alumnos','Alumnos',`<p>Cada alumno/dúo tiene su propia rutina, progresión, registro y fotos.</p>`+
-    DB.order.map(id=>{ const s=DB.students[id]; const duo=s.members&&s.members.length>1; return `<div class="stu-row"><span class="sn">${esc(s.name)}</span><span class="tg">${s.theme==='f'?'🌸':'🔵'}${duo?' 👯':''}${s.health&&s.health.enabled?' ⚕':''}</span><button class="ren" data-act="renameStudent" data-id="${esc(id)}">Renombrar</button><button class="del" data-act="deleteStudent" data-id="${esc(id)}">Eliminar</button></div>`; }).join('')+
+    DB.order.map(id=>{ const s=DB.students[id]; const duo=s.members&&s.members.length>1; return `<div class="stu-row"><span class="sn">${esc(s.name)}</span><span class="tg">${s.theme==='f'?'🌸':'🔵'}${duo?' 👯':''}${s.health&&s.health.enabled?' ⚕':''}</span><button class="lnk" data-act="copyStudentLink" data-id="${esc(id)}" title="Copiar/compartir su link">🔗</button><button class="ren" data-act="renameStudent" data-id="${esc(id)}">Renombrar</button><button class="del" data-act="deleteStudent" data-id="${esc(id)}">Eliminar</button></div>`; }).join('')+
     `<div class="edit-actions mt8"><button data-act="addStudent">+ Agregar alumno / dúo</button></div>`);
 
   {
@@ -5325,6 +5345,7 @@ document.addEventListener('click',e=>{
       else toast('No encontré ajustes viejos para limpiar','ok');
     })(); break;
     case 'clearRoutine': clearRoutineForFormsOnly(); break;
+    case 'copyStudentLink': copyStudentLink(el.dataset.id); break;
     case 'addEx': addEx(i); break;
     case 'removeEx': removeEx(i,j); break;
     case 'moveEx': e.stopPropagation(); moveEx(+el.dataset.i,+el.dataset.j,+el.dataset.dir); break;
