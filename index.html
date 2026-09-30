@@ -805,7 +805,7 @@
 /* ====================================================================
    TaFit · multi-alumno · v8 (Firebase sync + offline + dúos por pestaña + timer manual)
    ==================================================================== */
-const APP_VERSION='v8-78'; /* mantener igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión */
+const APP_VERSION='v8-80'; /* mantener igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión */
 let fireSync=()=>{},fireDel=()=>{};
 let _fromRemote=false;
 const DEVICE_ID=(()=>{ try{ let id=localStorage.getItem('tafit:devid'); if(!id){ id='d_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); localStorage.setItem('tafit:devid',id); } return id; }catch(e){ return 'd_'+Math.random().toString(36).slice(2,10); } })();
@@ -2077,6 +2077,37 @@ function exWithOverride(ex,ei){
     rest:ov.rest||ex.rest,
   });
 }
+/* Limpia los "wo_w{semana}_{día}_{ejercicio}" (overrides puntuales por semana, ver
+   exWithOverride arriba) que quedaron apuntando a un día/índice que ya no existe, o a
+   un ejercicio distinto del que hoy está en esa posición de la rutina — el rastro que
+   deja corregir una rutina "de raíz" sin tocar estos ajustes semanales sueltos. Nunca
+   borra un override que sea solo un ajuste de series/reps sobre el ejercicio CORRECTO
+   (eso es una personalización real de la profe, no un resto viejo). Trabaja sobre
+   tafit:data:<id> directo (no sobre CACHE en memoria), así funciona para cualquier
+   alumno, esté activo en este momento o no. */
+async function cleanStaleWeekOverrides(studentId){
+  const st=DB.students[studentId]; if(!st||!st.routine) return 0;
+  const correctNames=st.routine.map(d=>(d.ex||[]).map(e=>(e.n||'').trim().toLowerCase()));
+  const isActive=(studentId===active);
+  const raw=isActive?JSON.stringify(CACHE):await Store.get('tafit:data:'+studentId);
+  if(!raw) return 0;
+  const cache=safeParse(raw,null); if(!cache||typeof cache!=='object') return 0;
+  let removed=0;
+  Object.keys(cache).forEach(k=>{
+    const m=/^wo_w(\d+)_(\d+)_(\d+)$/.exec(k); if(!m) return;
+    const dayIdx=+m[2], ei=+m[3], ov=cache[k];
+    let stale=false;
+    if(dayIdx>=correctNames.length) stale=true;
+    else if(ei>=correctNames[dayIdx].length) stale=true;
+    else if(ov&&ov.n&&String(ov.n).trim().toLowerCase()!==correctNames[dayIdx][ei]) stale=true;
+    if(stale){ delete cache[k]; removed++; }
+  });
+  if(removed){
+    if(isActive) CACHE=cache;
+    await Store.set('tafit:data:'+studentId, JSON.stringify(cache));
+  }
+  return removed;
+}
 const slug=s=>String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')||('al-'+Date.now());
 const safeParse=(s,f)=>{ try{ return JSON.parse(s); }catch(e){ return f; } };
 function toast(msg,kind){ const t=$('toast'); t.textContent=msg; t.className='toast show '+(kind||''); clearTimeout(t._t); t._t=setTimeout(()=>t.className='toast',2000); }
@@ -3073,11 +3104,19 @@ function renderChrome(){
      CUALQUIER vista de alumno: tanto por el enlace bloqueado (?a=..&lock=1) como por el
      modo "Alumno" con PIN desde el mismo celular (el botón 🔒) — antes solo se agregaba en
      el primero, por eso a veces no le aparecía a un alumno aunque ya estuviera activado. */
-  const lockedTabs=[['app','App'],['trans','Transcripta']];
-  if(hasInforme) lockedTabs.push(['resumen','Informe']);
-  const unlockedStudentTabs=[['app','App'],['trans','Transcripta'],['fotos','Fotos']];
-  if(hasInforme) unlockedStudentTabs.push(['resumen','Informe']);
+  /* Alumno "solo formularios" (30/09/2026): si todavía no tiene rutina cargada (por
+     ejemplo, alguien que solo tiene que completar Acuerdo/Anamnesis antes de arrancar),
+     no tiene sentido mostrarle App/Transcripta/Fotos/Informe — quedarían vacías o rotas.
+     Para la profe no cambia nada, sigue viendo todas las pestañas siempre. */
+  const hasRoutine=!!(st.routine&&st.routine.length);
+  const lockedTabs=hasRoutine?[['app','App'],['trans','Transcripta']]:[];
+  if(hasInforme&&hasRoutine) lockedTabs.push(['resumen','Informe']);
+  const unlockedStudentTabs=hasRoutine?[['app','App'],['trans','Transcripta'],['fotos','Fotos']]:[];
+  if(hasInforme&&hasRoutine) unlockedStudentTabs.push(['resumen','Informe']);
   const tabs = locked ? lockedTabs.concat(formTabs) : trainer ? [['app','App'],['trans','Transcripta'],['fotos','Fotos'],['asis','Asistencia'],['pagos','Pagos'],['edit','Editar'],['rep','Informe']].concat(formTabs) : unlockedStudentTabs.concat(formTabs);
+  /* si la pestaña actual quedó afuera (ej: estaba en 'app' y este alumno no tiene
+     rutina), la mandamos a la primera pestaña que sí exista para este alumno. */
+  if(!tabs.find(t=>t[0]===tab)) tab=tabs.length?tabs[0][0]:'app';
   /* un ícono chiquito arriba de cada palabra ayuda a distinguirlas de un vistazo sin
      tener que leer letra por letra — sobre todo con varias pestañas juntas (profe). */
   const NAV_ICONS={app:'💪',trans:'📖',fotos:'📸',asis:'📋',pagos:'💰',edit:'✏️',rep:'📊',resumen:'📊',acuerdo:'📄',anamnesis:'📝'};
@@ -3228,6 +3267,17 @@ function renderApp(){
     const title=planExpired&&!DB.students[active].paused?'Tu plan venció':'Tu rutina está pausada por el momento';
     const detail=planExpired&&!DB.students[active].paused?`Venció hace ${Math.abs(planDue.daysLeft)} día${Math.abs(planDue.daysLeft)===1?'':'s'}. Contactá a tu profe para renovarlo y seguir entrenando.`:'Contactá a tu profe para más información.';
     m.innerHTML=`<div style="text-align:center;padding:40px 20px"><div style="font-size:48px;margin-bottom:16px">${icon}</div><div style="font-size:18px;font-weight:700;color:var(--navy);margin-bottom:12px">${esc(title)}</div><div style="font-size:14px;color:var(--mute);line-height:1.6">${esc(detail)}</div>${renderWhatsAppBtn()}</div>`;
+    return;
+  }
+  /* Alumno sin rutina cargada todavía (ej: alguien que por ahora solo tiene que
+     completar Acuerdo/Anamnesis) — antes esto rompía (r[day] no existía). Para la
+     profe muestra un aviso claro en vez de una pantalla vacía o un error. */
+  if(!r.length){
+    if(trainer){
+      m.innerHTML=`<div style="text-align:center;padding:40px 20px"><div style="font-size:48px;margin-bottom:16px">📝</div><div style="font-size:18px;font-weight:700;color:var(--navy);margin-bottom:12px">${esc(DB.students[active].name)} todavía no tiene rutina</div><div style="font-size:14px;color:var(--mute);line-height:1.6">Anda a la pestaña "Editar" para cargarle días y ejercicios cuando quieras.</div></div>`;
+    } else {
+      m.innerHTML=`<div style="text-align:center;padding:40px 20px"><div style="font-size:48px;margin-bottom:16px">📝</div><div style="font-size:18px;font-weight:700;color:var(--navy);margin-bottom:12px">Todavía no tenés una rutina cargada</div><div style="font-size:14px;color:var(--mute);line-height:1.6">Hablá con tu profe — en cuanto te la cargue, la vas a ver acá.</div>${renderWhatsAppBtn()}</div>`;
+    }
     return;
   }
   if(member>=members.length) member=0;
@@ -4485,6 +4535,26 @@ async function startNewCycle(){
   toast('✓ Nuevo ciclo iniciado para '+name,'ok');
   renderEdit();
 }
+/* Deja a un alumno sin rutina activa — para alguien que todavía no arrancó a entrenar
+   y por ahora solo debe completar formularios (ver "Alumno solo con formularios" en
+   Mantenimiento). Si ya tenía una rutina con historial, la archiva en cycleHistory
+   igual que "Iniciar nuevo ciclo" en vez de tirarla — así no se pierde nada si más
+   adelante se le vuelve a cargar una rutina. */
+async function clearRoutineForFormsOnly(){
+  const st=DB.students[active], name=st.name;
+  if(!st.routine||!st.routine.length){ toast('Ya está sin rutina','ok'); return; }
+  if(!await uiConfirm('¿Vaciar la rutina de '+name+' y dejarla solo con formularios? No le van a aparecer las pestañas App/Transcripta/Fotos hasta que le cargues una rutina de nuevo. Si ya tenía sesiones registradas, quedan a salvo archivadas.')) return;
+  const now=new Date().toISOString();
+  if(!st.cycleHistory) st.cycleHistory=[];
+  st.cycleHistory.push({ start:st.cycleStart||null, end:now, routine:cp(st.routine), weeks:cp(st.weeks) });
+  st.routine=[];
+  st.cycleStart=null;
+  CACHE={};
+  await saveData();
+  await saveDB();
+  toast('✓ '+name+' queda solo con formularios','ok');
+  renderEdit();
+}
 /* Lista los ciclos de un alumno (cada uno con su propia rutina "congelada" y rango de fechas).
    Si nunca se usó "Iniciar nuevo ciclo", devuelve un solo ciclo con la rutina actual. */
 function studentCycles(){
@@ -4746,6 +4816,21 @@ function renderEdit(){
     const cycleStart=DB.students[active].cycleStart;
     const cycleInfo=cycleStart?`<div class="note" style="margin:0 0 10px">📍 Ciclo actual iniciado el ${fmtShort(cycleStart)} — el informe solo cuenta los datos desde esa fecha (el historial anterior sigue completo en Transcripta).</div>`:'';
     SEC('resumen','🏆 Informe de Evolución',`<p>Generá el Informe de Evolución de ${esc(DB.students[active].name)}: asistencia, adherencia, progreso y una conclusión redactada sola con sus datos reales de entrenamiento. Lo podés descargar como PDF o compartirlo directo por WhatsApp.</p>${cycleInfo}<div class="edit-actions"><button data-act="genResumen">🏆 Generar informe</button><button data-act="newCycle" style="background:var(--card);border:1px solid var(--line);color:var(--steel)">🔄 Iniciar nuevo ciclo</button></div>`);
+  }
+
+  {
+    /* Herramienta de mantenimiento (29/09/2026): cuando se corrige la rutina de un
+       alumno "de raíz" (cambian ejercicios), los ajustes puntuales por semana que ya
+       tenía cargados (ver exWithOverride) pueden quedar apuntando a ejercicios que ya
+       no existen en esa posición — se ve como "esta semana muestra la rutina vieja".
+       Antes había que mandarme un backup para que yo lo detecte y limpie a mano; ahora
+       lo puede hacer ella misma con este botón, para cualquier alumno, sin esperarme. */
+    const st_=DB.students[active];
+    const hasRoutine_=!!(st_.routine&&st_.routine.length);
+    const clearBtn=hasRoutine_
+      ? `<button data-act="clearRoutine" style="background:var(--card);border:1px solid var(--line);color:var(--warn)">🗑️ Vaciar rutina (dejarla solo con formularios)</button>`
+      : `<p style="font-size:11.5px;color:var(--ok)">✓ Ya está sin rutina — solo le aparecen los formularios que actives arriba.</p>`;
+    SEC('maint','🧹 Mantenimiento',`<p style="font-size:11.5px;color:var(--mute)">Si cambiaste ejercicios de la rutina de ${esc(st_.name)} y alguna semana sigue mostrando ejercicios viejos (aunque ya corregiste el Día 1/Día 2/etc.), es porque quedaron ajustes puntuales de esa semana pegados al ejercicio anterior. Este botón los limpia — NO toca las series/repeticiones que le cargaste a propósito para una semana, solo borra los que quedaron apuntando a un ejercicio que ya no está en esa posición.</p><div class="edit-actions"><button data-act="cleanOverrides">🧹 Limpiar ajustes semanales viejos</button></div><hr class="mt8" style="border:none;border-top:1px solid var(--line)"><h3 class="mt8" style="font-size:13px">📝 Alumno solo con formularios</h3><p style="font-size:11.5px;color:var(--mute)">Para alguien que todavía no arrancó a entrenar (por ejemplo, mientras completa Acuerdo/Anamnesis), podés sacarle la rutina — no le van a aparecer las pestañas App/Transcripta/Fotos hasta que le cargues días de nuevo. No borra nada de su historial si ya tenía sesiones registradas (queda archivado en Transcripta).</p><div class="edit-actions">${clearBtn}</div>`);
   }
 
   const duo=isDuo(), mm=membersOf();
@@ -5232,6 +5317,14 @@ document.addEventListener('click',e=>{
     })(); break;
     case 'enableNotifs': requestNotifPermission(); break;
     case 'shareRecord': shareRecord(+el.dataset.idx); break;
+    case 'cleanOverrides': (async function(){
+      const name=DB.students[active].name;
+      if(!await uiConfirm('¿Limpiar los ajustes semanales viejos de '+name+'? Esto no toca las series/repeticiones que le cargaste a propósito, solo lo que quedó apuntando a un ejercicio que ya no está en esa rutina.')) return;
+      const n=await cleanStaleWeekOverrides(active);
+      if(n>0){ toast(n+' ajuste'+(n===1?'':'s')+' viejo'+(n===1?'':'s')+' limpiado'+(n===1?'':'s')+' ✓','ok'); renderApp(); }
+      else toast('No encontré ajustes viejos para limpiar','ok');
+    })(); break;
+    case 'clearRoutine': clearRoutineForFormsOnly(); break;
     case 'addEx': addEx(i); break;
     case 'removeEx': removeEx(i,j); break;
     case 'moveEx': e.stopPropagation(); moveEx(+el.dataset.i,+el.dataset.j,+el.dataset.dir); break;
