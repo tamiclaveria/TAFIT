@@ -924,7 +924,16 @@
 /* ====================================================================
    TaFit · multi-alumno · v8 (Firebase sync + offline + dúos por pestaña + timer manual)
    ==================================================================== */
-const APP_VERSION='v8-103'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+let _swVisibleSince=Date.now(), _swUpdateReady=false;
+function showUpdateBanner(){
+  if(document.getElementById('updBanner')) return;
+  const d=document.createElement('div'); d.id='updBanner';
+  d.style.cssText='position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:9999;background:#0a0908;color:#fff;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 6px 20px rgba(0,0,0,.35);font-size:13.5px;font-weight:600';
+  d.innerHTML='<span style="flex:1">✨ Hay una versión nueva de TaFit</span><button type="button" style="font-family:inherit;font-weight:800;font-size:13px;border:none;border-radius:9px;padding:8px 12px;background:#E3C3A5;color:#241F18;cursor:pointer">Actualizar</button>';
+  d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
+  document.body.appendChild(d);
+}
+const APP_VERSION='v8-107'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -3769,14 +3778,25 @@ function runSeeds(){
            "subí el zip nuevo pero no se actualiza". No recargamos en la instalación
            inicial (cuando todavía no había ningún Service Worker controlando la página). */
         if(_swRefreshing||!hadController) return;
-        _swRefreshing=true; location.reload();
+        /* 07/10/2026: si la app recién se abrió o recién volvió a primer plano (menos de
+           20 s), recargamos sola, como antes. Si la persona ya está usándola (por ejemplo,
+           a mitad de una sesión cargando pesos), NO la recargamos de golpe: aparece un
+           aviso para actualizar con un toque, y si no lo toca se actualiza sola la próxima
+           vez que vuelva a abrir la app. */
+        if(document.visibilityState==='hidden'||Date.now()-_swVisibleSince<20000){ _swRefreshing=true; location.reload(); return; }
+        _swUpdateReady=true; showUpdateBanner();
       });
-      navigator.serviceWorker.register('./sw.js').then(function(reg){
+      /* updateViaCache:'none' → al buscar versión nueva, sw.js se pide siempre a GitHub, nunca
+         a la caché del navegador. */
+      navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(function(reg){
         /* Un PWA standalone casi nunca revisa por su cuenta si hay una versión nueva.
-           Forzamos la revisión cada vez que la app vuelve a primer plano. */
+           Forzamos la revisión cada vez que la app vuelve a primer plano, al recuperar
+           señal, y cada 5 minutos mientras está abierta. */
         const checkForUpdate=()=>{ reg.update().catch(()=>{}); };
         if(document.visibilityState==='visible') checkForUpdate();
-        document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible') checkForUpdate(); });
+        document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible'){ _swVisibleSince=Date.now(); if(_swUpdateReady&&!_swRefreshing){ _swRefreshing=true; location.reload(); return; } checkForUpdate(); } });
+        window.addEventListener('online', checkForUpdate);
+        setInterval(function(){ if(document.visibilityState==='visible') checkForUpdate(); }, 5*60*1000);
       }).catch(()=>{});
     }
   }catch(e){}
