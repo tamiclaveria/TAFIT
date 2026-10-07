@@ -3381,6 +3381,24 @@ function runSeeds(){
     }
     DB._seed.sofiMartiCycleFix20261007=true;
   }
+  /* Re-corrección (07/10/2026, 17:15), verificada contra el backup exportado por Tami a
+     las 17:15 (TaFit-backup-2026-10-07.json): la corrección de arriba ya había corrido
+     (bandera en true), pero el corte volvió a quedar en el valor malo — un celular con
+     copia vieja lo pisó al publicarse una versión nueva (causa arreglada en v8-105). En
+     ese backup: cycleStart = BAD_TS, cycleHistory[0].end = BAD_TS, unlockWeek = 4, y las 5
+     sesiones con la rutina nueva (25/09, 30/09 ×3, 05/10 10:15) quedaban antes del corte.
+     Misma corrección exacta, con bandera nueva: solo si cada valor sigue siendo
+     exactamente el malo. No toca transcriptas ni rutina. */
+  if(!DB._seed.sofiMartiCycleFix20261007b){
+    const sm=DB.students['sofi-marti'];
+    if(sm){
+      const BAD_TS='2026-10-05T19:56:07.426Z', FIX_TS='2026-09-25T00:00:00.000Z';
+      if(sm.cycleStart===BAD_TS) sm.cycleStart=FIX_TS;
+      if(sm.cycleHistory&&sm.cycleHistory[0]&&sm.cycleHistory[0].end===BAD_TS) sm.cycleHistory[0].end=FIX_TS;
+      if(sm.unlockWeek===4) sm.unlockWeek=0;
+    }
+    DB._seed.sofiMartiCycleFix20261007b=true;
+  }
   /* Corrección puntual (07/10/2026), verificada contra un backup exportado. La rutina de
      Joni volvió a mostrar las 3 sesiones viejas (Día 1/2/3 · Popurrí de stuJoni(), el
      molde de cuando se lo creó por primera vez) pisando la rutina real de 2 días que tiene
