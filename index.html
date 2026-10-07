@@ -96,8 +96,9 @@
   .weeks button.sel{border-color:var(--steel);color:#fff;background:var(--steel)}
   .weeks button.sel small{color:#241F18;opacity:.75}
   .weekdesc{font-size:12px;color:var(--mute);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:16px}
-  .week-nudge{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:12px;color:#1D864A;background:var(--okbg);border:1px solid #9adbb5;border-radius:10px;padding:10px 12px;margin:-8px 0 16px}
-  .week-nudge button{border:none;border-radius:8px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;background:#1D864A;color:#fff;margin-left:auto}
+  .week-nudge{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:12px;color:var(--accentDk);background:var(--tint2);border:1px solid var(--accent);border-radius:10px;padding:10px 12px;margin:-8px 0 16px}
+  .week-nudge button{border:none;border-radius:8px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;background:var(--accentDk);color:#fff;margin-left:auto}
+  .unlock-warn{font-size:12px;color:#875D1C;background:#F6F0E4;border:1px solid #e3cc9e;border-radius:10px;padding:10px 12px;margin:10px 0;line-height:1.45}
 
   .medbanner{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:10px 13px;margin-bottom:14px;font-size:12.5px;color:var(--steel);font-weight:700}
   .rules .rule{display:flex;gap:9px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--light)}
@@ -629,7 +630,7 @@
   .inact{font-size:11px;color:#e39797;font-weight:700;margin-top:4px}
   .wa-btn{display:none}
   .wa-float{position:fixed;bottom:18px;right:18px;width:50px;height:50px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.3);z-index:50;text-decoration:none;font-size:26px}
-  .wa-ex{font-size:11px;color:#25d366;text-decoration:none;font-weight:600;padding:4px 8px;border:1px solid #25d366;border-radius:8px;display:inline-flex;align-items:center;gap:3px}
+  .wa-ex{font-size:11px;color:var(--accentDk);text-decoration:none;font-weight:600;padding:4px 8px;border:1px solid var(--accentDk);border-radius:8px;display:inline-flex;align-items:center;gap:3px}
   .welcome-overlay{position:fixed;inset:0;background:rgba(13,27,42,.6);display:flex;align-items:center;justify-content:center;z-index:70;padding:20px}
   .welcome-box{background:var(--card);border-radius:20px;padding:28px 24px;max-width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.25)}
   .welcome-box h2{font-size:20px;margin-bottom:8px;color:var(--navy)}
@@ -3100,13 +3101,55 @@ function runSeeds(){
     }
     DB._seed.sofiMartiCycleFix20261007=true;
   }
+  /* Corrección puntual (07/10/2026), verificada contra un backup exportado. La rutina de
+     Joni volvió a mostrar las 3 sesiones viejas (Día 1/2/3 · Popurrí de stuJoni(), el
+     molde de cuando se lo creó por primera vez) pisando la rutina real de 2 días que tiene
+     desde el 07/09 — sus propias Transcriptas (7-8 sesiones reales por día, semana a
+     semana, con nombres de ejercicio nuevos) confirman que esa es la rutina vigente, nunca
+     tocó un "Día 3" desde esa fecha. Se corrige SOLO si la rutina sigue siendo exactamente
+     esa foto vieja (si alguien ya la tocó a mano desde entonces, esto no hace nada). Series
+     y repeticiones reconstruidas de sus propias Transcriptas — peso, técnica y descanso
+     quedan para que Tami los complete en Editar, no se inventan acá. */
+  if(!DB._seed.joniRoutineFix20261007){
+    const jn=DB.students['joni-puebla'];
+    if(jn&&jn.routine&&jn.routine.length===3&&jn.routine[2]&&jn.routine[2].day==='Día 3 · Popurrí'&&jn.routine[0].ex&&jn.routine[0].ex[0]&&jn.routine[0].ex[0].n==='Press plano barra'){
+      jn.routine=[
+        {day:"Día 1", ex:[
+          ex("Press plano barra (sostener 2'' abajo)",4,"8","A definir"),
+          ex("Apertura inclinada con mancuerna",4,"8-10","A definir"),
+          ex("Bíceps banco Scott",4,"8","A definir"),
+          ex("Bíceps martillo inclinado",4,"8","A definir"),
+          ex("Volada lateral con mancuerna",4,"8-10","A definir"),
+          ex("Pistol squat en cajón",4,"8-10","A definir"),
+          ex("Máquina cuádriceps",4,"10","A definir"),
+        ]},
+        {day:"Día 2", ex:[
+          ex("Dorsalera agarre cerrado",4,"12-15","A definir"),
+          ex("Remo barra Smith",4,"12-15","A definir"),
+          ex("Press cerrado (tríceps)",4,"8-10","A definir"),
+          ex("Press francés con barra",4,"8-10","A definir"),
+          ex("Peso muerto unilateral con mancuerna",4,"12","A definir"),
+          ex("Volada posterior con mancuerna",4,"8","A definir"),
+          ex("Aductor máquina",3,"15","A definir"),
+          ex("Abductor máquina",4,"15","A definir"),
+        ]}
+      ];
+    }
+    DB._seed.joniRoutineFix20261007=true;
+  }
   if(!DB._seed.fede){ if(!DB.students['fede-del-sol']){ DB.students['fede-del-sol']=stuFede(); DB.order.push('fede-del-sol'); } DB._seed.fede=true; }
   if(!DB._seed.grupo5){ if(!DB.students['grupo-5']){ DB.students['grupo-5']=stuGrupo5(); DB.order.push('grupo-5'); } DB._seed.grupo5=true; }
   if(!DB._seed.adriana){ if(!DB.students['adriana-x']){ DB.students['adriana-x']=stuAdrianaX(); DB.order.push('adriana-x'); } DB._seed.adriana=true; }
   if(!DB._seed.micaela){ if(!DB.students['micaela']){ DB.students['micaela']=stuMicaela(); DB.order.push('micaela'); } DB._seed.micaela=true; }
-  if(!DB._seed.micaela_r2){ const mi=DB.students['micaela']; if(mi) mi.routine=stuMicaela().routine; DB._seed.micaela_r2=true; }
-  if(!DB._seed.carina_r2){ const ca=DB.students['carina']; if(ca) ca.routine=stuCarina().routine; DB._seed.carina_r2=true; }
-  if(!DB._seed.nati_r2){ const nc=DB.students['nati-caro']; if(nc) nc.routine=stuNatiCaro().routine; DB._seed.nati_r2=true; }
+  /* RETIRADO (07/10/2026): micaela_r2/carina_r2/nati_r2 pisaban TODA la rutina de esa
+     alumna con la versión escrita en el código, sin importar qué rutina tuviera cargada
+     en ese momento — el mismo patrón de riesgo que causó regresiones reales antes (ver
+     sofiMartiNewCycle20260924 más arriba). Ya cumplieron su función hace tiempo en todos
+     los dispositivos reales; se dejan solo como bandera para que nunca puedan volver a
+     disparar y pisar una rutina actual en un dispositivo viejo que recién ahora se conecte. */
+  if(!DB._seed.micaela_r2){ DB._seed.micaela_r2=true; }
+  if(!DB._seed.carina_r2){ DB._seed.carina_r2=true; }
+  if(!DB._seed.nati_r2){ DB._seed.nati_r2=true; }
   if(!DB._seed.gime){ if(!DB.students['gime']){ DB.students['gime']=stuGime(); DB.order.push('gime'); } DB._seed.gime=true; }
   if(!DB._seed.astrid){ if(!DB.students['astrid']){ DB.students['astrid']=stuAstrid(); DB.order.push('astrid'); } DB._seed.astrid=true; }
   if(!DB._seed.joni_6w){ const jn=DB.students['joni-puebla']; if(jn&&jn.weeks&&jn.weeks.length===4){ jn.weeks.push({t:'S5',n:'Pico',d:'Máxima carga con técnica. Series cortas e intensas.'},{t:'S6',n:'Descarga',d:'Reducir carga 40%. Recuperación activa.'}); } DB._seed.joni_6w=true; }
@@ -3435,7 +3478,19 @@ function whenFirebaseReady(tries){
   if(tries<=0){ updateSyncUI(false); return; }
   setTimeout(()=>whenFirebaseReady(tries-1),500);
 }
+/* Si el "desbloqueo manual" de un alumno ya quedó atrás del progreso real (porque fue
+   completando semanas por su cuenta), lo apagamos solo. Así un desbloqueo que la profe
+   activó hace tiempo y se olvidó de sacar no queda prendido para siempre ni vuelve a
+   confundir más adelante (fue justamente lo que pasó con Sofi/Marti: "hasta S5" quedó
+   puesto de una vez anterior y nadie lo notó hasta que coincidió con otro síntoma). */
+async function clearStaleUnlock(){
+  const st=DB.students[active]; if(!st||!st.unlockWeek) return;
+  const W=weeks(); let natural=0;
+  while(natural<W.length-1 && weekDone(natural)) natural++;
+  if(natural>=st.unlockWeek){ st.unlockWeek=0; await saveDB(); }
+}
 async function loadStudent(){ CACHE=safeParse(await Store.get('tafit:data:'+active)||'{}',{}); migrateLegacyWeeks(); LOGS=safeParse(await Store.get('tafit:logs:'+active)||'[]',[]); CHAT=safeParse(await Store.get('tafit:chat:'+active)||'[]',[]); openEx=-1;
+  await clearStaleUnlock();
   /* recordar dónde quedó: integrante, día y semana */
   let pos={}; try{ pos=safeParse(localStorage.getItem('tafit:pos:'+active)||'{}',{}); }catch(e){}
   const r=(DB.students[active]&&DB.students[active].routine)||[];
@@ -4884,7 +4939,7 @@ function renderWhatsAppBtn(){
   var num=DB.settings.whatsapp||'5492616985895';
   if(!num) return '';
   var sName=DB.students[active]?DB.students[active].name:'';
-  return '<a style="display:inline-block;margin-top:16px;background:#25d366;color:#fff;padding:12px 24px;border-radius:12px;text-decoration:none;font-weight:700;font-size:14px" href="https://wa.me/'+num.replace(/[^0-9]/g,'')+'?text='+encodeURIComponent('Hola profe, soy '+sName+'. Quería consultarte.')+'" target="_blank">💬 Escribirle a mi profe</a>';
+  return '<a style="display:inline-block;margin-top:16px;background:var(--accentDk);color:#fff;padding:12px 24px;border-radius:12px;text-decoration:none;font-weight:700;font-size:14px" href="https://wa.me/'+num.replace(/[^0-9]/g,'')+'?text='+encodeURIComponent('Hola profe, soy '+sName+'. Quería consultarte.')+'" target="_blank">💬 Escribirle a mi profe</a>';
 }
 function waExLink(exName){
   var num=DB.settings.whatsapp||'5492616985895';
@@ -5522,6 +5577,10 @@ function renderEdit(){
 
   const unlockW=DB.students[active].unlockWeek||0;
   let wkHtml=`<p>Cada alumno puede tener su propia progresión.</p>`;
+  if(unlockW>0){
+    const wLbl=(weeks()[unlockW]||{}).t||('S'+(unlockW+1));
+    wkHtml+=`<div class="unlock-warn">⚠ Desbloqueo manual activo: puede entrar hasta <b>${esc(wLbl)}</b> aunque no haya cerrado semanas anteriores. Se apaga solo en cuanto su progreso natural lo alcance — si querés sacarlo ahora, poné el selector de abajo en "Hasta ${esc((weeks()[0]||{}).t||'S1')}" y guardá.</div>`;
+  }
   wkHtml+=`<div class="fld mt8"><label>Desbloqueo manual · dejar entrar a ${esc(DB.students[active].name)} aunque no haya cerrado sesiones de semanas anteriores</label><select id="unlockWeekSel">${weeks().map((w,i)=>`<option value="${i}" ${i===unlockW?'selected':''}>Hasta ${esc(w.t)} · ${esc(w.n)}</option>`).join('')}</select></div><div class="edit-actions mt8"><button data-act="saveUnlockWeek">Guardar desbloqueo</button></div>`;
   weeks().forEach((w,i)=>{ wkHtml+=`<div class="week-row" data-w="${i}"><div class="fld"><label>Etiqueta</label><input data-wf="t" value="${esc(w.t)}"></div><div class="fld"><label>Nombre</label><input data-wf="n" value="${esc(w.n)}"></div><div class="fld wfull"><label>Indicación</label><textarea data-wf="d">${esc(w.d)}</textarea></div><button class="delw" data-act="removeWeek" data-i="${i}">Eliminar semana</button></div>`; });
   wkHtml+=`<button class="addx mt8" data-act="addWeek">+ Agregar semana</button><div class="edit-bottom mt8"><button class="save" data-act="saveWeeks">Guardar semanas</button></div>`;
