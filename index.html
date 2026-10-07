@@ -686,6 +686,7 @@
   #rest.show{display:flex}
   #rest b{font-size:22px;font-variant-numeric:tabular-nums;min-width:54px;text-align:center}
   #rest button{background:var(--accent);border:none;color:#17120E;border-radius:9px;padding:7px 12px;font-weight:700;cursor:pointer}
+  #mtitle{white-space:pre-line}
   #lb{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:70;padding:18px}
   #lb.show{display:flex}
   #lb img{max-width:100%;max-height:100%;border-radius:10px}
@@ -757,7 +758,7 @@
   .max-w{font-size:10px;color:var(--ok);font-weight:700}
   .inact{font-size:11px;color:#e39797;font-weight:700;margin-top:4px}
   .wa-btn{display:none}
-  .wa-float{position:fixed;bottom:18px;right:18px;width:50px;height:50px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.3);z-index:50;text-decoration:none;font-size:26px}
+  .wa-float{position:fixed;bottom:18px;right:18px;width:50px;height:50px;border-radius:50%;background:var(--accentDk);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.3);z-index:50;text-decoration:none;font-size:26px}
   .wa-ex{font-size:11px;color:var(--accentDk);text-decoration:none;font-weight:600;padding:4px 8px;border:1px solid var(--accentDk);border-radius:8px;display:inline-flex;align-items:center;gap:3px}
   .welcome-overlay{position:fixed;inset:0;background:rgba(13,27,42,.6);display:flex;align-items:center;justify-content:center;z-index:70;padding:20px}
   .welcome-box{background:var(--card);border-radius:20px;padding:28px 24px;max-width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.25)}
@@ -1019,7 +1020,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-112'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-113'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -3292,6 +3293,31 @@ async function listAutoBackups(){
    Solo agrega variantes que caen dentro de la rutina actual (día/ejercicio existentes).
    Las variantes recuperadas llevan marca de tiempo mínima: cualquier cambio que Tami
    haga después siempre les gana. Corre solo en el celular de la profe, con señal. */
+/* 07/10/2026: "Recuperar transcriptas" del alumno abierto. Busca en los backups automáticos
+   de los últimos 10 días las sesiones que hoy le faltan (por fecha y hora exactas), las
+   muestra y SOLO si Tami confirma las suma. No borra ni cambia nada más; respeta las
+   sesiones que se eliminaron a propósito. */
+async function recoverLogsForActive(){
+  if(!fsDB){ toast('Necesitás estar conectada a la nube','warn'); return; }
+  const id=active, name=DB.students[id].name;
+  toast('Buscando en los backups…');
+  const have=new Set(LOGS.map(function(l){ return l.date; })), dead=new Set(logsDelFor(id)), found={};
+  const d=new Date();
+  for(let i=0;i<10;i++){
+    const dISO=d.toISOString().slice(0,10);
+    try{ const snap=await fsDB.collection('kv').doc('tafit:autobackup:'+dISO).get();
+      if(snap.exists){ const p=safeParse(snap.data().v,null); ((p&&p.logs&&p.logs[id])||[]).forEach(function(l){ if(l&&l.date&&!have.has(l.date)&&!dead.has(l.date)) found[l.date]=l; }); } }catch(e){}
+    d.setDate(d.getDate()-1);
+  }
+  const list=Object.keys(found).sort().map(function(k){ return found[k]; });
+  if(!list.length){ toast('No falta ninguna sesión de '+name+' ✓','ok'); return; }
+  const lines=list.slice(0,15).map(function(l){ return '• '+fmtShort(l.date)+' · '+l.dayName+(l.weekName?' · '+l.weekName:''); }).join('\n')+(list.length>15?'\n… y '+(list.length-15)+' más':'');
+  if(!await uiConfirm('Encontré '+list.length+' sesión'+(list.length===1?'':'es')+' de '+name+' que hoy no '+(list.length===1?'está':'están')+' en su Transcripta:\n\n'+lines+'\n\n¿'+(list.length===1?'La agrego':'Las agrego')+'? No se borra ni cambia nada más.')) return;
+  LOGS=unionLogsArr(LOGS,list,logsDelFor(id));
+  await saveLogs();
+  toast('✓ '+list.length+' sesión'+(list.length===1?'':'es')+' recuperada'+(list.length===1?'':'s'),'ok');
+  render();
+}
 async function restoreSofiMartiWeeks(){
   if(!fsDB||(DB._seed&&DB._seed.smWeeksRestore20261007)) return;
   const SID='sofi-marti', K2='tafit:data:'+SID;
@@ -5268,7 +5294,7 @@ const INF2_GROUPS=[
   ['Core',/plancha|pallof|barquito|crunch|sit up|abdom|giro ruso|mountain|v-ups|bicicleta|bird dog|rueda|tijeras|pataditas/],
 ];
 function inf2Norm(n){ return String(n||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim(); }
-function inf2Num(x){ const m=String(x==null?'':x).replace(',','.').match(/\d+(\.\d+)?/); return m?parseFloat(m[0]):null; }
+function inf2Num(x){ const ms=String(x==null?'':x).replace(/,/g,'.').match(/\d+(\.\d+)?/g); if(!ms) return null; return /[\/+]/.test(String(x))?Math.max.apply(null,ms.map(parseFloat)):parseFloat(ms[0]); }
 function inf2Group(n){ const k=inf2Norm(n); const g=INF2_GROUPS.find(function(g){ return g[1].test(k); }); return g?g[0]:'Otros'; }
 function inf2Kg(x){ return (Math.round(x*10)/10).toString().replace('.',',')+' kg'; }
 const INF2_MESES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
@@ -5660,7 +5686,7 @@ function renderResumen(){
   reportWrap.appendChild(wrap);
 
   const actions=document.createElement('div'); actions.className='no-print'; actions.style.cssText='display:flex;gap:8px;max-width:420px;margin:0 auto 6px';
-  actions.innerHTML=`<button data-act="shareInforme" style="flex:1;padding:13px;border-radius:12px;border:none;font-size:13px;font-weight:700;background:#25d366;color:#fff">💬 Compartir por WhatsApp</button><button data-act="downloadInformePDF" style="flex:1;padding:13px;border-radius:12px;border:none;font-size:13px;font-weight:700;background:var(--repBrandDk);color:#fff">📥 Descargar PDF</button>`;
+  actions.innerHTML=`<button data-act="shareInforme" style="flex:1;padding:13px;border-radius:12px;border:none;font-size:13px;font-weight:700;background:var(--accentDk);color:#fff">💬 Compartir por WhatsApp</button><button data-act="downloadInformePDF" style="flex:1;padding:13px;border-radius:12px;border:none;font-size:13px;font-weight:700;background:var(--repBrandDk);color:#fff">📥 Descargar PDF</button>`;
   reportWrap.appendChild(actions);
 
   const hint=document.createElement('div'); hint.className='note no-print'; hint.style.cssText='max-width:420px;margin:0 auto'; hint.textContent='"Compartir por WhatsApp" abre directamente el panel para enviarla. "Descargar PDF" genera el archivo PDF del informe y lo guarda en el celular.'; reportWrap.appendChild(hint);
@@ -5708,7 +5734,32 @@ function showWelcome(){
   div.innerHTML='<div class="welcome-box"><h2>¡Bienvenido/a a TaFit!</h2><p>Hola <b>'+esc(name)+'</b> 👋<br>Acá vas a encontrar tu rutina personalizada. Tocá cada ejercicio para ver los detalles y cargar tus series.</p><button data-act="closeWelcome">¡Vamos! 💪</button></div>';
   document.body.appendChild(div);
 }
+/* 07/10/2026: aviso de peso fuera de lo normal. Caso real: un drop set cargado como
+   "102327" (eran 10 / 23 / 27 kg) en un ejercicio que no estaba marcado como drop set.
+   Si el número es muy alto (más de 250 kg, o 4 veces lo máximo que levantó antes en ese
+   ejercicio), se pregunta antes de dejarlo; si dice que no, la celda queda vacía. No
+   aplica a drop sets ni a valores con "/" o "+" (pesos separados a propósito). */
+function weightLooksOff(ex,v){
+  if(!ex||isDropSet(ex)||/[\/+]/.test(String(v))) return 0;
+  const n=firstNum(v); if(!n) return 0;
+  const mx=getMaxWeight(ex.n);
+  if(n>250||(mx>0&&n>mx*4&&n-mx>20)) return n;
+  return 0;
+}
+let _oddAsking={};
+async function confirmOddWeight(ei,si,mi,ex,n){
+  const ak=K(ei,si,mi)+'|'+n; if(_oddAsking[ak]) return; _oddAsking[ak]=true;
+  const cur=CACHE[K(ei,si,mi)]; if(!cur||firstNum(cur.w)!==n){ delete _oddAsking[ak]; return; } /* ya lo cambió */
+  let ok;
+  try{ ok=await uiConfirm('¿Seguro que fueron '+String(n).replace('.',',')+' kg en '+ex.n+'?\n\nSi fue un drop set, separá cada peso con / (por ejemplo 10/23/27).'); } finally { delete _oddAsking[ak]; }
+  if(ok) return;
+  const k=K(ei,si,mi); if(CACHE[k]){ CACHE[k].w=''; delete CACHE[k]._auto; }
+  for(let sj=si+1; sj<ex.s; sj++){ const k2=K(ei,sj,mi); if(CACHE[k2]&&CACHE[k2]._auto){ CACHE[k2].w=''; delete CACHE[k2]._auto; const i2=document.querySelector('input[data-chg="set"][data-i="'+ei+'"][data-j="'+sj+'"][data-m="'+mi+'"][data-f="w"]'); if(i2) i2.value=''; } }
+  const inp=document.querySelector('input[data-chg="set"][data-i="'+ei+'"][data-j="'+si+'"][data-m="'+mi+'"][data-f="w"]'); if(inp){ inp.value=''; inp.focus(); }
+  queueSave();
+}
 function updSet(ei,si,mi,f,v){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CACHE[k][f]=v; CACHE[k]._w=week;
+  if(f==='w'&&v){ const exW=routine()[day]&&routine()[day].ex[ei]; const odd=weightLooksOff(exW,v); if(odd) setTimeout(function(){ confirmOddWeight(ei,si,mi,exW,odd); },0); }
   /* Esta celda la tocó la persona a mano — si venía de una copia automática (ver abajo),
      deja de estar marcada como "copiada" para que, si más adelante corrigen la serie de
      origen, SÍ se le pueda volver a copiar el valor nuevo encima. */
@@ -5832,6 +5883,11 @@ async function closeSession(){
   let core=null;
   if(abPresetIdx(r[day]).size){ const ch=DB.students[active].abChoice, dn=coreDoneList(); if(coreChoiceValid(ch)&&dn.length){ core={fmt:ch.fmt, ex:ch.ex.map(id=>{ const it=coreItem(id); return it?it.n:id; }), done:dn.map(id=>{ const it=coreItem(id); return it?it.n:id; })}; } }
   if(!exs.length && !obs && !hh && !core){ toast("No hay nada cargado en esta sesión todavía",'warn'); return; }
+  /* 07/10/2026: aviso de sesión repetida — había días cerrados dos veces seguidas (mismo
+     día de rutina, misma semana, minutos de diferencia), que duplicaban la Transcripta. */
+  { const dup=LOGS.find(function(l){ return l.dayName===r[day].day&&+l.week===+week&&(Date.now()-Date.parse(l.date))<6*3600*1000; });
+    if(dup){ const mins=Math.max(1,Math.round((Date.now()-Date.parse(dup.date))/60000)); const t=mins<60?(mins+' minuto'+(mins===1?'':'s')):(Math.round(mins/60)+' hora'+(Math.round(mins/60)===1?'':'s'));
+      if(!await uiConfirm('Ya cerraste '+r[day].day+' de esta semana hace '+t+'.\n\n¿Guardar otra sesión igual en la Transcripta?')) return; } }
   LOGS.unshift({ date:new Date().toISOString(), dayName:r[day].day, week, weekName:weeks()[week].t+' '+weeks()[week].n, ex:exs, obs, health:hh, core });
   await saveLogs();
   await autoBackup('sesion');
@@ -6339,7 +6395,7 @@ function renderEdit(){
         autoBackupList.map(b=>`<button data-act="restoreBackupUI" data-date="${b.date}">🛟 Restaurar del ${fmtShort(b.exported||b.date)} · ${b.students} alumnos</button>`).join('')+
         `</div>`;
     }
-    SEC('backup','Respaldo de datos',`<p>El guardado automático va a <b>${Store.where==='nube'?'la nube de Claude':Store.where==='dispositivo'?'este dispositivo':'memoria temporal'}</b>. El backup incluye alumnos, rutinas y sesiones (las fotos no entran por su tamaño).</p><div class="edit-actions"><button data-act="export">⬇ Exportar backup</button><label class="impbtn">⬆ Importar backup<input type="file" accept="application/json" data-chg="import" hidden></label></div><hr class="mt8" style="border:none;border-top:1px solid var(--line)"><h3 class="mt8" style="font-size:13px">🛟 Backups automáticos (últimos 7 días)</h3>${autoBackupHtml}<hr class="mt8" style="border:none;border-top:1px solid var(--line)"><h3 class="mt8" style="font-size:13px">📲 Versión de la app</h3><p style="font-size:11.5px;color:var(--mute)">Este dispositivo tiene <b>${APP_VERSION}</b>. Si subiste un zip nuevo a GitHub y no se ve el cambio, tocá este botón en vez de cerrar y abrir la app varias veces.</p><div class="edit-actions"><button data-act="checkUpdate">🔄 Buscar actualización ahora</button></div>`);
+    SEC('backup','Respaldo de datos',`<p>El guardado automático va a <b>${Store.where==='nube'?'la nube de Claude':Store.where==='dispositivo'?'este dispositivo':'memoria temporal'}</b>. El backup incluye alumnos, rutinas y sesiones (las fotos no entran por su tamaño).</p><div class="edit-actions"><button data-act="export">⬇ Exportar backup</button><label class="impbtn">⬆ Importar backup<input type="file" accept="application/json" data-chg="import" hidden></label></div><hr class="mt8" style="border:none;border-top:1px solid var(--line)"><h3 class="mt8" style="font-size:13px">🛟 Backups automáticos (últimos 7 días)</h3>${autoBackupHtml}<div class="edit-actions mt8"><button data-act="recoverLogs">🛟 Recuperar transcriptas de ${esc(DB.students[active].name)}</button></div><p style="font-size:11.5px;color:var(--mute)">Busca en los backups de los últimos días las sesiones que le falten, te las muestra y solo las agrega si confirmás.</p><hr class="mt8" style="border:none;border-top:1px solid var(--line)"><h3 class="mt8" style="font-size:13px">📲 Versión de la app</h3><p style="font-size:11.5px;color:var(--mute)">Este dispositivo tiene <b>${APP_VERSION}</b>. Si subiste un zip nuevo a GitHub y no se ve el cambio, tocá este botón en vez de cerrar y abrir la app varias veces.</p><div class="edit-actions"><button data-act="checkUpdate">🔄 Buscar actualización ahora</button></div>`);
   }
 
   if(trainer&&!locked){
@@ -7003,6 +7059,7 @@ document.addEventListener('click',e=>{
     case 'coreEdit': coreStartEdit(); break;
     case 'coreDone': coreToggleDone(el.dataset.v); break;
     case 'inf2Pdf': informe2PDF(); break;
+    case 'recoverLogs': recoverLogsForActive(); break;
     /* 07/10/2026: tocar el logo del encabezado lo abre en grande (pedido de Tami). El logo
        del encabezado NO cambia de tamaño ni de lugar; se cierra tocando cualquier parte. */
     case 'viewLogo': $('lb').innerHTML='<img src="./logo-principal.png" alt="TaFiT" style="width:min(86vw,520px);height:auto;max-height:86vh;border-radius:50%;box-shadow:0 0 0 4px rgba(227,195,165,.35),0 12px 40px rgba(0,0,0,.6)">'; $('lb').classList.add('show'); break;
