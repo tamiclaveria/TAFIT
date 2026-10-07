@@ -35,10 +35,10 @@
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0908;color:var(--ink);min-height:100vh}
   a{color:var(--accentDk)}
   #app{max-width:600px;margin:0 auto;min-height:100vh;background:var(--light);display:flex;flex-direction:column}
-  header{background:#0a0908;color:#fff;padding:14px 16px 12px}
+  header{background:#0a0908;color:#fff;padding:12px 16px 12px}
   .topline{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .wm{font-weight:800;font-size:22px;letter-spacing:3px;display:flex;align-items:center}
-  .wm img{height:52px;width:52px;border-radius:50%;display:block;object-fit:cover;border:1.5px solid var(--accent);box-shadow:0 2px 10px rgba(0,0,0,.45)}
+  .wm img{height:76px;width:76px;border-radius:50%;display:block;object-fit:cover;border:2px solid var(--accent);box-shadow:0 2px 10px rgba(0,0,0,.45)}
   .wm b{color:var(--accent)}
   .topright{display:flex;gap:8px;align-items:center}
   .lockbtn{background:var(--steel);border:none;color:#fff;border-radius:9px;padding:7px 11px;font-size:12px;font-weight:700;cursor:pointer}
@@ -96,6 +96,8 @@
   .weeks button.sel{border-color:var(--steel);color:#fff;background:var(--steel)}
   .weeks button.sel small{color:#241F18;opacity:.75}
   .weekdesc{font-size:12px;color:var(--mute);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:16px}
+  .week-nudge{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:12px;color:#1D864A;background:var(--okbg);border:1px solid #9adbb5;border-radius:10px;padding:10px 12px;margin:-8px 0 16px}
+  .week-nudge button{border:none;border-radius:8px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;background:#1D864A;color:#fff;margin-left:auto}
 
   .medbanner{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:10px 13px;margin-bottom:14px;font-size:12.5px;color:var(--steel);font-weight:700}
   .rules .rule{display:flex;gap:9px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--light)}
@@ -164,10 +166,11 @@
   .block-banner .bb-ico{font-size:20px;flex:none}
   .block-banner .bb-title{font-size:15px;font-weight:800;letter-spacing:.3px}
   .block-banner .bb-desc{font-size:12.5px;opacity:.92;line-height:1.5;margin:2px 0 12px}
-  .block-banner .bb-btn{background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.5);color:#fff;font-size:12.5px;font-weight:700;padding:9px 14px;border-radius:9px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:inherit}
-  .block-banner .bb-btn:hover{background:rgba(255,255,255,.28)}
+  .block-banner .bb-btn{background:var(--steel);border:1.5px solid var(--steel);color:#fff;font-size:12.5px;font-weight:700;padding:9px 14px;border-radius:9px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:inherit}
+  .block-banner .bb-btn:hover{background:var(--accent);border-color:var(--accent);color:#17120E}
   .lastw{font-size:11.5px;color:var(--mute);background:var(--card);border:1px dashed var(--line);border-radius:9px;padding:8px 11px;margin:9px 0 0 0;line-height:1.5}
   .lastw b{color:var(--steel)}
+  .lastw-fill{display:block;margin-top:7px;border:none;border-radius:8px;padding:7px 12px;font-size:11.5px;font-weight:700;cursor:pointer;background:var(--accent);color:#17120E}
   .member-h{font-size:13px;font-weight:800;color:var(--steel);margin:14px 0 2px;display:flex;align-items:center;gap:7px;padding-top:11px;border-top:1px dashed var(--line)}
   .member-h::before{content:'';width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none}
   .member-h .mo{font-size:11px;font-weight:600;color:var(--niebla)}
@@ -237,14 +240,20 @@
   .study-item span{flex:1}
   .study-item button{background:none;border:none;color:var(--accentDk);font-weight:600;cursor:pointer;font-size:12px}
   .tpl-list{margin-top:8px}
-  .tpl-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:var(--card)}
-  .tpl-info{min-width:0}
+  .tpl-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:var(--card)}
+  .tpl-info{min-width:0;flex:1}
   .tpl-info b{display:block;font-size:12.5px;color:var(--navy)}
   .tpl-info small{font-size:11px;color:var(--mute)}
-  .tpl-actions{display:flex;gap:6px;flex:none}
-  .tpl-actions button{border:none;border-radius:7px;padding:6px 10px;font-size:11.5px;font-weight:700;cursor:pointer}
-  .tpl-actions button[data-act="applyTemplate"]{background:var(--accent);color:#17120E}
-  .tpl-actions button[data-act="deleteTemplate"]{background:var(--card);border:1px solid var(--line);color:var(--warn)}
+  .tpl-del{border:1px solid var(--line);background:var(--card);color:var(--warn);border-radius:7px;padding:6px 10px;font-size:13px;cursor:pointer;flex:none}
+  .tpl-apply-row{display:flex;gap:6px;margin-top:9px}
+  .tpl-apply-row select.tpl-target-sel{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:8px;padding:7px 8px;font-size:12px;background:var(--light);color:var(--ink)}
+  .tpl-apply-row button[data-act="applyTemplate"]{flex:none;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;background:var(--accent);color:#17120E}
+  .tpl-prev{margin-top:7px}
+  .tpl-prev summary{font-size:11px;font-weight:700;color:var(--accentDk);cursor:pointer}
+  .tpl-prev-body{margin-top:6px;display:flex;flex-direction:column;gap:5px}
+  .tpl-prev-day{background:var(--light);border:1px solid var(--line);border-radius:8px;padding:6px 9px}
+  .tpl-prev-day b{display:block;font-size:11px;color:var(--navy)}
+  .tpl-prev-day small{font-size:10.5px;color:var(--mute);line-height:1.4}
   .medidas-hist{margin-top:8px}
   .med-row{display:flex;gap:10px;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid var(--line);font-size:12px;color:var(--navy)}
   .med-date{font-weight:700;color:var(--accentDk);min-width:60px}
@@ -1030,7 +1039,7 @@ function addAbFinisher(di,id){
   const p=AB_CORE_BLOCKS.find(function(x){ return x.id===id; }); if(!p) return;
   const day=DB.students[active].routine[di];
   /* se agrega AL PRINCIPIO del día (antes del primer ejercicio), como bloque de activación */
-  const items=[{ n:'── '+p.label+' ──', blk:true, tip:p.desc, blkWork:p.work, blkRest:p.rest, blkRounds:p.rounds, s:p.rounds }]
+  const items=[{ n:'── '+p.label+' ──', blk:true, tip:p.desc, blkWork:p.work, blkRest:p.rest, blkRounds:p.rounds, blkFormat:p.format, s:p.rounds }]
     .concat(p.exercises.map(function(pe){ return JSON.parse(JSON.stringify(pe)); }));
   day.ex.unshift.apply(day.ex, items);
   openSecs.add('day'+di);
@@ -1067,10 +1076,10 @@ function dayTypeTag(d){ if(!d||!d.type) return ''; const o=DAYTYPE_OPTS.find(x=>
 function isBlockRow(ex){ return !!(ex&&(ex.blk||/^──.*──\s*$/.test((ex.n||'').trim()))); }
 function blockTitleClean(ex){ return (ex.n||'').replace(/^──\s*/,'').replace(/\s*──$/,'').trim()||'Bloque'; }
 function getBlockCfg(ex){
-  if(ex.blk){ return { title:blockTitleClean(ex), desc:ex.tip||'', work:+ex.blkWork||0, rest:+ex.blkRest||0, rounds:Math.max(1,+ex.blkRounds||+ex.s||3) }; }
+  if(ex.blk){ return { title:blockTitleClean(ex), desc:ex.tip||'', work:+ex.blkWork||0, rest:+ex.blkRest||0, rounds:Math.max(1,+ex.blkRounds||+ex.s||3), format:ex.blkFormat||'tabata' }; }
   /* legado: intenta sacar "(45s/15s)" del nombre; si no hay patrón, queda sin temporizador de trabajo/descanso (solo el chip de descanso) */
   const m=(ex.n||'').match(/\((\d+)\s*s\s*\/\s*(\d+)\s*s\)/i);
-  return { title:blockTitleClean(ex), desc:ex.tip||'', work:m?+m[1]:0, rest:m?+m[2]:(restSec(ex.rest)||0), rounds:Math.max(1,+ex.s||3) };
+  return { title:blockTitleClean(ex), desc:ex.tip||'', work:m?+m[1]:0, rest:m?+m[2]:(restSec(ex.rest)||0), rounds:Math.max(1,+ex.s||3), format:'tabata' };
 }
 
 /* Técnica en acordeón: cerrada por defecto para no alargar la tarjeta (nativo <details>,
@@ -3071,6 +3080,26 @@ function runSeeds(){
      sea) con esa foto del ciclo 2, perdiendo cycleStart/rutina/semanas más nuevas. Ya
      cumplió su función — queda inerte para siempre. */
   if(!DB._seed.sofiMartiNewCycle20260924){ DB._seed.sofiMartiNewCycle20260924=true; }
+  /* Corrección puntual (07/10/2026), verificada contra un backup exportado — no es una
+     corrección a ciegas como las de arriba. El corte de "ciclo actual" de Sofi/Marti quedó
+     el 05/10 (19:56), pero sus Transcriptas muestran que la rutina nueva (la transcripta a
+     mano semana a semana) ya se venía registrando desde el 25/09 — 4 sesiones reales
+     (25/09 y 30/09, ya con los nombres de ejercicio nuevos) quedaban por eso archivadas
+     como "rutina vieja" en vez de mostrarse en la Transcripta actual. Se corrige SOLO si el
+     corte sigue siendo exactamente ese valor (si alguien ya lo tocó a mano desde entonces,
+     esto no hace nada). De paso se resetea el desbloqueo manual de semanas, que había
+     quedado en "hasta S5" — dejaba entrar a semanas futuras sin haber cerrado las
+     anteriores, que era el otro síntoma reportado ("aparece hasta la semana 5"). */
+  if(!DB._seed.sofiMartiCycleFix20261007){
+    const sm=DB.students['sofi-marti'];
+    if(sm){
+      const BAD_TS='2026-10-05T19:56:07.426Z', FIX_TS='2026-09-25T00:00:00.000Z';
+      if(sm.cycleStart===BAD_TS) sm.cycleStart=FIX_TS;
+      if(sm.cycleHistory&&sm.cycleHistory[0]&&sm.cycleHistory[0].end===BAD_TS) sm.cycleHistory[0].end=FIX_TS;
+      if(sm.unlockWeek===4) sm.unlockWeek=0;
+    }
+    DB._seed.sofiMartiCycleFix20261007=true;
+  }
   if(!DB._seed.fede){ if(!DB.students['fede-del-sol']){ DB.students['fede-del-sol']=stuFede(); DB.order.push('fede-del-sol'); } DB._seed.fede=true; }
   if(!DB._seed.grupo5){ if(!DB.students['grupo-5']){ DB.students['grupo-5']=stuGrupo5(); DB.order.push('grupo-5'); } DB._seed.grupo5=true; }
   if(!DB._seed.adriana){ if(!DB.students['adriana-x']){ DB.students['adriana-x']=stuAdrianaX(); DB.order.push('adriana-x'); } DB._seed.adriana=true; }
@@ -3254,7 +3283,7 @@ function runSeeds(){
         if(!d||!d.ex||!d.ex.length) return;
         if(isBlockRow(d.ex[0])) return; /* ya tiene algo al principio, no duplicar */
         const p=AB_CORE_BLOCKS[di%AB_CORE_BLOCKS.length];
-        const block={ n:'── '+p.label+' ──', blk:true, tip:p.desc, blkWork:p.work, blkRest:p.rest, blkRounds:p.rounds, s:p.rounds };
+        const block={ n:'── '+p.label+' ──', blk:true, tip:p.desc, blkWork:p.work, blkRest:p.rest, blkRounds:p.rounds, blkFormat:p.format, s:p.rounds };
         const abEx=p.exercises.map(function(pe){ return JSON.parse(JSON.stringify(pe)); });
         d.ex.unshift.apply(d.ex, [block].concat(abEx));
       });
@@ -3711,6 +3740,16 @@ function renderApp(){
   if(isDuo()){ const ms=document.createElement('div'); ms.className='seg mseg'; ms.innerHTML=members.map((mn,mi)=>`<button data-act="pickMember" data-i="${mi}" class="${mi===member?'sel':''}">👤 ${esc(mn)}</button>`).join(''); m.appendChild(ms); }
   const wk=document.createElement('div'); wk.className='weeks'; wk.innerHTML=W.map((w,i)=>{ const lk=wkLocked(i); return `<button data-act="pickWeek" data-i="${i}" class="${i===week?'sel':''}${lk?' wlock':''}">${lk?'🔒 ':''}${esc(w.t)}<small>${esc(w.n)}</small></button>`; }).join(''); m.appendChild(wk);
   const wd=document.createElement('div'); wd.className='weekdesc'; wd.innerHTML=`<b>${esc(W[week].t)} · ${esc(W[week].n)}</b> — ${esc(W[week].d)}`; m.appendChild(wd);
+  /* 07/10/2026: el avance de semana es manual (hay que tocar el botón de la semana
+     siguiente) — si nadie lo toca, se puede seguir registrando sesiones nuevas bajo la
+     misma semana vieja indefinidamente, aunque ya se haya completado (esto fue justo lo
+     que le pasó a Sofi/Marti). Este aviso aparece SOLO cuando ya están cerrados todos los
+     días de la semana actual, para invitar a avanzar sin que sea obligatorio. */
+  if(weekDone(week)&&week<W.length-1){
+    const nudge=document.createElement('div'); nudge.className='week-nudge';
+    nudge.innerHTML=`✅ Ya completaste todos los días de <b>${esc(W[week].t)}</b> · ${esc(W[week].n)}<button type="button" data-act="pickWeek" data-i="${week+1}">Avanzar a ${esc(W[week+1].t)} · ${esc(W[week+1].n)} →</button>`;
+    m.appendChild(nudge);
+  }
   const pw=document.createElement('div'); pw.className='progwrap'; pw.innerHTML=`<div class="progbar"><i id="prog"></i></div><div class="proglbl" id="proglbl"></div>`; m.appendChild(pw);
 
   healthPre(m);
@@ -3723,7 +3762,7 @@ function renderApp(){
       let bh=`<div class="block-banner"><div class="bb-top"><span class="bb-ico">🔁</span><span class="bb-title">${esc(cfg.title)}</span></div>`;
       if(cfg.desc) bh+=`<div class="bb-desc">${esc(cfg.desc)}</div>`;
       if(cfg.work>0){
-        bh+=`<button type="button" class="bb-btn" data-act="openBlockTimer" data-title="${esc(cfg.title)}" data-work="${cfg.work}" data-rest="${cfg.rest||10}" data-rounds="${cfg.rounds}">⏱ Iniciar temporizador de circuito</button>`;
+        bh+=`<button type="button" class="bb-btn" data-act="openBlockTimer" data-title="${esc(cfg.title)}" data-work="${cfg.work}" data-rest="${cfg.rest||10}" data-rounds="${cfg.rounds}" data-format="${esc(cfg.format)}">⏱ Iniciar temporizador de circuito</button>`;
       } else if(cfg.rest>0){
         bh+=`<button type="button" class="bb-btn" data-act="rest" data-sec="${cfg.rest}">⏱ Descanso ${cfg.rest} s</button>`;
       }
@@ -3743,7 +3782,11 @@ function renderApp(){
     const hdrMeta=`${ex.s}×${esc(ex.r)}${(obj&&obj!=='A definir')?' · '+esc(obj):''}${maxBadge}${setsTotal?(' · '+setsDone+'/'+setsTotal+' ✓'):''}`;
     const wCmp=weightCmpHTML(ex.n,member);
     const exThumb=ytThumb(ex.vid);
-    const thumbHtml=exThumb?`<img class="ex-vidthumb" src="${exThumb}" alt="" data-act="viewExThumb" data-url="${esc(ex.vid)}" data-name="${esc(ex.n)}">`:'';
+    /* Si hay un video puntual cargado, mostramos el frame real de YouTube (se puede tocar
+       para reproducirlo). Si no (la mayoría de los ejercicios, que solo tienen un link de
+       búsqueda genérico), mostramos el ícono del grupo muscular en su lugar — así TODOS los
+       ejercicios tienen alguna miniatura, no solo los que ya tienen video elegido a mano. */
+    const thumbHtml=exThumb?`<img class="ex-vidthumb" src="${exThumb}" alt="" data-act="viewExThumb" data-url="${esc(ex.vid)}" data-name="${esc(ex.n)}">`:exThumbHTML(ex,ei);
     let html=`<div class="ex-hdr" data-act="accordion" data-i="${ei}">${thumbHtml}<span class="num">${ei+1}</span><div class="ex-hdr-info"><div class="ex-hdr-name">${esc(ex.n)}</div><div class="ex-hdr-meta">${hdrMeta}</div>${wCmp}<div class="ex-hdr-prog">${progDots}</div></div><span class="ex-chev${isOpen?' open':''}">▾</span></div>`;
     html+=`<div class="ex-body${isOpen?' open':''}">`;
     if(trainer){
@@ -3755,7 +3798,16 @@ function renderApp(){
     const restChip = `<span class="rest" data-act="rest" data-sec="${restSec(ex.rest)||60}">⏱ Descanso ${ex.rest?esc(ex.rest):'60 s'}</span>`;
     html+=`<div class="chips">${restChip}<button type="button" class="vid" data-act="playVideo" data-url="${esc(ex.vid||YT(ex.n))}" data-name="${esc(ex.n)}">▶ Ver técnica</button>${waExLink(ex.n)}</div>`;
     const last=lastFor(ex.n);
-    if(last) html+=`<div class="lastw"><b>📈 Última vez (${fmtShort(last.date)}):</b> ${setsLine(last.sets)}</div>`;
+    const lastHasWeight=!!(last&&last.sets&&last.sets.some(s=>s.w));
+    if(last){
+      /* 07/10/2026: botón para precargar los pesos de la última vez en las series de hoy —
+         así hay menos para escribir cuando se repite el mismo peso que la sesión anterior.
+         Solo rellena series que todavía estén vacías esta semana (misma protección que la
+         copia automática entre series); nunca pisa un valor ya cargado a mano. No aplica a
+         "drop set" (pesos distintos a propósito en cada serie). */
+      const fillBtn=(lastHasWeight&&!isDropSet(ex))?`<button type="button" class="lastw-fill" data-act="fillLastWeights" data-i="${ei}" data-m="${selMi}">↩ Usar estos pesos</button>`:'';
+      html+=`<div class="lastw"><b>📈 Última vez (${fmtShort(last.date)}):</b> ${setsLine(last.sets)}${fillBtn}</div>`;
+    }
     html+=setsTable(ex,ei,selMi,obj);
     html+=`<details class="rm" id="rm-${ei}-${selMi}">${rmHTML(ei,selMi)}</details>`;
     html+=`</div>`;
@@ -3815,12 +3867,24 @@ function numPH(w){ const n=firstNum(w); return n!=null?String(n).replace('.',','
 function rirOpts(v){ let o='<option value="">RIR</option>'; for(let i=0;i<=5;i++) o+=`<option value="${i}" ${String(v)===String(i)?'selected':''}>${i}</option>`; return o; }
 /* Tabata Timer */
 let tabataInt=null, tabataState=null, tabataMode='tabata';
-function openTabata(title,work,rest,rounds){
+function openTabata(title,work,rest,rounds,format){
   $('tabataTitle').textContent=title?String(title).toUpperCase():'TABATA';
-  setTabataMode('tabata'); /* los circuitos con temporizador siempre son formato Tabata (trabajo/descanso/vueltas) */
-  if(work) $('tabWork').value=work;
-  if(rest) $('tabRest').value=rest;
-  if(rounds) $('tabRounds').value=rounds;
+  /* El temporizador abre en el formato que se eligió al armar el bloque (Tabata/AMRAP/EMOM)
+     — antes siempre abría en Tabata sin importar cuál se había elegido. Igual se puede
+     cambiar de formato a mano acá mismo, tocando los botones de arriba, para una sesión
+     puntual sin tener que ir a Editar. */
+  const fmt=(format==='amrap'||format==='emom')?format:'tabata';
+  setTabataMode(fmt);
+  if(fmt==='emom'){
+    /* El intervalo de EMOM se guarda en "work" (mismo campo que usan Tabata/AMRAP para no
+       duplicar el dato), pero el temporizador en modo EMOM lo lee de "Cada (seg)" (tabRest). */
+    if(work) $('tabRest').value=work;
+    if(rounds) $('tabRounds').value=rounds;
+  } else {
+    if(work) $('tabWork').value=work;
+    if(rest) $('tabRest').value=rest;
+    if(rounds) $('tabRounds').value=rounds;
+  }
   $('tabata').classList.add('show');
 }
 function closeTabata(){ stopTabata(); $('tabata').classList.remove('show'); }
@@ -4840,11 +4904,57 @@ function showWelcome(){
   div.innerHTML='<div class="welcome-box"><h2>¡Bienvenido/a a TaFit!</h2><p>Hola <b>'+esc(name)+'</b> 👋<br>Acá vas a encontrar tu rutina personalizada. Tocá cada ejercicio para ver los detalles y cargar tus series.</p><button data-act="closeWelcome">¡Vamos! 💪</button></div>';
   document.body.appendChild(div);
 }
-function updSet(ei,si,mi,f,v){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CACHE[k][f]=v; CACHE[k]._w=week; CACHE[k]._w=week; const box=$('rm-'+ei+'-'+mi); if(box) box.innerHTML=rmHTML(ei,mi); queueSave();
+function updSet(ei,si,mi,f,v){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CACHE[k][f]=v; CACHE[k]._w=week;
+  /* Esta celda la tocó la persona a mano — si venía de una copia automática (ver abajo),
+     deja de estar marcada como "copiada" para que, si más adelante corrigen la serie de
+     origen, SÍ se le pueda volver a copiar el valor nuevo encima. */
+  if(f==='w') delete CACHE[k]._auto;
+  const box=$('rm-'+ei+'-'+mi); if(box) box.innerHTML=rmHTML(ei,mi); queueSave();
+  /* Copiar el mismo peso a las series siguientes que todavía estén vacías esta semana —
+     así si levantaste lo mismo en las 3 series, lo escribís una sola vez y se completa
+     solo. Nunca pisa una serie que ya tenga un valor escrito A MANO (si después la tocás
+     vos, ese valor manda); pero si una serie solo tiene un valor que llegó por esta misma
+     copia automática (marcado _auto), sí se actualiza si corregís la serie de origen — por
+     eso _auto se guarda y se limpia por separado de "tiene valor cargado". No aplica a
+     "drop set" (pesos distintos a propósito en cada serie). */
+  if(f==='w'&&v){
+    const ex=routine()[day]&&routine()[day].ex[ei];
+    if(ex&&!isDropSet(ex)){
+      for(let sj=si+1; sj<ex.s; sj++){
+        const k2=K(ei,sj,mi); const existing=CACHE[k2];
+        const hasOwn=existing&&wOf(existing)===+week&&existing.w&&!existing._auto;
+        if(hasOwn) continue;
+        CACHE[k2]=existing||{}; CACHE[k2].w=v; CACHE[k2]._w=week; CACHE[k2]._auto=true;
+        const inp=document.querySelector('input[data-chg="set"][data-i="'+ei+'"][data-j="'+sj+'"][data-m="'+mi+'"][data-f="w"]');
+        if(inp) inp.value=v;
+      }
+    }
+  }
   /* Celebración de nuevo récord — ya existía el cartel de 5 segundos; ahora además
      queda GUARDADO en el alumno (st.records) para poder verlo después en "🏆 Mis
      récords" y compartirlo como tarjeta cuando quiera, no solo en el momento. */
   if(f==='w'&&v){ const exName=routine()[day].ex[ei]?routine()[day].ex[ei].n:''; const maxW=getMaxWeight(exName); const cur=firstNum(v); if(cur&&cur>0&&maxW>0&&cur>maxW){ showRecord(exName,maxW,cur); saveNewRecord(exName,maxW,cur,mi); } }
+}
+/* Precarga en las series de hoy los pesos de la última vez que se registró este ejercicio
+   (botón "↩ Usar estos pesos", al lado de "📈 Última vez"). Misma protección que la copia
+   automática entre series: nunca pisa una serie que ya tenga un valor cargado A MANO esta
+   semana — si después la corrigen, esa corrección manda. No aplica a "drop set". */
+function fillLastWeights(ei,mi){
+  const ex=routine()[day]&&routine()[day].ex[ei]; if(!ex||isDropSet(ex)) return;
+  const last=lastFor(ex.n); if(!last||!last.sets||!last.sets.length) return;
+  let filled=0;
+  for(let si=0; si<ex.s; si++){
+    const srcSet=last.sets[si]; if(!srcSet||!srcSet.w) continue;
+    const k=K(ei,si,mi); const existing=CACHE[k];
+    const hasOwn=existing&&wOf(existing)===+week&&existing.w&&!existing._auto;
+    if(hasOwn) continue;
+    CACHE[k]=existing||{}; CACHE[k].w=srcSet.w; CACHE[k]._w=week; CACHE[k]._auto=true;
+    const inp=document.querySelector('input[data-chg="set"][data-i="'+ei+'"][data-j="'+si+'"][data-m="'+mi+'"][data-f="w"]');
+    if(inp) inp.value=srcSet.w;
+    filled++;
+  }
+  if(filled){ queueSave(); toast('✓ Pesos de la última vez cargados','ok'); }
+  else toast('Ya tenías pesos cargados en todas las series','warn');
 }
 function saveNewRecord(exName,oldW,newW,mi){
   const st=DB.students[active]; if(!st) return;
@@ -5070,14 +5180,24 @@ async function saveAsTemplate(){
   toast('Plantilla guardada ✓','ok');
   renderEdit();
 }
-async function applyTemplate(tplId){
+async function applyTemplate(tplId,targetId){
   const tpl=(DB.templates||[]).find(function(t){ return t.id===tplId; }); if(!tpl) return;
-  const st=DB.students[active], name=st.name;
+  /* 07/10/2026: Tami pidió poder elegir A QUIÉN mandarle la plantilla directamente desde
+     la lista, sin tener que primero cambiar de alumno arriba y después venir acá — ahora
+     cada plantilla tiene su propio selector de alumno (ver templates UI) y se puede aplicar
+     a cualquiera, no solo al que tenías abierto en ese momento. */
+  const target=(targetId&&DB.students[targetId])?targetId:active;
+  const st=DB.students[target]; if(!st) return;
+  const name=st.name;
   const hasCurrent=!!(st.routine&&st.routine.length);
   const msg=hasCurrent
     ? '¿Reemplazar la rutina actual de '+name+' por la plantilla "'+tpl.name+'"? Antes de reemplazarla guardo un respaldo completo de la rutina actual en su historial (igual que "Iniciar nuevo ciclo") — no se pierde nada, queda disponible en Transcripta.'
     : '¿Cargar la plantilla "'+tpl.name+'" como rutina de '+name+'?';
   if(!await uiConfirm(msg)) return;
+  /* si el alumno elegido no es el que estaba abierto, primero hay que cambiar a él para
+     que su CACHE/LOGS se carguen bien antes de tocar su rutina — si no, se pisaría la
+     CACHE del alumno que SÍ estaba abierto. */
+  if(target!==active) await switchStudent(target);
   if(hasCurrent){
     const now=new Date().toISOString();
     if(!st.cycleHistory) st.cycleHistory=[];
@@ -5088,7 +5208,7 @@ async function applyTemplate(tplId){
   }
   st.routine=cp(tpl.routine);
   await saveDB();
-  toast('Plantilla aplicada ✓','ok');
+  toast('Plantilla aplicada a '+name+' ✓','ok');
   renderEdit();
 }
 async function deleteTemplate(tplId){
@@ -5486,9 +5606,30 @@ function renderEdit(){
     const saveTplBtn=hasRoutineForTpl
       ? `<div class="edit-actions"><button data-act="saveAsTemplate">💾 Guardar esta rutina como plantilla</button></div>`
       : `<p style="font-size:11.5px;color:var(--mute)">${esc(st2_.name)} todavía no tiene rutina cargada, así que no hay nada para guardar como plantilla.</p>`;
+    /* 07/10/2026: Tami pidió poder identificar cada plantilla antes de usarla — antes solo
+       se veía el nombre y la cantidad de días. Ahora cada una tiene un acordeón plegado
+       con el contenido real (día por día, primeros ejercicios de cada uno), para no tener
+       que aplicarla a ciegas para enterarse qué tiene adentro. */
+    const tplPreviewHTML=function(t){
+      const days=(t.routine||[]).map(function(d){
+        const names=(d.ex||[]).map(function(e){ return isBlockRow(e)?('🔁 '+blockTitleClean(e)):e.n; }).filter(Boolean);
+        const shown=names.slice(0,5).join(', ')+(names.length>5?'…':'');
+        return `<div class="tpl-prev-day"><b>${esc(d.day||'Día')}</b><small>${esc(shown||'(sin ejercicios)')}</small></div>`;
+      }).join('');
+      return `<details class="tpl-prev"><summary>👁 Ver contenido</summary><div class="tpl-prev-body">${days}</div></details>`;
+    };
+    /* 07/10/2026: Tami pidió elegir a quién mandarle la plantilla directamente desde la
+       lista, en vez de tener que primero cambiar de alumno arriba de la pantalla. Cada
+       plantilla tiene ahora su propio selector — arranca en el alumno que tenías abierto,
+       pero se puede cambiar a cualquier otro antes de tocar "Usar". */
+    const tplTargetSelectHTML=function(tplId){
+      const opts=DB.order.filter(function(sid){ return !DB.students[sid].archived||sid===active; })
+        .map(function(sid){ return `<option value="${esc(sid)}"${sid===active?' selected':''}>${esc(DB.students[sid].name)}</option>`; }).join('');
+      return `<select class="tpl-target-sel" data-tplid="${esc(tplId)}">${opts}</select>`;
+    };
     const tplListHtml=tpls.length
       ? '<div class="tpl-list">'+tpls.map(function(t){
-          return `<div class="tpl-row"><div class="tpl-info"><b>${esc(t.name)}</b><small>${t.routine.length} día${t.routine.length===1?'':'s'} · guardada el ${fmtShort(t.createdAt)}</small></div><div class="tpl-actions"><button data-act="applyTemplate" data-id="${esc(t.id)}">▶ Usar en ${esc(st2_.name)}</button><button data-act="deleteTemplate" data-id="${esc(t.id)}" title="Borrar plantilla">🗑</button></div></div>`;
+          return `<div class="tpl-row"><div class="tpl-info"><b>${esc(t.name)}</b><small>${t.routine.length} día${t.routine.length===1?'':'s'} · guardada el ${fmtShort(t.createdAt)}</small>${tplPreviewHTML(t)}<div class="tpl-apply-row">${tplTargetSelectHTML(t.id)}<button data-act="applyTemplate" data-id="${esc(t.id)}">▶ Usar</button></div></div><button class="tpl-del" data-act="deleteTemplate" data-id="${esc(t.id)}" title="Borrar plantilla">🗑</button></div>`;
         }).join('')+'</div>'
       : `<p style="font-size:11.5px;color:var(--mute)">Todavía no guardaste ninguna plantilla.</p>`;
     SEC('templates','📑 Plantillas de rutina',`<p style="font-size:11.5px;color:var(--mute)">Guardá una rutina ya armada como plantilla para no volver a cargarla de cero con cada alumna nueva que empiece algo parecido. Son compartidas: las guardás acá y las podés usar desde la ficha de cualquier otra alumna.</p>${saveTplBtn}<hr class="mt8" style="border:none;border-top:1px solid var(--line)"><h3 class="mt8" style="font-size:13px">Plantillas guardadas (${tpls.length})</h3>${tplListHtml}`);
@@ -5515,9 +5656,10 @@ function renderEdit(){
         <div class="type-toggle"><div><div class="tt-lbl">🔀 Es un título de bloque / circuito</div><div class="tt-sub">Sin peso, sin series — solo un cartel</div></div><label class="switch"><input type="checkbox" class="blkbox" data-chg="blkToggle"${blk?' checked':''}><span class="slider"></span></label></div>
         <div class="new-fields${blk?'':' hidden'}">
           <div class="fld"><label>Título del bloque</label><input data-field="blkTitle" value="${blk?esc(bcfg.title):''}" placeholder="BLOQUE 1"></div>
+          <div class="fld mt8"><label>Formato del temporizador</label><select data-field="blkFormat">${['tabata','amrap','emom'].map(f=>`<option value="${f}"${(blk?bcfg.format:'tabata')===f?' selected':''}>${esc(AB_FORMAT_LABEL[f])}</option>`).join('')}</select></div>
           <div class="fld mt8"><label>Descripción</label><textarea data-field="blkDesc" placeholder="Circuito: 45 seg trabajo, 15 seg descanso, 3 vueltas.">${blk?esc(bcfg.desc):''}</textarea></div>
           <div class="row3 mt8"><div class="fld"><label>Trabajo (seg)</label><input data-field="blkWork" inputmode="numeric" value="${blk&&bcfg.work?bcfg.work:''}" placeholder="45"></div><div class="fld"><label>Descanso (seg)</label><input data-field="blkRest" inputmode="numeric" value="${blk&&bcfg.rest?bcfg.rest:''}" placeholder="15"></div><div class="fld"><label>Vueltas</label><input data-field="blkRounds" inputmode="numeric" value="${blk?bcfg.rounds:3}" placeholder="3"></div></div>
-          <div class="note mt8" style="padding:0;text-align:left;font-size:11px">Si dejás Trabajo/Descanso en blanco, el cartel muestra solo la descripción (sin botón de temporizador).</div>
+          <div class="note mt8" style="padding:0;text-align:left;font-size:11px">Si dejás Trabajo/Descanso en blanco, el cartel muestra solo la descripción (sin botón de temporizador). En <b>AMRAP</b>, "Trabajo" es la duración total (Descanso y Vueltas no se usan). En <b>EMOM</b>, "Trabajo" es cada cuántos segundos arranca una ronda nueva (Descanso no se usa).</div>
         </div>
         <div class="old-fields${blk?' hidden':''}">
         <select class="libpick" data-chg="libPick" data-i="${di}" data-j="${ei}">${exLibOptionsHTML()}</select>
@@ -5551,7 +5693,8 @@ function collectForm(){ const out=[]; document.querySelectorAll('.edit-day').for
         const bWork=Math.max(0,parseInt(g('blkWork'))||0);
         const bRest=Math.max(0,parseInt(g('blkRest'))||0);
         const bRounds=Math.max(1,parseInt(g('blkRounds'))||3);
-        exes.push({ n:bTitle, s:bRounds, r:'', w:'', alt:'', tip:bDesc, rest:bRest?(bRest+' s'):'', vid:'', blk:true, blkWork:bWork, blkRest:bRest, blkRounds:bRounds });
+        const bFormat=(g('blkFormat')==='amrap'||g('blkFormat')==='emom')?g('blkFormat'):'tabata';
+        exes.push({ n:bTitle, s:bRounds, r:'', w:'', alt:'', tip:bDesc, rest:bRest?(bRest+' s'):'', vid:'', blk:true, blkWork:bWork, blkRest:bRest, blkRounds:bRounds, blkFormat:bFormat });
         return;
       }
       const n=(g('n')||'').trim(); const rawS=(g('s')||'').trim();
@@ -5598,7 +5741,7 @@ function addDay(){
      (Tami pidió que esté siempre, en todos los días) — se puede cambiar por otra opción
      o borrar desde el editor como cualquier otro ejercicio. */
   const p=AB_CORE_BLOCKS[newIdx%AB_CORE_BLOCKS.length];
-  const block={ n:'── '+p.label+' ──', blk:true, tip:p.desc, blkWork:p.work, blkRest:p.rest, blkRounds:p.rounds, s:p.rounds };
+  const block={ n:'── '+p.label+' ──', blk:true, tip:p.desc, blkWork:p.work, blkRest:p.rest, blkRounds:p.rounds, blkFormat:p.format, s:p.rounds };
   const abEx=p.exercises.map(function(pe){ return JSON.parse(JSON.stringify(pe)); });
   DB.students[active].routine.push({day:"Día "+(newIdx+1), ex:[block].concat(abEx,[placeholder])});
   openSecs.add('day'+newIdx); renderEdit();
@@ -6044,7 +6187,8 @@ document.addEventListener('click',e=>{
     })(); break;
     case 'clearRoutine': clearRoutineForFormsOnly(); break;
     case 'saveAsTemplate': saveAsTemplate(); break;
-    case 'applyTemplate': applyTemplate(id); break;
+    case 'applyTemplate': { const sel=document.querySelector('select.tpl-target-sel[data-tplid="'+id+'"]'); applyTemplate(id, sel?sel.value:null); break; }
+    case 'fillLastWeights': fillLastWeights(i,mi); break;
     case 'deleteTemplate': deleteTemplate(id); break;
     case 'copyStudentLink': copyStudentLink(el.dataset.id); break;
     case 'addEx': addEx(i); break;
@@ -6089,7 +6233,7 @@ document.addEventListener('click',e=>{
     case 'saveWa': var wf=$('wafld'),mpf=$('mpfld'); if(wf) DB.settings.whatsapp=wf.value.trim(); if(mpf) DB.settings.mercadopago=mpf.value.trim(); saveDB(); toast('Datos guardados ✓','ok'); break;
     case 'copyReport': var rptCards=[]; DB.order.forEach(function(id){ var s=DB.students[id]; var logs=safeParse(localStorage.getItem('tafit:logs:'+id)||'[]',[]); var last=logs.length?logs[0]:null; var adh=0; if(last){var plan=0,h=0;last.ex.forEach(function(x){if(x.members){x.members.forEach(function(mm){mm.sets.forEach(function(st){plan++;if(st.done)h++})})}else if(x.sets){x.sets.forEach(function(st){plan++;if(st.done)h++})}});adh=plan?Math.round(h/plan*100):0;} rptCards.push({name:s.name,sessions:logs.length,last:last,adh:adh}); }); var txt=generateReportText(rptCards); navigator.clipboard.writeText(txt).then(function(){toast('Informe copiado ✓','ok')}).catch(function(){toast('No se pudo copiar','warn')}); break;
     case 'openTabata': openTabata(); break;
-    case 'openBlockTimer': openTabata(el.dataset.title,+el.dataset.work,+el.dataset.rest,+el.dataset.rounds); break;
+    case 'openBlockTimer': openTabata(el.dataset.title,+el.dataset.work,+el.dataset.rest,+el.dataset.rounds,el.dataset.format); break;
     case 'tabataMode': setTabataMode(el.dataset.mode); break;
     case 'openNotifs': renderNotifList(); $('notifOv').classList.add('show'); markNotifsSeen(); break;
     case 'closeNotifs': $('notifOv').classList.remove('show'); break;
