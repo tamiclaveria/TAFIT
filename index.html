@@ -961,7 +961,7 @@
 <div id="app">
   <header>
     <div class="topline">
-      <div class="wm"><img src="./logo-principal.png" alt="TaFiT"></div>
+      <div class="wm"><img src="./logo-principal.png" alt="TaFiT" data-act="viewLogo" style="cursor:zoom-in"></div>
       <div class="topright">
         <button class="bellbtn" id="bellbtn" data-act="openNotifs" style="display:none">🔔<span class="bell-badge" id="bellBadge"></span></button>
         <button class="lockbtn" id="lockbtn" data-act="lock"></button>
@@ -1019,7 +1019,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-109'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-110'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -7013,6 +7013,9 @@ document.addEventListener('click',e=>{
     case 'coreEdit': coreStartEdit(); break;
     case 'coreDone': coreToggleDone(el.dataset.v); break;
     case 'inf2Pdf': informe2PDF(); break;
+    /* 07/10/2026: tocar el logo del encabezado lo abre en grande (pedido de Tami). El logo
+       del encabezado NO cambia de tamaño ni de lugar; se cierra tocando cualquier parte. */
+    case 'viewLogo': $('lb').innerHTML='<img src="./logo-principal.png" alt="TaFiT" style="width:min(86vw,520px);height:auto;max-height:86vh;border-radius:50%;box-shadow:0 0 0 4px rgba(227,195,165,.35),0 12px 40px rgba(0,0,0,.6)">'; $('lb').classList.add('show'); break;
     case 'leg': setLeg(el.dataset.w, el.dataset.v); break;
     case 'alarm': toggleAlarm(el.dataset.a); break;
     case 'rest': startRest(+el.dataset.sec); break;
