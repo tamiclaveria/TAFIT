@@ -255,6 +255,13 @@
   .tpl-prev-day{background:var(--light);border:1px solid var(--line);border-radius:8px;padding:6px 9px}
   .tpl-prev-day b{display:block;font-size:11px;color:var(--navy)}
   .tpl-prev-day small{font-size:10.5px;color:var(--mute);line-height:1.4}
+  .routine-hist{margin:14px 0}
+  .routine-hist summary{font-size:12px;font-weight:700;color:var(--accentDk);cursor:pointer}
+  .routine-hist-body{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+  .routine-hist-row{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:9px;padding:8px 11px}
+  .routine-hist-row b{display:block;font-size:12px;color:var(--navy)}
+  .routine-hist-row small{font-size:11px;color:var(--mute);line-height:1.4}
+  .routine-hist-row button{border:1px solid var(--accentDk);background:var(--card);color:var(--accentDk);border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:700;cursor:pointer;flex:none}
   .medidas-hist{margin-top:8px}
   .med-row{display:flex;gap:10px;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid var(--line);font-size:12px;color:var(--navy)}
   .med-date{font-weight:700;color:var(--accentDk);min-width:60px}
@@ -2388,6 +2395,32 @@ async function cleanStaleWeekOverrides(studentId){
   }
   return removed;
 }
+/* Historial de versiones de la rutina de cada alumno \u2014 la red de seguridad real contra
+   CUALQUIER cambio inesperado (un bug nuevo que no imaginamos, un parche que se nos pas\u00f3,
+   un toque sin querer). Guarda una foto ANTES de cada cambio real a la rutina \u2014 manual
+   (Guardar rutina), por plantilla, o por un parche de correcci\u00f3n \u2014 as\u00ed, pase lo que pase,
+   Tami puede ver qu\u00e9 cambi\u00f3 y cu\u00e1ndo, y restaurar ella misma en un toque, sin esperar a
+   que se diagnostique nada. Guarda como m\u00e1ximo las \u00faltimas 8 versiones por alumno. */
+function snapshotRoutine(studentId,reason){
+  const st=DB.students[studentId]; if(!st) return;
+  if(!st.routineVersions) st.routineVersions=[];
+  const last=st.routineVersions[st.routineVersions.length-1];
+  const current=JSON.stringify(st.routine||[]);
+  if(last&&JSON.stringify(last.routine)===current) return; // nada cambi\u00f3, no duplicar
+  st.routineVersions.push({ at:new Date().toISOString(), reason:reason||'cambio', routine:cp(st.routine||[]) });
+  if(st.routineVersions.length>8) st.routineVersions=st.routineVersions.slice(-8);
+}
+async function restoreRoutineVersion(studentId,idx){
+  const st=DB.students[studentId]; if(!st||!st.routineVersions||!st.routineVersions[idx]) return;
+  const v=st.routineVersions[idx];
+  const when=fmtShort(v.at);
+  if(!await uiConfirm('\u00bfRestaurar la rutina de '+st.name+' tal como estaba el '+when+'? La rutina actual queda guardada tambi\u00e9n en el historial, as\u00ed que esto se puede deshacer.')) return;
+  snapshotRoutine(studentId,'antes de restaurar versi\u00f3n del '+when);
+  st.routine=cp(v.routine);
+  await saveDB();
+  toast('Rutina restaurada \u2713 \u00b7 '+when,'ok');
+  renderEdit();
+}
 const slug=s=>String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')||('al-'+Date.now());
 const safeParse=(s,f)=>{ try{ return JSON.parse(s); }catch(e){ return f; } };
 function toast(msg,kind){ const t=$('toast'); t.textContent=msg; t.className='toast show '+(kind||''); clearTimeout(t._t); t._t=setTimeout(()=>t.className='toast',2000); }
@@ -3058,6 +3091,14 @@ function urgentFixJoni20260925(){
 function urgentFixSofiMarti20260925(){
   return { routine:[ sofiMartiCycle2Day1(), sofiMartiCycle2Day2(), sofiMartiCycle2Day3() ], weeks:cp(WEEKS6) };
 }
+/* REGLA PARA CUALQUIER PARCHE NUEVO ACÁ ADENTRO (07/10/2026, después de los casos de
+   Sofi/Martí y Joni): si un parche de corrección va a tocar la `.routine` de un alumno que
+   YA EXISTE, tiene que:
+   1) ir guardado contra un estado exacto verificado con un backup real (nunca una condición
+      amplia tipo "si tiene menos de 3 días" o "si no tiene tal campo"), y
+   2) llamar a snapshotRoutine(studentId, motivo) ANTES de pisar la rutina, para que quede
+      en el historial y Tami pueda deshacerlo ella misma con un toque si algo salió mal.
+   Nunca escribir `st.routine = algo()` sin las dos cosas de arriba. */
 function runSeeds(){
   if(!DB._seed) DB._seed={};
   if(!DB._seed.delfina){ if(!DB.students['delfina']){ DB.students['delfina']=delfinaStudent(); DB.order.push('delfina'); } DB._seed.delfina=true; }
@@ -3113,6 +3154,7 @@ function runSeeds(){
   if(!DB._seed.joniRoutineFix20261007){
     const jn=DB.students['joni-puebla'];
     if(jn&&jn.routine&&jn.routine.length===3&&jn.routine[2]&&jn.routine[2].day==='Día 3 · Popurrí'&&jn.routine[0].ex&&jn.routine[0].ex[0]&&jn.routine[0].ex[0].n==='Press plano barra'){
+      snapshotRoutine('joni-puebla','antes del parche joniRoutineFix20261007 (rutina de fábrica pisando la real)');
       jn.routine=[
         {day:"Día 1", ex:[
           ex("Press plano barra (sostener 2'' abajo)",4,"8","A definir"),
@@ -3836,12 +3878,9 @@ function renderApp(){
     const maxBadge=maxW?` · <span class="max-w">🏆 ${fmt(maxW)}</span>`:'';
     const hdrMeta=`${ex.s}×${esc(ex.r)}${(obj&&obj!=='A definir')?' · '+esc(obj):''}${maxBadge}${setsTotal?(' · '+setsDone+'/'+setsTotal+' ✓'):''}`;
     const wCmp=weightCmpHTML(ex.n,member);
-    const exThumb=ytThumb(ex.vid);
-    /* Si hay un video puntual cargado, mostramos el frame real de YouTube (se puede tocar
-       para reproducirlo). Si no (la mayoría de los ejercicios, que solo tienen un link de
-       búsqueda genérico), mostramos el ícono del grupo muscular en su lugar — así TODOS los
-       ejercicios tienen alguna miniatura, no solo los que ya tienen video elegido a mano. */
-    const thumbHtml=exThumb?`<img class="ex-vidthumb" src="${exThumb}" alt="" data-act="viewExThumb" data-url="${esc(ex.vid)}" data-name="${esc(ex.n)}">`:exThumbHTML(ex,ei);
+    /* 07/10/2026: Tami pidió sacar las miniaturas (tanto el frame real de YouTube como el
+       ícono genérico de grupo muscular) de la lista de ejercicios — no las quiere por ahora. */
+    const thumbHtml='';
     let html=`<div class="ex-hdr" data-act="accordion" data-i="${ei}">${thumbHtml}<span class="num">${ei+1}</span><div class="ex-hdr-info"><div class="ex-hdr-name">${esc(ex.n)}</div><div class="ex-hdr-meta">${hdrMeta}</div>${wCmp}<div class="ex-hdr-prog">${progDots}</div></div><span class="ex-chev${isOpen?' open':''}">▾</span></div>`;
     html+=`<div class="ex-body${isOpen?' open':''}">`;
     if(trainer){
@@ -5261,6 +5300,7 @@ async function applyTemplate(tplId,targetId){
     CACHE={};
     await saveData();
   }
+  snapshotRoutine(target,'antes de aplicar plantilla "'+tpl.name+'"');
   st.routine=cp(tpl.routine);
   await saveDB();
   toast('Plantilla aplicada a '+name+' ✓','ok');
@@ -5743,6 +5783,22 @@ function renderEdit(){
   const addD=document.createElement('button'); addD.className='addday'; addD.dataset.act='addDay'; addD.textContent='+ Agregar día'; m.appendChild(addD);
   const bottom=document.createElement('div'); bottom.className='edit-bottom'; bottom.innerHTML=`<button class="save" data-act="saveRoutine">Guardar rutina</button>`; m.appendChild(bottom);
   const note=document.createElement('div'); note.className='note'; note.textContent="Los datos cargados se guardan por posición. Si reordenás o eliminás ejercicios con datos en curso, se corren. Cerrá la sesión o exportá un backup antes de reordenar."; m.appendChild(note);
+  /* Historial de la rutina: una foto automática de cómo estaba ANTES de cada cambio real
+     (guardado manual, plantilla aplicada, o una corrección puntual). Si algo cambia de
+     forma inesperada — un bug nuevo, un parche, lo que sea — esto deja restaurarlo con un
+     toque, sin tener que esperar a que se diagnostique nada. */
+  const rv=DB.students[active].routineVersions||[];
+  if(rv.length){
+    const histEl=document.createElement('details'); histEl.className='routine-hist';
+    let histHtml='<summary>🕓 Historial de la rutina ('+rv.length+')</summary><div class="routine-hist-body">';
+    for(let i=rv.length-1;i>=0;i--){
+      const v=rv[i];
+      histHtml+=`<div class="routine-hist-row"><div><b>${esc(fmtShort(v.at))}</b><small>${esc(v.reason||'')} · ${v.routine.length} día(s)</small></div><button type="button" data-act="restoreRoutineVersion" data-i="${i}">↩ Restaurar</button></div>`;
+    }
+    histHtml+='</div>';
+    histEl.innerHTML=histHtml;
+    m.appendChild(histEl);
+  }
 }
 function collectForm(){ const out=[]; document.querySelectorAll('.edit-day').forEach(dayEl=>{ const di=+dayEl.dataset.day; const dayName=(dayEl.querySelector('.dayname').value||'').trim()||('Día '+(di+1)); const wdEl=dayEl.querySelector('.dayweek'); const dayWd=wdEl?wdEl.value:''; const dtEl=dayEl.querySelector('.daytype'); const dayType=dtEl?dtEl.value:''; const exes=[]; dayEl.querySelectorAll('.edit-ex').forEach(exEl=>{ const g=f=>{ const el=exEl.querySelector('[data-field="'+f+'"]'); return el?el.value:''; };
       const blkbox=exEl.querySelector('.blkbox');
@@ -5811,6 +5867,7 @@ function removeWeek(i){ if(weeks().length<=1){ toast("Tiene que quedar al menos 
 function addRule(){ syncFromForms(); const h=DB.students[active].health=DB.students[active].health||{enabled:false,rules:[]}; h.rules=h.rules||[]; h.rules.push({t:'',d:''}); renderEdit(); }
 function removeRule(ri){ syncFromForms(); DB.students[active].health.rules.splice(ri,1); renderEdit(); }
 async function saveRoutine(){
+  snapshotRoutine(active,'guardado manual en Editar');
   syncFromForms();
   /* 06/10/2026: esto es lo que convierte el arreglo de "Mantenimiento" en algo automático
      en vez de un botón que hay que acordarse de tocar. CADA VEZ que se guarda una rutina,
@@ -6260,6 +6317,7 @@ document.addEventListener('click',e=>{
     case 'addRule': addRule(); break;
     case 'removeRule': removeRule(i); break;
     case 'saveRoutine': saveRoutine(); break;
+    case 'restoreRoutineVersion': restoreRoutineVersion(active,i); break;
     case 'saveWeeks': saveWeeks(); break;
     case 'saveUnlockWeek': { const sel=$('unlockWeekSel'); if(sel){ DB.students[active].unlockWeek=+sel.value; saveDB(); toast('Desbloqueo guardado ✓ · ya puede entrar a esa semana','ok'); } break; }
     case 'saveHealth': saveHealth(); break;
