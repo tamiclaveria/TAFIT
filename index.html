@@ -193,6 +193,19 @@
   .core-pick .cp-chips{display:flex;flex-wrap:wrap;gap:6px}
   .core-pick .cp-chip{font-family:inherit;font-size:12.5px;font-weight:600;color:var(--ink);background:var(--tint2);border:1.5px solid var(--line);border-radius:999px;padding:7px 12px;cursor:pointer}
   .core-pick .cp-chip.on{background:var(--accent);border-color:var(--accentDk);color:#241F18;font-weight:800}
+  .core-pick .cp-count{display:flex;flex-direction:column;gap:3px;font-size:12.5px;font-weight:700;color:var(--mute);margin-bottom:8px}
+  .core-pick .cp-count .ok{color:var(--accentDk)}
+  .core-pick .cp-acc{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .core-pick .cp-grp+.cp-grp{border-top:1px solid var(--line)}
+  .core-pick .cp-grp-hdr{width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px;font-family:inherit;font-size:13.5px;font-weight:700;color:var(--navy);background:var(--card);border:none;padding:12px 14px;cursor:pointer;text-align:left}
+  .core-pick .cp-grp.open .cp-grp-hdr{background:var(--tint2)}
+  .core-pick .cp-grp-meta{display:flex;align-items:center;gap:8px;flex:none}
+  .core-pick .cp-grp-meta b{font-size:11.5px;color:var(--accentDk);background:var(--tint2);border-radius:999px;padding:2px 8px}
+  .core-pick .cp-grp.open .cp-grp-meta b{background:var(--card)}
+  .core-pick .cp-grp-meta i{font-style:normal;color:var(--mute);font-size:13px}
+  .core-pick .cp-grp-body{padding:10px 12px 12px;background:var(--tint2)}
+  .core-pick .cp-grp-body .cp-chip{background:var(--card)}
+  .core-pick .cp-grp-body .cp-chip.on{background:var(--accent)}
   .core-pick .cp-go{display:block;width:100%;margin-top:14px;font-family:inherit;font-size:14px;font-weight:800;color:#fff;background:var(--steel);border:none;border-radius:11px;padding:12px;cursor:pointer}
   .core-pick .cp-go:disabled{background:var(--tint2);color:var(--mute);cursor:default}
   .core-pick .cp-title{font-size:16px;font-weight:800;color:var(--navy);margin-bottom:4px}
@@ -1087,18 +1100,52 @@ function addAbFinisher(di,id){
    "+ Agregar bloque de abdominales/espinal"): ese bloque y sus ejercicios dejan de
    mostrarse en la vista de Rutina, pero NO se borran de los datos — si Tami saca el bloque
    en Editar, ese día deja de mostrar el selector. */
+/* grp: sup = abdominales superiores · inf = inferiores · obl = oblicuos · pla = planchas
+   (todos cuentan como "abdominales") · esp = espinales (zona lumbar). Los que no tienen
+   video puntual usan la búsqueda de YouTube, igual que el resto de la app. Los id de los
+   ejercicios originales no cambian, para no romper elecciones ya guardadas. */
+const CORE_GROUPS=[
+  {v:'sup',l:'Abdominales superiores'},
+  {v:'inf',l:'Abdominales inferiores'},
+  {v:'obl',l:'Oblicuos'},
+  {v:'pla',l:'Planchas'},
+  {v:'esp',l:'Espinales (zona lumbar)'},
+];
 const CORE_CATALOG=[
-  {id:'plancha',grp:'ab',n:'Plancha abdominal',dose:'30 seg',tip:'Cuerpo en línea recta, abdomen firme, sin dejar caer la cadera.',vid:'https://www.youtube.com/watch?v=LKd2gK40YCY'},
-  {id:'planchalat',grp:'ab',n:'Plancha lateral',dose:'20 seg por lado',tip:'Cuerpo en línea recta de pies a cabeza, cadera arriba sin caer.',vid:'https://www.youtube.com/watch?v=kyOeSuh7LLo'},
-  {id:'mountain',grp:'ab',n:'Mountain climbers',dose:'20 reps',tip:'Cadera estable, llevá la rodilla al pecho sin que suba la cola.',vid:'https://www.youtube.com/watch?v=0MQF6Id1tp0'},
-  {id:'girorruso',grp:'ab',n:'Giro ruso',dose:'20 reps (10 por lado)',tip:'Talones apenas despegados del piso, girá desde el torso, espalda recta.',vid:'https://www.youtube.com/watch?v=hdSyLWfRJHc'},
-  {id:'bici',grp:'ab',n:'Bicicleta (crunch bicicleta)',dose:'20 reps',tip:'Codo hacia la rodilla contraria, sin tirar del cuello con las manos.',vid:'https://www.youtube.com/watch?v=dYxamPVcKvk'},
-  {id:'vups',grp:'ab',n:'Abdominales en V (V-ups)',dose:'10 reps',tip:'Subí piernas y torso a la vez formando una V, sin impulso.',vid:'https://www.youtube.com/watch?v=n78J6ajuCbI'},
-  {id:'crunchmaq',grp:'ab',n:'Crunch en máquina',dose:'15 reps',tip:'Subí con el abdomen, no con el cuello. Controlá la bajada.',vid:'https://www.youtube.com/watch?v=dJqB4oA4sdA'},
-  {id:'elevcolg',grp:'ab',n:'Elevación de piernas colgado',dose:'12 reps',tip:'Evitá el balanceo, subí con control usando el abdomen.',vid:'https://www.youtube.com/watch?v=F9wTR13Cd3M'},
-  {id:'elevpiso',grp:'ab',n:'Elevación de piernas en el piso',dose:'12 reps',tip:'Zona lumbar apoyada en el piso, bajá solo hasta donde controles.',vid:'https://www.youtube.com/watch?v=eEbq5_AIgpo'},
+  /* superiores */
+  {id:'crunchmaq',grp:'sup',n:'Crunch en máquina',dose:'15 reps',tip:'Subí con el abdomen, no con el cuello. Controlá la bajada.',vid:'https://www.youtube.com/watch?v=dJqB4oA4sdA'},
+  {id:'crunchpiso',grp:'sup',n:'Crunch en colchoneta',dose:'20 reps',tip:'Mirada al techo, subí despegando solo los hombros, sin tirar del cuello.'},
+  {id:'crunchdisco',grp:'sup',n:'Crunch con disco',dose:'15 reps',tip:'Disco contra el pecho, subí con el abdomen y bajá lento.'},
+  {id:'polea',grp:'sup',n:'Abdominales en polea',dose:'15 reps',tip:'Subí el torso desde el abdomen, sin tirar del cuello ni de los brazos.'},
+  {id:'situp',grp:'sup',n:'Sit up',dose:'15 reps',tip:'Subí el torso completo con control, sin impulsarte con los brazos.'},
+  {id:'vups',grp:'sup',n:'Abdominales en V (V-ups)',dose:'10 reps',tip:'Subí piernas y torso a la vez formando una V, sin impulso.',vid:'https://www.youtube.com/watch?v=n78J6ajuCbI'},
+  /* inferiores */
+  {id:'elevcolg',grp:'inf',n:'Elevación de piernas colgado',dose:'12 reps',tip:'Evitá el balanceo, subí con control usando el abdomen.',vid:'https://www.youtube.com/watch?v=F9wTR13Cd3M'},
+  {id:'elevpiso',grp:'inf',n:'Elevación de piernas en el piso',dose:'12 reps',tip:'Zona lumbar apoyada en el piso, bajá solo hasta donde controles.',vid:'https://www.youtube.com/watch?v=eEbq5_AIgpo'},
+  {id:'crunchinv',grp:'inf',n:'Crunch invertido',dose:'15 reps',tip:'Llevá las rodillas al pecho despegando la cola del piso, sin impulso.'},
+  {id:'tijeras',grp:'inf',n:'Tijeras',dose:'20 reps',tip:'Piernas estiradas cruzando arriba y abajo, zona lumbar pegada al piso.'},
+  {id:'flutter',grp:'inf',n:'Pataditas (flutter kicks)',dose:'30 seg',tip:'Patadas cortas y rápidas con las piernas estiradas, lumbar apoyada.'},
+  {id:'paralelas',grp:'inf',n:'Elevación de rodillas en paralelas',dose:'12 reps',tip:'Espalda apoyada en el respaldo, subí las rodillas sin balancearte.'},
+  /* oblicuos */
+  {id:'girorruso',grp:'obl',n:'Giro ruso',dose:'20 reps (10 por lado)',tip:'Talones apenas despegados del piso, girá desde el torso, espalda recta.',vid:'https://www.youtube.com/watch?v=hdSyLWfRJHc'},
+  {id:'bici',grp:'obl',n:'Bicicleta (crunch bicicleta)',dose:'20 reps',tip:'Codo hacia la rodilla contraria, sin tirar del cuello con las manos.',vid:'https://www.youtube.com/watch?v=dYxamPVcKvk'},
+  {id:'crunchobl',grp:'obl',n:'Crunch oblicuo',dose:'15 por lado',tip:'Rotá el torso al subir llevando el hombro hacia la rodilla contraria.'},
+  {id:'lenador',grp:'obl',n:'Leñador en polea',dose:'12 por lado',tip:'Girá desde el torso con los brazos firmes, sin tirar solo con los hombros.'},
+  {id:'talones',grp:'obl',n:'Toque de talones',dose:'20 reps (10 por lado)',tip:'Hombros despegados, inclinate de lado a lado tocando cada talón.'},
+  {id:'inclat',grp:'obl',n:'Inclinación lateral con mancuerna',dose:'15 por lado',tip:'Bajá la mancuerna por el costado de la pierna y subí sin girar el torso.'},
+  /* planchas */
+  {id:'plancha',grp:'pla',n:'Plancha abdominal',dose:'30 seg',tip:'Cuerpo en línea recta, abdomen firme, sin dejar caer la cadera.',vid:'https://www.youtube.com/watch?v=LKd2gK40YCY'},
+  {id:'planchalat',grp:'pla',n:'Plancha lateral',dose:'20 seg por lado',tip:'Cuerpo en línea recta de pies a cabeza, cadera arriba sin caer.',vid:'https://www.youtube.com/watch?v=kyOeSuh7LLo'},
+  {id:'mountain',grp:'pla',n:'Mountain climbers',dose:'20 reps',tip:'Cadera estable, llevá la rodilla al pecho sin que suba la cola.',vid:'https://www.youtube.com/watch?v=0MQF6Id1tp0'},
+  {id:'toquehombro',grp:'pla',n:'Plancha con toque de hombro',dose:'20 reps (10 por lado)',tip:'Cadera quieta mientras tocás el hombro contrario, pies algo separados.'},
+  {id:'rodillacodo',grp:'pla',n:'Plancha con rodilla al codo',dose:'10 por lado',tip:'Desde plancha, llevá la rodilla hacia el codo del mismo lado sin subir la cadera.'},
+  {id:'rueda',grp:'pla',n:'Rueda abdominal',dose:'10 reps',tip:'Avanzá solo hasta donde puedas sin hundir la zona lumbar, volvé con el abdomen.'},
+  /* espinales */
   {id:'superman',grp:'esp',n:'Superman (extensión de espalda)',dose:'10 reps',tip:'Subí a la vez pecho y piernas sin impulso, apretando zona lumbar y glúteos.',vid:'https://www.youtube.com/watch?v=I2w92FymIj8'},
   {id:'hiperext',grp:'esp',n:'Hiperextensión en banco romano',dose:'10 reps',tip:'Bajá con control, subí sin arquear de más la zona lumbar arriba.',vid:'https://www.youtube.com/watch?v=ye-dpRzXaOg'},
+  {id:'birddog',grp:'esp',n:'Bird dog (cuadrupedia alterna)',dose:'10 por lado',tip:'En cuatro apoyos, estirá brazo y pierna contraria sin rotar la cadera.'},
+  {id:'espbanco',grp:'esp',n:'Espinales en banco',dose:'15 reps',tip:'Subí el torso controlando, apretá la zona lumbar arriba.'},
+  {id:'swimmers',grp:'esp',n:'Nado en el piso (swimmers)',dose:'30 seg',tip:'Boca abajo, alterná brazo y pierna contraria arriba como si nadaras.'},
 ];
 const CORE_FMTS=[
   {v:'circuito',l:'🔁 Circuito'},
@@ -1106,13 +1153,14 @@ const CORE_FMTS=[
   {v:'emom',l:'🕐 EMOM'},
   {v:'tabata',l:'⏱ Tabata'},
 ];
+let coreOpenGrp=null; /* qué grupo del acordeón está abierto */
 let coreDraft=null, coreDraftFor=null; /* elección en curso mientras el alumno está eligiendo (null = no está editando) y de qué alumno es */
 function coreItem(id){ return CORE_CATALOG.find(function(c){ return c.id===id; }); }
 function coreChoiceValid(c){
   if(!c||!c.fmt||!Array.isArray(c.ex)) return false;
   if(!CORE_FMTS.some(function(f){ return f.v===c.fmt; })) return false;
   const items=c.ex.map(coreItem).filter(Boolean);
-  return items.filter(function(x){ return x.grp==='ab'; }).length>=2 && items.filter(function(x){ return x.grp==='esp'; }).length>=1;
+  return items.filter(function(x){ return x.grp!=='esp'; }).length>=2 && items.filter(function(x){ return x.grp==='esp'; }).length>=1;
 }
 /* Índices del bloque prearmado de core al principio de un día (cartel + sus ejercicios),
    para no mostrarlos en la vista de Rutina cuando el alumno elige el suyo. */
@@ -1145,12 +1193,19 @@ function coreCardHTML(){
     const c=coreDraft||{fmt:(saved&&saved.fmt)||'',ex:(saved&&Array.isArray(saved.ex))?saved.ex.slice():[]};
     if(!coreDraft){ coreDraft=c; coreDraftFor=active; }
     const sel=c.ex.map(coreItem).filter(Boolean);
-    const nAb=sel.filter(function(x){ return x.grp==='ab'; }).length, nEsp=sel.filter(function(x){ return x.grp==='esp'; }).length;
+    const nAb=sel.filter(function(x){ return x.grp!=='esp'; }).length, nEsp=sel.filter(function(x){ return x.grp==='esp'; }).length;
     const chip=function(it){ const on=c.ex.indexOf(it.id)>=0; return `<button type="button" class="cp-chip${on?' on':''}" data-act="coreEx" data-v="${it.id}">${on?'✓ ':''}${esc(it.n)}</button>`; };
     h+=`<div class="cp-hint">Elegí al menos <b>2 abdominales</b> y <b>1 espinal</b>, y cómo lo querés hacer.</div>`;
     h+=`<div class="cp-lbl">¿Cómo lo hacés?</div><div class="cp-chips">${CORE_FMTS.map(function(f){ return `<button type="button" class="cp-chip cp-fmt${c.fmt===f.v?' on':''}" data-act="coreFmt" data-v="${f.v}">${f.l}</button>`; }).join('')}</div>`;
-    h+=`<div class="cp-lbl">Abdominales <span class="${nAb>=2?'ok':''}">${nAb} elegido${nAb===1?'':'s'} · mínimo 2</span></div><div class="cp-chips">${CORE_CATALOG.filter(function(x){ return x.grp==='ab'; }).map(chip).join('')}</div>`;
-    h+=`<div class="cp-lbl">Espinales <span class="${nEsp>=1?'ok':''}">${nEsp} elegido${nEsp===1?'':'s'} · mínimo 1</span></div><div class="cp-chips">${CORE_CATALOG.filter(function(x){ return x.grp==='esp'; }).map(chip).join('')}</div>`;
+    /* contador general arriba + cada grupo en acordeón (cerrado por defecto) para que el
+       alumno no tenga que scrollear toda la lista: abre solo el grupo que quiere ver. */
+    h+=`<div class="cp-lbl">Ejercicios</div><div class="cp-count"><span class="${nAb>=2?'ok':''}">${nAb>=2?'✓':'○'} Abdominales: ${nAb} de mínimo 2</span><span class="${nEsp>=1?'ok':''}">${nEsp>=1?'✓':'○'} Espinales: ${nEsp} de mínimo 1</span></div>`;
+    h+='<div class="cp-acc">'+CORE_GROUPS.map(function(g){
+      const items=CORE_CATALOG.filter(function(x){ return x.grp===g.v; });
+      const nSel=items.filter(function(x){ return c.ex.indexOf(x.id)>=0; }).length;
+      const open=coreOpenGrp===g.v;
+      return `<div class="cp-grp${open?' open':''}"><button type="button" class="cp-grp-hdr" data-act="coreGrp" data-v="${g.v}"><span>${esc(g.l)}</span><span class="cp-grp-meta">${nSel?`<b>${nSel} elegido${nSel===1?'':'s'}</b>`:''}<i>${open?'▴':'▾'}</i></span></button>${open?`<div class="cp-chips cp-grp-body">${items.map(chip).join('')}</div>`:''}</div>`;
+    }).join('')+'</div>';
     const ok=coreChoiceValid(c);
     const why=!c.fmt?'Elegí el formato':(nAb<2?'Te falta elegir '+(2-nAb)+' abdominal'+(2-nAb>1?'es':''):(nEsp<1?'Te falta elegir 1 espinal':''));
     h+=`<button type="button" class="cp-go" data-act="coreSave"${ok?'':' disabled'}>${ok?'Listo, a entrenar 💪':esc(why)}</button>`;
@@ -1163,7 +1218,7 @@ function coreCardHTML(){
   const done=coreDoneList();
   h+=`<div class="cp-title">${esc(plan.title)}</div><div class="cp-desc">${esc(plan.desc)}</div>`;
   h+=`<button type="button" class="bb-btn cp-timer" data-act="openBlockTimer" data-title="${esc(plan.title)}" data-work="${plan.work}" data-rest="${plan.rest}" data-rounds="${plan.rounds}" data-format="${plan.format}">⏱ Iniciar temporizador</button>`;
-  h+='<div class="cp-list">'+items.map(function(it,ix){ const isOn=done.indexOf(it.id)>=0; return `<div class="cp-row"><span class="cp-n">${ix+1}</span><div class="cp-info"><div class="cp-name">${esc(it.n)}${it.grp==='esp'?' <i class="cp-tag">espinal</i>':''}</div><div class="cp-dose">${esc(plan.dose||it.dose)} · <button type="button" class="vid" data-act="playVideo" data-url="${esc(it.vid)}" data-name="${esc(it.n)}">▶ Ver técnica</button></div></div><button type="button" class="chk${isOn?' on':''}" data-act="coreDone" data-v="${it.id}">✓</button></div>`; }).join('')+'</div>';
+  h+='<div class="cp-list">'+items.map(function(it,ix){ const isOn=done.indexOf(it.id)>=0; return `<div class="cp-row"><span class="cp-n">${ix+1}</span><div class="cp-info"><div class="cp-name">${esc(it.n)}${it.grp==='esp'?' <i class="cp-tag">espinal</i>':''}</div><div class="cp-dose">${esc(plan.dose||it.dose)} · <button type="button" class="vid" data-act="playVideo" data-url="${esc(it.vid||YT(it.n))}" data-name="${esc(it.n)}">▶ Ver técnica</button></div></div><button type="button" class="chk${isOn?' on':''}" data-act="coreDone" data-v="${it.id}">✓</button></div>`; }).join('')+'</div>';
   h+=`<button type="button" class="cp-change" data-act="coreEdit">Cambiar ejercicios o formato</button>`;
   return h;
 }
@@ -1172,6 +1227,7 @@ function coreToggleDraftEx(id){
   const ix=coreDraft.ex.indexOf(id); if(ix>=0) coreDraft.ex.splice(ix,1); else coreDraft.ex.push(id);
   renderCoreCard();
 }
+function coreToggleGrp(v){ coreOpenGrp=(coreOpenGrp===v)?null:v; renderCoreCard(); }
 function coreSetDraftFmt(v){ if(!coreDraft) return; coreDraft.fmt=v; renderCoreCard(); }
 async function coreSaveChoice(){
   if(!coreDraft||!coreChoiceValid(coreDraft)) return;
@@ -6435,6 +6491,7 @@ document.addEventListener('click',e=>{
     case 'toggle': toggleSet(i,j,mi,el); break;
     case 'coreEx': coreToggleDraftEx(el.dataset.v); break;
     case 'coreFmt': coreSetDraftFmt(el.dataset.v); break;
+    case 'coreGrp': coreToggleGrp(el.dataset.v); break;
     case 'coreSave': coreSaveChoice(); break;
     case 'coreEdit': coreStartEdit(); break;
     case 'coreDone': coreToggleDone(el.dataset.v); break;
