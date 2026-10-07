@@ -1019,7 +1019,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-110'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-111'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -4057,7 +4057,10 @@ function renderChrome(){
   const tabs = locked ? lockedTabs.concat(formTabs) : trainer ? [['app','App'],['chat','Chat'],['trans','Transcripta'],['fotos','Fotos'],['asis','Asistencia'],['pagos','Pagos'],['edit','Editar'],['rep','Informe']].concat(formTabs) : unlockedStudentTabs.concat(formTabs);
   /* si la pestaña actual quedó afuera (ej: estaba en 'app' y este alumno no tiene
      rutina), la mandamos a la primera pestaña que sí exista para este alumno. */
-  if(!tabs.find(t=>t[0]===tab)) tab=tabs.length?tabs[0][0]:'app';
+  /* 07/10/2026: el Informe de la profe ('resumen') se abre desde Editar → "Generar informe"
+     y no tiene pestaña propia en la barra de la profe. Esta regla lo mandaba de vuelta a
+     la primera pestaña apenas se abría — por eso "Generar informe" no hacía nada. */
+  if(!tabs.find(t=>t[0]===tab)&&!(trainer&&tab==='resumen')) tab=tabs.length?tabs[0][0]:'app';
   /* un ícono chiquito arriba de cada palabra ayuda a distinguirlas de un vistazo sin
      tener que leer letra por letra — sobre todo con varias pestañas juntas (profe). */
   const NAV_ICONS={app:'💪',trans:'📖',fotos:'📸',asis:'📋',pagos:'💰',edit:'✏️',rep:'📊',resumen:'📊',acuerdo:'📄',anamnesis:'📝',chat:'💬'};
