@@ -933,7 +933,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-107'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-108'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -2555,7 +2555,7 @@ function migrateCache(){
 function exWithOverride(ex,ei){
   const ovKey='wo_w'+week+'_'+day+'_'+ei;
   const ov=CACHE[ovKey];
-  if(!ov) return ex;
+  if(!ov||ov._del) return ex;
   return Object.assign({},ex,{
     s:ov.s||ex.s,
     r:ov.r||ex.r,
@@ -2583,11 +2583,12 @@ async function cleanStaleWeekOverrides(studentId){
   Object.keys(cache).forEach(k=>{
     const m=/^wo_w(\d+)_(\d+)_(\d+)$/.exec(k); if(!m) return;
     const dayIdx=+m[2], ei=+m[3], ov=cache[k];
+    if(ov&&ov._del) return;
     let stale=false;
     if(dayIdx>=correctNames.length) stale=true;
     else if(ei>=correctNames[dayIdx].length) stale=true;
     else if(ov&&ov.n&&String(ov.n).trim().toLowerCase()!==correctNames[dayIdx][ei]) stale=true;
-    if(stale){ delete cache[k]; removed++; }
+    if(stale){ cache[k]=woTombstone(); removed++; }
   });
   if(removed){
     if(isActive) CACHE=cache;
@@ -3061,21 +3062,50 @@ function mergeAdditive(k,localStr,remoteStr){
   const id=k.slice('tafit:logs:'.length);
   return JSON.stringify(unionLogsArr(safeParse(localStr||'[]',[]),safeParse(remoteStr||'[]',[]),logsDelFor(id)));
 }
+/* ==== Semanas de la profe protegidas (07/10/2026) ====
+   Las variantes por semana que carga la profe ("wo_w<semana>_<día>_<ejercicio>": series y
+   reps distintas en cada semana) viven en el mismo 'tafit:data:<id>' donde cada celular
+   anota los pesos de la sesión en curso, y ese objeto se subía ENTERO. El celular de una
+   alumna (que no tiene esas variantes, solo sus pesos) las borraba de la nube al guardar
+   — así a Sofi/Marti les quedaron S1 a S6 todas iguales. Ahora, al subir o bajar, las
+   variantes "wo_" de la nube que este celular no tiene se conservan; si las dos tienen la
+   misma, gana la editada más recientemente (_t). Borrar una variante deja una marca
+   (_del) en vez de sacar la clave, para que no "resucite" desde otro celular. El resto
+   de las claves (pesos/reps de la sesión en curso) se comportan como siempre. */
+function isDataKey(k){ return typeof k==='string'&&k.indexOf('tafit:data:')===0; }
+function mergeDataObj(localObj,remoteObj){
+  const out=Object.assign({},localObj||{});
+  Object.keys(remoteObj||{}).forEach(function(k){
+    if(k.indexOf('wo_')!==0) return;
+    const r=remoteObj[k], l=out[k];
+    if(l===undefined||((r&&r._t)||0)>((l&&l._t)||0)) out[k]=r;
+  });
+  return out;
+}
+function woTombstone(){ return {_del:true,_t:Date.now()}; }
+/* vacía la CACHE de un alumno (nuevo ciclo, plantilla, etc.) dejando marca de borrado en
+   cada variante semanal, para que ningún otro celular las vuelva a traer */
+function clearedCache(old){ const out={}; Object.keys(old||{}).forEach(function(k){ if(k.indexOf('wo_')===0) out[k]=woTombstone(); }); return out; }
+function mergeKeyStr(k,localStr,remoteStr){
+  if(isDataKey(k)) return JSON.stringify(mergeDataObj(safeParse(localStr||'{}',{}),safeParse(remoteStr||'{}',{})));
+  return mergeAdditive(k,localStr,remoteStr);
+}
+function isMergedKey(k){ return isLogsKey(k)||isLogsDelKey(k)||isDataKey(k); }
 function _pushMergedRaw(k,v){ return new Promise(res=>{ let done=false; const t=setTimeout(()=>{ if(!done){ done=true; res(false); } },10000);
   const ref=fsDB.collection('kv').doc(k);
   fsDB.runTransaction(function(tx){ return tx.get(ref).then(function(doc){
     const remote=(doc.exists&&doc.data()&&doc.data().v!=null)?doc.data().v:null;
-    const merged=remote==null?v:mergeAdditive(k,v,remote);
+    const merged=remote==null?v:mergeKeyStr(k,v,remote);
     tx.set(ref,{v:merged,ts:firebase.firestore.FieldValue.serverTimestamp(),dev:DEVICE_ID});
     return merged;
   }); }).then(function(merged){
     if(done) return; done=true; clearTimeout(t);
     /* si la nube tenía sesiones que este celular no, quedan también acá */
-    try{ if(merged!==v&&localStorage.getItem(k)!==merged){ localStorage.setItem(k,merged); if(isLogsKey(k)&&k==='tafit:logs:'+active){ LOGS=unionLogsArr(LOGS,safeParse(merged,[]),logsDelFor(active)); } } }catch(e){}
+    try{ if(merged!==v&&localStorage.getItem(k)!==merged){ localStorage.setItem(k,mergeKeyStr(k,localStorage.getItem(k),merged)); if(isLogsKey(k)&&k==='tafit:logs:'+active){ LOGS=unionLogsArr(LOGS,safeParse(merged,[]),logsDelFor(active)); } if(k==='tafit:data:'+active){ CACHE=mergeDataObj(CACHE,safeParse(merged,{})); } } }catch(e){}
     res(true);
   }).catch(function(){ if(!done){ done=true; clearTimeout(t); res(false); } });
 }); }
-function _pushRaw(k,v){ if(isLogsKey(k)||isLogsDelKey(k)) return _pushMergedRaw(k,v); return new Promise(res=>{ let done=false; const t=setTimeout(()=>{ if(!done){ done=true; res(false); } },8000);
+function _pushRaw(k,v){ if(isMergedKey(k)) return _pushMergedRaw(k,v); return new Promise(res=>{ let done=false; const t=setTimeout(()=>{ if(!done){ done=true; res(false); } },8000);
   fsDB.collection('kv').doc(k).set({v:v,ts:firebase.firestore.FieldValue.serverTimestamp(),dev:DEVICE_ID})
     .then(()=>{ if(!done){ done=true; clearTimeout(t); res(true); } })
     .catch(()=>{ if(!done){ done=true; clearTimeout(t); res(false); } });
@@ -3163,6 +3193,58 @@ async function listAutoBackups(){
   }
   return out;
 }
+/* Recuperación de las semanas de Sofi/Marti (07/10/2026). Verificado contra el backup
+   exportado por Tami a las 17:15: su 'tafit:data:sofi-marti' tenía CERO variantes
+   semanales (S1 a S6 se veían iguales) porque el celular de una alumna las pisó al subir
+   sus pesos (causa arreglada arriba, "Semanas de la profe protegidas").
+   Solo actúa si, mirando la NUBE y este celular juntos, Sofi/Marti siguen sin ninguna
+   variante — si ya hay alguna (porque Tami las volvió a cargar, o ya se recuperaron en
+   otro celular), no toca nada. Fuente, en este orden:
+   1) el backup automático diario más reciente que SÍ tenga sus variantes (son las de
+      Tami, con sus modificaciones);
+   2) si no hay ninguno, la progresión pasada de la libreta (sofiMartiCycle2WeekOverrides).
+   Solo agrega variantes que caen dentro de la rutina actual (día/ejercicio existentes).
+   Las variantes recuperadas llevan marca de tiempo mínima: cualquier cambio que Tami
+   haga después siempre les gana. Corre solo en el celular de la profe, con señal. */
+async function restoreSofiMartiWeeks(){
+  if(!fsDB||(DB._seed&&DB._seed.smWeeksRestore20261007)) return;
+  const SID='sofi-marti', K2='tafit:data:'+SID;
+  const st=DB.students[SID]; if(!st||!st.routine||!st.routine.length) return;
+  const live=function(o){ return Object.keys(o||{}).filter(function(k){ return k.indexOf('wo_')===0&&o[k]&&!o[k]._del; }); };
+  let cloudObj={};
+  try{ const snap=await fsDB.collection('kv').doc(K2).get({source:'server'}); if(snap.exists) cloudObj=safeParse(snap.data().v,{}); }catch(e){ return; /* sin señal: se reintenta la próxima vez */ }
+  const localObj=(active===SID)?CACHE:safeParse(localStorage.getItem(K2)||'{}',{});
+  const merged=mergeDataObj(localObj,cloudObj);
+  if(live(merged).length){ DB._seed.smWeeksRestore20261007=true; await saveDB(); return; }
+  let src=null, srcLabel='';
+  const d=new Date();
+  for(let i=0;i<10&&!src;i++){
+    const dISO=d.toISOString().slice(0,10);
+    try{
+      const snap=await fsDB.collection('kv').doc('tafit:autobackup:'+dISO).get();
+      if(snap.exists){ const p=safeParse(snap.data().v,null); const dd=p&&p.data&&p.data[SID]; if(dd&&live(dd).length){ src={}; live(dd).forEach(function(k){ src[k]=dd[k]; }); srcLabel='backup automático del '+dISO.split('-').reverse().join('/'); } }
+    }catch(e){}
+    d.setDate(d.getDate()-1);
+  }
+  if(!src){ src=sofiMartiCycle2WeekOverrides(); srcLabel='la progresión de la libreta'; }
+  let added=0;
+  Object.keys(src).forEach(function(k){
+    const m=/^wo_w(\d+)_(\d+)_(\d+)$/.exec(k); if(!m) return;
+    const di=+m[2], ei=+m[3];
+    if(!st.routine[di]||!st.routine[di].ex||ei>=st.routine[di].ex.length) return;
+    const v=Object.assign({},src[k]); delete v._del; v._t=1;
+    merged[k]=v; added++;
+  });
+  if(added){
+    if(active===SID) CACHE=mergeDataObj(CACHE,merged);
+    await Store.set(K2, JSON.stringify(merged));
+    toast('✓ Semanas de Sofi/Marti recuperadas ('+added+' ajustes, desde '+srcLabel+')','ok');
+    try{ localStorage.setItem('tafit:smWeeksRestoreInfo', JSON.stringify({added:added,src:srcLabel,at:new Date().toISOString()})); }catch(e){}
+  }
+  DB._seed.smWeeksRestore20261007=true;
+  await saveDB();
+  try{ render(); }catch(e){}
+}
 /* Restaura un backup automático de una fecha puntual — mismo criterio que importData():
    reemplaza rutinas/cargas/sesiones por lo que había ese día, y lo vuelve a guardar pasando
    por saveDB() (con el merge alumno por alumno) para que quede bien propagado. */
@@ -3216,10 +3298,12 @@ async function initFirebase(){
        se volvía a escribir esa versión vieja de DB encima de la nube, ya con fireSync
        activo. Por eso también hay que actualizar DB acá, con la misma regla de "solo si
        es igual o más nuevo" que usa reloadFromRemote(), antes de que fireSync se active. */
-    try{ const snap=await kvQuery().get(); let _studentsMerged=false; snap.forEach(function(doc){ var k=doc.id,v=doc.data().v; if(shouldSync(k)&&v!=null){ try{ if((isLogsKey(k)||isLogsDelKey(k))&&localStorage.getItem(k)!=null){ v=mergeAdditive(k,localStorage.getItem(k),v); } if(localStorage.getItem(k)!==v){ localStorage.setItem(k,v); if(k==='tafit:students'){ var p=safeParse(v,null); if(p&&p.order&&p.order.length&&(!DB._ts||!p._ts||p._ts>=DB._ts)){ DB=p; setSyncBaseline(); _studentsMerged=true; } } } }catch(e){} } }); if(_studentsMerged){ /* llegó la versión real de la nube: los parches de una sola vez que esa versión todavía no tenga se aplican ENCIMA de ella (nunca de la copia vieja de este celular). Están guardados por bandera, así que los que ya corrieron en otro celular no se repiten. */ try{ if(window.__runSeeds) window.__runSeeds(); }catch(e){ console.warn('Seeds:',e); } try{ if(urlLockPending) await tryResolveLockedLink(); else render(); }catch(e){} } else if(urlLockPending){ try{ await tryResolveLockedLink(); }catch(e){} } }catch(e){ console.warn('Pull:',e); }
+    try{ const snap=await kvQuery().get(); let _studentsMerged=false; snap.forEach(function(doc){ var k=doc.id,v=doc.data().v; if(shouldSync(k)&&v!=null){ try{ if(isMergedKey(k)&&localStorage.getItem(k)!=null){ v=mergeKeyStr(k,localStorage.getItem(k),v); } if(localStorage.getItem(k)!==v){ localStorage.setItem(k,v); if(k==='tafit:students'){ var p=safeParse(v,null); if(p&&p.order&&p.order.length&&(!DB._ts||!p._ts||p._ts>=DB._ts)){ DB=p; setSyncBaseline(); _studentsMerged=true; } } } }catch(e){} } }); if(_studentsMerged){ /* llegó la versión real de la nube: los parches de una sola vez que esa versión todavía no tenga se aplican ENCIMA de ella (nunca de la copia vieja de este celular). Están guardados por bandera, así que los que ya corrieron en otro celular no se repiten. */ try{ if(window.__runSeeds) window.__runSeeds(); }catch(e){ console.warn('Seeds:',e); } try{ if(urlLockPending) await tryResolveLockedLink(); else render(); }catch(e){} } else if(urlLockPending){ try{ await tryResolveLockedLink(); }catch(e){} } }catch(e){ console.warn('Pull:',e); }
     /* las transcriptas de la nube que este celular no tenía, también a la memoria
        (antes quedaban solo en localStorage y el próximo guardado las pisaba) */
-    try{ if(active&&DB.students[active]){ LOGS=mergeLogs(LOGS,safeParse(localStorage.getItem('tafit:logs:'+active)||'[]',[])); } }catch(e){}
+    try{ if(active&&DB.students[active]){ LOGS=mergeLogs(LOGS,safeParse(localStorage.getItem('tafit:logs:'+active)||'[]',[])); CACHE=mergeDataObj(CACHE,safeParse(localStorage.getItem('tafit:data:'+active)||'{}',{})); } }catch(e){}
+    /* recuperar las semanas de Sofi/Marti si quedaron vacías (ver restoreSofiMartiWeeks) */
+    try{ if(!locked) await restoreSofiMartiWeeks(); }catch(e){ console.warn('SM weeks:',e); }
     /* push: local → cloud */
     await pushAllLocal();
     /* backup automático diario — solo desde el celular de la profe (modo bloqueado de un
@@ -3257,7 +3341,7 @@ async function initFirebase(){
           else if(data&&data.v!=null){
             var local=localStorage.getItem(k);
             var incoming=data.v;
-            if((isLogsKey(k)||isLogsDelKey(k))&&local!=null) incoming=mergeAdditive(k,local,data.v);
+            if(isMergedKey(k)&&local!=null) incoming=mergeKeyStr(k,local,data.v);
             if(local!==incoming){ localStorage.setItem(k,incoming); changed=true; }
           }
         }catch(e){}
@@ -5591,7 +5675,7 @@ async function startNewCycle(){
      dejar la CACHE vieja hace que se mezclen datos de la rutina anterior con la nueva (por
      ej. un día mostrando de golpe el ejercicio viejo a partir de cierta semana). El LOGS
      (historial de sesiones cerradas, lo que se ve en Transcripta) NO se toca acá. */
-  CACHE={};
+  CACHE=clearedCache(CACHE);
   await saveData();
   await saveDB();
   toast('✓ Nuevo ciclo iniciado para '+name,'ok');
@@ -5632,7 +5716,7 @@ async function applyTemplate(tplId,targetId){
     if(!st.cycleHistory) st.cycleHistory=[];
     st.cycleHistory.push({ start:st.cycleStart||null, end:now, routine:cp(st.routine), weeks:cp(st.weeks) });
     st.cycleStart=now;
-    CACHE={};
+    CACHE=clearedCache(CACHE);
     await saveData();
   }
   snapshotRoutine(target,'antes de aplicar plantilla "'+tpl.name+'"');
@@ -5663,7 +5747,7 @@ async function clearRoutineForFormsOnly(){
   st.cycleHistory.push({ start:st.cycleStart||null, end:now, routine:cp(st.routine), weeks:cp(st.weeks) });
   st.routine=[];
   st.cycleStart=null;
-  CACHE={};
+  CACHE=clearedCache(CACHE);
   /* 05/10/2026: sin esto, un alumno "solo con formularios" se quedaba sin NINGUNA pestaña
      (ni rutina, ni Acuerdo, ni Anamnesis) hasta que la profe se acordara de ir a tocar
      "Activar" en Formularios — que es un paso aparte, fácil de pasar por alto porque no
@@ -6732,7 +6816,8 @@ document.addEventListener('change',e=>{
     case 'qedit': { const ei=+el.dataset.ei; const f=el.dataset.f; const v=el.value;
       /* Guardar override por semana (no modifica la rutina base) */
       const ovKey='wo_w'+week+'_'+day+'_'+ei;
-      if(!CACHE[ovKey]) CACHE[ovKey]={};
+      if(!CACHE[ovKey]||CACHE[ovKey]._del) CACHE[ovKey]={};
+      CACHE[ovKey]._t=Date.now(); /* la edición más nueva gana entre celulares */
       if(f==='s'){
         const parts=v.match(/(\d+)\s*[xX×]\s*(\d+)/g);
         if(parts&&parts.length>1){
