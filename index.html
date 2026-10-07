@@ -889,7 +889,9 @@
 /* ====================================================================
    TaFit · multi-alumno · v8 (Firebase sync + offline + dúos por pestaña + timer manual)
    ==================================================================== */
-const APP_VERSION='v8-91'; /* mantener igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión */
+const APP_VERSION='v8-103'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+  07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
+  NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
 let _fromRemote=false;
 const DEVICE_ID=(()=>{ try{ let id=localStorage.getItem('tafit:devid'); if(!id){ id='d_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); localStorage.setItem('tafit:devid',id); } return id; }catch(e){ return 'd_'+Math.random().toString(36).slice(2,10); } })();
