@@ -1019,7 +1019,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-111'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-112'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -5795,22 +5795,9 @@ function saveNewRecord(exName,oldW,newW,mi){
 function showRecord(name,old,now){ var existing=document.querySelector('.record-banner'); if(existing) existing.remove(); var div=document.createElement('div'); div.className='record-banner'; div.textContent='🏆 ¡Nuevo récord en '+name+'! '+old+' kg → '+now+' kg'; var main=$('main'); if(main) main.insertBefore(div,main.firstChild); setTimeout(function(){if(div.parentNode) div.remove();},5000); }
 function updObs(v){ CACHE[OBSK()]=v; queueSave(); }
 function toggleSet(ei,si,mi,el){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CACHE[k].done=!CACHE[k].done; CACHE[k]._w=week; el.classList.toggle('on',CACHE[k].done);
-  /* 07/10/2026: al TILDAR una serie, se tildan también las siguientes que todavía no estén
-     tildadas esta semana (pedido de Tami, mismo espíritu que la copia de peso/reps). Al
-     DESTILDAR solo cambia esa serie, así se puede corregir una por una. */
-  if(CACHE[k].done){
-    const exT=routine()[day]&&routine()[day].ex[ei];
-    if(exT){
-      for(let sj=si+1; sj<exT.s; sj++){
-        const k2=K(ei,sj,mi); const existing=CACHE[k2];
-        const cur=(existing&&wOf(existing)===+week)?existing:{};
-        if(cur.done) continue;
-        cur.done=true; cur._w=week; CACHE[k2]=cur;
-        const b=document.querySelector('button.chk[data-act="toggle"][data-i="'+ei+'"][data-j="'+sj+'"][data-m="'+mi+'"]');
-        if(b) b.classList.add('on');
-      }
-    }
-  }
+  /* 07/10/2026 (19:50): Tami pidió volver atrás la tilde automática de las series
+     siguientes — cada serie se tilda SOLO cuando la toca el alumno, así se ve clarito cuál
+     hizo y cuál le falta. (El peso y las reps sí se siguen copiando a las series vacías.) */
   progress(); queueSave(); }
 function progress(){ const r=routine(); let total=0,done=0; const mi=isDuo()?member:0; let exDone=0,realExCount=0; const _hid=abPresetIdx(r[day]); r[day].ex.forEach((ex,ei)=>{ if(isBlockRow(ex)||_hid.has(ei)) return; realExCount++; let allDone=true; for(let si=0;si<ex.s;si++){ total++; const _rp=(CACHE[K(ei,si,mi)]||{}); if(wOf(_rp)===+week&&_rp.done) done++; else allDone=false; } if(allDone&&ex.s>0) exDone++; }); const pct=total?Math.round(done/total*100):0; if($('prog')) $('prog').style.width=pct+'%'; if($('proglbl')) $('proglbl').textContent=`${done}/${total} series · ${exDone}/${realExCount} ejercicios · ${pct}%`; if($('progbar2')) $('progbar2').textContent=`Vas ${exDone} de ${realExCount} ejercicios · ${pct}% completado`; const b=$('closebtn'); if(b){ b.classList.toggle('ready',pct===100); b.textContent=pct===100?'✓ Sesión completa · guardar en transcripta':'Cerrar sesión y guardar en transcripta'; } }
 
