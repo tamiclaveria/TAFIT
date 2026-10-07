@@ -185,6 +185,92 @@
   select.cell{padding:9px 2px;-webkit-appearance:none;appearance:none;background:var(--card)}
   .chk{width:30px;height:30px;border:2px solid var(--line);border-radius:9px;background:var(--card);cursor:pointer;font-size:15px;color:transparent;line-height:1}
   .chk.on{background:var(--ok);border-color:var(--ok);color:#fff}
+  /* ==== Informe v2 (07/10/2026) ==== */
+  .inf2{text-align:left;--i-ink:#241F18;--i-mute:#8A7866;--i-line:#E8DFD0;--i-br:#9B5F26;--i-acc:#E3C3A5;--i-tint:#F2ECE0;--i-bg:#FAF7F2;--i-dark:#0E0B09;color:var(--i-ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;max-width:760px;margin:0 auto 14px}
+  .inf2 *{box-sizing:border-box}
+  .inf2 .page{background:var(--i-bg);border-radius:16px;padding:14px 14px 10px;margin-bottom:12px;position:relative}
+  .inf2 h2{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:20px;margin:0 0 10px;color:var(--i-ink)}
+  .inf2 h2 small{font-family:system-ui,sans-serif;font-size:11px;color:var(--i-mute);margin-left:6px}
+  .inf2 .sec{margin-top:22px}
+  .inf2 .sec.first{margin-top:6px}
+  .inf2 .cover{background:var(--i-dark);color:#fff;border-radius:18px;padding:22px 16px 20px;text-align:center;position:relative;overflow:hidden}
+  .inf2 .cover:after{content:"";position:absolute;left:50%;top:-80px;width:340px;height:340px;margin-left:-170px;border-radius:50%;background:radial-gradient(circle,rgba(227,195,165,.22),rgba(227,195,165,0) 70%);pointer-events:none}
+  .inf2 .cover img{width:150px;height:150px;border-radius:50%;display:block;margin:0 auto 14px;box-shadow:0 0 0 4px rgba(227,195,165,.35),0 10px 30px rgba(0,0,0,.5);position:relative;z-index:1}
+  .inf2 .eyebrow{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--i-acc);font-weight:700;position:relative;z-index:1}
+  .inf2 .cover h1{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:38px;line-height:1.05;margin:8px 0 6px;color:#fff;position:relative;z-index:1}
+  .inf2 .cover .sub{font-size:13px;opacity:.85;position:relative;z-index:1}
+  .inf2 .cover .meta{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;margin-top:16px;font-size:12px;position:relative;z-index:1}
+  .inf2 .cover .meta span{display:block;color:var(--i-acc);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px}
+  .inf2 .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .inf2 .kpi{background:#fff;border:1px solid var(--i-line);border-radius:14px;padding:12px 10px}
+  .inf2 .kpi b{display:block;font-family:Georgia,serif;font-size:30px;font-weight:400;line-height:1;color:var(--i-ink)}
+  .inf2 .kpi span{display:block;font-size:10.5px;color:var(--i-mute);margin-top:6px;line-height:1.35}
+  .inf2 .kpi.hl{background:var(--i-tint);border-color:var(--i-acc)}
+  .inf2 .kpi.hl b{color:var(--i-br)}
+  .inf2 .note{background:#fff;border-left:3px solid var(--i-br);border-radius:0 12px 12px 0;padding:13px 14px;font-size:13.5px;line-height:1.6}
+  .inf2 .att{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .inf2 .aw{background:#fff;border:1px solid var(--i-line);border-radius:12px;padding:9px 6px;text-align:center}
+  .inf2 .aw-t{font-weight:800;font-size:13px}
+  .inf2 .aw-n{font-size:9.5px;color:var(--i-mute);min-height:24px;line-height:1.2;margin-top:2px}
+  .inf2 .aw-c{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:4px}
+  .inf2 .ad{width:20px;height:20px;border-radius:6px;background:var(--i-tint);border:1px solid var(--i-line);font-size:10px;line-height:19px;color:#fff;display:inline-block}
+  .inf2 .ad.on{background:var(--i-br);border-color:var(--i-br)}
+  .inf2 .legend{font-size:10.5px;color:var(--i-mute);margin-top:8px}
+  .inf2 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--i-br);vertical-align:-1px;margin:0 4px 0 10px}
+  .inf2 .legend i.off{background:var(--i-tint);border:1px solid var(--i-line)}
+  .inf2 .smalls{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .inf2 .sm{background:#fff;border:1px solid var(--i-line);border-radius:12px;padding:10px 9px 8px}
+  .inf2 .sm-n{font-size:12px;font-weight:700;min-height:30px;line-height:1.25}
+  .inf2 .sm-v{font-size:11.5px;color:var(--i-mute);margin:3px 0}
+  .inf2 .sm-v b{color:var(--i-ink)} .inf2 .sm-v b.br{color:var(--i-br)}
+  .inf2 .sm svg{width:100%;height:56px;display:block}
+  .inf2 .sm-d{font-size:9.5px;color:var(--i-mute);text-align:center}
+  .inf2 .tbl{background:#fff;border:1px solid var(--i-line);border-radius:12px;overflow:hidden}
+  .inf2 table{width:100%;border-collapse:collapse;font-size:12.5px}
+  .inf2 th{text-align:left;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--i-mute);font-weight:700;padding:8px 10px;background:var(--i-tint)}
+  .inf2 td{padding:8px 10px;border-top:1px solid var(--i-line)}
+  .inf2 .r{text-align:right;white-space:nowrap}
+  .inf2 td.up{color:var(--i-br);font-weight:800} .inf2 td.eq{color:var(--i-mute)}
+  .inf2 details.acc{background:#fff;border:1px solid var(--i-line);border-radius:12px;margin-bottom:8px;overflow:hidden}
+  .inf2 details.acc summary{list-style:none;display:flex;align-items:center;gap:10px;padding:12px 13px;cursor:pointer;background:var(--i-tint)}
+  .inf2 details.acc summary::-webkit-details-marker{display:none}
+  .inf2 .acc-t{font-weight:800;font-size:13.5px;flex:1}
+  .inf2 .acc-m{font-size:11.5px;color:var(--i-mute);text-align:right}
+  .inf2 .acc-m b{color:var(--i-br)}
+  .inf2 details.acc summary i{display:flex;transition:transform .2s}
+  .inf2 details.acc[open] summary i{transform:rotate(180deg)}
+  .inf2 details.acc .tbl{border:none;border-radius:0}
+  .inf2 details.acc th{background:#fff}
+  .inf2 .two{display:grid;grid-template-columns:1fr;gap:10px}
+  .inf2 .card{background:#fff;border:1px solid var(--i-line);border-radius:14px;padding:13px}
+  .inf2 .card h3{font-size:14px;margin:0 0 8px;color:var(--i-ink)}
+  .inf2 .card p{font-size:11.5px;color:var(--i-mute);line-height:1.45;margin:0 0 6px}
+  .inf2 .card p b.ink{color:var(--i-ink)}
+  .inf2 .gb-row{display:grid;grid-template-columns:118px 1fr 36px;align-items:center;gap:8px;font-size:12px;margin:7px 0}
+  .inf2 .gb-track{height:11px;background:var(--i-tint);border-radius:6px;overflow:hidden}
+  .inf2 .gb-track i{display:block;height:100%;background:var(--i-br);border-radius:6px}
+  .inf2 .gb-row b{text-align:right}
+  .inf2 .rec{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--i-line)}
+  .inf2 .rec:last-child{border-bottom:none}
+  .inf2 .rec-i{font-size:20px} .inf2 .rec-n{font-weight:700;font-size:12.5px} .inf2 .rec-v{font-size:12px;color:var(--i-br);font-weight:700} .inf2 .rec-v span{color:var(--i-mute);font-weight:400}
+  .inf2 ul.rv,.inf2 ul.goals{list-style:none;margin:0;padding:0;font-size:12px}
+  .inf2 ul.rv li{padding:6px 0;border-bottom:1px dashed var(--i-line)}
+  .inf2 ul.goals li{font-size:12.5px;padding:7px 0;border-bottom:1px dashed var(--i-line)}
+  .inf2 ul.goals li:before{content:"○";color:var(--i-br);margin-right:8px}
+  .inf2 .foot{display:flex;justify-content:space-between;font-size:10.5px;color:var(--i-mute);border-top:1px solid var(--i-line);padding-top:8px;margin-top:22px}
+  .inf2 .foot b{font-family:Georgia,serif;font-style:italic;font-weight:400;color:var(--i-ink);font-size:12.5px}
+  @media (min-width:600px){ .inf2 .att{grid-template-columns:repeat(6,1fr)} .inf2 .smalls{grid-template-columns:repeat(4,1fr)} .inf2 .two{grid-template-columns:1fr 1fr} }
+  .inf2-actions{display:flex;flex-direction:column;gap:8px;max-width:420px;margin:0 auto 10px}
+  .inf2-btn{font-family:inherit;font-size:14px;font-weight:800;border:none;border-radius:12px;padding:13px;background:var(--steel);color:#fff;cursor:pointer}
+  .inf2-btn.ghost{background:var(--card);color:var(--accentDk);border:1.5px solid var(--accent)}
+  /* versión PDF: ancho A4 fijo, sin bordes redondeados de "tarjeta de app" */
+  .inf2.pdf{max-width:none;width:794px;margin:0;background:#FAF7F2}
+  .inf2.pdf .page{border-radius:0;margin:0;padding:52px 52px 26px}
+  .inf2.pdf .page:first-child{min-height:1123px;display:flex;flex-direction:column}
+  .inf2.pdf .page:first-child .foot{margin-top:auto}
+  .inf2.pdf .page.flow{padding-top:30px}
+  .inf2.pdf .att{grid-template-columns:repeat(6,1fr)} .inf2.pdf .smalls{grid-template-columns:repeat(4,1fr)} .inf2.pdf .two{grid-template-columns:1fr 1fr}
+  .inf2.pdf .cover img{width:180px;height:180px}
   /* Selector de core del alumno (07/10/2026) */
   .core-pick .cp-hint{font-size:13px;color:var(--ink);line-height:1.5;margin-bottom:10px}
   .core-pick .cp-lbl{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--navy);margin:12px 0 6px;display:flex;justify-content:space-between;gap:8px}
@@ -933,7 +1019,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-108'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-109'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -5164,6 +5250,250 @@ async function shareRecord(idx){
   }
 }
 
+/* ==== Informe v2 (07/10/2026) ====
+   Diseño nuevo pedido por Tami (aprobado sobre la maqueta del Ciclo 1 de Sofi): portada con
+   el logo grande, 3 números, asistencia semana a semana, resumen escrito solo, progreso de
+   fuerza, primera vs última vez EN ACORDEÓN por grupo muscular, volumen, grupos, los que más
+   subieron, para revisar, constancia en el core, comparación con el ciclo anterior y
+   objetivos sugeridos. Nada para escribir a mano. Se ve igual en la app (acordeones
+   cerrados) y en el PDF (todo abierto, A4, varias hojas). Sin fotos ni medidas (Tami). */
+const INF2_GROUPS=[
+  ['Glúteos y piernas',/hip thrust|sentadilla|prensa|femoral|cuadriceps|abduc|aduc|gemelo|step up|caminata|patada|peso muerto|estocada|bulgara|isquio|pistol/],
+  ['Espalda',/remo|dorsal|dominada|espinal|pull|jalon|lachine|hiperext|superman/],
+  ['Hombros',/hombro|volada|elevacion lateral|militar/],
+  ['Pecho y brazos',/press plano|press inclinado|press de pecho|press cerrado|press frances|apertura|biceps|triceps|fondos|flexion|curl(?! femoral)/],
+  ['Core',/plancha|pallof|barquito|crunch|sit up|abdom|giro ruso|mountain|v-ups|bicicleta|bird dog|rueda|tijeras|pataditas/],
+];
+function inf2Norm(n){ return String(n||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim(); }
+function inf2Num(x){ const m=String(x==null?'':x).replace(',','.').match(/\d+(\.\d+)?/); return m?parseFloat(m[0]):null; }
+function inf2Group(n){ const k=inf2Norm(n); const g=INF2_GROUPS.find(function(g){ return g[1].test(k); }); return g?g[0]:'Otros'; }
+function inf2Kg(x){ return (Math.round(x*10)/10).toString().replace('.',',')+' kg'; }
+const INF2_MESES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+function inf2DateLong(iso){ const d=new Date(iso); return d.getDate()+' '+INF2_MESES[d.getMonth()]+' '+d.getFullYear(); }
+function inf2DateShort(iso){ const d=new Date(iso); return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0'); }
+/* series de una sesión para una persona (dúo: por nombre; individual: x.sets) */
+function inf2SetsOf(x,memberName){
+  if(x.members){ if(!memberName) return null; const me=x.members.find(function(mm){ return mm.name===memberName; }); return me?me.sets:null; }
+  return memberName&&x.members?null:(x.sets||null);
+}
+function computeInforme2(cycle,memberName){
+  const logs=logsForCycle(cycle).map(function(o){ return o.e; }).slice().sort(function(a,b){ return new Date(a.date)-new Date(b.date); });
+  const sessions=[], perEx={}, names={}, weekVol={}, weekDays={}, groupVol={};
+  logs.forEach(function(l){
+    let trained=false;
+    (l.ex||[]).forEach(function(x){
+      const sets=inf2SetsOf(x,memberName); if(!sets||!sets.length) return;
+      trained=true;
+      const k=inf2Norm(x.n); if(!names[k]) names[k]=x.n;
+      const ws=sets.map(function(s){ return inf2Num(s.w); }).filter(function(w){ return w&&w>0&&w<300; });
+      if(ws.length){ (perEx[k]=perEx[k]||[]).push({d:l.date,w:Math.max.apply(null,ws)}); }
+      let v=0; sets.forEach(function(s){ const w=inf2Num(s.w)||0, r=inf2Num(s.r)||0; if(s.done&&w<300) v+=w*r; });
+      weekVol[l.week]=(weekVol[l.week]||0)+v;
+      const g=inf2Group(x.n); groupVol[g]=(groupVol[g]||0)+v;
+    });
+    if(trained){ sessions.push(l); (weekDays[l.week]=weekDays[l.week]||{})[l.dayName]=true; }
+  });
+  const routineDays=(cycle.routine||[]).map(function(d){ return d.day; });
+  const weeksArr=cycle.weeksArr||weeks();
+  const weekIdx=Object.keys(weekDays).map(Number).sort(function(a,b){ return a-b; });
+  const uniqueDays=weekIdx.reduce(function(a,w){ return a+Object.keys(weekDays[w]).length; },0);
+  const planned=weekIdx.length*Math.max(1,routineDays.length);
+  const adher=planned?Math.min(100,Math.round(uniqueDays/planned*100)):0;
+  const prog=[];
+  Object.keys(perEx).forEach(function(k){
+    const v=perEx[k]; if(v.length<2) return;
+    const a=v[0].w, b=v[v.length-1].w; if(!(a>0)) return;
+    prog.push({ n:names[k], a:a, b:b, pct:Math.round((b-a)/a*100), serie:v, g:inf2Group(names[k]) });
+  });
+  const ups=prog.filter(function(x){ return x.pct>0; }).sort(function(x,y){ return y.pct-x.pct; });
+  const downs=prog.filter(function(x){ return x.pct<0; }).sort(function(x,y){ return x.pct-y.pct; });
+  const avgUp=prog.length?Math.round(prog.reduce(function(a,x){ return a+x.pct; },0)/prog.length):0;
+  const totalVol=Object.keys(weekVol).reduce(function(a,k){ return a+weekVol[k]; },0);
+  /* core elegido por la alumna (sesiones con e.core, desde v8-104) */
+  const coreSes=logs.filter(function(l){ return l.core&&l.core.done&&l.core.done.length; });
+  const coreFmt={}, coreEx={};
+  coreSes.forEach(function(l){ coreFmt[l.core.fmt]=(coreFmt[l.core.fmt]||0)+1; (l.core.done||[]).forEach(function(n){ coreEx[n]=(coreEx[n]||0)+1; }); });
+  const obs=logs.map(function(l){ return (l.obs||'').trim(); }).filter(Boolean);
+  return { sessions:sessions, uniqueDays:uniqueDays, planned:planned, adher:adher, weekIdx:weekIdx, weekDays:weekDays, weeksArr:weeksArr,
+    routineDays:routineDays, prog:prog, ups:ups, downs:downs, avgUp:avgUp, weekVol:weekVol, groupVol:groupVol, totalVol:totalVol,
+    coreSes:coreSes, coreFmt:coreFmt, coreEx:coreEx, obs:obs,
+    first:sessions.length?sessions[0].date:null, last:sessions.length?sessions[sessions.length-1].date:null };
+}
+function inf2Spark(serie){
+  const w=150,h=62,pad=8, vals=serie.map(function(s){ return s.w; });
+  let lo=Math.min.apply(null,vals), hi=Math.max.apply(null,vals); if(hi===lo){ lo-=1; hi+=1; }
+  const pts=vals.map(function(v,i){ return [pad+i*(w-2*pad)/Math.max(1,vals.length-1), h-pad-(v-lo)/(hi-lo)*(h-2*pad)]; });
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><line x1="${pad}" x2="${w-pad}" y1="${h-pad}" y2="${h-pad}" stroke="#E8DFD0"/><polyline points="${pts.map(function(p){ return p[0].toFixed(1)+','+p[1].toFixed(1); }).join(' ')}" fill="none" stroke="#9B5F26" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>${pts.map(function(p){ return `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3.2" fill="#9B5F26" stroke="#fff" stroke-width="1.5"/>`; }).join('')}</svg>`;
+}
+function inf2WeekBars(d){
+  const ks=Object.keys(d.weekVol).map(Number).sort(function(a,b){ return a-b; }); if(!ks.length) return '';
+  const mx=Math.max.apply(null,ks.map(function(k){ return d.weekVol[k]; }))||1;
+  const W=300,H=150,pad=22, bw=Math.min(44,(W-2*pad)/ks.length-8), gap=ks.length>1?(W-2*pad-bw*ks.length)/(ks.length-1):0;
+  let out='';
+  ks.forEach(function(k,i){
+    const v=d.weekVol[k], bh=Math.max(2,(H-52)*v/mx), x=pad+i*(bw+gap), y=H-24-bh, r=Math.min(4,bh/2);
+    out+=`<path d="M${x},${H-24} V${y+r} Q${x},${y} ${x+r},${y} H${x+bw-r} Q${x+bw},${y} ${x+bw},${y+r} V${H-24} Z" fill="#9B5F26"/>`;
+    out+=`<text x="${x+bw/2}" y="${y-6}" text-anchor="middle" font-size="10.5" fill="#241F18" font-weight="700">${(v/1000).toFixed(1).replace('.',',')} t</text>`;
+    const lbl=(d.weeksArr[k]&&d.weeksArr[k].t)||('S'+(k+1));
+    out+=`<text x="${x+bw/2}" y="${H-8}" text-anchor="middle" font-size="10.5" fill="#8A7866">${esc(lbl)}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%"><line x1="${pad-6}" x2="${W-pad+6}" y1="${H-24}" y2="${H-24}" stroke="#E8DFD0"/>${out}</svg>`;
+}
+function informe2HTML(d,opts){
+  const s=DB.students[active];
+  const name=opts.displayName;
+  const fmtL={circuito:'Circuito',amrap:'AMRAP',emom:'EMOM',tabata:'Tabata'};
+  const logoSrc='./logo-principal.png';
+  /* asistencia */
+  const nWeeks=Math.max(d.weeksArr.length, d.weekIdx.length?d.weekIdx[d.weekIdx.length-1]+1:0);
+  let att='';
+  for(let i=0;i<nWeeks;i++){
+    const w=d.weeksArr[i]||{t:'S'+(i+1),n:''}; const done=d.weekDays[i]||{};
+    att+=`<div class="aw"><div class="aw-t">${esc(w.t)}</div><div class="aw-n">${esc(w.n||'')}</div><div class="aw-c">${d.routineDays.map(function(dn){ return `<span class="ad${done[dn]?' on':''}">${done[dn]?'✓':''}</span>`; }).join('')}</div></div>`;
+  }
+  /* resumen automático */
+  const gv=d.groupVol, gTot=Object.keys(gv).reduce(function(a,k){ return a+gv[k]; },0);
+  const topG=Object.keys(gv).sort(function(a,b){ return gv[b]-gv[a]; })[0];
+  const t1=d.ups[0];
+  const resumen=`${esc(name)} completó <b>${d.sessions.length} sesiones</b> en ${d.weekIdx.length} semana${d.weekIdx.length===1?'':'s'}, con <b>${d.adher}% de asistencia</b> a los días planificados. `
+    +(t1?`Su mayor avance fue en <b>${esc(t1.n)}</b>, que pasó de ${inf2Kg(t1.a)} a ${inf2Kg(t1.b)}. `:'')
+    +(d.prog.length?`En total mejoró <b>${d.ups.length} de ${d.prog.length} ejercicios</b>, con una suba promedio de fuerza del <b>${d.avgUp}%</b>. `:'')
+    +(topG&&gTot?`El grupo más trabajado fue <b>${esc(topG.toLowerCase())}</b> (${Math.round(gv[topG]/gTot*100)}% del volumen).`:'');
+  /* progreso de fuerza (4 que más subieron) */
+  const smalls=d.ups.slice(0,4).map(function(x){ return `<div class="sm"><div class="sm-n">${esc(x.n)}</div><div class="sm-v"><b>${inf2Kg(x.a)}</b> → <b class="br">${inf2Kg(x.b)}</b></div>${inf2Spark(x.serie)}<div class="sm-d">${inf2DateShort(x.serie[0].d)} — ${inf2DateShort(x.serie[x.serie.length-1].d)}</div></div>`; }).join('');
+  /* acordeón por grupo */
+  const prow=function(x){ const up=x.pct>0; return `<tr><td>${esc(x.n)}</td><td class="r">${inf2Kg(x.a)}</td><td class="r">${inf2Kg(x.b)}</td><td class="r ${up?'up':'eq'}">${up?'▲':'＝'} ${Math.abs(x.pct)}%</td></tr>`; };
+  let acc='';
+  INF2_GROUPS.map(function(g){ return g[0]; }).concat(['Otros']).forEach(function(gn){
+    const items=d.prog.filter(function(x){ return x.g===gn&&x.pct>=0; }).sort(function(a,b){ return b.pct-a.pct; });
+    if(!items.length) return;
+    const nup=items.filter(function(x){ return x.pct>0; }).length;
+    acc+=`<details class="acc"${opts.pdf?' open':''}><summary><span class="acc-t">${esc(gn)}</span><span class="acc-m">${items.length} ejercicio${items.length===1?'':'s'} · <b>${nup} ${nup===1?'mejoró':'mejoraron'}</b></span><i><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="#8A7866" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></i></summary><div class="tbl"><table><tr><th>Ejercicio</th><th class="r">Empezó</th><th class="r">Terminó</th><th class="r">Cambio</th></tr>${items.map(prow).join('')}</table></div></details>`;
+  });
+  const groupRows=Object.keys(gv).filter(function(k){ return gv[k]>0; }).sort(function(a,b){ return gv[b]-gv[a]; }).map(function(k){
+    const mx=Math.max.apply(null,Object.keys(gv).map(function(z){ return gv[z]; }));
+    return `<div class="gb-row"><span class="gb-l">${esc(k)}</span><span class="gb-track"><i style="width:${Math.round(gv[k]/mx*100)}%"></i></span><b>${Math.round(gv[k]/gTot*100)}%</b></div>`; }).join('');
+  const recs=d.ups.slice().sort(function(a,b){ return (b.b-b.a)-(a.b-a.a); }).slice(0,3).map(function(x){ return `<div class="rec"><div class="rec-i">🏆</div><div><div class="rec-n">${esc(x.n)}</div><div class="rec-v">+${inf2Kg(x.b-x.a)} <span>(${inf2Kg(x.a)} → ${inf2Kg(x.b)})</span></div></div></div>`; }).join('');
+  const review=d.downs.map(function(x){ return `<li><b>${esc(x.n)}</b>: ${inf2Kg(x.a)} → ${inf2Kg(x.b)}</li>`; }).join('');
+  const obsHint=d.obs.length?` En sus observaciones anotó: “${esc(d.obs[d.obs.length-1].slice(0,90))}”.`:'';
+  const goals=d.ups.slice().sort(function(a,b){ return b.b-a.b; }).slice(0,3).map(function(x){ return `<li><b>${esc(x.n)}</b>: pasar de ${inf2Kg(x.b)} a <b>${inf2Kg(x.b+(x.b>=15?2.5:1))}</b></li>`; }).join('');
+  /* core */
+  let coreH='';
+  if(d.coreSes.length){
+    const fTop=Object.keys(d.coreFmt).sort(function(a,b){ return d.coreFmt[b]-d.coreFmt[a]; })[0];
+    const exTop=Object.keys(d.coreEx).sort(function(a,b){ return d.coreEx[b]-d.coreEx[a]; }).slice(0,3);
+    coreH=`<div class="card"><h3>🔥 Constancia en el core</h3><p>Hizo su bloque de abdominales/espinal en <b class="ink">${d.coreSes.length} de ${d.sessions.length} sesiones</b>. Formato preferido: <b class="ink">${esc(fmtL[fTop]||fTop)}</b>.</p>${exTop.length?`<ul class="rv">${exTop.map(function(n){ return `<li><b>${esc(n)}</b> · ${d.coreEx[n]} ${d.coreEx[n]===1?'vez':'veces'}</li>`; }).join('')}</ul>`:''}</div>`;
+  }
+  /* comparación con el ciclo anterior */
+  let cmpH='';
+  if(opts.prev&&opts.prev.sessions.length){
+    const p=opts.prev;
+    const row=function(lbl,a,b){ return `<tr><td>${lbl}</td><td class="r">${a}</td><td class="r"><b>${b}</b></td></tr>`; };
+    cmpH=`<div class="sec avoid"><h2>Comparado con el ciclo anterior</h2><div class="tbl"><table><tr><th></th><th class="r">Ciclo anterior</th><th class="r">Este ciclo</th></tr>${row('Sesiones',p.sessions.length,d.sessions.length)}${row('Asistencia',p.adher+'%',d.adher+'%')}${row('Fuerza promedio','+'+p.avgUp+'%','+'+d.avgUp+'%')}${row('Volumen total',Math.round(p.totalVol/1000)+' t',Math.round(d.totalVol/1000)+' t')}</table></div></div>`;
+  }
+  const foot=`<div class="foot"><b>Tamara Claveria</b><span>TAFIT · Entrenadora personal</span></div>`;
+  const dateRange=d.first?(inf2DateLong(d.first)+' — '+inf2DateLong(d.last)):'—';
+  const members=membersOf();
+  const subtitle=(opts.memberName&&members.length>1?'Entrena en dúo con '+members.filter(function(n){ return n!==opts.memberName; }).join(', ')+' · ':'')+'Rutina de '+d.routineDays.length+' día'+(d.routineDays.length===1?'':'s');
+  return `<div class="inf2${opts.pdf?' pdf':''}">
+  <section class="page">
+    <div class="cover"><img src="${logoSrc}" alt="TaFit"><div class="eyebrow">Informe de progreso · ${esc(opts.cycleLabel)}</div><h1>${esc(name)}</h1><div class="sub">${esc(subtitle)}</div>
+      <div class="meta"><div><span>Período</span>${dateRange}</div><div><span>Semanas</span>${d.weekIdx.length} de ${d.weeksArr.length}</div><div><span>Profe</span>Tamara Claveria</div></div></div>
+    <div class="sec avoid"><h2>En tres números</h2><div class="kpis">
+      <div class="kpi"><b>${d.sessions.length}</b><span>sesiones entrenadas<br>${d.uniqueDays} días distintos de rutina</span></div>
+      <div class="kpi hl"><b>${d.adher}%</b><span>de los días planificados<br>en las ${d.weekIdx.length} semanas que entrenó</span></div>
+      <div class="kpi"><b>${d.avgUp>=0?'+':''}${d.avgUp}%</b><span>de fuerza promedio<br>en ${d.prog.length} ejercicios medidos</span></div></div></div>
+    <div class="sec avoid"><h2>Asistencia semana a semana</h2><div class="att">${att}</div><div class="legend">Cada cuadradito es un día de la rutina<i></i>entrenado<i class="off"></i>pendiente</div></div>
+    <div class="sec avoid"><h2>Resumen del ciclo</h2><div class="note">${resumen}</div></div>
+    ${opts.pdf?foot:''}
+  </section>
+  <section class="page flow">
+    ${smalls?`<div class="sec avoid first"><h2>Progreso de fuerza <small>peso máximo de cada sesión</small></h2><div class="smalls">${smalls}</div></div>`:''}
+    ${acc?`<div class="sec"><h2>Primera vez vs. última vez <small>${d.ups.length} ejercicio${d.ups.length===1?'':'s'} mejoraron</small></h2>${acc}</div>`:''}
+    <div class="sec two">
+      <div class="card avoid"><h3>Volumen por semana</h3><p>Kilos × repeticiones de todas las series completadas. Total: <b class="ink">${Math.round(d.totalVol/1000)} toneladas</b>.</p>${inf2WeekBars(d)}</div>
+      <div class="card avoid"><h3>Qué se trabajó más</h3><p>Reparto del volumen por grupo muscular.</p>${groupRows}</div>
+    </div>
+    <div class="sec two">
+      ${recs?`<div class="card avoid"><h3>🏆 Los que más subieron</h3>${recs}</div>`:''}
+      ${review?`<div class="card avoid"><h3>Para revisar juntas</h3><p>Bajaron respecto del inicio (puede ser por un cambio de máquina o de técnica).${obsHint}</p><ul class="rv">${review}</ul></div>`:''}
+    </div>
+    ${coreH?`<div class="sec avoid">${coreH}</div>`:''}
+    ${cmpH}
+    ${goals?`<div class="sec avoid"><h2>Próximo ciclo</h2><div class="card"><p>Objetivos sugeridos según cómo terminó el ciclo (un pasito más en sus ejercicios más fuertes):</p><ul class="goals">${goals}</ul></div></div>`:''}
+    ${opts.pdf?'':foot}
+  </section>
+</div>`;
+}
+function renderInforme2(m,cycles,cIdx,rm,displayName){
+  const cycle=cycles[cIdx];
+  const d=computeInforme2(cycle,rm.name);
+  const prev=cIdx>0?computeInforme2(cycles[cIdx-1],rm.name):null;
+  const cycleLabel=(cIdx===cycles.length-1)?(cycles.length>1?'Ciclo '+(cIdx+1)+' · actual':'Ciclo actual'):('Ciclo '+(cIdx+1)+' completo');
+  const opts={displayName:displayName, memberName:rm.name, prev:prev, cycleLabel:cycleLabel};
+  if(!d.sessions.length){ const empty=document.createElement('div'); empty.className='note'; empty.textContent=displayName+' todavía no tiene sesiones en este ciclo — el informe se arma solo con datos reales de entrenamiento.'; m.appendChild(empty); return; }
+  const box=document.createElement('div'); box.innerHTML=informe2HTML(d,opts); m.appendChild(box.firstElementChild);
+  const actions=document.createElement('div'); actions.className='inf2-actions no-print';
+  actions.innerHTML=`<button type="button" data-act="inf2Pdf" class="inf2-btn">📄 Descargar / compartir PDF</button><button type="button" data-act="shareInforme" class="inf2-btn ghost">🖼 Imagen para WhatsApp</button>`;
+  m.appendChild(actions);
+  window.__inf2Last={d:d,opts:opts};
+}
+function inf2LoadScript(src){ return new Promise(function(res,rej){ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=rej; document.head.appendChild(s); }); }
+/* Arma el PDF: dibuja el informe (versión "pdf", todo abierto, ancho A4) en un canvas y lo
+   corta en hojas A4 sin partir ningún bloque por la mitad. Después lo comparte con el menú
+   del celular (WhatsApp, Guardar en Archivos, Imprimir…) — en iPhone con la app instalada
+   en la pantalla de inicio, la descarga directa a veces no hacía nada (reportado por Tami). */
+async function informe2PDF(){
+  const last=window.__inf2Last; if(!last){ toast('Abrí el informe primero','warn'); return; }
+  toast('Armando el PDF…');
+  try{
+    if(!window.html2canvas) await inf2LoadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    if(!window.jspdf||!window.jspdf.jsPDF) await inf2LoadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+  }catch(e){ toast('Para el PDF hace falta señal la primera vez','warn'); return; }
+  const PW=794, PH=1123, M=34; /* A4 a 96 dpi, margen arriba/abajo */
+  const host=document.createElement('div'); host.style.cssText='position:fixed;left:-20000px;top:0;width:'+PW+'px;z-index:-1';
+  host.innerHTML=informe2HTML(last.d,Object.assign({},last.opts,{pdf:true}));
+  document.body.appendChild(host);
+  try{
+    const imgs=Array.from(host.querySelectorAll('img')); await Promise.all(imgs.map(function(im){ return im.complete?0:new Promise(function(r){ im.onload=im.onerror=r; }); }));
+    const root=host.firstElementChild; const top0=root.getBoundingClientRect().top;
+    /* puntos donde se puede cortar la hoja sin partir nada */
+    const cuts=Array.from(root.querySelectorAll('.page,.sec,.avoid,.card,details.acc,details.acc tr,.kpis,.att,.cover')).map(function(el){ return Math.round(el.getBoundingClientRect().bottom-top0); });
+    const firstPageEnd=Math.round(root.querySelector('.page').getBoundingClientRect().bottom-top0);
+    const total=Math.round(root.getBoundingClientRect().height);
+    const canvas=await window.html2canvas(root,{scale:2,backgroundColor:'#FAF7F2',useCORS:true,logging:false,windowWidth:PW});
+    const sc=canvas.width/PW;
+    const { jsPDF }=window.jspdf; const doc=new jsPDF({unit:'px',format:[PW,PH],hotfixes:['px_scaling']});
+    let start=0, page=0;
+    while(start<total-4){
+      const room=PH-2*M;
+      let end=Math.min(total,start+room);
+      if(page===0) end=Math.min(total,firstPageEnd,PH);
+      else if(end<total){ const ok=cuts.filter(function(c){ return c>start+120&&c<=end; }); if(ok.length) end=Math.max.apply(null,ok); }
+      const pc=document.createElement('canvas'); pc.width=PW*sc; pc.height=PH*sc; const ctx=pc.getContext('2d');
+      ctx.fillStyle='#FAF7F2'; ctx.fillRect(0,0,pc.width,pc.height);
+      const yOff=page===0?0:M;
+      ctx.drawImage(canvas,0,start*sc,canvas.width,(end-start)*sc,0,yOff*sc,canvas.width,(end-start)*sc);
+      if(page>0){ ctx.fillStyle='#8A7866'; ctx.font=(11*sc)+'px system-ui,sans-serif'; ctx.textAlign='right'; ctx.fillText('TAFIT · Tamara Claveria · '+(page+1),(PW-56)*sc,(PH-14)*sc); }
+      if(page>0) doc.addPage([PW,PH]);
+      doc.addImage(pc.toDataURL('image/jpeg',0.92),'JPEG',0,0,PW,PH);
+      start=end; page++;
+      if(page>12) break;
+    }
+    const fname='Informe_'+String(last.opts.displayName||'alumno').replace(/\s+/g,'_')+'.pdf';
+    const blob=doc.output('blob');
+    const file=new File([blob],fname,{type:'application/pdf'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      try{ await navigator.share({files:[file],title:'Informe de progreso · '+last.opts.displayName}); }catch(e){ if(!(e&&e.name==='AbortError')) throw e; }
+    } else {
+      const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=fname; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); },60000);
+    }
+    toast('PDF listo ✓','ok');
+  }catch(err){ console.warn('PDF:',err); toast('No se pudo generar el PDF','warn'); }
+  finally{ host.remove(); }
+}
+
 function renderResumen(){
   const m=$('main'); m.innerHTML='';
   const s=DB.students[active];
@@ -5209,6 +5539,10 @@ function renderResumen(){
     const empty=document.createElement('div'); empty.className='note'; empty.textContent=`${displayName} todavía no cerró ninguna sesión — el informe se arma solo con datos reales de entrenamiento.`; m.appendChild(empty);
     return;
   }
+  /* 07/10/2026: informe nuevo (ver "Informe v2"). El diseño anterior queda abajo, sin usar,
+     por si hubiera que volver atrás rápido. */
+  renderInforme2(m,cycles,cIdx,rm,displayName);
+  return;
 
   const inf=computeInformeAuto(sum,rm.name);
   const rangeStr=sum.startDate&&sum.endDate?fmtShort(sum.startDate)+' — '+fmtShort(sum.endDate):'—';
@@ -6678,6 +7012,7 @@ document.addEventListener('click',e=>{
     case 'coreSave': coreSaveChoice(); break;
     case 'coreEdit': coreStartEdit(); break;
     case 'coreDone': coreToggleDone(el.dataset.v); break;
+    case 'inf2Pdf': informe2PDF(); break;
     case 'leg': setLeg(el.dataset.w, el.dataset.v); break;
     case 'alarm': toggleAlarm(el.dataset.a); break;
     case 'rest': startRest(+el.dataset.sec); break;
