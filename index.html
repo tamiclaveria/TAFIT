@@ -185,6 +185,28 @@
   select.cell{padding:9px 2px;-webkit-appearance:none;appearance:none;background:var(--card)}
   .chk{width:30px;height:30px;border:2px solid var(--line);border-radius:9px;background:var(--card);cursor:pointer;font-size:15px;color:transparent;line-height:1}
   .chk.on{background:var(--ok);border-color:var(--ok);color:#fff}
+  /* Selector de core del alumno (07/10/2026) */
+  .core-pick .cp-hint{font-size:13px;color:var(--ink);line-height:1.5;margin-bottom:10px}
+  .core-pick .cp-lbl{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--navy);margin:12px 0 6px;display:flex;justify-content:space-between;gap:8px}
+  .core-pick .cp-lbl span{font-weight:700;text-transform:none;letter-spacing:0;color:var(--mute)}
+  .core-pick .cp-lbl span.ok{color:var(--accentDk)}
+  .core-pick .cp-chips{display:flex;flex-wrap:wrap;gap:6px}
+  .core-pick .cp-chip{font-family:inherit;font-size:12.5px;font-weight:600;color:var(--ink);background:var(--tint2);border:1.5px solid var(--line);border-radius:999px;padding:7px 12px;cursor:pointer}
+  .core-pick .cp-chip.on{background:var(--accent);border-color:var(--accentDk);color:#241F18;font-weight:800}
+  .core-pick .cp-go{display:block;width:100%;margin-top:14px;font-family:inherit;font-size:14px;font-weight:800;color:#fff;background:var(--steel);border:none;border-radius:11px;padding:12px;cursor:pointer}
+  .core-pick .cp-go:disabled{background:var(--tint2);color:var(--mute);cursor:default}
+  .core-pick .cp-title{font-size:16px;font-weight:800;color:var(--navy);margin-bottom:4px}
+  .core-pick .cp-desc{font-size:12.5px;color:var(--mute);line-height:1.5;margin-bottom:10px}
+  .core-pick .cp-timer{margin-bottom:6px;background:var(--steel);border:1.5px solid var(--steel);color:#fff;font-size:12.5px;font-weight:700;padding:9px 14px;border-radius:9px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:inherit}
+  .core-pick .cp-list{margin-top:6px}
+  .core-pick .cp-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--light)}
+  .core-pick .cp-row:last-child{border-bottom:none}
+  .core-pick .cp-n{flex:none;width:22px;height:22px;border-radius:50%;background:var(--tint2);color:var(--accentDk);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .core-pick .cp-info{flex:1;min-width:0}
+  .core-pick .cp-name{font-size:13.5px;font-weight:700;color:var(--navy)}
+  .core-pick .cp-tag{font-style:normal;font-size:10px;font-weight:700;color:var(--accentDk);background:var(--tint2);border-radius:6px;padding:1px 6px;margin-left:4px}
+  .core-pick .cp-dose{font-size:12px;color:var(--mute);margin-top:2px}
+  .core-pick .cp-change{margin-top:8px;font-family:inherit;font-size:12px;font-weight:700;color:var(--accentDk);background:none;border:none;padding:4px 0;cursor:pointer;text-decoration:underline}
 
   details.rm{margin-top:9px;border:1px solid var(--line);border-radius:10px;background:var(--card);overflow:hidden}
   details.rm summary{list-style:none;cursor:pointer;padding:9px 12px;font-size:12px;font-weight:700;color:var(--steel);display:flex;justify-content:space-between;align-items:center}
@@ -1056,6 +1078,117 @@ function addAbFinisher(di,id){
   toast('Bloque agregado al principio del día — revisalo y tocá "Guardar rutina" ✓','ok');
   renderEdit();
 }
+/* ==== Selector de core del alumno — 07/10/2026 ====
+   Pedido de Tami: en vez de que el alumno vea el bloque de abdominales/espinal ya armado,
+   que él elija AL PRINCIPIO de la rutina cómo hacerlo (Circuito / AMRAP / EMOM / Tabata) y
+   qué ejercicios: al menos 2 abdominales y 1 espinal. La elección queda guardada en el
+   alumno (st.abChoice) para la próxima vez, y la puede cambiar cuando quiera.
+   Solo aparece en los días que tienen el bloque prearmado al principio (el que agrega
+   "+ Agregar bloque de abdominales/espinal"): ese bloque y sus ejercicios dejan de
+   mostrarse en la vista de Rutina, pero NO se borran de los datos — si Tami saca el bloque
+   en Editar, ese día deja de mostrar el selector. */
+const CORE_CATALOG=[
+  {id:'plancha',grp:'ab',n:'Plancha abdominal',dose:'30 seg',tip:'Cuerpo en línea recta, abdomen firme, sin dejar caer la cadera.',vid:'https://www.youtube.com/watch?v=LKd2gK40YCY'},
+  {id:'planchalat',grp:'ab',n:'Plancha lateral',dose:'20 seg por lado',tip:'Cuerpo en línea recta de pies a cabeza, cadera arriba sin caer.',vid:'https://www.youtube.com/watch?v=kyOeSuh7LLo'},
+  {id:'mountain',grp:'ab',n:'Mountain climbers',dose:'20 reps',tip:'Cadera estable, llevá la rodilla al pecho sin que suba la cola.',vid:'https://www.youtube.com/watch?v=0MQF6Id1tp0'},
+  {id:'girorruso',grp:'ab',n:'Giro ruso',dose:'20 reps (10 por lado)',tip:'Talones apenas despegados del piso, girá desde el torso, espalda recta.',vid:'https://www.youtube.com/watch?v=hdSyLWfRJHc'},
+  {id:'bici',grp:'ab',n:'Bicicleta (crunch bicicleta)',dose:'20 reps',tip:'Codo hacia la rodilla contraria, sin tirar del cuello con las manos.',vid:'https://www.youtube.com/watch?v=dYxamPVcKvk'},
+  {id:'vups',grp:'ab',n:'Abdominales en V (V-ups)',dose:'10 reps',tip:'Subí piernas y torso a la vez formando una V, sin impulso.',vid:'https://www.youtube.com/watch?v=n78J6ajuCbI'},
+  {id:'crunchmaq',grp:'ab',n:'Crunch en máquina',dose:'15 reps',tip:'Subí con el abdomen, no con el cuello. Controlá la bajada.',vid:'https://www.youtube.com/watch?v=dJqB4oA4sdA'},
+  {id:'elevcolg',grp:'ab',n:'Elevación de piernas colgado',dose:'12 reps',tip:'Evitá el balanceo, subí con control usando el abdomen.',vid:'https://www.youtube.com/watch?v=F9wTR13Cd3M'},
+  {id:'elevpiso',grp:'ab',n:'Elevación de piernas en el piso',dose:'12 reps',tip:'Zona lumbar apoyada en el piso, bajá solo hasta donde controles.',vid:'https://www.youtube.com/watch?v=eEbq5_AIgpo'},
+  {id:'superman',grp:'esp',n:'Superman (extensión de espalda)',dose:'10 reps',tip:'Subí a la vez pecho y piernas sin impulso, apretando zona lumbar y glúteos.',vid:'https://www.youtube.com/watch?v=I2w92FymIj8'},
+  {id:'hiperext',grp:'esp',n:'Hiperextensión en banco romano',dose:'10 reps',tip:'Bajá con control, subí sin arquear de más la zona lumbar arriba.',vid:'https://www.youtube.com/watch?v=ye-dpRzXaOg'},
+];
+const CORE_FMTS=[
+  {v:'circuito',l:'🔁 Circuito'},
+  {v:'amrap',l:'⏳ AMRAP'},
+  {v:'emom',l:'🕐 EMOM'},
+  {v:'tabata',l:'⏱ Tabata'},
+];
+let coreDraft=null, coreDraftFor=null; /* elección en curso mientras el alumno está eligiendo (null = no está editando) y de qué alumno es */
+function coreItem(id){ return CORE_CATALOG.find(function(c){ return c.id===id; }); }
+function coreChoiceValid(c){
+  if(!c||!c.fmt||!Array.isArray(c.ex)) return false;
+  if(!CORE_FMTS.some(function(f){ return f.v===c.fmt; })) return false;
+  const items=c.ex.map(coreItem).filter(Boolean);
+  return items.filter(function(x){ return x.grp==='ab'; }).length>=2 && items.filter(function(x){ return x.grp==='esp'; }).length>=1;
+}
+/* Índices del bloque prearmado de core al principio de un día (cartel + sus ejercicios),
+   para no mostrarlos en la vista de Rutina cuando el alumno elige el suyo. */
+function abPresetIdx(d){
+  const out=new Set();
+  if(!d||!d.ex||!d.ex.length||!isBlockRow(d.ex[0])) return out;
+  const title=blockTitleClean(d.ex[0]);
+  const p=AB_CORE_BLOCKS.find(function(x){ return x.label===title; }); if(!p) return out;
+  out.add(0);
+  const names=p.exercises.map(function(e){ return e.n; });
+  for(let i=1;i<d.ex.length&&i<=names.length;i++){ if(names.indexOf(d.ex[i].n)>=0) out.add(i); else break; }
+  return out;
+}
+function coreSessionKey(){ return 'core|'+day; }
+function coreDoneList(){ const v=CACHE[coreSessionKey()]; return (v&&wOf(v)===+week&&Array.isArray(v.done))?v.done:[]; }
+/* Cómo se arma el temporizador y la explicación según el formato y cuántos ejercicios eligió */
+function corePlan(fmt,n){
+  if(fmt==='circuito') return {title:'Circuito de core · 3 vueltas', desc:`3 vueltas seguidas de los ${n} ejercicios: 40″ de trabajo y 20″ de pausa entre cada uno. Al terminar cada vuelta, 1 minuto de descanso.`, work:40, rest:20, rounds:n*3, format:'tabata', dose:'40 seg por vuelta'};
+  if(fmt==='amrap'){ const min=n>=5?10:8; return {title:`AMRAP ${min}′ de core`, desc:`Tantas vueltas como puedas en ${min} minutos, sin descanso fijo, haciendo las repeticiones de cada ejercicio. Anotá cuántas vueltas completaste en Observaciones.`, work:min*60, rest:0, rounds:1, format:'amrap', dose:null}; }
+  if(fmt==='emom'){ const r=n*3; return {title:`EMOM ${r}′ de core`, desc:`Cada minuto, en el minuto, durante ${r} minutos: un ejercicio por minuto rotando en este orden (3 ciclos). Lo que sobre del minuto es descanso.`, work:60, rest:0, rounds:r, format:'emom', dose:null}; }
+  const r=Math.max(8,n*2); return {title:`Tabata ${Math.round(r/2)}′ de core`, desc:`20″ de trabajo / 10″ de descanso, ${r} vueltas (${Math.round(r/2)} minutos), rotando los ejercicios en este orden.`, work:20, rest:10, rounds:r, format:'tabata', dose:'20 seg'};
+}
+function coreCardHTML(){
+  const st=DB.students[active];
+  const saved=st.abChoice;
+  if(coreDraft&&coreDraftFor!==active) coreDraft=null;
+  const editing=coreDraft!==null||!coreChoiceValid(saved);
+  let h='<div class="eyebrow">🔥 Activación de core · antes de empezar</div>';
+  if(editing){
+    const c=coreDraft||{fmt:(saved&&saved.fmt)||'',ex:(saved&&Array.isArray(saved.ex))?saved.ex.slice():[]};
+    if(!coreDraft){ coreDraft=c; coreDraftFor=active; }
+    const sel=c.ex.map(coreItem).filter(Boolean);
+    const nAb=sel.filter(function(x){ return x.grp==='ab'; }).length, nEsp=sel.filter(function(x){ return x.grp==='esp'; }).length;
+    const chip=function(it){ const on=c.ex.indexOf(it.id)>=0; return `<button type="button" class="cp-chip${on?' on':''}" data-act="coreEx" data-v="${it.id}">${on?'✓ ':''}${esc(it.n)}</button>`; };
+    h+=`<div class="cp-hint">Elegí al menos <b>2 abdominales</b> y <b>1 espinal</b>, y cómo lo querés hacer.</div>`;
+    h+=`<div class="cp-lbl">¿Cómo lo hacés?</div><div class="cp-chips">${CORE_FMTS.map(function(f){ return `<button type="button" class="cp-chip cp-fmt${c.fmt===f.v?' on':''}" data-act="coreFmt" data-v="${f.v}">${f.l}</button>`; }).join('')}</div>`;
+    h+=`<div class="cp-lbl">Abdominales <span class="${nAb>=2?'ok':''}">${nAb} elegido${nAb===1?'':'s'} · mínimo 2</span></div><div class="cp-chips">${CORE_CATALOG.filter(function(x){ return x.grp==='ab'; }).map(chip).join('')}</div>`;
+    h+=`<div class="cp-lbl">Espinales <span class="${nEsp>=1?'ok':''}">${nEsp} elegido${nEsp===1?'':'s'} · mínimo 1</span></div><div class="cp-chips">${CORE_CATALOG.filter(function(x){ return x.grp==='esp'; }).map(chip).join('')}</div>`;
+    const ok=coreChoiceValid(c);
+    const why=!c.fmt?'Elegí el formato':(nAb<2?'Te falta elegir '+(2-nAb)+' abdominal'+(2-nAb>1?'es':''):(nEsp<1?'Te falta elegir 1 espinal':''));
+    h+=`<button type="button" class="cp-go" data-act="coreSave"${ok?'':' disabled'}>${ok?'Listo, a entrenar 💪':esc(why)}</button>`;
+    return h;
+  }
+  const items=saved.ex.map(coreItem).filter(Boolean);
+  /* abdominales primero, espinal al final (mismo orden que los bloques prearmados) */
+  items.sort(function(a,b){ return (a.grp==='esp')-(b.grp==='esp'); });
+  const plan=corePlan(saved.fmt,items.length);
+  const done=coreDoneList();
+  h+=`<div class="cp-title">${esc(plan.title)}</div><div class="cp-desc">${esc(plan.desc)}</div>`;
+  h+=`<button type="button" class="bb-btn cp-timer" data-act="openBlockTimer" data-title="${esc(plan.title)}" data-work="${plan.work}" data-rest="${plan.rest}" data-rounds="${plan.rounds}" data-format="${plan.format}">⏱ Iniciar temporizador</button>`;
+  h+='<div class="cp-list">'+items.map(function(it,ix){ const isOn=done.indexOf(it.id)>=0; return `<div class="cp-row"><span class="cp-n">${ix+1}</span><div class="cp-info"><div class="cp-name">${esc(it.n)}${it.grp==='esp'?' <i class="cp-tag">espinal</i>':''}</div><div class="cp-dose">${esc(plan.dose||it.dose)} · <button type="button" class="vid" data-act="playVideo" data-url="${esc(it.vid)}" data-name="${esc(it.n)}">▶ Ver técnica</button></div></div><button type="button" class="chk${isOn?' on':''}" data-act="coreDone" data-v="${it.id}">✓</button></div>`; }).join('')+'</div>';
+  h+=`<button type="button" class="cp-change" data-act="coreEdit">Cambiar ejercicios o formato</button>`;
+  return h;
+}
+function coreToggleDraftEx(id){
+  if(!coreDraft) return; const it=coreItem(id); if(!it) return;
+  const ix=coreDraft.ex.indexOf(id); if(ix>=0) coreDraft.ex.splice(ix,1); else coreDraft.ex.push(id);
+  renderCoreCard();
+}
+function coreSetDraftFmt(v){ if(!coreDraft) return; coreDraft.fmt=v; renderCoreCard(); }
+async function coreSaveChoice(){
+  if(!coreDraft||!coreChoiceValid(coreDraft)) return;
+  const st=DB.students[active];
+  st.abChoice={fmt:coreDraft.fmt, ex:coreDraft.ex.slice()};
+  coreDraft=null;
+  renderCoreCard();
+  await saveDB();
+  toast('✓ Core elegido — queda guardado para la próxima','ok');
+}
+function coreStartEdit(){ const s=DB.students[active].abChoice; coreDraftFor=active; coreDraft={fmt:(s&&s.fmt)||'',ex:(s&&Array.isArray(s.ex))?s.ex.slice():[]}; renderCoreCard(); }
+function coreToggleDone(id){
+  const k=coreSessionKey(); const cur=(CACHE[k]&&wOf(CACHE[k])===+week&&Array.isArray(CACHE[k].done))?CACHE[k]:{done:[]};
+  const ix=cur.done.indexOf(id); if(ix>=0) cur.done.splice(ix,1); else cur.done.push(id);
+  cur._w=week; CACHE[k]=cur; queueSave(); renderCoreCard();
+}
+function renderCoreCard(){ const el=$('coreCard'); if(el) el.innerHTML=coreCardHTML(); }
 function openVideoModal(id,name){
   let ov=$('vidModalOv');
   if(!ov){
@@ -3761,17 +3894,15 @@ function setsTable(ex,ei,mi,objetivo){
       sets+=`<tr><td class="s">S${si+1}</td>
         <td><div class="drop-row"><input class="cell dcell" inputmode="decimal" placeholder="D1" value="${esc(ws[0])}" data-chg="dset" data-i="${ei}" data-j="${si}" data-m="${mi}" data-di="0"><input class="cell dcell" inputmode="decimal" placeholder="D2" value="${esc(ws[1])}" data-chg="dset" data-i="${ei}" data-j="${si}" data-m="${mi}" data-di="1"><input class="cell dcell" inputmode="decimal" placeholder="D3" value="${esc(ws[2])}" data-chg="dset" data-i="${ei}" data-j="${si}" data-m="${mi}" data-di="2"><input class="cell dcell" inputmode="decimal" placeholder="D4" value="${esc(ws[3])}" data-chg="dset" data-i="${ei}" data-j="${si}" data-m="${mi}" data-di="3"></div></td>
         <td><input class="cell" inputmode="numeric" placeholder="${esc(ex.r)}" value="${esc(v.r||'')}" data-chg="set" data-i="${ei}" data-j="${si}" data-m="${mi}" data-f="r"></td>
-        <td><select class="cell" data-chg="set" data-i="${ei}" data-j="${si}" data-m="${mi}" data-f="rir">${rirOpts(v.rir)}</select></td>
         <td><button class="chk ${v.done?'on':''}" data-act="toggle" data-i="${ei}" data-j="${si}" data-m="${mi}">✓</button></td></tr>`;
     } else {
       sets+=`<tr><td class="s">S${si+1}</td>
         <td><input class="cell" inputmode="decimal" placeholder="${esc(numPH(objetivo))}" value="${esc(v.w||'')}" data-chg="set" data-i="${ei}" data-j="${si}" data-m="${mi}" data-f="w"></td>
         <td><input class="cell" inputmode="numeric" placeholder="${esc(ex.r)}" value="${esc(v.r||'')}" data-chg="set" data-i="${ei}" data-j="${si}" data-m="${mi}" data-f="r"></td>
-        <td><select class="cell" data-chg="set" data-i="${ei}" data-j="${si}" data-m="${mi}" data-f="rir">${rirOpts(v.rir)}</select></td>
         <td><button class="chk ${v.done?'on':''}" data-act="toggle" data-i="${ei}" data-j="${si}" data-m="${mi}">✓</button></td></tr>`;
     }
   }
-  return `<table class="sets"><tr><th class="s">Serie</th><th>${isDrop?'Pesos Drop':'Peso (kg)'}</th><th>Reps</th><th>RIR</th><th>✓</th></tr>${sets}</table>`;
+  return `<table class="sets"><tr><th class="s">Serie</th><th>${isDrop?'Pesos Drop':'Peso (kg)'}</th><th>Reps</th><th>✓</th></tr>${sets}</table>`;
 }
 function renderApp(){
   const r=routine(), W=weeks(), members=membersOf(); const m=$('main'); m.innerHTML='';
@@ -3799,7 +3930,7 @@ function renderApp(){
     return;
   }
   if(member>=members.length) member=0;
-  const f=document.createElement('div'); f.className='focus'; f.innerHTML=`<b>${esc(isDuo()?members[member]:DB.students[active].name)}</b> · cargá peso, reps y RIR de cada serie`; m.appendChild(f);
+  const f=document.createElement('div'); f.className='focus'; f.innerHTML=`<b>${esc(isDuo()?members[member]:DB.students[active].name)}</b> · cargá peso y reps de cada serie`; m.appendChild(f);
   /* Tarjeta "tablero" del día: mismo look bordó/azul del Informe (degradé + serif), con el
      día de hoy, la racha/días sin entrenar como chips, y la frase motivacional del día.
      Reemplaza lo que antes eran dos bloques separados (mini-dash + motiv-banner) — misma
@@ -3826,7 +3957,8 @@ function renderApp(){
   }
   const seg=document.createElement('div'); seg.className='seg'; seg.innerHTML=r.map((d,i)=>`<button data-act="pickDay" data-i="${i}" class="${i===day?'sel':''}">${esc(d.day.split('·')[0].trim())}${d.type?`<i class="daytag daytag-${esc(d.type)}">${d.type==='gym'?'🏋️':'🎒'}</i>`:''}</button>`).join(''); m.appendChild(seg);
   /* Barra de progreso de ejercicios */
-  const realExCount=r[day].ex.filter(e=>!isBlockRow(e)).length;
+  const coreHidden=abPresetIdx(r[day]);
+  const realExCount=r[day].ex.filter((e,ix)=>!isBlockRow(e)&&!coreHidden.has(ix)).length;
   const pb2=document.createElement('div'); pb2.className='prog-bar2'; pb2.id='progbar2'; pb2.textContent='Vas 0 de '+realExCount+' ejercicios · 0% completado'; m.appendChild(pb2);
   /* Entrada en calor */
   const warmup=document.createElement('div'); warmup.className='warmup-banner'; warmup.innerHTML='🔥 <b>Entrada en calor:</b> movilidad articular / bici / cinta / elíptico'; m.appendChild(warmup);
@@ -3853,7 +3985,11 @@ function renderApp(){
 
   healthPre(m);
 
+  /* 07/10/2026: selector de core del alumno, en lugar del bloque prearmado (ver CORE_CATALOG) */
+  if(coreHidden.size){ const cc=document.createElement('div'); cc.className='ex core-pick'; cc.id='coreCard'; cc.innerHTML=coreCardHTML(); m.appendChild(cc); }
+
   r[day].ex.forEach((rawEx,ei)=>{
+    if(coreHidden.has(ei)) return;
     const ex=exWithOverride(rawEx,ei);
     if(isBlockRow(ex)){
       const cfg=getBlockCfg(ex);
@@ -3883,7 +4019,7 @@ function renderApp(){
     /* 07/10/2026: Tami pidió sacar las miniaturas (tanto el frame real de YouTube como el
        ícono genérico de grupo muscular) de la lista de ejercicios — no las quiere por ahora. */
     const thumbHtml='';
-    let html=`<div class="ex-hdr" data-act="accordion" data-i="${ei}">${thumbHtml}<span class="num">${ei+1}</span><div class="ex-hdr-info"><div class="ex-hdr-name">${esc(ex.n)}</div><div class="ex-hdr-meta">${hdrMeta}</div>${wCmp}<div class="ex-hdr-prog">${progDots}</div></div><span class="ex-chev${isOpen?' open':''}">▾</span></div>`;
+    let html=`<div class="ex-hdr" data-act="accordion" data-i="${ei}">${thumbHtml}<span class="num">${ei+1-coreHidden.size}</span><div class="ex-hdr-info"><div class="ex-hdr-name">${esc(ex.n)}</div><div class="ex-hdr-meta">${hdrMeta}</div>${wCmp}<div class="ex-hdr-prog">${progDots}</div></div><span class="ex-chev${isOpen?' open':''}">▾</span></div>`;
     html+=`<div class="ex-body${isOpen?' open':''}">`;
     if(trainer){
       html+=`<div class="quick-edit"><div class="qe-title">✏ Edición rápida</div><div class="form-grid"><div class="form-field full"><div class="form-lbl">Ejercicio</div><input class="form-inp" value="${esc(ex.n)}" data-chg="qedit" data-ei="${ei}" data-f="n"></div><div class="form-field"><div class="form-lbl">Series</div><input class="form-inp" value="${esc(ex.s)}" data-chg="qedit" data-ei="${ei}" data-f="s"></div><div class="form-field"><div class="form-lbl">Reps</div><input class="form-inp" value="${esc(ex.r)}" data-chg="qedit" data-ei="${ei}" data-f="r"></div><div class="form-field"><div class="form-lbl">Peso obj.</div><input class="form-inp" value="${esc(ex.w)}" data-chg="qedit" data-ei="${ei}" data-f="w"></div><div class="form-field"><div class="form-lbl">Descanso</div><input class="form-inp" value="${esc(ex.rest)}" data-chg="qedit" data-ei="${ei}" data-f="rest"></div><div class="form-field full"><div class="form-lbl">Observación / Técnica</div><textarea class="form-inp" data-chg="qedit" data-ei="${ei}" data-f="tip" placeholder="Ej: rodillas semi rígidas, no bloquear codos...">${esc(ex.tip||'')}</textarea></div></div></div>`;
@@ -5005,7 +5141,25 @@ function updSet(ei,si,mi,f,v){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CACHE
      deja de estar marcada como "copiada" para que, si más adelante corrigen la serie de
      origen, SÍ se le pueda volver a copiar el valor nuevo encima. */
   if(f==='w') delete CACHE[k]._auto;
+  if(f==='r') delete CACHE[k]._autoR;
   const box=$('rm-'+ei+'-'+mi); if(box) box.innerHTML=rmHTML(ei,mi); queueSave();
+  /* 07/10/2026: mismo criterio que el peso, ahora también para las repeticiones — se
+     copian a las series siguientes que estén vacías esta semana (o que solo tengan un
+     valor que llegó por esta misma copia, marcado _autoR). Nunca pisa reps escritas a mano.
+     Esto sí aplica a drop set (las reps no cambian a propósito como los pesos). */
+  if(f==='r'&&v){
+    const exR=routine()[day]&&routine()[day].ex[ei];
+    if(exR){
+      for(let sj=si+1; sj<exR.s; sj++){
+        const k2=K(ei,sj,mi); const existing=CACHE[k2];
+        const hasOwn=existing&&wOf(existing)===+week&&existing.r&&!existing._autoR;
+        if(hasOwn) continue;
+        CACHE[k2]=(existing&&wOf(existing)===+week)?existing:{}; CACHE[k2].r=v; CACHE[k2]._w=week; CACHE[k2]._autoR=true;
+        const inp=document.querySelector('input[data-chg="set"][data-i="'+ei+'"][data-j="'+sj+'"][data-m="'+mi+'"][data-f="r"]');
+        if(inp) inp.value=v;
+      }
+    }
+  }
   /* Copiar el mismo peso a las series siguientes que todavía estén vacías esta semana —
      así si levantaste lo mismo en las 3 series, lo escribís una sola vez y se completa
      solo. Nunca pisa una serie que ya tenga un valor escrito A MANO (si después la tocás
@@ -5068,8 +5222,25 @@ function saveNewRecord(exName,oldW,newW,mi){
 }
 function showRecord(name,old,now){ var existing=document.querySelector('.record-banner'); if(existing) existing.remove(); var div=document.createElement('div'); div.className='record-banner'; div.textContent='🏆 ¡Nuevo récord en '+name+'! '+old+' kg → '+now+' kg'; var main=$('main'); if(main) main.insertBefore(div,main.firstChild); setTimeout(function(){if(div.parentNode) div.remove();},5000); }
 function updObs(v){ CACHE[OBSK()]=v; queueSave(); }
-function toggleSet(ei,si,mi,el){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CACHE[k].done=!CACHE[k].done; CACHE[k]._w=week; el.classList.toggle('on',CACHE[k].done); progress(); queueSave(); }
-function progress(){ const r=routine(); let total=0,done=0; const mi=isDuo()?member:0; let exDone=0,realExCount=0; r[day].ex.forEach((ex,ei)=>{ if(isBlockRow(ex)) return; realExCount++; let allDone=true; for(let si=0;si<ex.s;si++){ total++; const _rp=(CACHE[K(ei,si,mi)]||{}); if(wOf(_rp)===+week&&_rp.done) done++; else allDone=false; } if(allDone&&ex.s>0) exDone++; }); const pct=total?Math.round(done/total*100):0; if($('prog')) $('prog').style.width=pct+'%'; if($('proglbl')) $('proglbl').textContent=`${done}/${total} series · ${exDone}/${realExCount} ejercicios · ${pct}%`; if($('progbar2')) $('progbar2').textContent=`Vas ${exDone} de ${realExCount} ejercicios · ${pct}% completado`; const b=$('closebtn'); if(b){ b.classList.toggle('ready',pct===100); b.textContent=pct===100?'✓ Sesión completa · guardar en transcripta':'Cerrar sesión y guardar en transcripta'; } }
+function toggleSet(ei,si,mi,el){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CACHE[k].done=!CACHE[k].done; CACHE[k]._w=week; el.classList.toggle('on',CACHE[k].done);
+  /* 07/10/2026: al TILDAR una serie, se tildan también las siguientes que todavía no estén
+     tildadas esta semana (pedido de Tami, mismo espíritu que la copia de peso/reps). Al
+     DESTILDAR solo cambia esa serie, así se puede corregir una por una. */
+  if(CACHE[k].done){
+    const exT=routine()[day]&&routine()[day].ex[ei];
+    if(exT){
+      for(let sj=si+1; sj<exT.s; sj++){
+        const k2=K(ei,sj,mi); const existing=CACHE[k2];
+        const cur=(existing&&wOf(existing)===+week)?existing:{};
+        if(cur.done) continue;
+        cur.done=true; cur._w=week; CACHE[k2]=cur;
+        const b=document.querySelector('button.chk[data-act="toggle"][data-i="'+ei+'"][data-j="'+sj+'"][data-m="'+mi+'"]');
+        if(b) b.classList.add('on');
+      }
+    }
+  }
+  progress(); queueSave(); }
+function progress(){ const r=routine(); let total=0,done=0; const mi=isDuo()?member:0; let exDone=0,realExCount=0; const _hid=abPresetIdx(r[day]); r[day].ex.forEach((ex,ei)=>{ if(isBlockRow(ex)||_hid.has(ei)) return; realExCount++; let allDone=true; for(let si=0;si<ex.s;si++){ total++; const _rp=(CACHE[K(ei,si,mi)]||{}); if(wOf(_rp)===+week&&_rp.done) done++; else allDone=false; } if(allDone&&ex.s>0) exDone++; }); const pct=total?Math.round(done/total*100):0; if($('prog')) $('prog').style.width=pct+'%'; if($('proglbl')) $('proglbl').textContent=`${done}/${total} series · ${exDone}/${realExCount} ejercicios · ${pct}%`; if($('progbar2')) $('progbar2').textContent=`Vas ${exDone} de ${realExCount} ejercicios · ${pct}% completado`; const b=$('closebtn'); if(b){ b.classList.toggle('ready',pct===100); b.textContent=pct===100?'✓ Sesión completa · guardar en transcripta':'Cerrar sesión y guardar en transcripta'; } }
 
 function restSec(s){ if(!s) return 0; const str=String(s); if(str.includes(':')){ const p=str.split(':'); return (parseInt(p[0])||0)*60+(parseInt(p[1])||0); } const n=firstNum(str); return n?Math.round(n):0; }
 /* Vibración + beep (el contexto de audio se crea en el tap para que iPhone lo permita) */
@@ -5097,8 +5268,12 @@ async function closeSession(){
   const obs=(CACHE[OBSK()]||'').trim();
   const h=health(); let hh=null;
   if(h&&h.enabled){ const pre=CACHE['hpre|'+day]||'', post=CACHE['hpost|'+day]||'', alarms=CACHE['halarm|'+day]||[]; if(pre||post||alarms.length) hh={pre,post,alarms}; }
-  if(!exs.length && !obs && !hh){ toast("No hay nada cargado en esta sesión todavía",'warn'); return; }
-  LOGS.unshift({ date:new Date().toISOString(), dayName:r[day].day, week, weekName:weeks()[week].t+' '+weeks()[week].n, ex:exs, obs, health:hh });
+  /* 07/10/2026: core elegido por el alumno — se guarda aparte (e.core) para no mezclarlo
+     con e.ex, que usan los récords/estadísticas. */
+  let core=null;
+  if(abPresetIdx(r[day]).size){ const ch=DB.students[active].abChoice, dn=coreDoneList(); if(coreChoiceValid(ch)&&dn.length){ core={fmt:ch.fmt, ex:ch.ex.map(id=>{ const it=coreItem(id); return it?it.n:id; }), done:dn.map(id=>{ const it=coreItem(id); return it?it.n:id; })}; } }
+  if(!exs.length && !obs && !hh && !core){ toast("No hay nada cargado en esta sesión todavía",'warn'); return; }
+  LOGS.unshift({ date:new Date().toISOString(), dayName:r[day].day, week, weekName:weeks()[week].t+' '+weeks()[week].n, ex:exs, obs, health:hh, core });
   await saveLogs();
   await autoBackup('sesion');
   /* Avisá al profe (aviso interno, no push): si quien cierra es el alumno, no la profe */
@@ -5112,6 +5287,7 @@ async function closeSession(){
     }
   });
   delete CACHE[OBSK()];
+  delete CACHE[coreSessionKey()];
   await saveData();
   toast("✓ Sesión guardada en la transcripta",'ok');
   renderApp();
@@ -5119,17 +5295,19 @@ async function closeSession(){
 
 /* ===================== TRANSCRIPTA ===================== */
 function objLabel(ex){ const m=membersOf(); if(m.length>1){ const a=(ex.w&&ex.w!=='A definir')?ex.w:'—', b=(ex.w2&&ex.w2!=='A definir')?ex.w2:'—'; return `${esc(m[0])}: ${esc(a)}<br>${esc(m[1])}: ${esc(b)}`; } return esc(ex.w); }
-function setsLine(sets){ return sets.map(s=>`S${s.s}: ${s.w?esc(s.w)+'kg':'—'} × ${s.r?esc(s.r):'—'}${s.rir!==''?' · RIR '+esc(s.rir):''}`).join(' &nbsp;|&nbsp; '); }
+function setsLine(sets){ return sets.map(s=>`S${s.s}: ${s.w?esc(s.w)+'kg':'—'} × ${s.r?esc(s.r):'—'}${(s.rir!=null&&s.rir!=='')?' · RIR '+esc(s.rir):''}`).join(' &nbsp;|&nbsp; '); }
 function logEntryHTML(e,i){
   const exh=e.ex.map(x=>{
     if(x.members){ const blocks=x.members.map(mm=>`<div class="lsets"><b>${esc(mm.name)}:</b> ${setsLine(mm.sets)}</div>`).join(''); return `<div class="log-ex"><div class="len">${esc(x.n)}</div>${blocks}</div>`; }
     return `<div class="log-ex"><div class="len">${esc(x.n)}</div><div class="lsets">${setsLine(x.sets)}</div></div>`;
   }).join('');
   const obs=e.obs?`<div class="log-obs">📝 ${esc(e.obs)}</div>`:'';
+  const coreFmtL=e.core?((CORE_FMTS.find(f=>f.v===e.core.fmt)||{}).l||e.core.fmt):'';
+  const coreH=e.core?`<div class="log-ex"><div class="len">🔥 Core · ${esc(coreFmtL)}</div><div class="lsets">${(e.core.ex||[]).map(n=>((e.core.done||[]).indexOf(n)>=0?'✓ ':'— ')+esc(n)).join(' &nbsp;|&nbsp; ')}</div></div>`:'';
   let hh='';
   if(e.health){ const fl=(e.health.alarms&&e.health.alarms.length)||e.health.pre==='warn'||e.health.post==='warn'; hh=`<div class="log-health ${fl?'flag':'ok'}">⚕ Pierna · antes: ${esc(e.health.pre||'—')} · después: ${esc(e.health.post||'—')}${(e.health.alarms&&e.health.alarms.length)?' · alarmas: '+esc(e.health.alarms.join(', ')):''}</div>`; }
   const del=trainer?`<div class="log-del"><button data-act="delLog" data-i="${i}">eliminar</button></div>`:'';
-  return `<details class="log-entry"><summary><span class="le-day">${esc(e.dayName)}<small>${fmtDate(e.date)}</small></span><span class="le-meta">${esc(e.weekName||'')}${e.obs?'<br>📝 obs':''}${(e.health&&((e.health.alarms&&e.health.alarms.length)||e.health.pre==='warn'||e.health.post==='warn'))?'<br>⚕ revisar':''}</span></summary><div class="log-body">${exh}${obs}${hh}${del}</div></details>`;
+  return `<details class="log-entry"><summary><span class="le-day">${esc(e.dayName)}<small>${fmtDate(e.date)}</small></span><span class="le-meta">${esc(e.weekName||'')}${e.obs?'<br>📝 obs':''}${(e.health&&((e.health.alarms&&e.health.alarms.length)||e.health.pre==='warn'||e.health.post==='warn'))?'<br>⚕ revisar':''}</span></summary><div class="log-body">${coreH}${exh}${obs}${hh}${del}</div></details>`;
 }
 function renderTrans(){
   const m=$('main'); m.innerHTML='';
@@ -6255,6 +6433,11 @@ document.addEventListener('click',e=>{
     case 'pickWeek': pickWeek(i); break;
     case 'pickMember': pickMember(i); break;
     case 'toggle': toggleSet(i,j,mi,el); break;
+    case 'coreEx': coreToggleDraftEx(el.dataset.v); break;
+    case 'coreFmt': coreSetDraftFmt(el.dataset.v); break;
+    case 'coreSave': coreSaveChoice(); break;
+    case 'coreEdit': coreStartEdit(); break;
+    case 'coreDone': coreToggleDone(el.dataset.v); break;
     case 'leg': setLeg(el.dataset.w, el.dataset.v); break;
     case 'alarm': toggleAlarm(el.dataset.a); break;
     case 'rest': startRest(+el.dataset.sec); break;
