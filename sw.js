@@ -1,13 +1,17 @@
 /* TaFit · Service Worker v8
    Cachea la app y los scripts para que abra al instante, con o sin señal. */
-const CACHE = 'tafit-v8-84';
+const CACHE = 'tafit-v8-93';
 const ASSETS = [
   './',
   './index.html',
-  './icon-m.png',
-  './icon-f.png',
+  './icon-app-192.png',
+  './icon-app-512.png',
+  './apple-touch-icon-180.png',
+  './logo-principal.png',
+  './favicon.ico',
   'https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js',
-  'https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js'
+  'https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
 ];
 
 self.addEventListener('install', e => {
@@ -41,7 +45,7 @@ self.addEventListener('fetch', e => {
   /* nunca interceptar la base de datos en vivo */
   if (url.includes('firestore.googleapis.com') || url.includes('googleapis.com/identitytoolkit')) return;
 
-  const cacheable = url.startsWith(self.location.origin) || url.includes('gstatic.com/firebasejs');
+  const cacheable = url.startsWith(self.location.origin) || url.includes('gstatic.com/firebasejs') || url.includes('cdnjs.cloudflare.com');
   if (!cacheable) return;
 
   /* cache primero (velocidad + offline), y actualiza por detrás */
