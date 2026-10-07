@@ -2747,7 +2747,13 @@ async function saveDB(force){
   if(_mergedFromServer||_syncBaseline===null) setSyncBaseline();
 }
 async function saveData(){ await Store.set('tafit:data:'+active, JSON.stringify(CACHE)); }
-async function saveLogs(){ await Store.set('tafit:logs:'+active, JSON.stringify(LOGS)); }
+async function saveLogs(){
+  /* nunca escribir una lista "más corta" que la guardada: se une con lo que ya hay acá
+     (que puede incluir sesiones que llegaron de la nube mientras la app estaba abierta) */
+  let cur=[]; try{ cur=safeParse(await Store.get('tafit:logs:'+active)||'[]',[]); }catch(e){}
+  LOGS=unionLogsArr(LOGS,cur,logsDelFor(active));
+  await Store.set('tafit:logs:'+active, JSON.stringify(LOGS));
+}
 /* Auto-guardado cada 5 minutos */
 setInterval(async function(){
   if(!active||!DB.students[active]) return;
@@ -2755,15 +2761,7 @@ setInterval(async function(){
 }, 5*60*1000);
 /* Protección: al recibir LOGS de Firebase, solo AGREGAR sesiones nuevas, nunca borrar existentes */
 function mergeLogs(localLogs, remoteLogs){
-  if(!remoteLogs||!remoteLogs.length) return localLogs;
-  if(!localLogs||!localLogs.length) return remoteLogs;
-  const localDates=new Set(localLogs.map(l=>l.date));
-  const merged=localLogs.slice();
-  remoteLogs.forEach(function(rl){
-    if(!localDates.has(rl.date)) merged.push(rl);
-  });
-  merged.sort(function(a,b){ return new Date(b.date)-new Date(a.date); });
-  return merged;
+  return unionLogsArr(localLogs, remoteLogs, logsDelFor(active));
 }
 /* Mismo criterio que mergeLogs: al recibir mensajes de chat de Firebase, solo AGREGAR los
    que no tengamos todavía (por id), nunca pisar/perder los que ya están acá — así dos
@@ -3024,7 +3022,51 @@ function _savePending(){ try{ localStorage.setItem('tafit:pending',JSON.stringif
 function markPending(k){ if(PENDING.indexOf(k)<0){ PENDING.push(k); _savePending(); } syncBadge(); }
 function clearPending(k){ const i=PENDING.indexOf(k); if(i>=0){ PENDING.splice(i,1); _savePending(); } syncBadge(); }
 function syncBadge(){ if(!fsDB) return; if(PENDING.length){ $('clouddot').className='dot pend'; $('cloudlbl').textContent='⏳ Pendiente ('+PENDING.length+')'; } else updateSyncUI(true); }
-function _pushRaw(k,v){ return new Promise(res=>{ let done=false; const t=setTimeout(()=>{ if(!done){ done=true; res(false); } },8000);
+/* ==== Transcriptas intocables (07/10/2026) ====
+   CAUSA de las transcriptas perdidas (Joni, Sofi/Marti): las sesiones de cada alumno viven
+   en una sola clave ('tafit:logs:<id>') que se subía a la nube ENTERA, tal cual estaba en el
+   celular que guardaba. Al publicar una versión nueva, todos los celulares se recargan a la
+   vez: cada uno arranca con SU copia local (a veces vieja), y el primer guardado (cerrar una
+   sesión, o el push del arranque si la bajada de la nube todavía no había llegado) pisaba en
+   la nube las sesiones que había cargado OTRO celular (ej: la otra integrante del dúo, o la
+   profe). Como el avance de semana se calcula con esas sesiones, también "se perdía por
+   dónde iban".
+   Ahora las transcriptas son SOLO DE SUMAR en todos lados: al subir, se lee lo que hay en la
+   nube y se sube la UNIÓN (transacción, así dos celulares a la vez no se pisan); al bajar, se
+   une con lo local en vez de reemplazarlo. La única forma de sacar una sesión es "eliminar"
+   desde Transcripta, que deja una marca ('tafit:logsdel:<id>', también solo de sumar) para
+   que ningún otro celular la vuelva a traer. */
+function isLogsKey(k){ return typeof k==='string'&&k.indexOf('tafit:logs:')===0; }
+function isLogsDelKey(k){ return typeof k==='string'&&k.indexOf('tafit:logsdel:')===0; }
+function logsDelFor(id){ try{ return safeParse(localStorage.getItem('tafit:logsdel:'+id)||'[]',[]); }catch(e){ return []; } }
+function unionLogsArr(a,b,tomb){
+  const dead=new Set(tomb||[]); const seen=new Set(); const out=[];
+  (a||[]).concat(b||[]).forEach(function(l){ if(!l||!l.date||dead.has(l.date)||seen.has(l.date)) return; seen.add(l.date); out.push(l); });
+  out.sort(function(x,y){ return new Date(y.date)-new Date(x.date); });
+  return out;
+}
+function unionStrArr(a,b){ const out=(a||[]).slice(); (b||[]).forEach(function(x){ if(out.indexOf(x)<0) out.push(x); }); return out; }
+/* Une el valor local con el remoto para claves "solo de sumar". Devuelve el string unido. */
+function mergeAdditive(k,localStr,remoteStr){
+  if(isLogsDelKey(k)) return JSON.stringify(unionStrArr(safeParse(localStr||'[]',[]),safeParse(remoteStr||'[]',[])));
+  const id=k.slice('tafit:logs:'.length);
+  return JSON.stringify(unionLogsArr(safeParse(localStr||'[]',[]),safeParse(remoteStr||'[]',[]),logsDelFor(id)));
+}
+function _pushMergedRaw(k,v){ return new Promise(res=>{ let done=false; const t=setTimeout(()=>{ if(!done){ done=true; res(false); } },10000);
+  const ref=fsDB.collection('kv').doc(k);
+  fsDB.runTransaction(function(tx){ return tx.get(ref).then(function(doc){
+    const remote=(doc.exists&&doc.data()&&doc.data().v!=null)?doc.data().v:null;
+    const merged=remote==null?v:mergeAdditive(k,v,remote);
+    tx.set(ref,{v:merged,ts:firebase.firestore.FieldValue.serverTimestamp(),dev:DEVICE_ID});
+    return merged;
+  }); }).then(function(merged){
+    if(done) return; done=true; clearTimeout(t);
+    /* si la nube tenía sesiones que este celular no, quedan también acá */
+    try{ if(merged!==v&&localStorage.getItem(k)!==merged){ localStorage.setItem(k,merged); if(isLogsKey(k)&&k==='tafit:logs:'+active){ LOGS=unionLogsArr(LOGS,safeParse(merged,[]),logsDelFor(active)); } } }catch(e){}
+    res(true);
+  }).catch(function(){ if(!done){ done=true; clearTimeout(t); res(false); } });
+}); }
+function _pushRaw(k,v){ if(isLogsKey(k)||isLogsDelKey(k)) return _pushMergedRaw(k,v); return new Promise(res=>{ let done=false; const t=setTimeout(()=>{ if(!done){ done=true; res(false); } },8000);
   fsDB.collection('kv').doc(k).set({v:v,ts:firebase.firestore.FieldValue.serverTimestamp(),dev:DEVICE_ID})
     .then(()=>{ if(!done){ done=true; clearTimeout(t); res(true); } })
     .catch(()=>{ if(!done){ done=true; clearTimeout(t); res(false); } });
@@ -3039,7 +3081,7 @@ setInterval(()=>{ if(navigator.onLine) flushPending(); },30000);
 async function cloudDel(k){ if(!fsDB||_fromRemote) return; try{ fsDB.collection('kv').doc(k).delete(); }catch(e){} }
 async function pushAllLocal(){ if(!fsDB) return; let keys;
   if(locked&&active){ keys=myKeys(); }
-  else { keys=['tafit:students']; DB.order.forEach(id=>{ keys.push('tafit:data:'+id,'tafit:logs:'+id,'tafit:chat:'+id,'tafit:form:acuerdo:'+id,'tafit:form:anamnesis:'+id); const s=DB.students[id]; if(s&&s.members&&s.members.length>1){ for(let mi=0;mi<s.members.length;mi++){ keys.push('tafit:form:acuerdo:'+id+':'+mi,'tafit:form:anamnesis:'+id+':'+mi); } } }); }
+  else { keys=['tafit:students']; DB.order.forEach(id=>{ keys.push('tafit:data:'+id,'tafit:logs:'+id,'tafit:logsdel:'+id,'tafit:chat:'+id,'tafit:form:acuerdo:'+id,'tafit:form:anamnesis:'+id); const s=DB.students[id]; if(s&&s.members&&s.members.length>1){ for(let mi=0;mi<s.members.length;mi++){ keys.push('tafit:form:acuerdo:'+id+':'+mi,'tafit:form:anamnesis:'+id+':'+mi); } } }); }
   for(const k of keys){
     try{
       if(k==='tafit:students'){
@@ -3142,7 +3184,7 @@ async function restoreAutoBackup(dateISO){
 async function reloadFromRemote(){ try{ const raw=await Store.get('tafit:students'); if(raw){ const p=safeParse(raw,null); if(p&&p.order&&p.order.length){ if(!DB._ts||!p._ts||p._ts>=DB._ts){ DB=p; setSyncBaseline(); } } } if(urlLockPending){ await tryResolveLockedLink(); return; } if(DB.students[active]){ CACHE=safeParse(await Store.get('tafit:data:'+active)||'{}',{}); migrateLegacyWeeks(); const remoteLogs=safeParse(await Store.get('tafit:logs:'+active)||'[]',[]); LOGS=mergeLogs(LOGS,remoteLogs); const remoteChat=safeParse(await Store.get('tafit:chat:'+active)||'[]',[]); CHAT=mergeChat(CHAT,remoteChat); } render(); }catch(e){} }
 function updateSyncUI(on){ $('clouddot').className='dot'+(on?' on':''); $('cloudlbl').textContent=on?'Sincronizado':(Store.ls?'En este dispositivo':'Solo esta sesión'); }
 function myKeys(){ /* claves que necesita una alumna con link bloqueado */
-  return ['tafit:students','tafit:data:'+active,'tafit:logs:'+active,'tafit:chat:'+active,'tafit:form:acuerdo:'+active,'tafit:form:anamnesis:'+active];
+  return ['tafit:students','tafit:data:'+active,'tafit:logs:'+active,'tafit:logsdel:'+active,'tafit:chat:'+active,'tafit:form:acuerdo:'+active,'tafit:form:anamnesis:'+active];
 }
 function kvQuery(){ /* alumna bloqueada: baja solo lo suyo (mucho más liviano). Profe: baja todo. */
   const col=fsDB.collection('kv');
@@ -3165,7 +3207,10 @@ async function initFirebase(){
        se volvía a escribir esa versión vieja de DB encima de la nube, ya con fireSync
        activo. Por eso también hay que actualizar DB acá, con la misma regla de "solo si
        es igual o más nuevo" que usa reloadFromRemote(), antes de que fireSync se active. */
-    try{ const snap=await kvQuery().get(); let _studentsMerged=false; snap.forEach(function(doc){ var k=doc.id,v=doc.data().v; if(shouldSync(k)&&v!=null){ try{ if(localStorage.getItem(k)!==v){ localStorage.setItem(k,v); if(k==='tafit:students'){ var p=safeParse(v,null); if(p&&p.order&&p.order.length&&(!DB._ts||!p._ts||p._ts>=DB._ts)){ DB=p; setSyncBaseline(); _studentsMerged=true; } } } }catch(e){} } }); if(_studentsMerged){ try{ if(urlLockPending) await tryResolveLockedLink(); else render(); }catch(e){} } else if(urlLockPending){ try{ await tryResolveLockedLink(); }catch(e){} } }catch(e){ console.warn('Pull:',e); }
+    try{ const snap=await kvQuery().get(); let _studentsMerged=false; snap.forEach(function(doc){ var k=doc.id,v=doc.data().v; if(shouldSync(k)&&v!=null){ try{ if((isLogsKey(k)||isLogsDelKey(k))&&localStorage.getItem(k)!=null){ v=mergeAdditive(k,localStorage.getItem(k),v); } if(localStorage.getItem(k)!==v){ localStorage.setItem(k,v); if(k==='tafit:students'){ var p=safeParse(v,null); if(p&&p.order&&p.order.length&&(!DB._ts||!p._ts||p._ts>=DB._ts)){ DB=p; setSyncBaseline(); _studentsMerged=true; } } } }catch(e){} } }); if(_studentsMerged){ /* llegó la versión real de la nube: los parches de una sola vez que esa versión todavía no tenga se aplican ENCIMA de ella (nunca de la copia vieja de este celular). Están guardados por bandera, así que los que ya corrieron en otro celular no se repiten. */ try{ if(window.__runSeeds) window.__runSeeds(); }catch(e){ console.warn('Seeds:',e); } try{ if(urlLockPending) await tryResolveLockedLink(); else render(); }catch(e){} } else if(urlLockPending){ try{ await tryResolveLockedLink(); }catch(e){} } }catch(e){ console.warn('Pull:',e); }
+    /* las transcriptas de la nube que este celular no tenía, también a la memoria
+       (antes quedaban solo en localStorage y el próximo guardado las pisaba) */
+    try{ if(active&&DB.students[active]){ LOGS=mergeLogs(LOGS,safeParse(localStorage.getItem('tafit:logs:'+active)||'[]',[])); } }catch(e){}
     /* push: local → cloud */
     await pushAllLocal();
     /* backup automático diario — solo desde el celular de la profe (modo bloqueado de un
@@ -3202,7 +3247,9 @@ async function initFirebase(){
           if(ch.type==='removed') localStorage.removeItem(k);
           else if(data&&data.v!=null){
             var local=localStorage.getItem(k);
-            if(local!==data.v){ localStorage.setItem(k,data.v); changed=true; }
+            var incoming=data.v;
+            if((isLogsKey(k)||isLogsDelKey(k))&&local!=null) incoming=mergeAdditive(k,local,data.v);
+            if(local!==incoming){ localStorage.setItem(k,incoming); changed=true; }
           }
         }catch(e){}
       });
@@ -3237,6 +3284,7 @@ async function initFirebase(){
      defecto modificaron algo de verdad. */
   const _dbBeforeSeeds=JSON.stringify(DB);
   runSeeds();
+  window.__runSeeds=runSeeds; /* initFirebase lo vuelve a correr sobre los datos frescos de la nube */
   /* Progresión semanal de Lola/Anto (semanas 2-6): vive en su CACHE (Store
      'tafit:data:lola-anto'), separado de DB, así que no se puede sembrar dentro de
      runSeeds() — se hace acá, una sola vez, mezclando con lo que ya haya (nunca pisa
@@ -3651,7 +3699,16 @@ function runSeeds(){
     DB._seed.candeDia4=true;
   }
 
-  if(JSON.stringify(DB)!==_dbBeforeSeeds) await saveDB();
+  /* 07/10/2026 — CAUSA de "se pierden rutinas cada vez que subo una versión nueva": acá
+     se llamaba a saveDB(), que le ponía al DB local una marca de tiempo NUEVA (_ts=ahora)
+     aunque la copia de este celular fuera vieja. Con eso, al conectar con la nube, la
+     versión real del servidor quedaba "más vieja" que la local y NO se bajaba; después el
+     merge veía los cambios de los parches de una sola vez (runSeeds) como ediciones reales
+     de este celular y subía la rutina VIEJA de este celular encima de la buena.
+     Ahora acá solo se guarda en el celular SIN tocar la marca de tiempo: así, si la nube
+     tiene algo más nuevo, se baja igual, y los parches se vuelven a aplicar ENCIMA de la
+     versión de la nube (ver initFirebase). */
+  if(JSON.stringify(DB)!==_dbBeforeSeeds){ try{ await Store.set('tafit:students', JSON.stringify(DB)); }catch(e){} }
   const lastA=await Store.get('tafit:active');
   /* URL params: ?a=alumnoId&lock=1 */
   const urlP=new URLSearchParams(window.location.search);
@@ -5473,7 +5530,11 @@ async function viewCalDay(ds){
 }
 function closeCalDay(){ const ov=$('calDayOv'); if(ov) ov.classList.remove('show'); }
 function fmtDate(iso){ const d=new Date(iso); return d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})+' · '+d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}); }
-async function delLog(i){ if(!await uiConfirm("¿Eliminar esta sesión del registro?")) return; LOGS.splice(i,1); await saveLogs(); renderTrans(); }
+async function delLog(i){ if(!await uiConfirm("¿Eliminar esta sesión del registro?")) return;
+  const gone=LOGS[i]; if(!gone) return;
+  /* marca de eliminado (solo de sumar), para que ningún otro celular la vuelva a traer */
+  if(gone.date){ const t=unionStrArr(logsDelFor(active),[gone.date]); await Store.set('tafit:logsdel:'+active, JSON.stringify(t)); }
+  LOGS.splice(i,1); await saveLogs(); renderTrans(); }
 /* Marca el inicio de un nuevo ciclo/programa: NO borra ni toca el historial (sigue completo en
    Transcripta), solo guarda una fecha para que el Informe de Evolución de acá en más cuente
    nada más que las sesiones del programa nuevo. */
