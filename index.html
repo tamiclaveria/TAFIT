@@ -1020,7 +1020,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-113'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-114'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -2723,6 +2723,93 @@ function health(){ return DB.students[active]&&DB.students[active].health; }
 function membersOf(){ const s=DB.students[active]; return (s.members&&s.members.length>1)?s.members:[s.name]; }
 function isDuo(){ return membersOf().length>1; }
 
+/* ==== Guardado de alumnos a prueba de pisadas (08/10/2026) — ver saveDB ==== */
+function ftOf(st,f){ return (st&&st._ft&&st._ft[f])||0; }
+function mergeFtMaps(a,b){ const o=Object.assign({},(a&&a._ft)||{}); const bf=(b&&b._ft)||{}; Object.keys(bf).forEach(function(k){ if((bf[k]||0)>(o[k]||0)) o[k]=bf[k]; }); return o; }
+/* marca con la hora actual cada campo de cada alumno que cambió en ESTE celular desde la
+   última vez que se sincronizó con la nube (el "baseline"). Una copia vieja no cambió nada
+   respecto de su propio baseline, así que nunca queda marcada como más nueva. */
+function stampLocalEdits(){
+  const base=safeParse(_syncBaseline,null); const bs=(base&&base.students)||{}; const now=Date.now();
+  Object.keys(DB.students||{}).forEach(function(id){
+    const st=DB.students[id]; if(!st||!Object.prototype.hasOwnProperty.call(bs,id)) return;
+    const b=bs[id]||{};
+    new Set(Object.keys(st).concat(Object.keys(b))).forEach(function(f){
+      if(f==='_ft') return;
+      if(JSON.stringify(st[f])!==JSON.stringify(b[f])){ st._ft=st._ft||{}; st._ft[f]=now; }
+    });
+  });
+}
+/* importar / restaurar un backup: todo lo que trae cuenta como cambio nuevo y real */
+function stampAllFields(){ const now=Date.now(); Object.keys(DB.students||{}).forEach(function(id){ const st=DB.students[id]; if(!st) return; st._ft=st._ft||{}; Object.keys(st).forEach(function(f){ if(f!=='_ft') st._ft[f]=now; }); }); }
+function mergeDBWithRemote(L,remote,base){
+  const baseStudents=(base&&base.students)||{};
+  const mergedStudents={};
+  const mergedDeleted=Object.assign({},remote._deleted,L._deleted);
+  const ids=new Set(Object.keys(L.students||{}).concat(Object.keys(remote.students||{})));
+  ids.forEach(function(id){
+    if(mergedDeleted[id]) return;
+    const localHas=L.students&&Object.prototype.hasOwnProperty.call(L.students,id);
+    const remoteHas=Object.prototype.hasOwnProperty.call(remote.students,id);
+    if(localHas&&!remoteHas){ mergedStudents[id]=L.students[id]; return; }
+    if(!localHas&&remoteHas){ mergedStudents[id]=remote.students[id]; return; }
+    const hadInBaseline=Object.prototype.hasOwnProperty.call(baseStudents,id);
+    const localSt=L.students[id]||{}, remoteSt=remote.students[id]||{}, baseSt=baseStudents[id]||{};
+    const allFields=new Set(Object.keys(localSt).concat(Object.keys(remoteSt)).concat(Object.keys(baseSt)));
+    const mergedSt={};
+    allFields.forEach(function(f){
+      if(f==='_ft') return;
+      const lt=ftOf(localSt,f), rt=ftOf(remoteSt,f);
+      let val;
+      if(lt!==rt) val=(lt>rt)?localSt[f]:remoteSt[f];          /* gana el cambio más nuevo */
+      else if(!hadInBaseline) val=remoteSt[f];                  /* alumno recreado localmente: manda la nube */
+      else val=(JSON.stringify(localSt[f])!==JSON.stringify(baseSt[f]))?localSt[f]:remoteSt[f];
+      if(val!==undefined) mergedSt[f]=val;
+    });
+    const ft=mergeFtMaps(localSt,remoteSt); if(Object.keys(ft).length) mergedSt._ft=ft;
+    mergedStudents[id]=mergedSt;
+  });
+  const mergedOrder=(L.order||[]).filter(function(id){ return mergedStudents[id]; });
+  (remote.order||[]).forEach(function(id){ if(mergedStudents[id]&&mergedOrder.indexOf(id)===-1) mergedOrder.push(id); });
+  Object.keys(mergedStudents).forEach(function(id){ if(mergedOrder.indexOf(id)===-1) mergedOrder.push(id); });
+  const settingsUnchanged=JSON.stringify(L.settings)===JSON.stringify(base&&base.settings);
+  const mergedSeed={};
+  new Set(Object.keys(remote._seed||{}).concat(Object.keys(L._seed||{}))).forEach(function(k){ mergedSeed[k]=!!(remote._seed&&remote._seed[k])||!!(L._seed&&L._seed[k]); });
+  return {
+    order:mergedOrder, students:mergedStudents,
+    settings:(settingsUnchanged&&remote.settings)?remote.settings:L.settings,
+    _seed:mergedSeed, _deleted:mergedDeleted,
+    exLib:mergeListById(L.exLib,remote.exLib,base&&base.exLib),
+    templates:mergeListById(L.templates,remote.templates,base&&base.templates),
+  };
+}
+/* Para cuando llega una versión de la nube a ESTE celular (o cuando se sube sin baseline):
+   por alumno y por campo, gana el cambio más nuevo; si ninguno está marcado, manda "pref". */
+function mergeStudentsByFt(L,R,pref){
+  const out=JSON.parse(JSON.stringify(pref==='local'?L:R));
+  const dead=Object.assign({},R._deleted,L._deleted); out._deleted=dead;
+  out.students={};
+  const ids=new Set(Object.keys(L.students||{}).concat(Object.keys(R.students||{})));
+  ids.forEach(function(id){
+    if(dead[id]) return;
+    const a=L.students&&L.students[id], b=R.students&&R.students[id];
+    if(a&&!b){ out.students[id]=a; return; } if(b&&!a){ out.students[id]=b; return; }
+    const m={};
+    new Set(Object.keys(a).concat(Object.keys(b))).forEach(function(f){
+      if(f==='_ft') return;
+      const lt=ftOf(a,f), rt=ftOf(b,f);
+      const val=(lt!==rt)?((lt>rt)?a[f]:b[f]):(pref==='local'?a[f]:b[f]);
+      if(val!==undefined) m[f]=val;
+    });
+    const ft=mergeFtMaps(a,b); if(Object.keys(ft).length) m._ft=ft;
+    out.students[id]=m;
+  });
+  const order=((pref==='local'?L.order:R.order)||[]).filter(function(id){ return out.students[id]; });
+  Object.keys(out.students).forEach(function(id){ if(order.indexOf(id)===-1) order.push(id); });
+  out.order=order;
+  out._ts=Math.max(+L._ts||0,+R._ts||0);
+  return out;
+}
 async function saveDB(force){
   /* Protección contra pisadas — historia completa:
      v1 (sin chequeo): el último dispositivo que guardaba pisaba TODO el objeto DB entero
@@ -2747,88 +2834,40 @@ async function saveDB(force){
      comportamiento: el merge por alumno es siempre seguro, incluso al importar un backup
      (los alumnos que trae el backup se guardan tal cual se importaron; los que el backup no
      conoce —por ejemplo si se sumó un alumno nuevo después de exportarlo— se conservan). */
-  let _mergedFromServer=false;
+  /* 08/10/2026 — "guardé la rutina de Grupo 5 y desapareció": el guardado leía la nube y
+     DESPUÉS escribía. Si en ese medio otro celular (ej. el de una alumna con su copia vieja)
+     también guardaba, el último en escribir pisaba al otro — y como esa copia vieja no tenía
+     la rutina nueva, la borraba. Ahora:
+     1) cada campo que ESTE celular cambió de verdad queda marcado con su hora (st._ft);
+        al juntar dos versiones, gana siempre el cambio más nuevo de ese campo, venga de
+        donde venga (una copia vieja nunca le gana a una edición más nueva);
+     2) leer + juntar + escribir en la nube va en UN solo paso (transacción): si otro
+        celular escribe en el medio, se vuelve a juntar con lo suyo antes de guardar. */
+  if(force) stampAllFields(); else stampLocalEdits();
+  let _mergedFromServer=false, _wroteCloud=false;
   if(fsDB){
     try{
-      const snap=await fsDB.collection('kv').doc('tafit:students').get({source:'server'});
-      if(snap.exists){
-        const remote=safeParse(snap.data().v,null);
-        if(remote&&remote.students){
-          const base=safeParse(_syncBaseline,null);
-          const baseStudents=(base&&base.students)||{};
-          const mergedStudents={};
-          /* Tumba de borrados (05/10/2026): si ESTE dispositivo borró a alguien a propósito
-             (ver deleteStudent), nunca más lo volvemos a traer del servidor, ni acá ni en
-             ningún otro dispositivo que haga este mismo merge más adelante — así "Eliminar"
-             por fin borra de verdad, en vez de que el alumno pueda reaparecer solo. */
-          const mergedDeleted=Object.assign({},remote._deleted,DB._deleted);
-          const ids=new Set(Object.keys(DB.students||{}).concat(Object.keys(remote.students||{})));
-          ids.forEach(id=>{
-            if(mergedDeleted[id]) return;
-            const localHas=DB.students&&Object.prototype.hasOwnProperty.call(DB.students,id);
-            const remoteHas=Object.prototype.hasOwnProperty.call(remote.students,id);
-            if(localHas&&!remoteHas){ mergedStudents[id]=DB.students[id]; return; }
-            if(!localHas&&remoteHas){ mergedStudents[id]=remote.students[id]; return; }
-            /* está en los dos lados. Si este dispositivo ni siquiera tenía a este alumno
-               en su última sincronización conocida (por ejemplo: recién abre la app y su
-               caché local venía incompleta, y runSeeds() lo volvió a crear de cero con la
-               rutina "de fábrica" del código), NO podemos asumir que el valor local es un
-               cambio real — es casi seguro una recreación desde el molde original, y el
-               servidor ya tenía una versión real (con ediciones hechas desde otro
-               dispositivo). En ese caso, el servidor manda siempre. Recién si este
-               dispositivo YA conocía a este alumno y su copia cambió de verdad respecto a
-               eso, confiamos en que es una edición real y priorizamos lo local. */
-            const hadInBaseline=Object.prototype.hasOwnProperty.call(baseStudents,id);
-            if(!hadInBaseline){ mergedStudents[id]=remote.students[id]; return; }
-            /* v4 (05/10/2026) — merge CAMPO POR CAMPO, no todo-o-nada:
-               v3 (más arriba) comparaba el alumno ENTERO contra el baseline: si cualquier
-               campo cambió localmente, se mandaba el objeto local COMPLETO, pisando de paso
-               cualquier otro campo que otro dispositivo hubiera actualizado mientras tanto
-               (ej: la alumna completa su Anamnesis desde su celu, y después la profe edita
-               la rutina desde el suyo — sin esto, ese guardado de rutina viajaba con la
-               copia VIEJA de forms que tenía la profe en memoria, y la Anamnesis recién
-               completada desaparecía). Ahora se compara campo por campo: un campo se manda
-               tal cual está en este dispositivo SOLO si ese campo puntual cambió respecto al
-               baseline; cualquier otro campo se toma siempre del servidor (que puede tener
-               ediciones más nuevas de otro dispositivo). */
-            const localSt=DB.students[id]||{}, remoteSt=remote.students[id]||{}, baseSt=baseStudents[id]||{};
-            const allFields=new Set(Object.keys(localSt).concat(Object.keys(remoteSt)).concat(Object.keys(baseSt)));
-            const mergedSt={};
-            allFields.forEach(function(f){
-              const changedLocally=JSON.stringify(localSt[f])!==JSON.stringify(baseSt[f]);
-              /* cambió en este dispositivo → se manda tal cual. si no cambió, el servidor
-                 manda SIEMPRE (incluso si eso significa que el campo ya no existe — por
-                 ejemplo, otro dispositivo lo borró a propósito). */
-              const val=changedLocally?localSt[f]:remoteSt[f];
-              if(val!==undefined) mergedSt[f]=val;
-            });
-            mergedStudents[id]=mergedSt;
-          });
-          const mergedOrder=(DB.order||[]).filter(id=>mergedStudents[id]);
-          (remote.order||[]).forEach(id=>{ if(mergedStudents[id]&&mergedOrder.indexOf(id)===-1) mergedOrder.push(id); });
-          Object.keys(mergedStudents).forEach(id=>{ if(mergedOrder.indexOf(id)===-1) mergedOrder.push(id); });
-          const settingsUnchanged=JSON.stringify(DB.settings)===JSON.stringify(base&&base.settings);
-          const seedKeys=new Set(Object.keys(remote._seed||{}).concat(Object.keys(DB._seed||{})));
-          const mergedSeed={};
-          seedKeys.forEach(k=>{ mergedSeed[k]=!!(remote._seed&&remote._seed[k])||!!(DB._seed&&DB._seed[k]); });
-          const mergedExLib=mergeListById(DB.exLib,remote.exLib,base&&base.exLib);
-          const mergedTemplates=mergeListById(DB.templates,remote.templates,base&&base.templates);
-          DB={
-            order:mergedOrder,
-            students:mergedStudents,
-            settings:(settingsUnchanged&&remote.settings)?remote.settings:DB.settings,
-            _seed:mergedSeed,
-            _deleted:mergedDeleted,
-            exLib:mergedExLib,
-            templates:mergedTemplates,
-          };
-          _mergedFromServer=true;
-        }
-      }
+      const ref=fsDB.collection('kv').doc('tafit:students');
+      const localDB=DB, base=safeParse(_syncBaseline,null);
+      const tx=fsDB.runTransaction(function(t){ return t.get(ref).then(function(snap){
+        const remote=snap.exists?safeParse(snap.data().v,null):null;
+        const out=(remote&&remote.students)?mergeDBWithRemote(localDB,remote,base):JSON.parse(JSON.stringify(localDB));
+        out._ts=Date.now();
+        t.set(ref,{v:JSON.stringify(out),ts:firebase.firestore.FieldValue.serverTimestamp(),dev:DEVICE_ID});
+        return out;
+      }); });
+      const merged=await Promise.race([tx,new Promise(function(_,rej){ setTimeout(function(){ rej(new Error('timeout')); },10000); })]);
+      DB=merged; _mergedFromServer=true; _wroteCloud=true;
     }catch(e){ /* sin señal u otro error: seguimos con el guardado normal (offline-first) */ }
   }
-  DB._ts=Date.now();
-  await Store.set('tafit:students', JSON.stringify(DB));
+  if(_wroteCloud){
+    /* ya quedó en la nube: solo lo dejamos también en este celular (sin volver a subirlo) */
+    try{ localStorage.setItem('tafit:students', JSON.stringify(DB)); }catch(e){}
+    clearPending('tafit:students');
+  } else {
+    DB._ts=Date.now();
+    await Store.set('tafit:students', JSON.stringify(DB)); /* sube por _pushRaw, que también junta con la nube */
+  }
   /* SEGUNDA CAUSA (25/09/2026) de "se ve bien un instante y después vuelve a lo malo":
      acá siempre se adelantaba _syncBaseline, incluso cuando este guardado NO se pudo
      comparar contra el servidor (fsDB todavía null, sin señal, etc. — el caso típico es el
@@ -3174,10 +3213,18 @@ function woTombstone(){ return {_del:true,_t:Date.now()}; }
    cada variante semanal, para que ningún otro celular las vuelva a traer */
 function clearedCache(old){ const out={}; Object.keys(old||{}).forEach(function(k){ if(k.indexOf('wo_')===0) out[k]=woTombstone(); }); return out; }
 function mergeKeyStr(k,localStr,remoteStr){
+  if(k==='tafit:students'){
+    const L=safeParse(localStr||'null',null), R=safeParse(remoteStr||'null',null);
+    if(!L||!L.students) return remoteStr; if(!R||!R.students) return localStr;
+    const out=mergeStudentsByFt(L,R,'remote');
+    /* ajustes generales (PIN, biblioteca, plantillas): como siempre, los de este celular */
+    if(L.settings) out.settings=L.settings; if(L.exLib) out.exLib=L.exLib; if(L.templates) out.templates=L.templates;
+    return JSON.stringify(out);
+  }
   if(isDataKey(k)) return JSON.stringify(mergeDataObj(safeParse(localStr||'{}',{}),safeParse(remoteStr||'{}',{})));
   return mergeAdditive(k,localStr,remoteStr);
 }
-function isMergedKey(k){ return isLogsKey(k)||isLogsDelKey(k)||isDataKey(k); }
+function isMergedKey(k){ return k==='tafit:students'||isLogsKey(k)||isLogsDelKey(k)||isDataKey(k); }
 function _pushMergedRaw(k,v){ return new Promise(res=>{ let done=false; const t=setTimeout(()=>{ if(!done){ done=true; res(false); } },10000);
   const ref=fsDB.collection('kv').doc(k);
   fsDB.runTransaction(function(tx){ return tx.get(ref).then(function(doc){
@@ -3197,9 +3244,10 @@ function _pushRaw(k,v){ if(isMergedKey(k)) return _pushMergedRaw(k,v); return ne
     .then(()=>{ if(!done){ done=true; clearTimeout(t); res(true); } })
     .catch(()=>{ if(!done){ done=true; clearTimeout(t); res(false); } });
 }); }
-async function cloudPush(k,v){ if(!fsDB||_fromRemote) return; const ok=await _pushRaw(k,v); if(ok) clearPending(k); else markPending(k); }
+async function cloudPush(k,v){ if(!fsDB) return; if(_fromRemote){ markPending(k); return; } const ok=await _pushRaw(k,v); if(ok) clearPending(k); else markPending(k); }
 async function flushPending(){ if(!fsDB||!PENDING.length) return; const list=PENDING.slice();
   for(const k of list){ let v=null; try{ v=localStorage.getItem(k); }catch(e){} if(v==null){ clearPending(k); continue; }
+    if(k==='tafit:students'){ try{ await saveDB(); }catch(e){} continue; } /* saveDB junta con la nube en un solo paso */
     const ok=await _pushRaw(k,v); if(ok) clearPending(k); else break; }
 }
 window.addEventListener('online',()=>setTimeout(flushPending,800));
@@ -3384,7 +3432,7 @@ async function restoreAutoBackup(dateISO){
     return true;
   }catch(e){ console.warn('Restore:',e); return false; }
 }
-async function reloadFromRemote(){ try{ const raw=await Store.get('tafit:students'); if(raw){ const p=safeParse(raw,null); if(p&&p.order&&p.order.length){ if(!DB._ts||!p._ts||p._ts>=DB._ts){ DB=p; setSyncBaseline(); } } } if(urlLockPending){ await tryResolveLockedLink(); return; } if(DB.students[active]){ CACHE=safeParse(await Store.get('tafit:data:'+active)||'{}',{}); migrateLegacyWeeks(); const remoteLogs=safeParse(await Store.get('tafit:logs:'+active)||'[]',[]); LOGS=mergeLogs(LOGS,remoteLogs); const remoteChat=safeParse(await Store.get('tafit:chat:'+active)||'[]',[]); CHAT=mergeChat(CHAT,remoteChat); } render(); }catch(e){} }
+async function reloadFromRemote(){ try{ const raw=await Store.get('tafit:students'); if(raw){ const p=safeParse(raw,null); if(p&&p.order&&p.order.length){ if(!DB._ts||!p._ts||p._ts>=DB._ts){ DB=mergeStudentsByFt(DB,p,'remote'); setSyncBaseline(); } } } if(urlLockPending){ await tryResolveLockedLink(); return; } if(DB.students[active]){ CACHE=safeParse(await Store.get('tafit:data:'+active)||'{}',{}); migrateLegacyWeeks(); const remoteLogs=safeParse(await Store.get('tafit:logs:'+active)||'[]',[]); LOGS=mergeLogs(LOGS,remoteLogs); const remoteChat=safeParse(await Store.get('tafit:chat:'+active)||'[]',[]); CHAT=mergeChat(CHAT,remoteChat); } if(trainer&&tab==='edit'&&document.querySelector('.edit-day,.week-row,#healthsec,#membersfld')){ /* 08/10/2026: llegaron datos de otro celular mientras la profe edita — NO se redibuja el formulario (se perdía lo que estaba escribiendo). Al guardar, lo suyo gana por ser más nuevo. */ return; } render(); }catch(e){} }
 function updateSyncUI(on){ $('clouddot').className='dot'+(on?' on':''); $('cloudlbl').textContent=on?'Sincronizado':(Store.ls?'En este dispositivo':'Solo esta sesión'); }
 function myKeys(){ /* claves que necesita una alumna con link bloqueado */
   return ['tafit:students','tafit:data:'+active,'tafit:logs:'+active,'tafit:logsdel:'+active,'tafit:chat:'+active,'tafit:form:acuerdo:'+active,'tafit:form:anamnesis:'+active];
@@ -3410,7 +3458,7 @@ async function initFirebase(){
        se volvía a escribir esa versión vieja de DB encima de la nube, ya con fireSync
        activo. Por eso también hay que actualizar DB acá, con la misma regla de "solo si
        es igual o más nuevo" que usa reloadFromRemote(), antes de que fireSync se active. */
-    try{ const snap=await kvQuery().get(); let _studentsMerged=false; snap.forEach(function(doc){ var k=doc.id,v=doc.data().v; if(shouldSync(k)&&v!=null){ try{ if(isMergedKey(k)&&localStorage.getItem(k)!=null){ v=mergeKeyStr(k,localStorage.getItem(k),v); } if(localStorage.getItem(k)!==v){ localStorage.setItem(k,v); if(k==='tafit:students'){ var p=safeParse(v,null); if(p&&p.order&&p.order.length&&(!DB._ts||!p._ts||p._ts>=DB._ts)){ DB=p; setSyncBaseline(); _studentsMerged=true; } } } }catch(e){} } }); if(_studentsMerged){ /* llegó la versión real de la nube: los parches de una sola vez que esa versión todavía no tenga se aplican ENCIMA de ella (nunca de la copia vieja de este celular). Están guardados por bandera, así que los que ya corrieron en otro celular no se repiten. */ try{ if(window.__runSeeds) window.__runSeeds(); }catch(e){ console.warn('Seeds:',e); } try{ if(urlLockPending) await tryResolveLockedLink(); else render(); }catch(e){} } else if(urlLockPending){ try{ await tryResolveLockedLink(); }catch(e){} } }catch(e){ console.warn('Pull:',e); }
+    try{ const snap=await kvQuery().get(); let _studentsMerged=false; snap.forEach(function(doc){ var k=doc.id,v=doc.data().v; if(shouldSync(k)&&v!=null){ try{ if(isMergedKey(k)&&localStorage.getItem(k)!=null){ v=mergeKeyStr(k,localStorage.getItem(k),v); } if(localStorage.getItem(k)!==v){ localStorage.setItem(k,v); if(k==='tafit:students'){ var p=safeParse(v,null); if(p&&p.order&&p.order.length&&(!DB._ts||!p._ts||p._ts>=DB._ts)){ DB=mergeStudentsByFt(DB,p,'remote'); setSyncBaseline(); _studentsMerged=true; } } } }catch(e){} } }); if(_studentsMerged){ /* llegó la versión real de la nube: los parches de una sola vez que esa versión todavía no tenga se aplican ENCIMA de ella (nunca de la copia vieja de este celular). Están guardados por bandera, así que los que ya corrieron en otro celular no se repiten. */ try{ if(window.__runSeeds) window.__runSeeds(); }catch(e){ console.warn('Seeds:',e); } try{ if(urlLockPending) await tryResolveLockedLink(); else render(); }catch(e){} } else if(urlLockPending){ try{ await tryResolveLockedLink(); }catch(e){} } }catch(e){ console.warn('Pull:',e); }
     /* las transcriptas de la nube que este celular no tenía, también a la memoria
        (antes quedaban solo en localStorage y el próximo guardado las pisaba) */
     try{ if(active&&DB.students[active]){ LOGS=mergeLogs(LOGS,safeParse(localStorage.getItem('tafit:logs:'+active)||'[]',[])); CACHE=mergeDataObj(CACHE,safeParse(localStorage.getItem('tafit:data:'+active)||'{}',{})); } }catch(e){}
