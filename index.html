@@ -1020,7 +1020,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-114'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-115'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -3859,6 +3859,113 @@ function runSeeds(){
     ].filter(function(it){ return existingNames.indexOf(it.n.trim().toLowerCase())===-1; });
     DB.exLib=DB.exLib.concat(extra);
     DB._seed.libCoreExtra20261006=true;
+  }
+
+  /* 08/10/2026: Tami pidió más ejercicios en la biblioteca (poleas, mancuernas, bandas para
+     glúteos y abdominales). Solo SUMA: nunca pisa ni duplica un ejercicio que ya exista con
+     el mismo nombre. El video abre la búsqueda en YouTube (se puede poner un link puntual
+     desde la biblioteca, como con cualquier otro). */
+  if(!DB._seed.libMore20261008){
+    if(!DB.exLib) DB.exLib=[];
+    const have=DB.exLib.map(function(it){ return (it.n||'').trim().toLowerCase(); });
+    const L3=(n,groups,alt,tip)=>({ id:slug(n)+'-lib2', n, groups, alt:alt||'', tip:tip||'', vid:YT(n) });
+    const more=[
+      /* ---- poleas ---- */
+      L3('Cruce de poleas',['Pecho'],'Aperturas con mancuernas','Un paso adelante, codos levemente flexionados. Juntá las manos frente al pecho apretando el pectoral y volvé lento.'),
+      L3('Cruce de poleas de abajo hacia arriba',['Pecho'],'Cruce de poleas','Poleas abajo, llevá las manos hacia arriba y al centro (altura del mentón) marcando la parte alta del pecho.'),
+      L3('Jalón al pecho agarre cerrado (triángulo)',['Espalda'],'Dorsalera amplia','Pecho arriba, llevá el triángulo al esternón con los codos pegados al cuerpo. Subí controlando.'),
+      L3('Jalón al pecho agarre supino',['Espalda','Brazos'],'Dorsalera amplia','Palmas hacia vos, a la altura de los hombros. Bajá la barra al pecho sin balancear el torso.'),
+      L3('Pullover en polea alta',['Espalda'],'Pullover con mancuerna','Brazos casi extendidos, bajá la barra o cuerda hasta los muslos con el dorsal, sin doblar los codos.'),
+      L3('Remo unilateral en polea',['Espalda'],'Remo con mancuerna a una mano','Torso firme sin girar, llevá el codo atrás pegado al cuerpo y apretá la escápula.'),
+      L3('Face pull (remo a la cara en polea)',['Hombros','Espalda'],'Pájaro con mancuernas','Cuerda a la altura de los ojos, tirá hacia la cara abriendo los codos y rotando las manos hacia afuera.'),
+      L3('Elevación lateral en polea',['Hombros'],'Elevación lateral con mancuerna','Polea baja del lado contrario, subí el brazo hasta la altura del hombro sin encoger el trapecio.'),
+      L3('Elevación frontal en polea',['Hombros'],'Elevación frontal con mancuernas','De espaldas a la polea, subí el brazo estirado hasta la altura del hombro, sin balancear.'),
+      L3('Pájaro en polea (vuelo posterior)',['Hombros'],'Pájaro con mancuernas','Poleas cruzadas a la altura del hombro, abrí los brazos hacia atrás marcando la parte posterior del hombro.'),
+      L3('Curl de bíceps en polea baja',['Brazos'],'Curl de bíceps con barra','Codos quietos pegados al cuerpo, subí sin balancear y bajá lento hasta estirar.'),
+      L3('Curl martillo con cuerda en polea',['Brazos'],'Curl martillo con mancuernas','Agarre neutro con la cuerda, codos fijos, subí separando apenas las puntas de la cuerda.'),
+      L3('Curl de bíceps en polea alta',['Brazos'],'Curl concentrado','Brazos abiertos a la altura de los hombros, llevá las manos hacia la cabeza apretando el bíceps.'),
+      L3('Extensión de tríceps con cuerda en polea',['Brazos'],'Press de tríceps en polea','Codos pegados al cuerpo, extendé abajo separando la cuerda al final. Subí controlando.'),
+      L3('Extensión de tríceps sobre la cabeza en polea',['Brazos'],'Extensión de tríceps sobre la cabeza con mancuerna','De espaldas a la polea, codos apuntando adelante, extendé los brazos sin abrir los codos.'),
+      L3('Patada de tríceps en polea',['Brazos'],'Patada de tríceps con mancuerna','Torso inclinado, codo fijo al costado, extendé el brazo completo hacia atrás.'),
+      L3('Abducción de cadera en polea',['Glúteos'],'Abducción de pie con banda','Tobillera en la pierna de afuera, llevala hacia el costado sin inclinar el torso. Volvé lento.'),
+      L3('Aducción de cadera en polea',['Piernas'],'Aductores en máquina','Tobillera en la pierna de adentro, cruzala por delante del cuerpo controlando la vuelta.'),
+      L3('Pull through en polea',['Glúteos'],'Peso muerto rumano','De espaldas a la polea baja, cuerda entre las piernas. Llevá la cadera atrás y subí apretando glúteos.'),
+      L3('Crunch en polea alta (arrodillado)',['Core'],'Crunch en máquina','De rodillas, cuerda a los costados de la cabeza. Enrollá el torso con el abdomen, sin tirar con los brazos.'),
+      L3('Leñador en polea (de arriba hacia abajo)',['Core'],'Giro ruso','Brazos firmes, girá desde el torso llevando la cuerda en diagonal hacia la rodilla contraria.'),
+      L3('Leñador en polea (de abajo hacia arriba)',['Core'],'Giro ruso','Desde abajo, llevá la cuerda en diagonal por encima del hombro contrario girando el torso.'),
+      L3('Press Pallof',['Core'],'Plancha lateral','De costado a la polea, empujá la manija adelante sin dejar que el cuerpo gire. Aguantá y volvé.'),
+      /* ---- mancuernas ---- */
+      L3('Press plano con mancuernas',['Pecho'],'Press de banca con barra','Omóplatos juntos, bajá las mancuernas a los costados del pecho con los codos a 45° y empujá arriba.'),
+      L3('Pullover con mancuerna',['Pecho','Espalda'],'Pullover en polea alta','Acostada en el banco, mancuerna con las dos manos, bajá por detrás de la cabeza con los codos apenas flexionados.'),
+      L3('Remo con mancuerna a una mano',['Espalda'],'Remo en polea baja','Mano y rodilla apoyadas en el banco, espalda recta. Llevá el codo hacia la cadera.'),
+      L3('Remo con mancuernas pecho apoyado',['Espalda'],'Remo con barra','Pecho apoyado en un banco inclinado, llevá los codos atrás apretando las escápulas.'),
+      L3('Press Arnold',['Hombros'],'Press militar con mancuernas','Arrancá con las palmas hacia vos y girá las manos mientras empujás arriba. Bajá deshaciendo el giro.'),
+      L3('Elevación frontal con mancuernas',['Hombros'],'Elevación frontal en polea','Brazos casi estirados, subí hasta la altura del hombro alternando o juntas, sin balancear.'),
+      L3('Pájaro con mancuernas',['Hombros'],'Pájaro en polea (vuelo posterior)','Torso inclinado adelante, espalda recta, abrí los brazos hacia los costados marcando el hombro posterior.'),
+      L3('Encogimientos con mancuernas',['Espalda'],'Encogimientos con barra','Brazos estirados, subí los hombros hacia las orejas, aguantá un segundo y bajá lento.'),
+      L3('Curl de bíceps alterno con mancuernas',['Brazos'],'Curl de bíceps con barra','Codos quietos, subí girando la palma hacia arriba. Alterná brazos sin balancear el cuerpo.'),
+      L3('Curl concentrado',['Brazos'],'Curl de bíceps en polea baja','Sentada, codo apoyado en la cara interna del muslo, subí la mancuerna apretando el bíceps.'),
+      L3('Curl inclinado con mancuernas',['Brazos'],'Curl de bíceps alterno con mancuernas','Banco a 45°, brazos colgando atrás del cuerpo, subí sin adelantar los codos.'),
+      L3('Press francés con mancuernas',['Brazos'],'Extensión de tríceps con cuerda en polea','Acostada, codos apuntando al techo, bajá las mancuernas a los costados de la cabeza y extendé.'),
+      L3('Extensión de tríceps sobre la cabeza con mancuerna',['Brazos'],'Extensión de tríceps sobre la cabeza en polea','Mancuerna con las dos manos detrás de la cabeza, codos cerrados, extendé hacia arriba.'),
+      L3('Patada de tríceps con mancuerna',['Brazos'],'Patada de tríceps en polea','Torso inclinado, codo fijo pegado al cuerpo, extendé el brazo atrás y apretá.'),
+      L3('Sentadilla goblet',['Piernas','Glúteos'],'Sentadilla con barra','Mancuerna pegada al pecho, bajá con la espalda erguida y las rodillas siguiendo la punta de los pies.'),
+      L3('Sentadilla sumo con mancuerna',['Glúteos','Piernas'],'Sentadilla con banda en rodillas','Piernas bien abiertas y puntas afuera, mancuerna colgando al medio. Bajá recto y subí apretando glúteos.'),
+      L3('Sentadilla búlgara con mancuernas',['Glúteos','Piernas'],'Estocadas / Zancadas','Pie de atrás apoyado en el banco, bajá la rodilla de atrás hacia el piso con el torso apenas inclinado.'),
+      L3('Estocada caminando con mancuernas',['Piernas','Glúteos'],'Estocadas / Zancadas','Pasos largos, bajá hasta que las dos rodillas formen 90° y avanzá empujando con el pie de adelante.'),
+      L3('Estocada hacia atrás con mancuernas',['Glúteos','Piernas'],'Sentadilla búlgara con mancuernas','Paso atrás, bajá controlando y volvé empujando con el talón de la pierna de adelante.'),
+      L3('Peso muerto rumano con mancuernas',['Glúteos','Piernas'],'Peso muerto rumano','Rodillas apenas flexionadas, llevá la cadera atrás bajando las mancuernas pegadas a las piernas. Espalda recta.'),
+      L3('Peso muerto a una pierna con mancuerna',['Glúteos'],'Peso muerto rumano con mancuernas','Inclinate adelante sobre una pierna con la otra estirada atrás, cadera alineada sin abrirla.'),
+      L3('Step up al cajón con mancuernas',['Piernas','Glúteos'],'Estocada hacia atrás con mancuernas','Pisá con toda la planta, subí empujando con la pierna de arriba sin impulsarte con la de abajo.'),
+      L3('Hip thrust con mancuerna',['Glúteos'],'Hip thrust','Espalda apoyada en el banco, mancuerna sobre la cadera. Subí apretando glúteos y aguantá arriba.'),
+      L3('Puente de glúteos con mancuerna',['Glúteos'],'Puente de glúteos con banda','Acostada, pies apoyados, mancuerna sobre la cadera. Subí la cadera apretando glúteos sin arquear la lumbar.'),
+      L3('Elevación de talones con mancuernas',['Piernas'],'Gemelos en máquina','Puntas sobre un escalón, bajá el talón estirando y subí lo más alto posible.'),
+      L3('Swing con mancuerna o pesa rusa',['Glúteos','Cardio'],'Pull through en polea','Llevá la cadera atrás y empujala adelante con fuerza; los brazos solo acompañan. Espalda recta.'),
+      L3('Caminata del granjero',['Core','Otro'],'Plancha abdominal','Mancuernas pesadas a los costados, caminá erguida con el abdomen firme y los hombros atrás.'),
+      L3('Inclinación lateral con mancuerna',['Core'],'Plancha lateral','Mancuerna en una mano, bajá por el costado de la pierna y subí sin girar el torso.'),
+      /* ---- bandas para glúteos ---- */
+      L3('Caminata lateral con banda',['Glúteos'],'Abducción de cadera en polea','Banda arriba de las rodillas o en los tobillos, semi sentadilla, pasos al costado sin juntar los pies.'),
+      L3('Caminata en X con banda (monster walk)',['Glúteos'],'Caminata lateral con banda','Semi sentadilla, pasos en diagonal adelante y atrás manteniendo la banda siempre tensa.'),
+      L3('Abducción sentada con banda',['Glúteos'],'Abductores en máquina','Sentada al borde del banco, banda en las rodillas, abrí las piernas y volvé lento.'),
+      L3('Almeja con banda (clamshell)',['Glúteos'],'Abducción sentada con banda','De costado, rodillas flexionadas, abrí la rodilla de arriba sin separar los pies ni girar la cadera.'),
+      L3('Puente de glúteos con banda',['Glúteos'],'Puente de glúteos con mancuerna','Banda en las rodillas, empujá hacia afuera mientras subís la cadera y apretás glúteos.'),
+      L3('Hip thrust con banda',['Glúteos'],'Hip thrust','Espalda en el banco, banda en las rodillas. Subí apretando glúteos y abriendo las rodillas contra la banda.'),
+      L3('Patada de glúteo en cuadrupedia con banda',['Glúteos'],'Patada de glúteo en polea','En cuatro apoyos, llevá una pierna atrás y arriba con la rodilla flexionada, sin arquear la lumbar.'),
+      L3('Patada lateral en cuadrupedia con banda (fire hydrant)',['Glúteos'],'Almeja con banda (clamshell)','En cuatro apoyos, abrí la rodilla hacia el costado sin girar el torso ni mover los brazos.'),
+      L3('Sentadilla con banda en rodillas',['Glúteos','Piernas'],'Sentadilla goblet','Banda arriba de las rodillas, bajá empujando las rodillas hacia afuera contra la banda.'),
+      L3('Sentadilla sumo con pulsos y banda',['Glúteos'],'Sentadilla sumo con mancuerna','Abajo de la sentadilla sumo, hacé pequeños rebotes manteniendo la banda tensa.'),
+      L3('Abducción de pie con banda',['Glúteos'],'Abducción de cadera en polea','Banda en los tobillos, apoyada en algo firme, llevá la pierna al costado sin inclinar el torso.'),
+      L3('Patada atrás de pie con banda',['Glúteos'],'Patada de glúteo en polea','Banda en los tobillos, llevá la pierna estirada hacia atrás apretando el glúteo, sin arquear.'),
+      L3('Puente rana con banda (frog pump)',['Glúteos'],'Puente de glúteos con banda','Plantas de los pies juntas y rodillas abiertas, subí la cadera apretando glúteos, ritmo rápido.'),
+      L3('Peso muerto rumano con banda',['Glúteos','Piernas'],'Peso muerto rumano con mancuernas','Pisá la banda larga, llevá la cadera atrás con la espalda recta y subí apretando glúteos.'),
+      L3('Puente de glúteos a una pierna',['Glúteos'],'Puente de glúteos con banda','Una pierna estirada arriba, subí la cadera empujando con el talón de la pierna apoyada.'),
+      /* ---- abdominales ---- */
+      L3('Crunch en colchoneta',['Core'],'Crunch en máquina','Mirada al techo, subí despegando solo los hombros, sin tirar del cuello con las manos.'),
+      L3('Crunch invertido',['Core'],'Elevación de piernas en el piso','Llevá las rodillas al pecho despegando la cola del piso, sin impulso. Bajá lento.'),
+      L3('Crunch con disco',['Core'],'Crunch en colchoneta','Disco contra el pecho, subí con el abdomen y bajá controlando.'),
+      L3('Sit up',['Core'],'Crunch en colchoneta','Subí el torso completo con control, sin impulsarte con los brazos ni tirar del cuello.'),
+      L3('Crunch oblicuo',['Core'],'Bicicleta (crunch bicicleta)','Rotá el torso al subir llevando el hombro hacia la rodilla contraria.'),
+      L3('Dead bug (bicho muerto)',['Core'],'Plancha abdominal','Boca arriba, brazos y piernas arriba. Estirá brazo y pierna contraria sin despegar la lumbar del piso.'),
+      L3('Hollow hold (posición hueca)',['Core'],'Plancha abdominal','Boca arriba, lumbar pegada al piso, despegá hombros y piernas estiradas y aguantá.'),
+      L3('Tijeras',['Core'],'Pataditas (flutter kicks)','Piernas estiradas cruzándose arriba y abajo, con la zona lumbar pegada al piso.'),
+      L3('Pataditas (flutter kicks)',['Core'],'Tijeras','Piernas estiradas, patadas cortas y rápidas arriba y abajo, lumbar apoyada.'),
+      L3('Toque de talones',['Core'],'Crunch oblicuo','Hombros despegados, inclinate de lado a lado tocando cada talón con la mano.'),
+      L3('Plancha con toque de hombro',['Core'],'Plancha abdominal','Desde plancha alta, tocá el hombro contrario sin mover la cadera. Pies algo separados.'),
+      L3('Plancha con rodilla al codo',['Core'],'Mountain climbers','Desde plancha, llevá la rodilla hacia el codo del mismo lado sin subir la cadera.'),
+      L3('Plancha dinámica (antebrazos a manos)',['Core'],'Plancha abdominal','Pasá de plancha baja a alta apoyando una mano y después la otra, sin balancear la cadera.'),
+      L3('Plancha lateral con elevación de cadera',['Core'],'Plancha lateral','Desde plancha lateral, bajá y subí la cadera controlando, cuerpo en línea.'),
+      L3('Rueda abdominal',['Core'],'Plancha dinámica (antebrazos a manos)','Avanzá solo hasta donde puedas sin hundir la zona lumbar y volvé con el abdomen.'),
+      L3('Elevación de rodillas en paralelas',['Core'],'Elevación de piernas colgado','Espalda apoyada en el respaldo, subí las rodillas al pecho sin balancearte.'),
+      L3('Crunch en pelota (fitball)',['Core'],'Crunch en colchoneta','Lumbar apoyada en la pelota, subí el torso con el abdomen y bajá estirando.'),
+      L3('Mountain climbers cruzados',['Core','Cardio'],'Mountain climbers','Desde plancha, llevá la rodilla hacia el codo contrario alternando, cadera estable.'),
+      L3('Navaja (jackknife)',['Core'],'Abdominales en V (V-ups)','Boca arriba, subí brazos y piernas a la vez para tocar los pies, bajá controlando.'),
+      L3('Barquito',['Core'],'Hollow hold (posición hueca)','Sentada, piernas arriba y torso inclinado formando una V, espalda recta. Aguantá.'),
+      L3('Bird dog (cuadrupedia alterna)',['Core','Espalda'],'Superman (extensión de espalda)','En cuatro apoyos, estirá brazo y pierna contraria sin rotar la cadera. Volvé lento.'),
+      L3('Espinales en banco',['Core','Espalda'],'Hiperextensión en banco romano','Subí el torso controlando y apretá la zona lumbar arriba, sin pasarte hacia atrás.'),
+      L3('Nado en el piso (swimmers)',['Core','Espalda'],'Superman (extensión de espalda)','Boca abajo, alterná brazo y pierna contraria arriba como si nadaras, sin impulso.'),
+    ].filter(function(it){ const k=it.n.trim().toLowerCase(); if(have.indexOf(k)>=0) return false; have.push(k); return true; });
+    DB.exLib=DB.exLib.concat(more);
+    DB._seed.libMore20261008=true;
   }
 
   /* 06/10/2026: Tami pidió que el bloque de abdominales/espinal esté SIEMPRE, en TODOS
