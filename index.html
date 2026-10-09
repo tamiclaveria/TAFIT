@@ -1076,7 +1076,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-119'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-120'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -7488,18 +7488,17 @@ function cobroEditHTML(id){ const st=DB.students[id]; const c=st.cobro||{}; cons
    Nunca se bloquea: a quien no tiene tarifa, a quien "no paga este mes", a quien Tami marcó
    "Nunca bloquear", ni antes de COBRO_BLOQ_DESDE (para que Tami tenga tiempo de marcar lo
    que ya le pagaron). Bloquea la rutina; el chat sigue abierto. */
-const COBRO_BLOQ_DESDE='2026-11', COBRO_DIA_LIMITE=10, COBRO_MARGEN_VIRTUAL=3;
+const COBRO_BLOQ_DESDE='2026-10', COBRO_DIA_LIMITE=10, COBRO_MARGEN_VIRTUAL=3;
 function payBlockInfo(id,mi){
   const st=DB.students[id]; if(!st||!st.cobro) return null;
   let c=st.cobro, sid=id, pmi=mi;
   if(c.parteDe&&DB.students[c.parteDe]){ sid=c.parteDe; pmi=0; c=DB.students[sid].cobro||{}; }
   if(c.noBloquear) return null;
   const hoy=todayISO(), ym=hoy.slice(0,7);
-  if(ym<COBRO_BLOQ_DESDE) return null;
   const p=cobroPayers(ym).find(function(x){ return x.id===sid&&x.mi===pmi; }); if(!p||p.sinTarifa||p.exento||p.sinDias||p.noToca) return null;
   const pagado=p.paid?+p.paid.monto:0; if(pagado>=p.monto) return null;
-  if(p.virtual){ if(!p.due) return null; if(hoy<=addDaysISO(p.due,COBRO_MARGEN_VIRTUAL)) return null; }
-  else if(+hoy.slice(8,10)<=COBRO_DIA_LIMITE) return null;
+  if(p.virtual){ if(!p.due) return null; if(hoy<=addDaysISO(p.due,COBRO_MARGEN_VIRTUAL)) return null; } /* virtuales: bloquean desde ya (Tami, 09/10/2026) */
+  else { if(ym<COBRO_BLOQ_DESDE) return null; if(+hoy.slice(8,10)<=COBRO_DIA_LIMITE) return null; } /* presenciales: desde octubre (Tami, 09/10/2026: "si pasó la fecha de pago que se bloqueen") */
   return { p, ym, falta:p.monto-pagado };
 }
 function blockedMembersOf(id){ const st=DB.students[id]; if(!st) return []; const n=(st.members&&st.members.length>1)?st.members.length:1; const out=[]; for(let i=0;i<n;i++){ if(payBlockInfo(id,i)) out.push(i); } return out; }

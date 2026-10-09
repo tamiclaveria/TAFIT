@@ -7,7 +7,7 @@
    2) la página (index.html) se pide primero a la red, con un límite de 3 segundos; si no hay
       señal o tarda, se abre la copia guardada. Así, con señal, siempre se ve la última
       versión publicada, y sin señal la app sigue abriendo igual que antes. */
-const CACHE = 'tafit-v8-119';
+const CACHE = 'tafit-v8-120';
 const ASSETS = [
   './',
   './index.html',
