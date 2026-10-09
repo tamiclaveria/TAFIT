@@ -447,6 +447,49 @@
 
   /* Pagos */
   .pago-block{border-radius:12px;padding:14px 16px;margin-bottom:14px}
+  .cobro-block{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:12px}
+  .cobro-block.paid{background:var(--tint2);border-color:var(--accent)}
+  .cobro-block.muted summary{list-style:none;cursor:pointer}
+  .cobro-title{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);font-weight:800;margin:2px 0 6px}
+  .cobro-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+  .cobro-title+.cobro-row{border-top:none}
+  .cobro-who{flex:1;min-width:0;cursor:pointer}
+  .cobro-who b{display:block;font-size:14px}
+  .cobro-grp{display:inline-block;font-size:10.5px;color:var(--accentDk);background:var(--tint2);border-radius:6px;padding:1px 6px;margin-top:2px}
+  .cobro-det{display:block;font-size:11.5px;color:var(--mute);margin-top:2px}
+  .cobro-r{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+  .cobro-m{font-size:15px}
+  .cobro-acts{display:flex;gap:5px}
+  .cobro-b{font-family:inherit;border:none;border-radius:10px;padding:7px 12px;font-weight:800;font-size:12.5px;background:var(--accentDk);color:#fff;cursor:pointer}
+  .cobro-b.ghost{background:var(--card);color:var(--accentDk);border:1.5px solid var(--accent)}
+  .cobro-b.sm{padding:6px 9px}
+  .cobro-chip{font-family:inherit;font-size:12px;font-weight:800;border-radius:10px;padding:6px 10px;background:var(--light);color:var(--mute);border:none}
+  .cobro-chip.ok{background:var(--accentDk);color:#fff;cursor:pointer}
+  .cobro-parcial{font-size:11px;color:var(--warn);font-weight:700}
+  .cobro-fer{display:flex;align-items:center;gap:10px;justify-content:space-between;background:var(--tint2);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:12.5px}
+  .cobro-mute{color:var(--mute);font-size:11px}
+  .cobro-cal{margin-bottom:6px}
+  .cobro-cal .asis-cell.a{background:var(--accentDk);border-color:var(--accentDk);color:#fff}
+  .cobro-edit *{box-sizing:border-box}
+  .cobro-grid input,.cobro-grid select{width:100%}
+  .cobro-grid>label{min-width:0}
+  .cobro-edit{background:var(--light);border:1.5px solid var(--accent);border-radius:12px;padding:12px;margin:4px 0 10px}
+  .cobro-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+  .cobro-grid.three{grid-template-columns:1.3fr 1fr 1fr}
+  .cobro-grid label,.cobro-alias label{font-size:11px;color:var(--mute);font-weight:700;display:flex;flex-direction:column;gap:4px}
+  .cobro-grid input,.cobro-grid select,.cobro-alias input{font-family:inherit;font-size:14px;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff;min-width:0}
+  .cobro-lbl{font-size:11px;color:var(--mute);font-weight:800;margin:6px 0 5px}
+  .cobro-dows{display:flex;gap:6px;margin-bottom:10px}
+  .cobro-dow{flex:1;font-family:inherit;font-weight:800;border:1.5px solid var(--accent);background:#fff;color:var(--accentDk);border-radius:10px;padding:8px 0;cursor:pointer}
+  .cobro-dow.on{background:var(--accentDk);border-color:var(--accentDk);color:#fff}
+  .cobro-chk{display:flex;gap:8px;align-items:center;font-size:12.5px;margin:2px 0 8px}
+  .cobro-more summary{font-size:12px;font-weight:700;color:var(--accentDk);cursor:pointer;margin:6px 0}
+  .cobro-btns{display:flex;gap:8px;margin-top:8px}.cobro-btns .inf2-btn{flex:1;padding:10px}
+  .cobro-alias{margin:0 0 12px}
+  .cobro-hist{display:grid;grid-template-columns:34px 1fr 92px;gap:8px;align-items:center;font-size:12px;margin:6px 0}
+  .cobro-hist i{height:10px;background:var(--tint2);border-radius:6px;overflow:hidden;display:block}
+  .cobro-hist i b{display:block;height:100%;background:var(--accentDk);border-radius:6px}
+  .cobro-hist em{font-style:normal;text-align:right;font-weight:700}
   .pago-block.vencido{background:#F7E5E3;border:1.5px solid #fca5a5}
   .pago-block.porvencer{background:#F6F0E4;border:1.5px solid #fbd38d}
   .pago-block.aldia{background:var(--okbg);border:1.5px solid #9adbb5}
@@ -1020,7 +1063,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-117'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-118'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -4150,6 +4193,18 @@ function runSeeds(){
     if(!DB.templates.some(function(t){ return t.id===T.id; })&&!(DB._tomb&&DB._tomb[T.id])) DB.templates.push(T);
     DB._seed.tplRestore20261009=true;
   }
+  /* 3) Cobros (09/10/2026): tarifas que pasó Tami. Solo se cargan en quien todavía no tenga
+     tarifa (si ya la cargó a mano, no se toca). Los días que entrena cada uno los elige ella. */
+  if(!DB._seed.cobroInit20261009){
+    const A=function(desde){ return {desde:desde, monto:2000, cada:3}; };
+    const T={ 'jus-yesi':{precio:19000,horas:1,dias:[],aumento:A('2026-11')}, 'grupo-5':{precio:15000,horas:1,dias:[],aumento:A('2026-11')},
+      'flor':{precio:19000,horas:1,dias:[],aumento:A('2027-01')}, 'cecilia':{precio:20000,horas:1,dias:[],aumento:A('2027-01')},
+      'marcela-balter':{precio:25000,horas:1,dias:[],aumento:A('2027-01')}, 'sofia-catalan':{precio:25000,horas:1,dias:[],aumento:null},
+      'omar':{fijo:300000,junto:'martin',dias:[],aumento:A('2026-12')}, 'martin':{parteDe:'omar'} };
+    Object.keys(T).forEach(function(id){ const st=DB.students[id]; if(st&&!st.cobro) st.cobro=T[id]; });
+    const sc=DB.students['sofia-catalan']; if(sc&&!sc.cobroExento) sc.cobroExento=['2026-10','2026-11'];
+    DB._seed.cobroInit20261009=true;
+  }
   if(!DB._seed.abBlockAllDays20261006){
     DB.order.forEach(function(sid){
       const st=DB.students[sid];
@@ -7244,7 +7299,7 @@ function pagoRowHTML(id,due){
   const statusTxt=due?(due.status==='bad'?'🔴 venció hace '+Math.abs(due.daysLeft)+' día'+(Math.abs(due.daysLeft)===1?'':'s'):due.status==='warn'?'🟠 '+(due.daysLeft===0?'vence hoy':'vence en '+due.daysLeft+' día'+(due.daysLeft===1?'':'s')):'✓ vence el '+due.dueStr):'— sin fecha de pago cargada';
   return `<div class="pago-row"><span class="pago-name">${st.theme==='f'?'🌸 ':''}${st.members&&st.members.length>1?'👯 ':''}${esc(st.name)}</span><span class="pago-status">${statusTxt}</span>${btn}</div>`;
 }
-function renderPagos(){
+function renderPagosVencimientos(){ /* vista anterior (por fecha de vencimiento), reemplazada el 09/10/2026 por Cobros por mes */
   const m=$('main');
   const ids=DB.order.filter(id=>DB.students[id]);
   const rows=ids.map(id=>({id, due:planDueInfo(DB.students[id].planPaid)}));
@@ -7271,6 +7326,125 @@ function renderPagos(){
   const hint=document.createElement('div'); hint.className='note'; hint.textContent='"Recordar" abre WhatsApp con un mensaje ya escrito. Si un alumno no tiene teléfono cargado, te lo va a pedir la primera vez (después queda guardado en Editar → Plan del alumno).'; m.appendChild(hint);
 }
 
+/* ==== Cobros por mes (09/10/2026) ====
+   Tami cobra por hora: precio × clases del mes (los días que entrena cada uno, sin
+   feriados), y casi todos transfieren. Acá la app hace la cuenta sola y ella solo marca
+   "Pagó". Grupos y dúos: cada integrante paga por separado. Monto fijo para quien lo tenga
+   (Omar + Martín). Aumento automático cada N meses. Todo vive en el alumno (st.cobro,
+   st.cobros[mes][integrante], st.cobroExtra[mes], st.cobroExento[mes]) y los feriados/alias
+   en Ajustes (DB.settings). */
+const FERIADOS_AR=['2026-10-12','2026-11-23','2026-12-07','2026-12-08','2026-12-25','2027-01-01','2027-02-08','2027-02-09','2027-03-24','2027-03-26','2027-04-02','2027-05-25','2027-06-21'];
+const DOW_L=['D','L','M','X','J','V','S'], DOW_N=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+let cobroMes=null, cobroEditId=null, cobroFerEdit=false;
+function ymNow(){ const d=new Date(); return d.getFullYear()+'-'+pad2(d.getMonth()+1); }
+function ymAdd(ym,n){ let y=+ym.slice(0,4), m=+ym.slice(5,7)+n; while(m>12){ m-=12; y++; } while(m<1){ m+=12; y--; } return y+'-'+pad2(m); }
+function ymDiff(a,b){ return (+b.slice(0,4)-+a.slice(0,4))*12+(+b.slice(5,7)-+a.slice(5,7)); }
+function ymLabel(ym){ return MESES[+ym.slice(5,7)-1]+' '+ym.slice(0,4); }
+function money(n){ return '$'+Math.round(+n||0).toLocaleString('es-AR'); }
+function feriadosSet(){ const st=DB.settings||{}; const f=new Set(FERIADOS_AR); (st.feriadosOn||[]).forEach(function(d){ f.add(d); }); (st.feriadosOff||[]).forEach(function(d){ f.delete(d); }); return f; }
+function conAumento(base,c,ym){ let p=+base||0; const a=c.aumento; if(a&&a.desde&&+a.monto&&ym>=a.desde) p+=(+a.monto)*(1+Math.floor(ymDiff(a.desde,ym)/(+a.cada||3))); return p; }
+function proxAumento(c,ym){ const a=c.aumento; if(!a||!a.desde||!+a.monto) return null; if(ym<a.desde) return a.desde; const k=Math.floor(ymDiff(a.desde,ym)/(+a.cada||3))+1; return ymAdd(a.desde,k*(+a.cada||3)); }
+function clasesMes(c,ym){ const y=+ym.slice(0,4), m=+ym.slice(5,7)-1, n=new Date(y,m+1,0).getDate(); const fer=feriadosSet(); const dias=c.dias||[]; let cnt=0; const feri=[];
+  for(let d=1; d<=n; d++){ const dow=new Date(y,m,d).getDay(); if(dias.indexOf(dow)<0) continue; const iso=dstr(y,m,d); if(fer.has(iso)) feri.push(iso); else cnt++; }
+  return {n:cnt, fer:feri}; }
+function cobroPayers(ym){
+  const out=[];
+  DB.order.forEach(function(id){ const st=DB.students[id]; if(!st||st.archived) return; const c=st.cobro;
+    if(c&&c.parteDe&&DB.students[c.parteDe]) return; /* lo paga junto con otro (ej: Martín dentro de Omar) */
+    if(!c||(!+c.precio&&!+c.fijo)){ out.push({id, mi:0, name:st.name, sinTarifa:true}); return; }
+    const exento=(st.cobroExento||[]).indexOf(ym)>=0;
+    const paidOf=function(mi){ return ((st.cobros||{})[ym]||{})[mi]||null; };
+    if(+c.fijo){ const junto=c.junto&&DB.students[c.junto]?DB.students[c.junto].name:''; out.push({ id, mi:0, name:st.name+(junto?' + '+junto:''), monto:exento?0:conAumento(c.fijo,c,ym), detalle:'Monto fijo del mes'+(junto?' (los dos)':''), exento, paid:paidOf(0) }); return; }
+    const cl=clasesMes(c,ym); const extra=+((st.cobroExtra||{})[ym]||0); const n=cl.n+extra; const precio=conAumento(c.precio,c,ym); const horas=+c.horas||1;
+    const mem=(st.members&&st.members.length>1)?st.members:[st.name];
+    const sinDias=!(c.dias&&c.dias.length);
+    mem.forEach(function(nm,mi){ out.push({ id, mi, name:nm, grupo:mem.length>1?st.name:'', monto:(exento||sinDias)?0:precio*horas*n, precio, horas, n, extra, fer:cl.fer, sinDias, exento,
+      detalle: sinDias?'Faltan los días que entrena':(n+' clase'+(n===1?'':'s')+(extra?' ('+(extra>0?'+':'')+extra+' extra)':'')+' × '+money(precio)+(horas!==1?' × '+horas+' h':'')), paid:paidOf(mi) }); });
+  });
+  return out;
+}
+function cobroWaMsg(p,ym){ const alias=(DB.settings&&DB.settings.alias)||''; const first=String(p.name).split(/[ ,/]/)[0];
+  return 'Hola '+first+'! Te paso la cuota de '+MESES[+ym.slice(5,7)-1].toLowerCase()+': '+(p.n!=null?p.n+' clase'+(p.n===1?'':'s')+' × '+money(p.precio)+' = ':'')+'*'+money(p.monto)+'*.'+(alias?' Podés transferir al alias *'+alias+'*.':'')+' ¡Gracias! 💪'; }
+function cobroTel(p){ const st=DB.students[p.id]; return ((st.telefonos||{})[p.mi])||(p.mi===0?st.telefono:'')||''; }
+async function cobroWa(id,mi){ const ym=cobroMes||ymNow(); const p=cobroPayers(ym).find(function(x){ return x.id===id&&x.mi===mi; }); if(!p) return; const st=DB.students[id];
+  let tel=cobroTel(p);
+  if(!tel){ const v=((await uiPrompt('Teléfono de '+p.name+' (con código de país, ej: 5492612345678):'))||'').trim(); if(!v) return; tel=v; if(!st.telefonos) st.telefonos={}; st.telefonos[mi]=v; if(mi===0&&!st.telefono) st.telefono=v; await saveDB(); }
+  window.open('https://wa.me/'+tel.replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(cobroWaMsg(p,ym)),'_blank'); }
+async function cobroPago(id,mi,mode){ const ym=cobroMes||ymNow(); const st=DB.students[id]; const p=cobroPayers(ym).find(function(x){ return x.id===id&&x.mi===mi; }); if(!p) return;
+  if(!st.cobros) st.cobros={}; if(!st.cobros[ym]) st.cobros[ym]={};
+  if(mode==='undo'){ if(!await uiConfirm('¿Desmarcar el pago de '+p.name+' de '+ymLabel(ym)+'?')) return; delete st.cobros[ym][mi]; }
+  else if(mode==='parcial'){ const v=await uiPrompt('¿Cuánto transfirió '+p.name+'? (total del mes: '+money(p.monto)+')', p.paid?String(p.paid.monto):''); if(v==null) return; const n=+String(v).replace(/[^0-9]/g,''); if(!n){ delete st.cobros[ym][mi]; } else st.cobros[ym][mi]={ monto:n, fecha:todayISO() }; }
+  else st.cobros[ym][mi]={ monto:p.monto, fecha:todayISO() };
+  await saveDB(); renderPagos(); }
+async function cobroSave(id){ const st=DB.students[id]; const box=document.querySelector('.cobro-edit[data-id="'+id+'"]'); if(!box) return;
+  const g=function(f){ const el=box.querySelector('[data-cf="'+f+'"]'); return el?el.value:''; };
+  const num=function(v){ return +String(v||'').replace(/[^0-9.]/g,'')||0; };
+  const dias=Array.prototype.slice.call(box.querySelectorAll('.cobro-dow.on')).map(function(b){ return +b.dataset.v; });
+  const c=Object.assign({},st.cobro||{});
+  c.precio=num(g('precio')); c.horas=num(g('horas'))||1; c.dias=dias; c.fijo=num(g('fijo'));
+  const junto=g('junto'); if(c.junto&&c.junto!==junto&&DB.students[c.junto]&&DB.students[c.junto].cobro) delete DB.students[c.junto].cobro.parteDe;
+  if(junto&&c.fijo){ c.junto=junto; const o=DB.students[junto]; o.cobro=Object.assign({},o.cobro||{}, {parteDe:id}); } else delete c.junto;
+  const ad=g('aumDesde'), am=num(g('aumMonto')), ac=num(g('aumCada'))||3; c.aumento=(ad&&am)?{desde:ad,monto:am,cada:ac}:null;
+  st.cobro=c;
+  const ym=cobroMes||ymNow(); const ex=parseInt(g('extra'),10)||0; if(!st.cobroExtra) st.cobroExtra={}; if(ex) st.cobroExtra[ym]=ex; else delete st.cobroExtra[ym];
+  const exento=box.querySelector('[data-cf="exento"]'); if(exento){ const arr=(st.cobroExento||[]).filter(function(x){ return x!==ym; }); if(exento.checked) arr.push(ym); st.cobroExento=arr; }
+  cobroEditId=null; await saveDB(); toast('Cobro de '+st.name+' guardado ✓','ok'); renderPagos(); }
+async function cobroToggleFer(iso){ const s=DB.settings; const base=FERIADOS_AR.indexOf(iso)>=0; const on=feriadosSet().has(iso);
+  s.feriadosOn=(s.feriadosOn||[]).filter(function(d){ return d!==iso; }); s.feriadosOff=(s.feriadosOff||[]).filter(function(d){ return d!==iso; });
+  if(on){ if(base) s.feriadosOff.push(iso); } else { if(!base) s.feriadosOn.push(iso); }
+  await saveDB(); renderPagos(); }
+async function cobroAlias(v){ DB.settings.alias=String(v||'').trim(); await saveDB(); toast('Alias guardado ✓','ok'); }
+function cobroEditHTML(id){ const st=DB.students[id]; const c=st.cobro||{}; const ym=cobroMes||ymNow(); const a=c.aumento||{};
+  const others=DB.order.filter(function(x){ return x!==id&&DB.students[x]&&!DB.students[x].archived; });
+  return `<div class="cobro-edit" data-id="${esc(id)}">
+    <div class="cobro-grid"><label>Precio por hora<input data-cf="precio" inputmode="numeric" value="${esc(c.precio||'')}" placeholder="19000"></label>
+    <label>Horas por clase<input data-cf="horas" inputmode="decimal" value="${esc(c.horas||1)}"></label></div>
+    <div class="cobro-lbl">Días que entrena</div><div class="cobro-dows">${[1,2,3,4,5,6].map(function(d){ return `<button type="button" class="cobro-dow${(c.dias||[]).indexOf(d)>=0?' on':''}" data-act="cobroDow" data-v="${d}">${DOW_L[d]}</button>`; }).join('')}</div>
+    <div class="cobro-grid"><label>Clases extra en ${esc(MESES[+ym.slice(5,7)-1].toLowerCase())} (recuperar / restar)<input data-cf="extra" inputmode="numeric" value="${esc((st.cobroExtra||{})[ym]||'')}" placeholder="0"></label></div>
+    <label class="cobro-chk"><input type="checkbox" data-cf="exento" ${(st.cobroExento||[]).indexOf(ym)>=0?'checked':''}> No paga en ${esc(ymLabel(ym).toLowerCase())}</label>
+    <div class="cobro-lbl">Aumento automático</div>
+    <div class="cobro-grid three"><label>Desde<input type="month" data-cf="aumDesde" value="${esc(a.desde||'')}"></label><label>De<input data-cf="aumMonto" inputmode="numeric" value="${esc(a.monto||'')}" placeholder="2000"></label><label>Cada (meses)<input data-cf="aumCada" inputmode="numeric" value="${esc(a.cada||3)}"></label></div>
+    <details class="cobro-more"${+c.fijo?' open':''}><summary>Monto fijo por mes (en vez de por hora)</summary>
+    <div class="cobro-grid"><label>Monto fijo<input data-cf="fijo" inputmode="numeric" value="${esc(c.fijo||'')}" placeholder="300000"></label>
+    <label>Incluye también a<select data-cf="junto"><option value="">— nadie más —</option>${others.map(function(x){ return `<option value="${esc(x)}"${c.junto===x?' selected':''}>${esc(DB.students[x].name)}</option>`; }).join('')}</select></label></div></details>
+    <div class="cobro-btns"><button class="inf2-btn" data-act="cobroSave" data-id="${esc(id)}">Guardar</button><button class="inf2-btn ghost" data-act="cobroEdit" data-id="">Cancelar</button></div></div>`; }
+function renderPagos(){
+  const m=$('main'); const ym=cobroMes||(cobroMes=ymNow());
+  const ps=cobroPayers(ym);
+  const conMonto=ps.filter(function(p){ return !p.sinTarifa&&!p.exento&&!p.sinDias; });
+  const total=conMonto.reduce(function(a,p){ return a+p.monto; },0);
+  const cobrado=ps.reduce(function(a,p){ return a+(p.paid?+p.paid.monto:0); },0);
+  const pend=conMonto.filter(function(p){ return !p.paid||+p.paid.monto<p.monto; });
+  const pag=conMonto.filter(function(p){ return p.paid&&+p.paid.monto>=p.monto; });
+  const otros=ps.filter(function(p){ return !p.sinTarifa&&(p.exento||p.sinDias); });
+  const sinT=ps.filter(function(p){ return p.sinTarifa; });
+  const fer=Array.from(feriadosSet()).filter(function(d){ return d.slice(0,7)===ym; }).sort();
+  const row=function(p){ const st=DB.students[p.id]; const editing=cobroEditId===p.id&&p.mi===0;
+    let right;
+    if(p.sinTarifa) right=`<button class="cobro-b ghost" data-act="cobroEdit" data-id="${esc(p.id)}">Cargar tarifa</button>`;
+    else if(p.exento) right=`<span class="cobro-chip">No paga este mes</span>`;
+    else if(p.sinDias) right=`<button class="cobro-b ghost" data-act="cobroEdit" data-id="${esc(p.id)}">Elegir días</button>`;
+    else if(p.paid&&+p.paid.monto>=p.monto) right=`<button class="cobro-chip ok" data-act="cobroUndo" data-id="${esc(p.id)}" data-m="${p.mi}">✓ Pagó ${esc(p.paid.fecha.slice(8,10)+'/'+p.paid.fecha.slice(5,7))}</button>`;
+    else right=`${p.paid?`<span class="cobro-parcial">Pagó ${money(p.paid.monto)} · falta ${money(p.monto-p.paid.monto)}</span>`:''}<div class="cobro-acts"><button class="cobro-b" data-act="cobroPagado" data-id="${esc(p.id)}" data-m="${p.mi}">Pagó</button><button class="cobro-b ghost sm" data-act="cobroParcial" data-id="${esc(p.id)}" data-m="${p.mi}" title="Pagó otro monto">✎</button><button class="cobro-b ghost sm" data-act="cobroWa" data-id="${esc(p.id)}" data-m="${p.mi}" title="Mandar por WhatsApp">💬</button></div>`;
+    return `<div class="cobro-row"><div class="cobro-who" data-act="cobroEdit" data-id="${esc(p.id)}"><b>${esc(p.name)}</b>${p.grupo?`<span class="cobro-grp">${esc(p.grupo)}</span>`:''}<span class="cobro-det">${p.sinTarifa?'Sin tarifa cargada':esc(p.detalle||'')}</span></div><div class="cobro-r">${(!p.sinTarifa&&!p.exento&&!p.sinDias)?`<b class="cobro-m">${money(p.monto)}</b>`:''}${right}</div></div>${editing?cobroEditHTML(p.id):''}`; };
+  let h=`<div class="rep-hero"><div class="rep-hero-eyebrow">💳 COBROS</div>
+    <div class="rep-hero-row"><button type="button" class="rep-hero-nav" data-act="cobroPrev">◀</button><div class="rep-hero-title sm" style="text-align:center;flex:1">${esc(ymLabel(ym))}</div><button type="button" class="rep-hero-nav" data-act="cobroNext">▶</button></div>
+    <div class="rep-hero-stats"><div class="rep-hero-stat"><b>${money(total)}</b><span>A cobrar</span></div><div class="rep-hero-stat ok"><b>${money(cobrado)}</b><span>Cobrado</span></div><div class="rep-hero-stat bad"><b>${money(Math.max(0,total-cobrado))}</b><span>Falta</span></div></div></div>`;
+  h+=`<div class="cobro-fer"><div><b>📅 Feriados de ${esc(MESES[+ym.slice(5,7)-1].toLowerCase())}:</b> ${fer.length?fer.map(function(d){ return DOW_N[new Date(d+'T12:00:00').getDay()]+' '+(+d.slice(8,10)); }).join(', '):'ninguno'} <span class="cobro-mute">(no se cobran)</span></div><button class="cobro-b ghost sm" data-act="cobroFerEdit">${cobroFerEdit?'Listo':'Editar'}</button></div>`;
+  if(cobroFerEdit){ const y=+ym.slice(0,4), mm=+ym.slice(5,7)-1, nd=new Date(y,mm+1,0).getDate(), off=(new Date(y,mm,1).getDay()+6)%7, fs=feriadosSet();
+    h+='<div class="asis-grid cobro-cal">'+['L','M','X','J','V','S','D'].map(function(w){ return '<div class="asis-dow">'+w+'</div>'; }).join('')+'<div></div>'.repeat(off);
+    for(let d=1; d<=nd; d++){ const iso=dstr(y,mm,d); h+=`<button class="asis-cell${fs.has(iso)?' a':''}" data-act="cobroFer" data-date="${iso}">${d}${fs.has(iso)?'<small>F</small>':''}</button>`; }
+    h+='</div><div class="note">Tocá un día para marcarlo o desmarcarlo como feriado. Ya vienen cargados los feriados nacionales.</div>'; }
+  if(pend.length) h+=`<div class="cobro-block"><div class="cobro-title">Falta cobrar (${pend.length})</div>${pend.map(row).join('')}</div>`;
+  if(pag.length) h+=`<div class="cobro-block paid"><div class="cobro-title">✓ Pagaron (${pag.length})</div>${pag.map(row).join('')}</div>`;
+  if(otros.length) h+=`<div class="cobro-block"><div class="cobro-title">Sin cobro este mes (${otros.length})</div>${otros.map(row).join('')}</div>`;
+  if(sinT.length) h+=`<details class="cobro-block muted"${sinT.some(function(p){ return p.id===cobroEditId; })?' open':''}><summary class="cobro-title">Sin tarifa cargada (${sinT.length}) ▾</summary>${sinT.map(row).join('')}</details>`;
+  h+=`<div class="cobro-alias"><label>Tu alias para transferencias (va en el mensaje de WhatsApp)</label><input data-chg="cobroAlias" value="${esc((DB.settings&&DB.settings.alias)||'')}" placeholder="ej: tafit.tami"></div>`;
+  const hist=[]; for(let k=5;k>=0;k--){ const mm=ymAdd(ym,-k); const tot=DB.order.reduce(function(a,id){ const st=DB.students[id]; const r=(st&&st.cobros&&st.cobros[mm])||{}; return a+Object.keys(r).reduce(function(b,mi){ return b+(+r[mi].monto||0); },0); },0); hist.push([mm,tot]); }
+  const mx=Math.max.apply(null,hist.map(function(x){ return x[1]; }).concat([1]));
+  h+=`<div class="cobro-block"><div class="cobro-title">Cobrado por mes</div>${hist.map(function(x){ return `<div class="cobro-hist"><span>${esc(MESES[+x[0].slice(5,7)-1].slice(0,3))}</span><i><b style="width:${Math.round(x[1]/mx*100)}%"></b></i><em>${money(x[1])}</em></div>`; }).join('')}</div>`;
+  m.innerHTML=h;
+}
 /* ===================== INFORME ===================== */
 async function renderReport(){
   const m=$('main'); m.innerHTML='<div class="empty">Calculando informe…</div>';
@@ -7495,6 +7669,17 @@ document.addEventListener('click',e=>{
     case 'planToday': planToday(); break;
     case 'saveTelefono': saveTelefono(); break;
     case 'waReminder': waReminder(el.dataset.id); break;
+    case 'cobroPrev': cobroMes=ymAdd(cobroMes||ymNow(),-1); cobroEditId=null; renderPagos(); break;
+    case 'cobroNext': cobroMes=ymAdd(cobroMes||ymNow(),1); cobroEditId=null; renderPagos(); break;
+    case 'cobroPagado': cobroPago(id,mi,'full'); break;
+    case 'cobroParcial': cobroPago(id,mi,'parcial'); break;
+    case 'cobroUndo': cobroPago(id,mi,'undo'); break;
+    case 'cobroWa': cobroWa(id,mi); break;
+    case 'cobroEdit': cobroEditId=(id&&cobroEditId!==id)?id:null; renderPagos(); { const ed=document.querySelector('.cobro-edit'); if(ed) ed.scrollIntoView({block:'center'}); } break;
+    case 'cobroDow': el.classList.toggle('on'); break;
+    case 'cobroSave': cobroSave(id); break;
+    case 'cobroFerEdit': cobroFerEdit=!cobroFerEdit; renderPagos(); break;
+    case 'cobroFer': cobroToggleFer(el.dataset.date); break;
     case 'playVideo': playVideo(el.dataset.url, el.dataset.name); break;
     case 'viewExThumb': viewExThumb(el.dataset.url, el.dataset.name); break;
     case 'closeVideo': closeVideoModal(); break;
@@ -7535,6 +7720,7 @@ document.addEventListener('click',e=>{
 document.addEventListener('change',e=>{
   const el=e.target.closest('[data-chg]'); if(el){ switch(el.dataset.chg){
     case 'switch': switchStudent(el.value); break;
+    case 'cobroAlias': cobroAlias(el.value); break;
     case 'resumenCycle': resumenCycleIdx=+el.value; renderResumen(); break;
     case 'informeCycle': saveInformeCycle(+el.value); break;
     case 'resumenMember': resumenMemberIdx=+el.value; renderResumen(); break;
