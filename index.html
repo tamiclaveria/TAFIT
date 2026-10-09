@@ -450,6 +450,14 @@
   .my-link{display:flex;align-items:center;gap:10px;background:var(--tint2);border:1px solid var(--accent);border-radius:12px;padding:10px 12px;margin:6px 0 10px}
   .my-link div{flex:1;min-width:0}.my-link b{display:block;font-size:13px}.my-link span{display:block;font-size:11.5px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .my-link .lnk{font-family:inherit;font-weight:800;border:none;border-radius:10px;padding:8px 12px;background:var(--accentDk);color:#fff;cursor:pointer}
+  .payblock{text-align:center;padding:26px 18px;background:var(--card);border:1.5px solid var(--accent);border-radius:18px;margin:6px 0 12px}
+  .pb-ico{font-size:42px}.pb-t{font-size:18px;font-weight:800;margin:8px 0 6px}.pb-d{font-size:13px;color:var(--mute);line-height:1.5}
+  .pb-m{font-family:Georgia,serif;font-size:34px;color:var(--accentDk);margin:12px 0 2px}.pb-s{font-size:12px;color:var(--mute)}
+  .pb-alias{display:block;margin:14px auto 0;font-family:inherit;font-size:13px;background:var(--tint2);border:1px dashed var(--accent);border-radius:10px;padding:9px 14px;color:var(--ink,#241F18);cursor:pointer}
+  .pb-btn{display:block;width:100%;max-width:280px;margin:12px auto 0;font-family:inherit;font-size:15px;font-weight:800;border:none;border-radius:12px;padding:13px;background:var(--accentDk);color:#fff;cursor:pointer}
+  .pb-n{font-size:11.5px;color:var(--mute);margin-top:14px;line-height:1.5}
+  .pb-others{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}.pb-sw{font-family:inherit;font-weight:700;border:1.5px solid var(--accent);background:#fff;color:var(--accentDk);border-radius:12px;padding:11px;cursor:pointer}
+  .cobro-lock{font-size:10.5px;font-weight:800;color:#fff;background:var(--warn);border-radius:6px;padding:1px 6px;vertical-align:2px}
   .cobro-block{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:12px}
   .cobro-block.paid{background:var(--tint2);border-color:var(--accent)}
   .cobro-block.muted summary{list-style:none;cursor:pointer}
@@ -1068,7 +1076,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-118'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-119'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -2595,7 +2603,7 @@ async function checkDailyReminders(){
     if(!notifsSupported()||Notification.permission!=='granted') return;
     if(lastReminderShownDate()===todayISO()) return; /* ya se mostró hoy en este celular */
     const ids=DB.order.filter(id=>DB.students[id]);
-    const rows=ids.map(id=>planDueInfo(DB.students[id].planPaid));
+    const rows=[]; /* recordatorio de planes a 30 días: reemplazado por Cobros */
     const vencidos=rows.filter(d=>d&&d.status==='bad').length;
     const porVencer=rows.filter(d=>d&&d.status==='warn').length;
     const avisos=unseenNotifs().length;
@@ -4524,14 +4532,14 @@ async function tryResolveLockedLink(){
    de despachar a CUALQUIER renderer de pestaña, así que queda bloqueada en todas. */
 function renderBlockedIfNeeded(){
   const st=DB.students[active]; if(!st) return false;
-  const planDue=planDueInfo(st.planPaid);
-  const planExpired=!!(planDue&&planDue.status==='bad');
-  if(!(st.paused||planExpired)) return false;
-  const icon=planExpired&&!st.paused?'🔒':'⏸';
-  const title=planExpired&&!st.paused?'Tu plan venció':'Tu rutina está pausada por el momento';
-  const detail=planExpired&&!st.paused?`Venció hace ${Math.abs(planDue.daysLeft)} día${Math.abs(planDue.daysLeft)===1?'':'s'}. Contactá a tu profe para renovarlo y seguir entrenando.`:'Contactá a tu profe para más información.';
-  const m=$('main'); m.innerHTML=`<div style="text-align:center;padding:40px 20px"><div style="font-size:48px;margin-bottom:16px">${icon}</div><div style="font-size:18px;font-weight:700;color:var(--navy);margin-bottom:12px">${esc(title)}</div><div style="font-size:14px;color:var(--mute);line-height:1.6">${esc(detail)}</div>${renderWhatsAppBtn()}</div>`;
-  return true;
+  /* 09/10/2026: el bloqueo por "plan vencido a los 30 días" se reemplazó por el de Cobros */
+  if(st.paused){
+    const m=$('main'); m.innerHTML=`<div style="text-align:center;padding:40px 20px"><div style="font-size:48px;margin-bottom:16px">⏸</div><div style="font-size:18px;font-weight:700;color:var(--navy);margin-bottom:12px">Tu rutina está pausada por el momento</div><div style="font-size:14px;color:var(--mute);line-height:1.6">Contactá a tu profe para más información.</div>${renderWhatsAppBtn()}</div>`;
+    return true; }
+  if(tab==='chat') return false; /* el chat siempre queda abierto */
+  const n=(st.members&&st.members.length>1)?st.members.length:1; const bl=blockedMembersOf(active);
+  if(bl.length&&bl.length===n){ $('main').innerHTML=payBlockHTML(active,bl[0]); return true; }
+  return false;
 }
 function render(){
   if(urlLockPending){ renderLinkPending(); return; }
@@ -4653,9 +4661,12 @@ function renderApp(){
   /* Verificar si alumno está pausado a mano, o si se le venció el plan (30 días desde el
      último pago cargado en Editar) — en ambos casos se le bloquea el acceso a la rutina
      hasta que el profe la reactive o cargue el pago del mes siguiente. */
-  const planDue=planDueInfo(DB.students[active].planPaid);
-  const planExpired=!!(planDue&&planDue.status==='bad');
-  if((DB.students[active].paused||planExpired)&&!trainer){
+  if(!trainer&&isDuo()&&blockedMembersOf(active).indexOf(member)>=0){
+    /* dúo/grupo: solo la integrante que debe ve el bloqueo; puede pasar a la columna de otra */
+    const others=members.map(function(nm,i){ return i===member?'':`<button class="pb-sw" data-act="pickMember" data-i="${i}">Ver la rutina de ${esc(nm)}</button>`; }).join('');
+    m.innerHTML=payBlockHTML(active,member)+(others?`<div class="pb-others">${others}</div>`:''); return; }
+  const planExpired=false;
+  if(DB.students[active].paused&&!trainer){
     const icon=planExpired&&!DB.students[active].paused?'🔒':'⏸';
     const title=planExpired&&!DB.students[active].paused?'Tu plan venció':'Tu rutina está pausada por el momento';
     const detail=planExpired&&!DB.students[active].paused?`Venció hace ${Math.abs(planDue.daysLeft)} día${Math.abs(planDue.daysLeft)===1?'':'s'}. Contactá a tu profe para renovarlo y seguir entrenando.`:'Contactá a tu profe para más información.';
@@ -6856,17 +6867,7 @@ function renderEdit(){
   })():'';
   SEC('forms',`Formularios de ${esc(DB.students[active].name)}`,`<p style="font-size:13px;color:var(--mute);margin-bottom:12px">Activá los formularios que este alumno debe completar, o dejá que vea su propio Informe de Evolución. Le aparecen como pestañas en su link.</p><div class="edit-actions"><button data-act="toggleForm" data-ftype="acuerdo" style="${stForms.acuerdo?'background:var(--ok);color:#fff':''}">${stForms.acuerdo?'✓ Acuerdo activado':'Activar Acuerdo'}</button><button data-act="toggleForm" data-ftype="anamnesis" style="${stForms.anamnesis?'background:var(--ok);color:#fff':''}">${stForms.anamnesis?'✓ Anamnesis activada':'Activar Anamnesis'}</button><button data-act="toggleForm" data-ftype="informe" style="${stForms.informe?'background:var(--ok);color:#fff':''}">${stForms.informe?'✓ Informe visible para el alumno':'Mostrarle su Informe de Evolución'}</button></div>${informeCycleSel}<div class="edit-actions mt8"><button data-act="togglePause" style="${isPaused?'background:#e74c3c;color:#fff':'background:var(--light)'}">${isPaused?'⏸ Alumno PAUSADO · Tocá para activar':'⏸ Pausar alumno'}</button></div>`);
 
-  {
-    const planPaid=DB.students[active].planPaid||'';
-    const due=planDueInfo(planPaid);
-    let statusHTML;
-    const isManuallyPaused=!!DB.students[active].paused;
-    if(!due) statusHTML=`<div class="plan-status none">Sin fecha de pago cargada · no se muestra ninguna alerta ni se bloquea el acceso</div>`;
-    else if(due.status==='bad') statusHTML=`<div class="plan-status bad">🔴 El plan venció hace ${Math.abs(due.daysLeft)} día${Math.abs(due.daysLeft)===1?'':'s'}${isManuallyPaused?'':' · 🔒 el alumno ya no puede acceder a su rutina'}</div>`;
-    else if(due.status==='warn') statusHTML=`<div class="plan-status warn">🟠 ${due.daysLeft===0?'El plan vence hoy':'El plan vence en '+due.daysLeft+' día'+(due.daysLeft===1?'':'s')}</div>`;
-    else statusHTML=`<div class="plan-status ok">✓ Plan al día · vence el ${due.dueStr}</div>`;
-    SEC('plan','💳 Plan del alumno (vence a los 30 días)',`${statusHTML}<div class="fld"><label>Fecha del último pago</label><input type="date" class="plan-date-inp" id="planPaidInput" value="${esc(planPaid)}"></div><button class="plan-btn" data-act="savePlanDate">💾 Guardar fecha</button><button class="plan-btn" data-act="planToday" style="margin-top:8px;background:var(--ok)">✅ Marcar pago de hoy</button><div class="plan-hint">El plan dura 30 días desde la fecha cargada. Apenas se vence, la app le muestra al alumno una pantalla de "Tu plan venció" y no puede seguir entrenando hasta que renueve. Cuando ${esc(DB.students[active].name)} te pague de nuevo, tocá "Marcar pago de hoy" (o cargá la fecha manualmente) y se le desbloquea al instante. Si dejás la fecha vacía, no se muestra ninguna alerta ni se bloquea nada.</div><div class="fld mt8"><label>Teléfono para recordatorios de pago (con código de país)</label><input id="planTelInput" value="${esc(DB.students[active].telefono||'')}" placeholder="5492612345678"></div><button class="plan-btn" data-act="saveTelefono">💾 Guardar teléfono</button><div class="plan-hint">Se usa para el botón "Recordar por WhatsApp" de la pestaña Pagos. Si no lo cargás acá, te lo va a pedir la primera vez que lo uses.</div>`);
-  }
+  /* 09/10/2026: la sección "Plan del alumno (vence a los 30 días)" se sacó — ahora todo eso vive en la pestaña Pagos (Cobros). */
 
   {
     const cycleStart=DB.students[active].cycleStart;
@@ -7431,6 +7432,8 @@ async function cobroSave(id){ const st=DB.students[id]; const box=document.query
   const junto=g('junto'); if(c.junto&&c.junto!==junto&&DB.students[c.junto]&&DB.students[c.junto].cobro) delete DB.students[c.junto].cobro.parteDe;
   if(junto&&c.fijo){ c.junto=junto; const o=DB.students[junto]; o.cobro=Object.assign({},o.cobro||{}, {parteDe:id}); } else delete c.junto;
   const ad=g('aumDesde'), am=num(g('aumMonto')), ac=num(g('aumCada'))||3; c.aumento=(ad&&am)?{desde:ad,monto:am,cada:ac}:null;
+  const nb=box.querySelector('[data-cf="noBloq"]'); if(nb&&nb.checked) c.noBloquear=true; else delete c.noBloquear;
+  const tel=(g('tel')||'').trim(); if(tel) st.telefono=tel;
   st.cobro=c;
   const ym=cobroMes||ymNow(); const ex=parseInt(g('extra'),10)||0; if(!st.cobroExtra) st.cobroExtra={}; if(ex) st.cobroExtra[ym]=ex; else delete st.cobroExtra[ym];
   const exento=box.querySelector('[data-cf="exento"]'); if(exento){ const arr=(st.cobroExento||[]).filter(function(x){ return x!==ym; }); if(exento.checked) arr.push(ym); st.cobroExento=arr; }
@@ -7456,7 +7459,46 @@ function cobroEditHTML(id){ const st=DB.students[id]; const c=st.cobro||{}; cons
     <details class="cobro-more"${+c.fijo?' open':''}><summary>Monto fijo por mes (en vez de por hora)</summary>
     <div class="cobro-grid"><label>Monto fijo<input data-cf="fijo" inputmode="numeric" value="${esc(c.fijo||'')}" placeholder="300000"></label>
     <label>Incluye también a<select data-cf="junto"><option value="">— nadie más —</option>${others.map(function(x){ return `<option value="${esc(x)}"${c.junto===x?' selected':''}>${esc(DB.students[x].name)}</option>`; }).join('')}</select></label></div></details></div>
+    <div class="cobro-grid"><label>Teléfono (WhatsApp)<input data-cf="tel" inputmode="tel" value="${esc(st.telefono||'')}" placeholder="5492612345678"></label></div>
+    <label class="cobro-chk"><input type="checkbox" data-cf="noBloq" ${c.noBloquear?'checked':''}> Nunca bloquearle la rutina por falta de pago</label>
     <div class="cobro-btns"><button class="inf2-btn" data-act="cobroSave" data-id="${esc(id)}">Guardar</button><button class="inf2-btn ghost" data-act="cobroEdit" data-id="">Cancelar</button></div></div>`; }
+/* ==== Bloqueo por falta de pago (09/10/2026) ====
+   Presenciales: si al día 11 del mes Tami no marcó "Pagó" (o el pago no cubre el total).
+   Virtuales: a los 3 días de vencido su plan. Dúos y grupos: solo se bloquea la que debe.
+   Nunca se bloquea: a quien no tiene tarifa, a quien "no paga este mes", a quien Tami marcó
+   "Nunca bloquear", ni antes de COBRO_BLOQ_DESDE (para que Tami tenga tiempo de marcar lo
+   que ya le pagaron). Bloquea la rutina; el chat sigue abierto. */
+const COBRO_BLOQ_DESDE='2026-11', COBRO_DIA_LIMITE=10, COBRO_MARGEN_VIRTUAL=3;
+function payBlockInfo(id,mi){
+  const st=DB.students[id]; if(!st||!st.cobro) return null;
+  let c=st.cobro, sid=id, pmi=mi;
+  if(c.parteDe&&DB.students[c.parteDe]){ sid=c.parteDe; pmi=0; c=DB.students[sid].cobro||{}; }
+  if(c.noBloquear) return null;
+  const hoy=todayISO(), ym=hoy.slice(0,7);
+  if(ym<COBRO_BLOQ_DESDE) return null;
+  const p=cobroPayers(ym).find(function(x){ return x.id===sid&&x.mi===pmi; }); if(!p||p.sinTarifa||p.exento||p.sinDias||p.noToca) return null;
+  const pagado=p.paid?+p.paid.monto:0; if(pagado>=p.monto) return null;
+  if(p.virtual){ if(!p.due) return null; if(hoy<=addDaysISO(p.due,COBRO_MARGEN_VIRTUAL)) return null; }
+  else if(+hoy.slice(8,10)<=COBRO_DIA_LIMITE) return null;
+  return { p, ym, falta:p.monto-pagado };
+}
+function blockedMembersOf(id){ const st=DB.students[id]; if(!st) return []; const n=(st.members&&st.members.length>1)?st.members.length:1; const out=[]; for(let i=0;i<n;i++){ if(payBlockInfo(id,i)) out.push(i); } return out; }
+function payBlockHTML(id,mi){
+  const b=payBlockInfo(id,mi); if(!b) return ''; const p=b.p; const alias=(DB.settings&&DB.settings.alias)||'';
+  const mes=MESES[+b.ym.slice(5,7)-1].toLowerCase();
+  return `<div class="payblock"><div class="pb-ico">🔒</div><div class="pb-t">${p.virtual?'Tu plan está vencido':'Tu cuota de '+esc(mes)+' está pendiente'}</div>
+    <div class="pb-d">${esc(p.name)}, para seguir entrenando falta registrar tu pago.</div>
+    <div class="pb-m">${money(b.falta)}</div>${p.n!=null&&!p.virtual?`<div class="pb-s">${p.n} clases × ${money(p.precio)}</div>`:''}
+    ${alias?`<button class="pb-alias" data-act="copyAlias">Alias: <b>${esc(alias)}</b> · copiar</button>`:''}
+    <button class="pb-btn" data-act="yaTransferi" data-m="${mi}">Ya transferí ✓</button>
+    ${renderWhatsAppBtn()}
+    <div class="pb-n">Apenas Tami confirme el pago, se te habilita la rutina. El chat sigue abierto.</div></div>`;
+}
+async function yaTransferi(mi){ const st=DB.students[active]; const b=payBlockInfo(active,mi); const who=b?b.p.name:st.name;
+  const text='💸 '+who+' avisa que ya transfirió'+(b?' '+money(b.falta)+' ('+(b.p.virtual?'plan virtual':'cuota de '+MESES[+b.ym.slice(5,7)-1].toLowerCase())+')':'')+'.';
+  try{ const remote=safeParse(await Store.get('tafit:chat:'+active)||'[]',[]); CHAT=mergeChat(CHAT,remote); CHAT.push({ id:newChatId(), from:'student', text, ts:new Date().toISOString() }); await Store.set('tafit:chat:'+active, JSON.stringify(CHAT)); await pushNotif({ id:active, name:st.name, date:new Date().toISOString(), chat:true, text }); }catch(e){}
+  toast('¡Listo! Le avisamos a Tami ✓','ok'); }
+async function copyAlias(){ const a=(DB.settings&&DB.settings.alias)||''; try{ await navigator.clipboard.writeText(a); toast('Alias copiado ✓','ok'); }catch(e){ uiPrompt('Alias:',a); } }
 function renderPagos(){
   const m=$('main'); const ym=cobroMes||(cobroMes=ymNow());
   const ps=cobroPayers(ym);
@@ -7476,7 +7518,8 @@ function renderPagos(){
     else if(p.sinDias) right=`<button class="cobro-b ghost" data-act="cobroEdit" data-id="${esc(p.id)}">${p.virtual?'Cargar fecha':'Elegir días'}</button>`;
     else if(p.paid&&+p.paid.monto>=p.monto) right=`<button class="cobro-chip ok" data-act="cobroUndo" data-id="${esc(p.id)}" data-m="${p.mi}">✓ Pagó ${esc(p.paid.fecha.slice(8,10)+'/'+p.paid.fecha.slice(5,7))}</button>`;
     else right=`${p.paid?`<span class="cobro-parcial">Pagó ${money(p.paid.monto)} · falta ${money(p.monto-p.paid.monto)}</span>`:''}<div class="cobro-acts"><button class="cobro-b" data-act="cobroPagado" data-id="${esc(p.id)}" data-m="${p.mi}">Pagó</button><button class="cobro-b ghost sm" data-act="cobroParcial" data-id="${esc(p.id)}" data-m="${p.mi}" title="Pagó otro monto">✎</button><button class="cobro-b ghost sm" data-act="cobroWa" data-id="${esc(p.id)}" data-m="${p.mi}" title="Mandar por WhatsApp">💬</button></div>`;
-    return `<div class="cobro-row"><div class="cobro-who" data-act="cobroEdit" data-id="${esc(p.id)}"><b>${esc(p.name)}</b>${p.grupo?`<span class="cobro-grp">${esc(p.grupo)}</span>`:''}<span class="cobro-det">${p.sinTarifa?'Sin tarifa cargada':esc(p.detalle||'')}</span></div><div class="cobro-r">${(!p.sinTarifa&&!p.exento&&!p.sinDias&&!p.noToca)?`<b class="cobro-m">${money(p.monto)}</b>`:''}${right}</div></div>${editing?cobroEditHTML(p.id):''}`; };
+    const bloq=(!p.sinTarifa&&payBlockInfo(p.id,p.mi))?' <span class="cobro-lock">🔒 bloqueada</span>':'';
+    return `<div class="cobro-row"><div class="cobro-who" data-act="cobroEdit" data-id="${esc(p.id)}"><b>${esc(p.name)}${bloq}</b>${p.grupo?`<span class="cobro-grp">${esc(p.grupo)}</span>`:''}<span class="cobro-det">${p.sinTarifa?'Sin tarifa cargada':esc(p.detalle||'')}</span></div><div class="cobro-r">${(!p.sinTarifa&&!p.exento&&!p.sinDias&&!p.noToca)?`<b class="cobro-m">${money(p.monto)}</b>`:''}${right}</div></div>${editing?cobroEditHTML(p.id):''}`; };
   let h=`<div class="rep-hero"><div class="rep-hero-eyebrow">💳 COBROS</div>
     <div class="rep-hero-row"><button type="button" class="rep-hero-nav" data-act="cobroPrev">◀</button><div class="rep-hero-title sm" style="text-align:center;flex:1">${esc(ymLabel(ym))}</div><button type="button" class="rep-hero-nav" data-act="cobroNext">▶</button></div>
     <div class="rep-hero-stats"><div class="rep-hero-stat"><b>${money(total)}</b><span>A cobrar</span></div><div class="rep-hero-stat ok"><b>${money(cobrado)}</b><span>Cobrado</span></div><div class="rep-hero-stat bad"><b>${money(Math.max(0,total-cobrado))}</b><span>Falta</span></div></div></div>`;
@@ -7543,7 +7586,7 @@ async function renderReport(){
   const inactivos=cards.filter(c=>{ if(!c.last) return true; return Math.floor((Date.now()-new Date(c.last.date).getTime())/86400000)>=2; });
   if(inactivos.length){ html+=`<div class="inact-block"><div class="inact-title">⚠ Alumnos sin entrenar (2+ días)</div><div class="inact-list">${inactivos.map(c=>{ const d=c.last?Math.floor((Date.now()-new Date(c.last.date).getTime())/86400000):999; return `<span class="inact-chip">${esc(c.name)} · ${d>=999?'nunca':(d+' días')}</span>`; }).join('')}</div></div>`; }
   /* Vencimiento de plan (30 días desde el último pago cargado en Editar) */
-  const dueInfo=cards.map(c=>({ c, due:planDueInfo(c.planPaid) })).filter(x=>x.due);
+  const dueInfo=[]; /* 09/10/2026: el vencimiento a 30 días se reemplazó por la pestaña Pagos (Cobros) */
   const vencidos=dueInfo.filter(x=>x.due.status==='bad').sort((a,b)=>a.due.daysLeft-b.due.daysLeft);
   const porVencer=dueInfo.filter(x=>x.due.status==='warn').sort((a,b)=>a.due.daysLeft-b.due.daysLeft);
   if(vencidos.length){ html+=`<div class="due-block vencido"><div class="due-title">🔴 Plan vencido</div>${vencidos.map(x=>`<div class="due-row"><span class="due-name">${esc(x.c.name)}</span><span class="due-chip">venció hace ${Math.abs(x.due.daysLeft)} día${Math.abs(x.due.daysLeft)===1?'':'s'}</span></div>`).join('')}</div>`; }
@@ -7553,7 +7596,7 @@ async function renderReport(){
   if(c.forms.acuerdo) formBadges+=c.fa._ts?'<span class="form-status done" style="margin:4px 4px 0 0">✓ Acuerdo</span>':'<span class="form-status pending" style="margin:4px 4px 0 0">⏳ Acuerdo</span>';
   if(c.forms.anamnesis) formBadges+=c.fn._ts?'<span class="form-status done" style="margin:4px 4px 0 0">✓ Anamnesis</span>':'<span class="form-status pending" style="margin:4px 4px 0 0">⏳ Anamnesis</span>';
   var daysSince=''; if(c.last){ var diff=Math.floor((Date.now()-new Date(c.last.date).getTime())/(1000*60*60*24)); if(diff>7) daysSince='<div class="inact">⚠ '+diff+' días sin entrenar</div>'; }
-  const due=planDueInfo(c.planPaid);
+  const due=null;
   const planLine=due?`<div class="plan-line">Último pago: <b>${new Date(c.planPaid+'T00:00:00').toLocaleDateString('es-AR')}</b> · <span class="plan-${due.status}">${due.status==='bad'?'🔴 venció hace '+Math.abs(due.daysLeft)+' día'+(Math.abs(due.daysLeft)===1?'':'s'):due.status==='warn'?'🟠 '+(due.daysLeft===0?'vence hoy':'vence en '+due.daysLeft+' día'+(due.daysLeft===1?'':'s')):'✓ plan al día (vence '+due.dueStr+')'}</span></div>`:'';
   html+=`<div class="rep-card"><div class="rh"><span class="rn">${c.theme==='f'?'🌸 ':''}${c.duo?'👯 ':''}${esc(c.name)}${c.wstreak>=2?` <span class="wstreak-chip" title="Semanas seguidas sin faltar">📅 ${c.wstreak}</span>`:''}</span><span class="rw">${esc(c.week)}</span></div><div class="rep-stats"><div><b>${c.sessions}</b><span>Sesiones</span></div><div><b>${c.last?fmtShort(c.last.date):'—'}</b><span>Última</span></div><div><b>${c.adh}%</b><span>Últ. sesión</span></div></div>${daysSince}${planLine}${formBadges?'<div style="margin-top:4px">'+formBadges+'</div>':''}<div class="rep-last">${c.last?'Último: '+esc(c.last.dayName):'Sin sesiones registradas todavía.'}</div>${c.last&&c.last.obs?`<div class="rep-flag" style="background:#3d0c06;color:#e2a198">📝 ${esc(c.last.obs)}</div>`:''}${flag?`<div class="rep-flag">⚕ Revisar pierna · antes: ${esc(c.last.health.pre||'—')} / después: ${esc(c.last.health.post||'—')}${(c.last.health.alarms&&c.last.health.alarms.length)?' · '+esc(c.last.health.alarms.join(', ')):''}</div>`:''}${c.last?`<div class="rep-adh"><i style="width:${c.adh}%"></i></div>`:''}</div>`; });
   m.innerHTML=html;
@@ -7720,6 +7763,8 @@ document.addEventListener('click',e=>{
     case 'saveTelefono': saveTelefono(); break;
     case 'waReminder': waReminder(el.dataset.id); break;
     case 'copyMyLink': copyMyLink(); break;
+    case 'yaTransferi': yaTransferi(mi); break;
+    case 'copyAlias': copyAlias(); break;
     case 'cobroPrev': cobroMes=ymAdd(cobroMes||ymNow(),-1); cobroEditId=null; renderPagos(); break;
     case 'cobroNext': cobroMes=ymAdd(cobroMes||ymNow(),1); cobroEditId=null; renderPagos(); break;
     case 'cobroPagado': cobroPago(id,mi,'full'); break;
