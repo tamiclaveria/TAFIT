@@ -480,6 +480,8 @@
   .cobro-grid input,.cobro-grid select,.cobro-alias input{font-family:inherit;font-size:14px;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff;min-width:0}
   .cobro-lbl{font-size:11px;color:var(--mute);font-weight:800;margin:6px 0 5px}
   .cobro-dows{display:flex;gap:6px;margin-bottom:10px}
+  .cobro-tipo{display:flex;gap:6px;margin-bottom:10px}.cobro-tipo .cobro-dow{font-size:12px;padding:8px 4px}
+  .cobro-edit [hidden]{display:none}
   .cobro-dow{flex:1;font-family:inherit;font-weight:800;border:1.5px solid var(--accent);background:#fff;color:var(--accentDk);border-radius:10px;padding:8px 0;cursor:pointer}
   .cobro-dow.on{background:var(--accentDk);border-color:var(--accentDk);color:#fff}
   .cobro-chk{display:flex;gap:8px;align-items:center;font-size:12.5px;margin:2px 0 8px}
@@ -4197,10 +4199,16 @@ function runSeeds(){
      tarifa (si ya la cargó a mano, no se toca). Los días que entrena cada uno los elige ella. */
   if(!DB._seed.cobroInit20261009){
     const A=function(desde){ return {desde:desde, monto:2000, cada:3}; };
-    const T={ 'jus-yesi':{precio:19000,horas:1,dias:[],aumento:A('2026-11')}, 'grupo-5':{precio:15000,horas:1,dias:[],aumento:A('2026-11')},
-      'flor':{precio:19000,horas:1,dias:[],aumento:A('2027-01')}, 'cecilia':{precio:20000,horas:1,dias:[],aumento:A('2027-01')},
-      'marcela-balter':{precio:25000,horas:1,dias:[],aumento:A('2027-01')}, 'sofia-catalan':{precio:25000,horas:1,dias:[],aumento:null},
-      'omar':{fijo:300000,junto:'martin',dias:[],aumento:A('2026-12')}, 'martin':{parteDe:'omar'} };
+    const MA=[2,4], LM=[1,3]; /* martes y jueves / lunes y miércoles */
+    /* Sol y Claudia son nuevas: se agregan sin rutina (Tami se la carga cuando quiera) */
+    [['sol','Sol'],['claudia','Claudia']].forEach(function(x){ if(!DB.students[x[0]]&&!(DB._deleted&&DB._deleted[x[0]])){ DB.students[x[0]]={ name:x[1], theme:'f', routine:[], weeks:cp(DEFAULT_WEEKS) }; DB.order.push(x[0]); } });
+    const V=function(plan){ return {tipo:'virtual', plan:plan, cadaDias:45}; };
+    const T={ 'jus-yesi':{precio:19000,horas:1,dias:MA,aumento:A('2026-11')}, 'flor':{precio:19000,horas:1,dias:MA,aumento:A('2027-01')},
+      'sofia-catalan':{precio:25000,horas:1,dias:MA,aumento:null}, 'marcela-balter':{precio:25000,horas:1,dias:MA,aumento:A('2027-01')},
+      'grupo-5':{precio:15000,horas:1,dias:LM,aumento:A('2026-11')}, 'cecilia':{precio:20000,horas:1,dias:LM,aumento:A('2027-01')},
+      'sol':{precio:20000,horas:1,dias:LM,aumento:A('2027-01')}, 'claudia':{precio:20000,horas:1,dias:LM,aumento:A('2027-01')},
+      'omar':{fijo:300000,junto:'martin',dias:LM,aumento:A('2026-12')}, 'martin':{parteDe:'omar'},
+      'joni-puebla':V(60000), 'fede-del-sol':V(50000), 'lola-anto':V(60000), 'astrid':V(60000), 'sofi-marti':V(60000) };
     Object.keys(T).forEach(function(id){ const st=DB.students[id]; if(st&&!st.cobro) st.cobro=T[id]; });
     const sc=DB.students['sofia-catalan']; if(sc&&!sc.cobroExento) sc.cobroExento=['2026-10','2026-11'];
     DB._seed.cobroInit20261009=true;
@@ -4595,7 +4603,7 @@ async function archiveStudent(id){
   await saveDB();
   toast('✓ '+st.name+' archivada','ok');
   if(active===id){ const next=DB.order.find(x=>x!==id&&!DB.students[x].archived); if(next){ active=next; await Store.set('tafit:active',active); await loadStudent(); } }
-  renderEdit();
+  if(tab==='edit') renderEdit(); else render();
 }
 async function unarchiveStudent(id){
   const st=DB.students[id]; if(!st) return;
@@ -7347,14 +7355,35 @@ function proxAumento(c,ym){ const a=c.aumento; if(!a||!a.desde||!+a.monto) retur
 function clasesMes(c,ym){ const y=+ym.slice(0,4), m=+ym.slice(5,7)-1, n=new Date(y,m+1,0).getDate(); const fer=feriadosSet(); const dias=c.dias||[]; let cnt=0; const feri=[];
   for(let d=1; d<=n; d++){ const dow=new Date(y,m,d).getDay(); if(dias.indexOf(dow)<0) continue; const iso=dstr(y,m,d); if(fer.has(iso)) feri.push(iso); else cnt++; }
   return {n:cnt, fer:feri}; }
+/* Alumnos virtuales: pagan un plan cada X días (Tami: 45 días, "cada mes y medio").
+   Pagos en st.cobroVirt=[{fecha,monto}]; el próximo vence a los X días del último. */
+function addDaysISO(iso,n){ const d=new Date(iso+'T12:00:00'); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); }
+function virtLast(st,c){ const ps=(st.cobroVirt||[]).map(function(p){ return p.fecha; }).sort(); return ps.length?ps[ps.length-1]:(c.ultimo||null); }
+function virtPayer(id,st,c,ym,exento){
+  const nm=st.name+((st.members&&st.members.length>1)?' (las dos)':'');
+  const plan=+c.plan||0, cada=+c.cadaDias||45;
+  const pagosMes=(st.cobroVirt||[]).filter(function(p){ return p.fecha.slice(0,7)===ym; });
+  const base={ id, mi:0, name:nm, virtual:true, exento, monto:exento?0:plan };
+  if(pagosMes.length){ const tot=pagosMes.reduce(function(a,p){ return a+(+p.monto||0); },0); return Object.assign(base,{ monto:Math.max(plan,tot), paid:{monto:tot, fecha:pagosMes[pagosMes.length-1].fecha}, detalle:'Plan virtual · cada '+cada+' días' }); }
+  const last=virtLast(st,c);
+  if(!last) return Object.assign(base,{ sinDias:true, detalle:'Falta la fecha del último pago' });
+  const due=addDaysISO(last,cada); const fin=ym+'-31';
+  if(due.slice(0,7)>ym) return Object.assign(base,{ noToca:true, monto:0, detalle:'Plan virtual · próximo pago '+due.slice(8,10)+'/'+due.slice(5,7) });
+  const hoy=todayISO(); const dd=Math.round((new Date(due+'T12:00:00')-new Date(hoy+'T12:00:00'))/86400000);
+  return Object.assign(base,{ due, detalle:'Plan virtual · '+(dd<0?'venció hace '+(-dd)+' día'+(dd===-1?'':'s')+' ('+due.slice(8,10)+'/'+due.slice(5,7)+')':dd===0?'vence hoy':'vence el '+due.slice(8,10)+'/'+due.slice(5,7)) });
+}
 function cobroPayers(ym){
   const out=[];
   DB.order.forEach(function(id){ const st=DB.students[id]; if(!st||st.archived) return; const c=st.cobro;
     if(c&&c.parteDe&&DB.students[c.parteDe]) return; /* lo paga junto con otro (ej: Martín dentro de Omar) */
-    if(!c||(!+c.precio&&!+c.fijo)){ out.push({id, mi:0, name:st.name, sinTarifa:true}); return; }
+    if(!c||(!+c.precio&&!+c.fijo&&!(c.tipo==='virtual'&&+c.plan))){ out.push({id, mi:0, name:st.name, sinTarifa:true}); return; }
     const exento=(st.cobroExento||[]).indexOf(ym)>=0;
     const paidOf=function(mi){ return ((st.cobros||{})[ym]||{})[mi]||null; };
-    if(+c.fijo){ const junto=c.junto&&DB.students[c.junto]?DB.students[c.junto].name:''; out.push({ id, mi:0, name:st.name+(junto?' + '+junto:''), monto:exento?0:conAumento(c.fijo,c,ym), detalle:'Monto fijo del mes'+(junto?' (los dos)':''), exento, paid:paidOf(0) }); return; }
+    if(c.tipo==='virtual'){ out.push(virtPayer(id,st,c,ym,exento)); return; }
+    if(+c.fijo){ const junto=c.junto&&DB.students[c.junto]?DB.students[c.junto].name:''; const cl=(c.dias&&c.dias.length)?clasesMes(c,ym).n:0;
+      /* el aumento es "por hora": sobre un monto fijo se suma por cada clase del mes */
+      const sube=(c.aumento&&c.aumento.desde&&ym>=c.aumento.desde)?(conAumento(0,c,ym)*(cl||1)):0;
+      out.push({ id, mi:0, name:st.name+(junto?' + '+junto:''), monto:exento?0:(+c.fijo+sube), detalle:'Monto fijo del mes'+(junto?' (los dos)':'')+(sube?' + aumento '+money(conAumento(0,c,ym))+(cl?' × '+cl+' clases':''):''), exento, paid:paidOf(0) }); return; }
     const cl=clasesMes(c,ym); const extra=+((st.cobroExtra||{})[ym]||0); const n=cl.n+extra; const precio=conAumento(c.precio,c,ym); const horas=+c.horas||1;
     const mem=(st.members&&st.members.length>1)?st.members:[st.name];
     const sinDias=!(c.dias&&c.dias.length);
@@ -7371,6 +7400,11 @@ async function cobroWa(id,mi){ const ym=cobroMes||ymNow(); const p=cobroPayers(y
   if(!tel){ const v=((await uiPrompt('Teléfono de '+p.name+' (con código de país, ej: 5492612345678):'))||'').trim(); if(!v) return; tel=v; if(!st.telefonos) st.telefonos={}; st.telefonos[mi]=v; if(mi===0&&!st.telefono) st.telefono=v; await saveDB(); }
   window.open('https://wa.me/'+tel.replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(cobroWaMsg(p,ym)),'_blank'); }
 async function cobroPago(id,mi,mode){ const ym=cobroMes||ymNow(); const st=DB.students[id]; const p=cobroPayers(ym).find(function(x){ return x.id===id&&x.mi===mi; }); if(!p) return;
+  if(p.virtual){ if(!st.cobroVirt) st.cobroVirt=[];
+    if(mode==='undo'){ if(!await uiConfirm('¿Desmarcar el pago de '+p.name+' de '+ymLabel(ym)+'?')) return; st.cobroVirt=st.cobroVirt.filter(function(x){ return x.fecha.slice(0,7)!==ym; }); }
+    else { let monto=p.monto; if(mode==='parcial'){ const v=await uiPrompt('¿Cuánto transfirió '+p.name+'? (plan: '+money(p.monto)+')',''); if(v==null) return; monto=+String(v).replace(/[^0-9]/g,''); if(!monto) return; }
+      const f=(ym===todayISO().slice(0,7))?todayISO():(ym+'-'+(p.due&&p.due.slice(0,7)===ym?p.due.slice(8,10):'01')); st.cobroVirt.push({ fecha:f, monto }); }
+    await saveDB(); renderPagos(); return; }
   if(!st.cobros) st.cobros={}; if(!st.cobros[ym]) st.cobros[ym]={};
   if(mode==='undo'){ if(!await uiConfirm('¿Desmarcar el pago de '+p.name+' de '+ymLabel(ym)+'?')) return; delete st.cobros[ym][mi]; }
   else if(mode==='parcial'){ const v=await uiPrompt('¿Cuánto transfirió '+p.name+'? (total del mes: '+money(p.monto)+')', p.paid?String(p.paid.monto):''); if(v==null) return; const n=+String(v).replace(/[^0-9]/g,''); if(!n){ delete st.cobros[ym][mi]; } else st.cobros[ym][mi]={ monto:n, fecha:todayISO() }; }
@@ -7381,6 +7415,8 @@ async function cobroSave(id){ const st=DB.students[id]; const box=document.query
   const num=function(v){ return +String(v||'').replace(/[^0-9.]/g,'')||0; };
   const dias=Array.prototype.slice.call(box.querySelectorAll('.cobro-dow.on')).map(function(b){ return +b.dataset.v; });
   const c=Object.assign({},st.cobro||{});
+  const tipoV=box.querySelector('.cobro-tipo .on'); c.tipo=(tipoV&&tipoV.dataset.v==='virtual')?'virtual':'hora';
+  if(c.tipo==='virtual'){ c.plan=num(g('plan')); c.cadaDias=num(g('cadaDias'))||45; const u=g('ultimo'); const lastPaid=(st.cobroVirt||[]).length?virtLast(st,{}):null; if(u&&u!==lastPaid) c.ultimo=u; }
   c.precio=num(g('precio')); c.horas=num(g('horas'))||1; c.dias=dias; c.fijo=num(g('fijo'));
   const junto=g('junto'); if(c.junto&&c.junto!==junto&&DB.students[c.junto]&&DB.students[c.junto].cobro) delete DB.students[c.junto].cobro.parteDe;
   if(junto&&c.fijo){ c.junto=junto; const o=DB.students[junto]; o.cobro=Object.assign({},o.cobro||{}, {parteDe:id}); } else delete c.junto;
@@ -7397,6 +7433,9 @@ async function cobroAlias(v){ DB.settings.alias=String(v||'').trim(); await save
 function cobroEditHTML(id){ const st=DB.students[id]; const c=st.cobro||{}; const ym=cobroMes||ymNow(); const a=c.aumento||{};
   const others=DB.order.filter(function(x){ return x!==id&&DB.students[x]&&!DB.students[x].archived; });
   return `<div class="cobro-edit" data-id="${esc(id)}">
+    <div class="cobro-tipo"><button type="button" class="cobro-dow${c.tipo!=='virtual'?' on':''}" data-act="cobroTipo" data-v="hora">Presencial · por hora</button><button type="button" class="cobro-dow${c.tipo==='virtual'?' on':''}" data-act="cobroTipo" data-v="virtual">Virtual · plan</button></div>
+    <div class="cobro-virt"${c.tipo==='virtual'?'':' hidden'}><div class="cobro-grid three"><label>Monto del plan<input data-cf="plan" inputmode="numeric" value="${esc(c.plan||'')}" placeholder="60000"></label><label>Cada (días)<input data-cf="cadaDias" inputmode="numeric" value="${esc(c.cadaDias||45)}"></label><label>Último pago<input type="date" data-cf="ultimo" value="${esc(virtLast(st,c)||'')}"></label></div>${(st.members&&st.members.length>1)?'<div class="cobro-mute" style="margin:-2px 0 8px">Es el monto entre las dos.</div>':''}</div>
+    <div class="cobro-hora"${c.tipo==='virtual'?' hidden':''}>
     <div class="cobro-grid"><label>Precio por hora<input data-cf="precio" inputmode="numeric" value="${esc(c.precio||'')}" placeholder="19000"></label>
     <label>Horas por clase<input data-cf="horas" inputmode="decimal" value="${esc(c.horas||1)}"></label></div>
     <div class="cobro-lbl">Días que entrena</div><div class="cobro-dows">${[1,2,3,4,5,6].map(function(d){ return `<button type="button" class="cobro-dow${(c.dias||[]).indexOf(d)>=0?' on':''}" data-act="cobroDow" data-v="${d}">${DOW_L[d]}</button>`; }).join('')}</div>
@@ -7406,27 +7445,28 @@ function cobroEditHTML(id){ const st=DB.students[id]; const c=st.cobro||{}; cons
     <div class="cobro-grid three"><label>Desde<input type="month" data-cf="aumDesde" value="${esc(a.desde||'')}"></label><label>De<input data-cf="aumMonto" inputmode="numeric" value="${esc(a.monto||'')}" placeholder="2000"></label><label>Cada (meses)<input data-cf="aumCada" inputmode="numeric" value="${esc(a.cada||3)}"></label></div>
     <details class="cobro-more"${+c.fijo?' open':''}><summary>Monto fijo por mes (en vez de por hora)</summary>
     <div class="cobro-grid"><label>Monto fijo<input data-cf="fijo" inputmode="numeric" value="${esc(c.fijo||'')}" placeholder="300000"></label>
-    <label>Incluye también a<select data-cf="junto"><option value="">— nadie más —</option>${others.map(function(x){ return `<option value="${esc(x)}"${c.junto===x?' selected':''}>${esc(DB.students[x].name)}</option>`; }).join('')}</select></label></div></details>
+    <label>Incluye también a<select data-cf="junto"><option value="">— nadie más —</option>${others.map(function(x){ return `<option value="${esc(x)}"${c.junto===x?' selected':''}>${esc(DB.students[x].name)}</option>`; }).join('')}</select></label></div></details></div>
     <div class="cobro-btns"><button class="inf2-btn" data-act="cobroSave" data-id="${esc(id)}">Guardar</button><button class="inf2-btn ghost" data-act="cobroEdit" data-id="">Cancelar</button></div></div>`; }
 function renderPagos(){
   const m=$('main'); const ym=cobroMes||(cobroMes=ymNow());
   const ps=cobroPayers(ym);
-  const conMonto=ps.filter(function(p){ return !p.sinTarifa&&!p.exento&&!p.sinDias; });
+  const conMonto=ps.filter(function(p){ return !p.sinTarifa&&!p.exento&&!p.sinDias&&!p.noToca; });
   const total=conMonto.reduce(function(a,p){ return a+p.monto; },0);
   const cobrado=ps.reduce(function(a,p){ return a+(p.paid?+p.paid.monto:0); },0);
   const pend=conMonto.filter(function(p){ return !p.paid||+p.paid.monto<p.monto; });
   const pag=conMonto.filter(function(p){ return p.paid&&+p.paid.monto>=p.monto; });
-  const otros=ps.filter(function(p){ return !p.sinTarifa&&(p.exento||p.sinDias); });
+  const otros=ps.filter(function(p){ return !p.sinTarifa&&(p.exento||p.sinDias||p.noToca); });
   const sinT=ps.filter(function(p){ return p.sinTarifa; });
   const fer=Array.from(feriadosSet()).filter(function(d){ return d.slice(0,7)===ym; }).sort();
   const row=function(p){ const st=DB.students[p.id]; const editing=cobroEditId===p.id&&p.mi===0;
     let right;
-    if(p.sinTarifa) right=`<button class="cobro-b ghost" data-act="cobroEdit" data-id="${esc(p.id)}">Cargar tarifa</button>`;
+    if(p.sinTarifa) right=`<div class="cobro-acts"><button class="cobro-b ghost" data-act="cobroEdit" data-id="${esc(p.id)}">Cargar tarifa</button><button class="cobro-b ghost sm" data-act="archiveStudent" data-id="${esc(p.id)}" title="Ya no entrena: archivar (no se borra nada)">📦</button></div>`;
     else if(p.exento) right=`<span class="cobro-chip">No paga este mes</span>`;
-    else if(p.sinDias) right=`<button class="cobro-b ghost" data-act="cobroEdit" data-id="${esc(p.id)}">Elegir días</button>`;
+    else if(p.noToca) right=`<span class="cobro-chip">Este mes no</span>`;
+    else if(p.sinDias) right=`<button class="cobro-b ghost" data-act="cobroEdit" data-id="${esc(p.id)}">${p.virtual?'Cargar fecha':'Elegir días'}</button>`;
     else if(p.paid&&+p.paid.monto>=p.monto) right=`<button class="cobro-chip ok" data-act="cobroUndo" data-id="${esc(p.id)}" data-m="${p.mi}">✓ Pagó ${esc(p.paid.fecha.slice(8,10)+'/'+p.paid.fecha.slice(5,7))}</button>`;
     else right=`${p.paid?`<span class="cobro-parcial">Pagó ${money(p.paid.monto)} · falta ${money(p.monto-p.paid.monto)}</span>`:''}<div class="cobro-acts"><button class="cobro-b" data-act="cobroPagado" data-id="${esc(p.id)}" data-m="${p.mi}">Pagó</button><button class="cobro-b ghost sm" data-act="cobroParcial" data-id="${esc(p.id)}" data-m="${p.mi}" title="Pagó otro monto">✎</button><button class="cobro-b ghost sm" data-act="cobroWa" data-id="${esc(p.id)}" data-m="${p.mi}" title="Mandar por WhatsApp">💬</button></div>`;
-    return `<div class="cobro-row"><div class="cobro-who" data-act="cobroEdit" data-id="${esc(p.id)}"><b>${esc(p.name)}</b>${p.grupo?`<span class="cobro-grp">${esc(p.grupo)}</span>`:''}<span class="cobro-det">${p.sinTarifa?'Sin tarifa cargada':esc(p.detalle||'')}</span></div><div class="cobro-r">${(!p.sinTarifa&&!p.exento&&!p.sinDias)?`<b class="cobro-m">${money(p.monto)}</b>`:''}${right}</div></div>${editing?cobroEditHTML(p.id):''}`; };
+    return `<div class="cobro-row"><div class="cobro-who" data-act="cobroEdit" data-id="${esc(p.id)}"><b>${esc(p.name)}</b>${p.grupo?`<span class="cobro-grp">${esc(p.grupo)}</span>`:''}<span class="cobro-det">${p.sinTarifa?'Sin tarifa cargada':esc(p.detalle||'')}</span></div><div class="cobro-r">${(!p.sinTarifa&&!p.exento&&!p.sinDias&&!p.noToca)?`<b class="cobro-m">${money(p.monto)}</b>`:''}${right}</div></div>${editing?cobroEditHTML(p.id):''}`; };
   let h=`<div class="rep-hero"><div class="rep-hero-eyebrow">💳 COBROS</div>
     <div class="rep-hero-row"><button type="button" class="rep-hero-nav" data-act="cobroPrev">◀</button><div class="rep-hero-title sm" style="text-align:center;flex:1">${esc(ymLabel(ym))}</div><button type="button" class="rep-hero-nav" data-act="cobroNext">▶</button></div>
     <div class="rep-hero-stats"><div class="rep-hero-stat"><b>${money(total)}</b><span>A cobrar</span></div><div class="rep-hero-stat ok"><b>${money(cobrado)}</b><span>Cobrado</span></div><div class="rep-hero-stat bad"><b>${money(Math.max(0,total-cobrado))}</b><span>Falta</span></div></div></div>`;
@@ -7677,6 +7717,7 @@ document.addEventListener('click',e=>{
     case 'cobroWa': cobroWa(id,mi); break;
     case 'cobroEdit': cobroEditId=(id&&cobroEditId!==id)?id:null; renderPagos(); { const ed=document.querySelector('.cobro-edit'); if(ed) ed.scrollIntoView({block:'center'}); } break;
     case 'cobroDow': el.classList.toggle('on'); break;
+    case 'cobroTipo': { const box=el.closest('.cobro-edit'); box.querySelectorAll('.cobro-tipo .cobro-dow').forEach(function(b){ b.classList.toggle('on',b===el); }); box.querySelector('.cobro-virt').hidden=el.dataset.v!=='virtual'; box.querySelector('.cobro-hora').hidden=el.dataset.v==='virtual'; } break;
     case 'cobroSave': cobroSave(id); break;
     case 'cobroFerEdit': cobroFerEdit=!cobroFerEdit; renderPagos(); break;
     case 'cobroFer': cobroToggleFer(el.dataset.date); break;
