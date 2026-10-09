@@ -1020,7 +1020,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-116'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-117'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -2729,8 +2729,46 @@ function mergeFtMaps(a,b){ const o=Object.assign({},(a&&a._ft)||{}); const bf=(b
 /* marca con la hora actual cada campo de cada alumno que cambió en ESTE celular desde la
    última vez que se sincronizó con la nube (el "baseline"). Una copia vieja no cambió nada
    respecto de su propio baseline, así que nunca queda marcada como más nueva. */
+/* ==== 09/10/2026 — listas compartidas (Plantillas y Biblioteca) y Ajustes ====
+   CAUSA de "desaparecen las rutinas guardadas": al juntar con la nube, cada celular ponía
+   SUS plantillas/biblioteca/ajustes encima de los de la nube (el celular de una alumna con
+   su copia vieja, sin la plantilla nueva de la profe, la borraba al subir con mala señal).
+   Ahora: cada ítem lleva su hora de última edición (_t) y se juntan las dos listas — nunca
+   se pierde un ítem por venir de un celular viejo. Borrar deja una marca (DB._tomb) para que
+   no vuelva desde otro celular. Los Ajustes (PIN, etc.) también llevan hora (_t): gana el
+   cambio más nuevo. */
+function unionListT(a,b,tomb){
+  const map={}, order=[];
+  (a||[]).concat(b||[]).forEach(function(it){
+    if(!it||!it.id) return;
+    if(tomb&&tomb[it.id]&&tomb[it.id]>=(it._t||0)) return;
+    if(!map[it.id]){ map[it.id]=it; order.push(it.id); }
+    else if((it._t||0)>(map[it.id]._t||0)) map[it.id]=it;
+  });
+  return order.map(function(id){ return map[id]; });
+}
+function mergeTomb(a,b){ const o=Object.assign({},a||{}); Object.keys(b||{}).forEach(function(k){ if((b[k]||0)>(o[k]||0)) o[k]=b[k]; }); return o; }
+function newerSettings(a,b){ if(!a) return b; if(!b) return a; return ((a._t||0)>(b._t||0))?a:b; }
+/* parches que corrieron al abrir sobre la copia de ESTE celular (posiblemente vieja): no
+   cuentan como hechos hasta que corran de nuevo sobre la versión real de la nube */
+let _provisionalSeeds=new Set();
+function mergeSeedFlags(L,R){ const o={}; new Set(Object.keys((L&&L._seed)||{}).concat(Object.keys((R&&R._seed)||{}))).forEach(function(k){ const r=!!(R&&R._seed&&R._seed[k]); const l=!!(L&&L._seed&&L._seed[k])&&!_provisionalSeeds.has(k); if(r||l) o[k]=true; }); return o; }
+function stampLists(base){
+  const now=Date.now(); if(!DB._tomb) DB._tomb={};
+  ['exLib','templates'].forEach(function(f){
+    const bm={}; ((base&&base[f])||[]).forEach(function(it){ if(it&&it.id) bm[it.id]=it; });
+    const cur={};
+    (DB[f]||[]).forEach(function(it){ if(!it||!it.id) return; cur[it.id]=1; const b=bm[it.id];
+      if(!b){ if(!it._t) it._t=now; return; }
+      const x=Object.assign({},it), y=Object.assign({},b); delete x._t; delete y._t;
+      if(JSON.stringify(x)!==JSON.stringify(y)) it._t=now; });
+    Object.keys(bm).forEach(function(id){ if(!cur[id]) DB._tomb[id]=now; });
+  });
+  if(base&&JSON.stringify(Object.assign({},DB.settings,{_t:0}))!==JSON.stringify(Object.assign({},base.settings,{_t:0}))){ DB.settings=DB.settings||{}; DB.settings._t=now; }
+}
 function stampLocalEdits(){
   const base=safeParse(_syncBaseline,null); const bs=(base&&base.students)||{}; const now=Date.now();
+  if(base) stampLists(base);
   Object.keys(DB.students||{}).forEach(function(id){
     const st=DB.students[id]; if(!st||!Object.prototype.hasOwnProperty.call(bs,id)) return;
     const b=bs[id]||{};
@@ -2772,15 +2810,13 @@ function mergeDBWithRemote(L,remote,base){
   const mergedOrder=(L.order||[]).filter(function(id){ return mergedStudents[id]; });
   (remote.order||[]).forEach(function(id){ if(mergedStudents[id]&&mergedOrder.indexOf(id)===-1) mergedOrder.push(id); });
   Object.keys(mergedStudents).forEach(function(id){ if(mergedOrder.indexOf(id)===-1) mergedOrder.push(id); });
-  const settingsUnchanged=JSON.stringify(L.settings)===JSON.stringify(base&&base.settings);
-  const mergedSeed={};
-  new Set(Object.keys(remote._seed||{}).concat(Object.keys(L._seed||{}))).forEach(function(k){ mergedSeed[k]=!!(remote._seed&&remote._seed[k])||!!(L._seed&&L._seed[k]); });
+  const tomb=mergeTomb(L._tomb,remote._tomb);
   return {
     order:mergedOrder, students:mergedStudents,
-    settings:(settingsUnchanged&&remote.settings)?remote.settings:L.settings,
-    _seed:mergedSeed, _deleted:mergedDeleted,
-    exLib:mergeListById(L.exLib,remote.exLib,base&&base.exLib),
-    templates:mergeListById(L.templates,remote.templates,base&&base.templates),
+    settings:newerSettings(L.settings,remote.settings)||{pin:''},
+    _seed:mergeSeedFlags(L,remote), _deleted:mergedDeleted, _tomb:tomb,
+    exLib:unionListT(L.exLib,remote.exLib,tomb),
+    templates:unionListT(L.templates,remote.templates,tomb),
   };
 }
 /* Para cuando llega una versión de la nube a ESTE celular (o cuando se sube sin baseline):
@@ -2808,6 +2844,13 @@ function mergeStudentsByFt(L,R,pref){
   Object.keys(out.students).forEach(function(id){ if(order.indexOf(id)===-1) order.push(id); });
   out.order=order;
   out._ts=Math.max(+L._ts||0,+R._ts||0);
+  /* 09/10/2026: banderas de parches, plantillas, biblioteca y ajustes se JUNTAN (antes se
+     copiaban enteros de un solo lado y se perdían cosas) */
+  out._seed=mergeSeedFlags(L,R);
+  out._tomb=mergeTomb(L._tomb,R._tomb);
+  out.exLib=unionListT(L.exLib,R.exLib,out._tomb);
+  out.templates=unionListT(L.templates,R.templates,out._tomb);
+  out.settings=(pref==='local')?(newerSettings(R.settings,L.settings)||{pin:''}):(newerSettings(L.settings,R.settings)||{pin:''});
   return out;
 }
 async function saveDB(force){
@@ -2847,9 +2890,13 @@ async function saveDB(force){
   let _mergedFromServer=false, _wroteCloud=false;
   if(fsDB){
     try{
-      const ref=fsDB.collection('kv').doc('tafit:students');
+      const ref=fsDB.collection('kv').doc(CLOUD_DB_ID);
       const localDB=DB, base=safeParse(_syncBaseline,null);
       const tx=fsDB.runTransaction(function(t){ return t.get(ref).then(function(snap){
+        if(snap.exists) return snap;
+        /* primera vez con el documento nuevo: se parte de lo último del documento viejo */
+        return t.get(fsDB.collection('kv').doc(LEGACY_DB_ID));
+      }).then(function(snap){
         const remote=snap.exists?safeParse(snap.data().v,null):null;
         const out=(remote&&remote.students)?mergeDBWithRemote(localDB,remote,base):JSON.parse(JSON.stringify(localDB));
         out._ts=Date.now();
@@ -2858,6 +2905,7 @@ async function saveDB(force){
       }); });
       const merged=await Promise.race([tx,new Promise(function(_,rej){ setTimeout(function(){ rej(new Error('timeout')); },10000); })]);
       DB=merged; _mergedFromServer=true; _wroteCloud=true;
+      mirrorLegacyDB(JSON.stringify(merged));
     }catch(e){ /* sin señal u otro error: seguimos con el guardado normal (offline-first) */ }
   }
   if(_wroteCloud){
@@ -3150,6 +3198,20 @@ function renderFormView(type){
 /* ---- Firebase Sync ---- */
 const FIREBASE_CONFIG={apiKey:"AIzaSyDokKjbDPD1uTOddeNrLvoub6idYHXDTPA",authDomain:"tafit-rutinas.firebaseapp.com",projectId:"tafit-rutinas",storageBucket:"tafit-rutinas.firebasestorage.app",messagingSenderId:"335678288814",appId:"1:335678288814:web:f6ab69d0f615e3cbfb4e3f"};
 let fsDB=null;
+/* ==== 09/10/2026 — documento nuevo de alumnos en la nube ("cortafuegos") ====
+   CAUSA de "en cada versión nueva se pierden cosas": los celulares que todavía tenían una
+   versión VIEJA de la app (con la lógica de guardado vieja) abrían una vez, corrían sus
+   parches viejos sobre su copia vieja y la subían entera al documento 'tafit:students',
+   pisando lo último de la profe (así volvió el corte de ciclo del 29/09 de Sofi/Marti, se
+   perdieron plantillas, nombres, archivados…). Desde esta versión, los alumnos/rutinas
+   viven en un documento NUEVO ('tafit:students:v2') que las versiones viejas no conocen:
+   lo que escriba un celular viejo ya no le llega a nadie. Se le sigue copiando lo último
+   al documento viejo (solo escritura) para que un celular viejo, mientras se actualiza,
+   igual vea las rutinas al día. La primera vez, el documento nuevo arranca desde el viejo. */
+const CLOUD_DB_ID='tafit:students:v2', LEGACY_DB_ID='tafit:students';
+function cid(k){ return k==='tafit:students'?CLOUD_DB_ID:k; }
+function fromCid(id){ if(id===CLOUD_DB_ID) return 'tafit:students'; if(id===LEGACY_DB_ID) return null; return id; }
+function mirrorLegacyDB(v){ try{ if(fsDB) fsDB.collection('kv').doc(LEGACY_DB_ID).set({v:v,ts:firebase.firestore.FieldValue.serverTimestamp(),dev:DEVICE_ID}).catch(function(){}); }catch(e){} }
 function shouldSync(k){ return k&&!k.includes('photo')&&k!=='tafit:devid'&&k!=='tafit:active'&&!k.startsWith('tafit:pos:')&&k!=='tafit:pending'&&k!=='tafit:dark'&&!k.startsWith('tafit:autobackup:'); }
 
 /* ===== Cola de pendientes: si no hay señal, el envío queda guardado y se reintenta solo ===== */
@@ -3216,31 +3278,35 @@ function mergeKeyStr(k,localStr,remoteStr){
   if(k==='tafit:students'){
     const L=safeParse(localStr||'null',null), R=safeParse(remoteStr||'null',null);
     if(!L||!L.students) return remoteStr; if(!R||!R.students) return localStr;
-    const out=mergeStudentsByFt(L,R,'remote');
-    /* ajustes generales (PIN, biblioteca, plantillas): como siempre, los de este celular */
-    if(L.settings) out.settings=L.settings; if(L.exLib) out.exLib=L.exLib; if(L.templates) out.templates=L.templates;
-    return JSON.stringify(out);
+    /* 09/10/2026: antes acá las plantillas, la biblioteca y los ajustes de ESTE celular
+       pisaban siempre a los de la nube — un celular viejo borraba plantillas nuevas. Ahora
+       mergeStudentsByFt los junta ítem por ítem (ver unionListT). */
+    return JSON.stringify(mergeStudentsByFt(L,R,'remote'));
   }
   if(isDataKey(k)) return JSON.stringify(mergeDataObj(safeParse(localStr||'{}',{}),safeParse(remoteStr||'{}',{})));
   return mergeAdditive(k,localStr,remoteStr);
 }
 function isMergedKey(k){ return k==='tafit:students'||isLogsKey(k)||isLogsDelKey(k)||isDataKey(k); }
 function _pushMergedRaw(k,v){ return new Promise(res=>{ let done=false; const t=setTimeout(()=>{ if(!done){ done=true; res(false); } },10000);
-  const ref=fsDB.collection('kv').doc(k);
+  const ref=fsDB.collection('kv').doc(cid(k));
   fsDB.runTransaction(function(tx){ return tx.get(ref).then(function(doc){
+    if(doc.exists||k!=='tafit:students') return doc;
+    return tx.get(fsDB.collection('kv').doc(LEGACY_DB_ID)); /* primera vez con el documento nuevo */
+  }).then(function(doc){
     const remote=(doc.exists&&doc.data()&&doc.data().v!=null)?doc.data().v:null;
     const merged=remote==null?v:mergeKeyStr(k,v,remote);
     tx.set(ref,{v:merged,ts:firebase.firestore.FieldValue.serverTimestamp(),dev:DEVICE_ID});
     return merged;
   }); }).then(function(merged){
     if(done) return; done=true; clearTimeout(t);
+    if(k==='tafit:students') mirrorLegacyDB(merged);
     /* si la nube tenía sesiones que este celular no, quedan también acá */
     try{ if(merged!==v&&localStorage.getItem(k)!==merged){ localStorage.setItem(k,mergeKeyStr(k,localStorage.getItem(k),merged)); if(isLogsKey(k)&&k==='tafit:logs:'+active){ LOGS=unionLogsArr(LOGS,safeParse(merged,[]),logsDelFor(active)); } if(k==='tafit:data:'+active){ CACHE=mergeDataObj(CACHE,safeParse(merged,{})); } } }catch(e){}
     res(true);
   }).catch(function(){ if(!done){ done=true; clearTimeout(t); res(false); } });
 }); }
 function _pushRaw(k,v){ if(isMergedKey(k)) return _pushMergedRaw(k,v); return new Promise(res=>{ let done=false; const t=setTimeout(()=>{ if(!done){ done=true; res(false); } },8000);
-  fsDB.collection('kv').doc(k).set({v:v,ts:firebase.firestore.FieldValue.serverTimestamp(),dev:DEVICE_ID})
+  fsDB.collection('kv').doc(cid(k)).set({v:v,ts:firebase.firestore.FieldValue.serverTimestamp(),dev:DEVICE_ID})
     .then(()=>{ if(!done){ done=true; clearTimeout(t); res(true); } })
     .catch(()=>{ if(!done){ done=true; clearTimeout(t); res(false); } });
 }); }
@@ -3252,7 +3318,7 @@ async function flushPending(){ if(!fsDB||!PENDING.length) return; const list=PEN
 }
 window.addEventListener('online',()=>setTimeout(flushPending,800));
 setInterval(()=>{ if(navigator.onLine) flushPending(); },30000);
-async function cloudDel(k){ if(!fsDB||_fromRemote) return; try{ fsDB.collection('kv').doc(k).delete(); }catch(e){} }
+async function cloudDel(k){ if(!fsDB||_fromRemote) return; try{ fsDB.collection('kv').doc(cid(k)).delete(); }catch(e){} }
 async function pushAllLocal(){ if(!fsDB) return; let keys;
   if(locked&&active){ keys=myKeys(); }
   else { keys=['tafit:students']; DB.order.forEach(id=>{ keys.push('tafit:data:'+id,'tafit:logs:'+id,'tafit:logsdel:'+id,'tafit:chat:'+id,'tafit:form:acuerdo:'+id,'tafit:form:anamnesis:'+id); const s=DB.students[id]; if(s&&s.members&&s.members.length>1){ for(let mi=0;mi<s.members.length;mi++){ keys.push('tafit:form:acuerdo:'+id+':'+mi,'tafit:form:anamnesis:'+id+':'+mi); } } }); }
@@ -3366,6 +3432,41 @@ async function recoverLogsForActive(){
   toast('✓ '+list.length+' sesión'+(list.length===1?'':'es')+' recuperada'+(list.length===1?'':'s'),'ok');
   render();
 }
+/* ==== 09/10/2026 — variantes por semana corridas 5 lugares ====
+   El bloque prearmado de core (cartel + 4 ejercicios) se agregó AL PRINCIPIO de cada día,
+   pero las variantes por semana (S2…S6, "wo_w<sem>_<día>_<ej>") se guardan por posición y
+   NO se corrieron: la variante del Hip thrust de Sofi/Marti quedó sobre el cartel del Tabata,
+   y así en cada ejercicio (también Joni, Fede, Lola/Anto, Rosario y Astrid). Verificado en el
+   backup del 09/10: en esos días hay variantes en posiciones del bloque de core (0 a 4), que
+   nunca llevan variantes. Se corren todas las variantes de ese día tantos lugares como
+   ejercicios tiene el bloque. Solo en el celular de la profe, con señal, una sola vez por día
+   de rutina (si ya no hay variantes en el bloque, no hace nada). */
+async function shiftWoForCorePresets(){
+  if(!fsDB||locked||(DB._seed&&DB._seed.woPresetShift20261009)) return;
+  for(const sid of DB.order){
+    const st=DB.students[sid]; if(!st||!st.routine) continue;
+    const pres=st.routine.map(function(d){ return abPresetIdx(d).size; });
+    if(!pres.some(function(n){ return n>0; })) continue;
+    const K2='tafit:data:'+sid;
+    let cloudObj={};
+    try{ const snap=await fsDB.collection('kv').doc(K2).get({source:'server'}); if(snap.exists) cloudObj=safeParse(snap.data().v,{}); }catch(e){ return; /* sin señal: se reintenta la próxima vez */ }
+    const localObj=(active===sid)?CACHE:safeParse(localStorage.getItem(K2)||'{}',{});
+    const obj=mergeDataObj(localObj,cloudObj);
+    const now=Date.now(); let changed=false;
+    pres.forEach(function(P,di){
+      if(!P) return;
+      const keys=Object.keys(obj).filter(function(k){ const m=/^wo_w(\d+)_(\d+)_(\d+)$/.exec(k); return m&&+m[2]===di&&obj[k]&&!obj[k]._del; });
+      if(!keys.some(function(k){ return +k.split('_')[3]<P; })) return;
+      const nl=st.routine[di].ex.length, moved={};
+      keys.forEach(function(k){ const p=k.split('_'); const ne=+p[3]+P; if(ne<nl){ moved[p[0]+'_'+p[1]+'_'+p[2]+'_'+ne]=Object.assign({},obj[k],{_t:now}); } });
+      keys.forEach(function(k){ if(!(k in moved)) obj[k]=woTombstone(); });
+      Object.keys(moved).forEach(function(k){ obj[k]=moved[k]; });
+      changed=true;
+    });
+    if(changed){ if(active===sid) CACHE=obj; await Store.set(K2,JSON.stringify(obj)); }
+  }
+  DB._seed.woPresetShift20261009=true; await saveDB();
+}
 async function restoreSofiMartiWeeks(){
   if(!fsDB||(DB._seed&&DB._seed.smWeeksRestore20261007)) return;
   const SID='sofi-marti', K2='tafit:data:'+SID;
@@ -3432,14 +3533,14 @@ async function restoreAutoBackup(dateISO){
     return true;
   }catch(e){ console.warn('Restore:',e); return false; }
 }
-async function reloadFromRemote(){ try{ const raw=await Store.get('tafit:students'); if(raw){ const p=safeParse(raw,null); if(p&&p.order&&p.order.length){ if(!DB._ts||!p._ts||p._ts>=DB._ts){ DB=mergeStudentsByFt(DB,p,'remote'); setSyncBaseline(); } } } if(urlLockPending){ await tryResolveLockedLink(); return; } if(DB.students[active]){ CACHE=safeParse(await Store.get('tafit:data:'+active)||'{}',{}); migrateLegacyWeeks(); const remoteLogs=safeParse(await Store.get('tafit:logs:'+active)||'[]',[]); LOGS=mergeLogs(LOGS,remoteLogs); const remoteChat=safeParse(await Store.get('tafit:chat:'+active)||'[]',[]); CHAT=mergeChat(CHAT,remoteChat); } if(trainer&&tab==='edit'&&document.querySelector('.edit-day,.week-row,#healthsec,#membersfld')){ /* 08/10/2026: llegaron datos de otro celular mientras la profe edita — NO se redibuja el formulario (se perdía lo que estaba escribiendo). Al guardar, lo suyo gana por ser más nuevo. */ return; } render(); }catch(e){} }
+async function reloadFromRemote(){ try{ const raw=await Store.get('tafit:students'); if(raw){ const p=safeParse(raw,null); if(p&&p.order&&p.order.length){ /* 09/10/2026: siempre se junta por hora de cada campo (antes, si la hora general de este celular era más nueva —relojes distintos entre celulares— no se bajaba nada) */ DB=mergeStudentsByFt(DB,p,'remote'); setSyncBaseline(); if(_provisionalSeeds.size){ _provisionalSeeds=new Set(); const _b4=JSON.stringify(DB); try{ runSeeds(); }catch(e){} if(JSON.stringify(DB)!==_b4){ try{ saveDB(); }catch(e){} } } } } if(urlLockPending){ await tryResolveLockedLink(); return; } if(DB.students[active]){ CACHE=safeParse(await Store.get('tafit:data:'+active)||'{}',{}); migrateLegacyWeeks(); const remoteLogs=safeParse(await Store.get('tafit:logs:'+active)||'[]',[]); LOGS=mergeLogs(LOGS,remoteLogs); const remoteChat=safeParse(await Store.get('tafit:chat:'+active)||'[]',[]); CHAT=mergeChat(CHAT,remoteChat); } if(trainer&&tab==='edit'&&document.querySelector('.edit-day,.week-row,#healthsec,#membersfld')){ /* 08/10/2026: llegaron datos de otro celular mientras la profe edita — NO se redibuja el formulario (se perdía lo que estaba escribiendo). Al guardar, lo suyo gana por ser más nuevo. */ return; } render(); }catch(e){} }
 function updateSyncUI(on){ $('clouddot').className='dot'+(on?' on':''); $('cloudlbl').textContent=on?'Sincronizado':(Store.ls?'En este dispositivo':'Solo esta sesión'); }
 function myKeys(){ /* claves que necesita una alumna con link bloqueado */
   return ['tafit:students','tafit:data:'+active,'tafit:logs:'+active,'tafit:logsdel:'+active,'tafit:chat:'+active,'tafit:form:acuerdo:'+active,'tafit:form:anamnesis:'+active];
 }
 function kvQuery(){ /* alumna bloqueada: baja solo lo suyo (mucho más liviano). Profe: baja todo. */
   const col=fsDB.collection('kv');
-  if(locked&&active){ try{ return col.where(firebase.firestore.FieldPath.documentId(),'in',myKeys()); }catch(e){ return col; } }
+  if(locked&&active){ try{ return col.where(firebase.firestore.FieldPath.documentId(),'in',myKeys().map(cid).concat([LEGACY_DB_ID])); }catch(e){ return col; } }
   return col;
 }
 async function initFirebase(){
@@ -3458,12 +3559,23 @@ async function initFirebase(){
        se volvía a escribir esa versión vieja de DB encima de la nube, ya con fireSync
        activo. Por eso también hay que actualizar DB acá, con la misma regla de "solo si
        es igual o más nuevo" que usa reloadFromRemote(), antes de que fireSync se active. */
-    try{ const snap=await kvQuery().get(); let _studentsMerged=false; snap.forEach(function(doc){ var k=doc.id,v=doc.data().v; if(shouldSync(k)&&v!=null){ try{ if(isMergedKey(k)&&localStorage.getItem(k)!=null){ v=mergeKeyStr(k,localStorage.getItem(k),v); } if(localStorage.getItem(k)!==v){ localStorage.setItem(k,v); if(k==='tafit:students'){ var p=safeParse(v,null); if(p&&p.order&&p.order.length&&(!DB._ts||!p._ts||p._ts>=DB._ts)){ DB=mergeStudentsByFt(DB,p,'remote'); setSyncBaseline(); _studentsMerged=true; } } } }catch(e){} } }); if(_studentsMerged){ /* llegó la versión real de la nube: los parches de una sola vez que esa versión todavía no tenga se aplican ENCIMA de ella (nunca de la copia vieja de este celular). Están guardados por bandera, así que los que ya corrieron en otro celular no se repiten. */ try{ if(window.__runSeeds) window.__runSeeds(); }catch(e){ console.warn('Seeds:',e); } try{ if(urlLockPending) await tryResolveLockedLink(); else render(); }catch(e){} } else if(urlLockPending){ try{ await tryResolveLockedLink(); }catch(e){} } }catch(e){ console.warn('Pull:',e); }
+    try{ const snap=await kvQuery().get(); let _studentsMerged=false;
+      /* 09/10/2026: se usa el documento nuevo de alumnos; el viejo solo si el nuevo todavía no existe (primera vez) */
+      const docs=[]; let legacyV=null, hasV2=false;
+      snap.forEach(function(doc){ const v=doc.data().v; if(doc.id===LEGACY_DB_ID){ legacyV=v; return; } const k=fromCid(doc.id); if(!k) return; if(k==='tafit:students') hasV2=true; docs.push([k,v]); });
+      if(!hasV2&&legacyV!=null) docs.push(['tafit:students',legacyV]);
+      docs.forEach(function(kv){ var k=kv[0],v=kv[1]; if(shouldSync(k)&&v!=null){ try{
+        if(isMergedKey(k)&&localStorage.getItem(k)!=null){ v=mergeKeyStr(k,localStorage.getItem(k),v); }
+        if(localStorage.getItem(k)!==v) localStorage.setItem(k,v);
+        if(k==='tafit:students'){ var p=safeParse(v,null); if(p&&p.order&&p.order.length){ DB=mergeStudentsByFt(DB,p,'remote'); setSyncBaseline(); _studentsMerged=true; } }
+      }catch(e){} } });
+      if(_studentsMerged){ /* llegó la versión real de la nube: los parches de una sola vez que esa versión todavía no tenga se aplican ENCIMA de ella (nunca de la copia vieja de este celular). Lo que corrió al abrir sobre la copia local era provisorio y no cuenta. */ _provisionalSeeds=new Set(); try{ if(window.__runSeeds) window.__runSeeds(); }catch(e){ console.warn('Seeds:',e); } try{ if(urlLockPending) await tryResolveLockedLink(); else render(); }catch(e){} } else if(urlLockPending){ try{ await tryResolveLockedLink(); }catch(e){} } }catch(e){ console.warn('Pull:',e); }
     /* las transcriptas de la nube que este celular no tenía, también a la memoria
        (antes quedaban solo en localStorage y el próximo guardado las pisaba) */
     try{ if(active&&DB.students[active]){ LOGS=mergeLogs(LOGS,safeParse(localStorage.getItem('tafit:logs:'+active)||'[]',[])); CACHE=mergeDataObj(CACHE,safeParse(localStorage.getItem('tafit:data:'+active)||'{}',{})); } }catch(e){}
     /* recuperar las semanas de Sofi/Marti si quedaron vacías (ver restoreSofiMartiWeeks) */
     try{ if(!locked) await restoreSofiMartiWeeks(); }catch(e){ console.warn('SM weeks:',e); }
+    try{ if(!locked) await shiftWoForCorePresets(); }catch(e){ console.warn('WO shift:',e); }
     /* push: local → cloud */
     await pushAllLocal();
     /* backup automático diario — solo desde el celular de la profe (modo bloqueado de un
@@ -3494,8 +3606,8 @@ async function initFirebase(){
     kvQuery().onSnapshot(function(snap){
       var changed=false;
       snap.docChanges().forEach(function(ch){
-        var k=ch.doc.id,data=ch.doc.data();
-        if(!shouldSync(k)) return;
+        var k=fromCid(ch.doc.id),data=ch.doc.data();
+        if(!k||!shouldSync(k)) return; /* el documento viejo de alumnos se ignora (09/10/2026) */
         try{
           if(ch.type==='removed') localStorage.removeItem(k);
           else if(data&&data.v!=null){
@@ -3536,7 +3648,14 @@ async function initFirebase(){
      guarda (y se marca como cambio real) si runSeeds() o el completado de valores por
      defecto modificaron algo de verdad. */
   const _dbBeforeSeeds=JSON.stringify(DB);
+  const _seedsBefore=Object.assign({},DB._seed||{});
   runSeeds();
+  /* 09/10/2026: estos parches corrieron sobre la copia de ESTE celular, que puede ser vieja.
+     No cuentan como edición nueva (no se marcan con hora, así nunca le ganan a lo de la nube)
+     y sus banderas quedan "provisorias": cuando llega la versión real de la nube, vuelven a
+     correr encima de ella (ver initFirebase). */
+  Object.keys(DB._seed||{}).forEach(function(k){ if(DB._seed[k]&&!_seedsBefore[k]) _provisionalSeeds.add(k); });
+  setSyncBaseline();
   window.__runSeeds=runSeeds; /* initFirebase lo vuelve a correr sobre los datos frescos de la nube */
   /* Progresión semanal de Lola/Anto (semanas 2-6): vive en su CACHE (Store
      'tafit:data:lola-anto'), separado de DB, así que no se puede sembrar dentro de
@@ -4003,6 +4122,34 @@ function runSeeds(){
      (no solo al que esté activo en este dispositivo en este momento). Por seguridad,
      si un día ya arranca con un bloque/circuito (el que sea), no le suma otro encima —
      para no duplicar si Tami ya le había agregado uno a mano antes de actualizar. */
+  /* ==== Correcciones del 09/10/2026, verificadas contra el backup que exportó Tami hoy
+     (TaFit-backup-2026-10-09.json, 00:11) — cada una SOLO actúa si el dato sigue siendo
+     exactamente el malo que se vio en ese backup. ==== */
+  /* 1) Sofi/Marti: un celular con una versión vieja de la app volvió a subir su copia del
+     29/09: corte de ciclo 29/09 13:22 y DOS rutinas anteriores (la misma rutina repetida,
+     09/08→29/09 sin ninguna sesión). Con ese corte, su Día 3 del 25/09 quedaba "en la rutina
+     vieja" y por eso la S2 no se habilitaba aunque ya hicieron la S1. Vuelve a ser: una sola
+     rutina anterior (hasta el 25/09) y la actual desde el 25/09 — igual que en el backup del
+     07/10 ya corregido. No toca la rutina actual, ni transcriptas, ni semanas. */
+  if(!DB._seed.smCycleFix20261009){
+    const sm=DB.students['sofi-marti'];
+    if(sm&&sm.cycleStart==='2026-09-29T13:22:43.797Z'&&Array.isArray(sm.cycleHistory)&&sm.cycleHistory.length===2
+       &&sm.cycleHistory[1].start==='2026-09-08T15:54:56.896Z'&&sm.cycleHistory[1].end==='2026-09-29T13:22:43.797Z'&&!sm.cycleHistory[0].start){
+      const FIX='2026-09-25T00:00:00.000Z', h0=sm.cycleHistory[0];
+      sm.cycleHistory=[{ start:null, end:FIX, routine:h0.routine, weeks:h0.weeks }];
+      sm.cycleStart=FIX;
+    }
+    DB._seed.smCycleFix20261009=true;
+  }
+  /* 2) Plantilla "Fuerza 3 dias" (guardada el 07/10 19:50): estaba en el backup del 07/10
+     y ya no está en el de hoy — la borró un celular viejo al subir sus plantillas. Vuelve
+     tal cual estaba (solo si no existe y no se borró a propósito desde esta versión). */
+  if(!DB._seed.tplRestore20261009){
+    const T={"id": "tpl-1791402600335", "name": "Fuerza 3 dias", "createdAt": "2026-10-07T19:50:00.335Z", "routine": [{"day": "Día 1", "ex": [{"n": "Hip thrust", "s": 3, "r": "10 + 20\" sostener arriba + 6-8", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Hip%20thrust%20t%C3%A9cnica%20ejercicio"}, {"n": "Press de hombro barra", "s": 3, "r": "10", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Press%20de%20hombro%20barra%20t%C3%A9cnica%20ejercicio"}, {"n": "Peso muerto unilateral mancuerna", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Peso%20muerto%20unilateral%20mancuerna%20t%C3%A9cnica%20ejercicio"}, {"n": "Bíceps inclinado mancuerna", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=B%C3%ADceps%20inclinado%20mancuerna%20t%C3%A9cnica%20ejercicio"}, {"n": "Sentadilla sumo mancuerna", "s": 4, "r": "15", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Sentadilla%20sumo%20mancuerna%20t%C3%A9cnica%20ejercicio"}, {"n": "Curl femoral c/banda", "s": 3, "r": "15", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Curl%20femoral%20c%2Fbanda%20t%C3%A9cnica%20ejercicio"}, {"n": "Remo bajo máquina", "s": 3, "r": "15", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Remo%20bajo%20m%C3%A1quina%20t%C3%A9cnica%20ejercicio"}, {"n": "Bíceps polea barrita", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=B%C3%ADceps%20polea%20barrita%20t%C3%A9cnica%20ejercicio"}]}, {"day": "Día 2", "ex": [{"n": "Sentadilla cajón", "s": 3, "r": "15", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Sentadilla%20caj%C3%B3n%20t%C3%A9cnica%20ejercicio"}, {"n": "Prensa 45°", "s": 3, "r": "15", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Prensa%2045%C2%B0%20t%C3%A9cnica%20ejercicio"}, {"n": "Fondos paralelos", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Fondos%20paralelos%20t%C3%A9cnica%20ejercicio"}, {"n": "Press francés mancuerna", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Press%20franc%C3%A9s%20mancuerna%20t%C3%A9cnica%20ejercicio"}, {"n": "Apertura máquina", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Apertura%20m%C3%A1quina%20t%C3%A9cnica%20ejercicio"}, {"n": "Aductores", "s": 3, "r": "15 + 15 pulsos", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Aductores%20t%C3%A9cnica%20ejercicio"}, {"n": "Press inclinado barra", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Press%20inclinado%20barra%20t%C3%A9cnica%20ejercicio"}, {"n": "Máquina cuádriceps", "s": 3, "r": "15", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=M%C3%A1quina%20cu%C3%A1driceps%20t%C3%A9cnica%20ejercicio"}]}, {"day": "Día 3", "ex": [{"n": "Step up Smith", "s": 3, "r": "15", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Step%20up%20Smith%20t%C3%A9cnica%20ejercicio"}, {"n": "Volada lateral inclinado", "s": 3, "r": "12", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Volada%20lateral%20inclinado%20t%C3%A9cnica%20ejercicio"}, {"n": "Dominadas", "s": 3, "r": "al fallo", "w": "Peso corporal", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Dominadas%20t%C3%A9cnica%20ejercicio"}, {"n": "Flexiones", "s": 3, "r": "al fallo", "w": "Peso corporal", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Flexiones%20t%C3%A9cnica%20ejercicio"}, {"n": "Búlgara", "s": 3, "r": "15", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=B%C3%BAlgara%20t%C3%A9cnica%20ejercicio"}, {"n": "Máquina de femoral", "s": 3, "r": "15", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=M%C3%A1quina%20de%20femoral%20t%C3%A9cnica%20ejercicio"}, {"n": "Prensa", "s": 3, "r": "15", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Prensa%20t%C3%A9cnica%20ejercicio"}, {"n": "Abductores", "s": 3, "r": "15 + 15 pulsos", "w": "A definir", "alt": "", "tip": "", "rest": "", "vid": "https://www.youtube.com/results?search_query=Abductores%20t%C3%A9cnica%20ejercicio"}]}]};
+    if(!DB.templates) DB.templates=[];
+    if(!DB.templates.some(function(t){ return t.id===T.id; })&&!(DB._tomb&&DB._tomb[T.id])) DB.templates.push(T);
+    DB._seed.tplRestore20261009=true;
+  }
   if(!DB._seed.abBlockAllDays20261006){
     DB.order.forEach(function(sid){
       const st=DB.students[sid];
@@ -4835,8 +4982,10 @@ function weekDone(wi){
   const r=routine(); if(r.length===0) return false;
   const st=DB.students[active];
   const cutoff=(st&&st.cycleStart)?Date.parse(st.cycleStart):0;
-  return r.every(function(d){ return LOGS.some(function(l){
-    if(+l.week!==+wi || l.dayName!==d.day) return false;
+  /* 09/10/2026: el día se reconoce por su posición (dayIdx) además del nombre: si la profe
+     renombra un día ("Día 1" → "Día 1 · Piernas"), las sesiones ya hechas siguen contando */
+  return r.every(function(d,di){ return LOGS.some(function(l){
+    if(+l.week!==+wi || !(l.dayName===d.day || (l.dayIdx!=null&&+l.dayIdx===di))) return false;
     if(!cutoff) return true;
     const t=l.date?Date.parse(l.date):0;
     return !isNaN(t) && t>=cutoff;
@@ -5887,8 +6036,8 @@ function renderWhatsApp(){
   if(!num||!locked) return;
   var sName=DB.students[active]?DB.students[active].name:'';
   var a=document.createElement('a'); a.id='waFloat'; a.className='wa-float';
-  a.href='https://wa.me/'+num.replace(/[^0-9]/g,'')+'?text='+encodeURIComponent('Hola profe, soy '+sName+'. Tengo una consulta sobre mi rutina \U0001f4aa');
-  a.target='_blank'; a.rel='noopener'; a.textContent='\U0001f4ac'; a.title='Consultar al profe';
+  a.href='https://wa.me/'+num.replace(/[^0-9]/g,'')+'?text='+encodeURIComponent('Hola profe, soy '+sName+'. Tengo una consulta sobre mi rutina \u{1F4AA}');
+  a.target='_blank'; a.rel='noopener'; a.textContent='\u{1F4AC}'; a.title='Consultar al profe';
   document.body.appendChild(a);
 }
 function renderWhatsAppBtn(){
@@ -6069,7 +6218,7 @@ async function closeSession(){
   { const dup=LOGS.find(function(l){ return l.dayName===r[day].day&&+l.week===+week&&(Date.now()-Date.parse(l.date))<6*3600*1000; });
     if(dup){ const mins=Math.max(1,Math.round((Date.now()-Date.parse(dup.date))/60000)); const t=mins<60?(mins+' minuto'+(mins===1?'':'s')):(Math.round(mins/60)+' hora'+(Math.round(mins/60)===1?'':'s'));
       if(!await uiConfirm('Ya cerraste '+r[day].day+' de esta semana hace '+t+'.\n\n¿Guardar otra sesión igual en la Transcripta?')) return; } }
-  LOGS.unshift({ date:new Date().toISOString(), dayName:r[day].day, week, weekName:weeks()[week].t+' '+weeks()[week].n, ex:exs, obs, health:hh, core });
+  LOGS.unshift({ date:new Date().toISOString(), dayName:r[day].day, dayIdx:day, week, weekName:weeks()[week].t+' '+weeks()[week].n, ex:exs, obs, health:hh, core });
   await saveLogs();
   await autoBackup('sesion');
   /* Avisá al profe (aviso interno, no push): si quien cierra es el alumno, no la profe */
@@ -6804,7 +6953,32 @@ function collectHealth(){ const sec=$('healthsec'); if(!sec) return DB.students[
 function collectMembers(){ const el=$('membersfld'); if(!el) return DB.students[active].members; const arr=el.value.split(',').map(s=>s.trim()).filter(Boolean); return arr; }
 function syncFromForms(){ if(document.querySelector('.edit-day')) DB.students[active].routine=collectForm(); if(document.querySelector('.week-row')) DB.students[active].weeks=collectWeeks(); if($('healthsec')) DB.students[active].health=collectHealth(); if($('membersfld')){ const a=collectMembers(); if(a&&a.length>1){ DB.students[active].members=a; } else { delete DB.students[active].members; } } }
 function addEx(di){ syncFromForms(); DB.students[active].routine[di].ex.push(isDuo()?exD("",4,"12","A definir","A definir","","",""):ex("",4,"12","A definir","","","")); renderEdit(); }
-function removeEx(di,ei){ syncFromForms(); DB.students[active].routine[di].ex.splice(ei,1); renderEdit(); }
+/* 09/10/2026: las variantes por semana (wo_w<sem>_<día>_<ej>) y los pesos de la sesión se
+   guardan por POSICIÓN del ejercicio. Antes, al borrar o mover un ejercicio (o borrar un día)
+   las variantes quedaban en la posición vieja y aparecían en el ejercicio equivocado. Ahora
+   se corren junto con el ejercicio. mapD(d)→nuevo día o null; mapE(d,e)→nueva posición o null. */
+function remapCacheIdx(mapD,mapE){
+  const out={}, moved={}, vac=[]; const now=Date.now();
+  Object.keys(CACHE).forEach(function(k){
+    const v=CACHE[k]; let m;
+    if((m=/^wo_w(\d+)_(\d+)_(\d+)$/.exec(k))){
+      const d=+m[2], e=+m[3]; const nd=mapD(d); const ne=(nd==null)?null:mapE(d,e);
+      if(nd===d&&ne===e){ if(!(k in moved)) out[k]=v; return; }
+      vac.push(k);
+      if(nd!=null&&ne!=null&&!(v&&v._del)){ const nk='wo_w'+m[1]+'_'+nd+'_'+ne; out[nk]=Object.assign({},v,{_t:now}); moved[nk]=1; }
+      return;
+    }
+    if((m=/^(\d+)\|(\d+)\|(.*)$/.exec(k))){
+      const d=+m[1], e=+m[2]; const nd=mapD(d); const ne=(nd==null)?null:mapE(d,e);
+      if(nd!=null&&ne!=null) out[nd+'|'+ne+'|'+m[3]]=v; return;
+    }
+    if((m=/^(obs|hpre|hpost|halarm|core)\|(\d+)$/.exec(k))){ const nd=mapD(+m[2]); if(nd!=null) out[m[1]+'|'+nd]=v; return; }
+    if(!(k in out)) out[k]=v;
+  });
+  vac.forEach(function(k){ if(!(k in moved)) out[k]=woTombstone(); });
+  CACHE=out;
+}
+function removeEx(di,ei){ syncFromForms(); DB.students[active].routine[di].ex.splice(ei,1); remapCacheIdx(function(d){ return d; },function(d,e){ return d!==di?e:(e===ei?null:(e>ei?e-1:e)); }); queueSave(); saveDB(); renderEdit(); }
 function moveEx(di,ei,dir){
   syncFromForms();
   const exArr=DB.students[active].routine[di].ex;
@@ -6812,15 +6986,8 @@ function moveEx(di,ei,dir){
   if(target<0||target>=exArr.length) return;
   /* swap exercises */
   const tmp=exArr[ei]; exArr[ei]=exArr[target]; exArr[target]=tmp;
-  /* remap CACHE keys: swap prefixes day|a|* <-> day|b|* */
-  const newCache={};
-  const preA=di+'|'+ei+'|', preB=di+'|'+target+'|';
-  Object.keys(CACHE).forEach(k=>{
-    if(k.startsWith(preA)) newCache[preB+k.slice(preA.length)]=CACHE[k];
-    else if(k.startsWith(preB)) newCache[preA+k.slice(preB.length)]=CACHE[k];
-    else newCache[k]=CACHE[k];
-  });
-  CACHE=newCache;
+  /* mover también sus pesos y sus variantes por semana (09/10/2026: antes las variantes se quedaban en el lugar viejo) */
+  remapCacheIdx(function(d){ return d; },function(d,e){ return d!==di?e:(e===ei?target:(e===target?ei:e)); });
   saveDB(); queueSave();
   /* adjust accordion */
   if(openEditEx===di*100+ei) openEditEx=di*100+target;
@@ -6841,7 +7008,7 @@ function addDay(){
   DB.students[active].routine.push({day:"Día "+(newIdx+1), ex:[block].concat(abEx,[placeholder])});
   openSecs.add('day'+newIdx); renderEdit();
 }
-async function removeDay(di){ if(routine().length<=1){ toast("Tiene que quedar al menos un día",'warn'); return; } if(!await uiConfirm("¿Eliminar este día?")) return; syncFromForms(); DB.students[active].routine.splice(di,1); if(day>=routine().length) day=0; renderEdit(); }
+async function removeDay(di){ if(routine().length<=1){ toast("Tiene que quedar al menos un día",'warn'); return; } if(!await uiConfirm("¿Eliminar este día?")) return; syncFromForms(); DB.students[active].routine.splice(di,1); remapCacheIdx(function(d){ return d===di?null:(d>di?d-1:d); },function(d,e){ return e; }); queueSave(); saveDB(); if(day>=routine().length) day=0; renderEdit(); }
 function addWeek(){ syncFromForms(); DB.students[active].weeks.push({t:'S'+(weeks().length+1),n:'Nueva',d:''}); renderEdit(); }
 function removeWeek(i){ if(weeks().length<=1){ toast("Tiene que quedar al menos una semana",'warn'); return; } syncFromForms(); DB.students[active].weeks.splice(i,1); if(week>=weeks().length) week=0; renderEdit(); }
 function addRule(){ syncFromForms(); const h=DB.students[active].health=DB.students[active].health||{enabled:false,rules:[]}; h.rules=h.rules||[]; h.rules.push({t:'',d:''}); renderEdit(); }
