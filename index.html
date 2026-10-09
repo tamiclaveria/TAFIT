@@ -4237,6 +4237,18 @@ function runSeeds(){
       if(!st.telefono) st.telefono=st.telefonos[0]; });
     DB._seed.telInit20261009=true;
   }
+  /* 5) Pagos de octubre que Tami confirmó por chat (09/10/2026): Omar + Martín, Yesi, Flor,
+     Ceci, Sol y Claudia. Solo se marca si todavía no hay un pago cargado para esa persona en
+     octubre (los de Grupo 5 los marcó ella en la app). */
+  if(!DB._seed.payOct20261009){
+    const P=[['omar',0],['jus-yesi',1],['flor',0],['cecilia',0],['sol',0],['claudia',0]];
+    let ps=[]; try{ ps=cobroPayers('2026-10'); }catch(e){}
+    P.forEach(function(x){ const st=DB.students[x[0]]; if(!st||!st.cobro) return;
+      const p=ps.find(function(q){ return q.id===x[0]&&q.mi===x[1]; }); if(!p||!p.monto) return;
+      if(!st.cobros) st.cobros={}; if(!st.cobros['2026-10']) st.cobros['2026-10']={};
+      if(!st.cobros['2026-10'][x[1]]) st.cobros['2026-10'][x[1]]={ monto:p.monto, fecha:'2026-10-09' }; });
+    DB._seed.payOct20261009=true;
+  }
   if(!DB._seed.abBlockAllDays20261006){
     DB.order.forEach(function(sid){
       const st=DB.students[sid];
