@@ -4249,6 +4249,51 @@ function runSeeds(){
       if(!st.cobros['2026-10'][x[1]]) st.cobros['2026-10'][x[1]]={ monto:p.monto, fecha:'2026-10-09' }; });
     DB._seed.payOct20261009=true;
   }
+  /* Biblioteca (09/10/2026): hip thrust de pie, core bag, fitball, sogas, cajones, balón medicinal,
+     las máquinas de Tami (fondos, asistida, gemelos) y cardio. Cada uno con su video. */
+  if(!DB._seed.libMore3_20261009){
+    if(!DB.exLib) DB.exLib=[];
+    const have=DB.exLib.map(function(it){ return (it.n||'').trim().toLowerCase(); });
+    const VID3={"Hip thrust de pie con banda": "xXr2Jpk6K50", "Pull through en polea": "i04NloqHYBE", "Sentadilla con core bag (abrazada al pecho)": "Jpj51FykjjA", "Estocada con core bag al hombro": "C_j8d6cofh8", "Peso muerto con core bag": "s244BYB5SzY", "Remo inclinado con core bag": "hnt1DO1q4fs", "Cargada de core bag al hombro": "9HgqdcrWH6s", "Giro ruso con core bag": "desrQRtMcQY", "Plancha con antebrazos en fitball": "_j0lKJ3EsG4", "Rodillas al pecho en fitball": "-8jnbTDBs2Q", "Puente de glúteo con pies en fitball": "UvCP97d5-l8", "Press de pecho con mancuernas en fitball": "upJyIg6ip3k", "Hiperextensión en fitball": "PpRxID2LmqM", "Pase de fitball de manos a pies": "-70Mv20jx7o", "Battle ropes: ondas alternas": "6sYR9OcvU24", "Battle ropes: golpes dobles": "3PE6FKlT54Q", "Saltar la soga": "AnQwqHgZdoQ", "Salto al cajón": "c-Yonc6lzUs", "Flexiones con pies en el cajón": "_tQlk2vqko0", "Fondos de tríceps en cajón": "V1K9BFx9OeM", "Lanzamiento de balón medicinal al piso (slam)": "EsAhU1jHpiQ", "Wall ball (sentadilla y lanzamiento a la pared)": "PDraAEVsgXs", "Pase de pecho con balón medicinal contra la pared": "R7JHUIIS-s4", "Giro ruso con balón medicinal": "NSCbldIsXeI", "Lanzamiento lateral de balón medicinal contra la pared": "o9BC7lgN1bo", "Fondos en máquina (tríceps y pecho)": "R2n9TW9yHBo", "Dominadas asistidas en máquina": "lgE47t3dr2Q", "Fondos asistidos en máquina": "8V25cDaBtJk", "Gemelos de pie en máquina": "RLX8HFAOIhg", "Sentadilla en máquina con cinturón (belt squat)": "_W4ILzFkbg4", "Cinta: caminata en pendiente": "Ii71nAaRc_8", "Elíptico: intervalos": "JgS5RLAHoBw"};
+    const L4=(n,groups,alt,tip)=>({ id:slug(n)+'-lib3', n, groups, alt:alt||'', tip:tip||'', vid:VID3[n]?('https://www.youtube.com/watch?v='+VID3[n]):YT(n) });
+    const more=[
+      L4('Hip thrust de pie con banda',["Glúteos"],'Hip thrust con banda','Banda atrás de la cadera, empujá la cadera adelante apretando glúteos y volvé lento con la espalda neutra.'),
+      L4('Pull through en polea',["Glúteos", "Piernas"],'Hip thrust de pie con banda','De espaldas a la polea baja, cuerda entre las piernas: llevá la cadera atrás y extendé apretando glúteos.'),
+      L4('Sentadilla con core bag (abrazada al pecho)',["Piernas", "Glúteos", "Core"],'Sentadilla goblet','Abrazá el core bag pegado al pecho, torso firme, bajá hasta 90° y subí empujando con todo el pie.'),
+      L4('Estocada con core bag al hombro',["Piernas", "Glúteos"],'Estocada caminando con mancuernas','Core bag apoyado en un hombro, paso largo y bajá la rodilla de atrás sin tocar el piso.'),
+      L4('Peso muerto con core bag',["Piernas", "Glúteos", "Espalda"],'Peso muerto rumano con mancuernas','Agarrá las manijas, espalda neutra, llevá la cadera atrás y subí apretando glúteos.'),
+      L4('Remo inclinado con core bag',["Espalda"],'Remo con barra','Torso inclinado y espalda recta, llevá el core bag hacia el ombligo apretando las escápulas.'),
+      L4('Cargada de core bag al hombro',["Piernas", "Espalda", "Hombros"],'Peso muerto con core bag','Del piso al hombro en un solo movimiento: empujá con las piernas y la cadera, no tires con la espalda.'),
+      L4('Giro ruso con core bag',["Core"],'Giro ruso','Sentada con el torso inclinado, girá llevando el core bag de un lado al otro sin redondear la espalda.'),
+      L4('Plancha con antebrazos en fitball',["Core"],'Plancha abdominal','Antebrazos sobre la pelota, cuerpo en línea recta y abdomen firme; que la pelota no se mueva.'),
+      L4('Rodillas al pecho en fitball',["Core"],'Mountain climbers','Pies sobre la pelota en posición de plancha, traé las rodillas al pecho y volvé sin hundir la cadera.'),
+      L4('Puente de glúteo con pies en fitball',["Glúteos", "Core"],'Hip thrust','Boca arriba con los talones en la pelota, subí la cadera apretando glúteos y bajá lento.'),
+      L4('Press de pecho con mancuernas en fitball',["Pecho", "Core"],'Press plano con mancuernas','Espalda alta apoyada en la pelota y cadera arriba, empujá las mancuernas sin perder el puente.'),
+      L4('Hiperextensión en fitball',["Espalda", "Core"],'Hiperextensión en banco romano','Panza sobre la pelota y pies firmes, subí el torso hasta quedar en línea y bajá controlando.'),
+      L4('Pase de fitball de manos a pies',["Core"],'Abdominales en V (V-ups)','Boca arriba, pasá la pelota de las manos a los pies subiendo brazos y piernas a la vez, sin despegar la zona lumbar.'),
+      L4('Battle ropes: ondas alternas',["Cardio", "Hombros"],'Saltar la soga','Rodillas semiflexionadas y abdomen firme, mové los brazos alternados haciendo ondas parejas.'),
+      L4('Battle ropes: golpes dobles',["Cardio", "Hombros"],'Lanzamiento de balón medicinal al piso (slam)','Subí las dos sogas juntas y golpeá fuerte el piso usando todo el cuerpo.'),
+      L4('Saltar la soga',["Cardio"],'Battle ropes: ondas alternas','Saltos cortos en la punta de los pies, codos pegados y giro de muñecas.'),
+      L4('Salto al cajón',["Piernas", "Cardio"],'Step up al cajón con mancuernas','Saltá con las dos piernas y caé suave sobre el cajón, rodillas alineadas. Bajá caminando.'),
+      L4('Flexiones con pies en el cajón',["Pecho", "Brazos"],'Flexiones','Pies arriba del cajón y manos en el piso, cuerpo en línea recta, bajá el pecho controlando.'),
+      L4('Fondos de tríceps en cajón',["Brazos"],'Press de tríceps en polea','Manos en el borde del cajón, bajá doblando los codos hacia atrás y subí empujando.'),
+      L4('Lanzamiento de balón medicinal al piso (slam)',["Cardio", "Core"],'Battle ropes: golpes dobles','Subí el balón por arriba de la cabeza y tiralo con fuerza al piso usando el abdomen.'),
+      L4('Wall ball (sentadilla y lanzamiento a la pared)',["Piernas", "Hombros", "Cardio"],'Sentadilla con balón medicinal','Bajá en sentadilla con el balón al pecho y al subir lanzalo a la pared; recibilo y seguí.'),
+      L4('Pase de pecho con balón medicinal contra la pared',["Pecho", "Brazos"],'Flexiones','Frente a la pared, empujá el balón desde el pecho con fuerza y recibilo con los brazos firmes.'),
+      L4('Giro ruso con balón medicinal',["Core"],'Giro ruso','Sentada con el torso inclinado, girá llevando el balón de un lado al otro, sin redondear la espalda.'),
+      L4('Lanzamiento lateral de balón medicinal contra la pared',["Core"],'Giro ruso con balón medicinal','De costado a la pared, girá desde la cadera y lanzá el balón; recibilo y repetí.'),
+      L4('Fondos en máquina (tríceps y pecho)',["Brazos", "Pecho"],'Fondos de tríceps en cajón','Espalda apoyada y codos atrás, empujá hasta casi extender y volvé lento. Torso inclinado = más pecho.'),
+      L4('Dominadas asistidas en máquina',["Espalda", "Brazos"],'Dorsalera amplia','Rodillas en la plataforma, tirá llevando el pecho hacia la barra y bajá controlando. Más peso = más ayuda.'),
+      L4('Fondos asistidos en máquina',["Brazos", "Pecho"],'Fondos en máquina (tríceps y pecho)','Rodillas en la plataforma, bajá hasta 90° de codo y subí empujando. Más peso = más ayuda.'),
+      L4('Gemelos de pie en máquina',["Piernas"],'Gemelos sentada','Hombros bajo las almohadillas, bajá el talón todo lo que puedas y subí en puntas apretando arriba.'),
+      L4('Sentadilla en máquina de gemelos',["Piernas", "Glúteos"],'Sentadilla en Smith','Hombros bajo las almohadillas y pies apoyados planos adelante: bajá en sentadilla con la espalda recta.'),
+      L4('Sentadilla en máquina con cinturón (belt squat)',["Piernas", "Glúteos"],'Sentadilla hack','Cinturón en la cadera y apoyo lumbar, bajá con el torso derecho sin cargar hombros ni columna.'),
+      L4('Cinta: caminata en pendiente',["Cardio"],'Elíptico: intervalos','Pendiente 8-12%, ritmo de caminata rápida sin agarrarte de las barandas. Ideal para quemar sin impacto.'),
+      L4('Elíptico: intervalos',["Cardio"],'Cinta: caminata en pendiente','Alterná 1 minuto rápido con resistencia alta y 1-2 minutos suave. Postura derecha, empujá también con los brazos.'),
+    ].filter(function(it){ const k=it.n.trim().toLowerCase(); if(have.indexOf(k)>=0) return false; have.push(k); return true; });
+    DB.exLib=DB.exLib.concat(more);
+    DB._seed.libMore3_20261009=true;
+  }
   if(!DB._seed.abBlockAllDays20261006){
     DB.order.forEach(function(sid){
       const st=DB.students[sid];
