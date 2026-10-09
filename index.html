@@ -447,6 +447,9 @@
 
   /* Pagos */
   .pago-block{border-radius:12px;padding:14px 16px;margin-bottom:14px}
+  .my-link{display:flex;align-items:center;gap:10px;background:var(--tint2);border:1px solid var(--accent);border-radius:12px;padding:10px 12px;margin:6px 0 10px}
+  .my-link div{flex:1;min-width:0}.my-link b{display:block;font-size:13px}.my-link span{display:block;font-size:11.5px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .my-link .lnk{font-family:inherit;font-weight:800;border:none;border-radius:10px;padding:8px 12px;background:var(--accentDk);color:#fff;cursor:pointer}
   .cobro-block{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:12px}
   .cobro-block.paid{background:var(--tint2);border-color:var(--accent)}
   .cobro-block.muted summary{list-style:none;cursor:pointer}
@@ -4207,7 +4210,7 @@ function runSeeds(){
       'sofia-catalan':{precio:25000,horas:1,dias:MA,aumento:null}, 'marcela-balter':{precio:25000,horas:1,dias:MA,aumento:A('2027-01')},
       'grupo-5':{precio:15000,horas:1,dias:LM,aumento:A('2026-11')}, 'cecilia':{precio:20000,horas:1,dias:LM,aumento:A('2027-01')},
       'sol':{precio:20000,horas:1,dias:LM,aumento:A('2027-01')}, 'claudia':{precio:20000,horas:1,dias:LM,aumento:A('2027-01')},
-      'omar':{fijo:300000,junto:'martin',dias:LM,aumento:A('2026-12')}, 'martin':{parteDe:'omar'},
+      'omar':{fijo:300000,junto:'martin',dias:LM,aumento:null,fijoDesde:[{desde:'2026-12',monto:350000}]}, 'martin':{parteDe:'omar'},
       'joni-puebla':V(60000), 'fede-del-sol':V(50000), 'lola-anto':V(60000), 'astrid':V(60000), 'sofi-marti':V(60000) };
     Object.keys(T).forEach(function(id){ const st=DB.students[id]; if(st&&!st.cobro) st.cobro=T[id]; });
     const sc=DB.students['sofia-catalan']; if(sc&&!sc.cobroExento) sc.cobroExento=['2026-10','2026-11'];
@@ -6536,6 +6539,9 @@ async function clearRoutineForFormsOnly(){
 }
 /* Genera el link directo de un alumno (con lock=1) y lo comparte o copia,
    para no tener que pedirlo/buscarlo por WhatsApp. */
+/* 09/10/2026: el link propio de Tami (sin alumno), a mano en Editar → Alumnos */
+async function copyMyLink(){ const url=location.origin+location.pathname.replace(/index\.html$/,'');
+  try{ await navigator.clipboard.writeText(url); toast('Tu link quedó copiado ✓','ok'); }catch(e){ uiPrompt('Tu link de TaFit:', url); } }
 async function copyStudentLink(id){
   const st=DB.students[id]; if(!st) return;
   const url=location.origin+location.pathname+'?a='+encodeURIComponent(id)+'&lock=1';
@@ -6718,6 +6724,7 @@ function renderEdit(){
       return `<div class="stu-row"><span class="sn">${esc(s.name)}</span><span class="tg">${s.theme==='f'?'🌸':'🔵'}${duo?' 👯':''}${s.health&&s.health.enabled?' ⚕':''}</span>${btns}</div>`;
     };
     SEC('alumnos','Alumnos',`<p>Cada alumno/dúo tiene su propia rutina, progresión, registro y fotos.</p>`+
+      `<div class="my-link"><div><b>🔗 Tu link de la app (profe)</b><span>${esc(location.origin+location.pathname.replace(/index\.html$/,''))}</span></div><button class="lnk" data-act="copyMyLink" title="Copiar/compartir tu link">Copiar</button></div>`+
       activeIds.map(id=>rowHtml(id,false)).join('')+
       `<div class="edit-actions mt8"><button data-act="addStudent">+ Agregar alumno / dúo</button></div>`+
       (archivedIds.length?`<details class="tacc mt8" style="border-top:1px solid var(--line);padding-top:8px"><summary><h2 style="font-size:13px">📦 Archivados (${archivedIds.length})</h2><span class="tchev">▾</span></summary><div class="tacc-body"><p style="font-size:11.5px;color:var(--mute)">Ya no entrenan por ahora, pero sus rutinas y datos quedan a salvo — "Reactivar" los vuelve a la lista de arriba tal cual estaban.</p>${archivedIds.map(id=>rowHtml(id,true)).join('')}</div></details>`:''));
@@ -7380,6 +7387,9 @@ function cobroPayers(ym){
     const exento=(st.cobroExento||[]).indexOf(ym)>=0;
     const paidOf=function(mi){ return ((st.cobros||{})[ym]||{})[mi]||null; };
     if(c.tipo==='virtual'){ out.push(virtPayer(id,st,c,ym,exento)); return; }
+    if(+c.fijo&&Array.isArray(c.fijoDesde)&&c.fijoDesde.length){ /* monto fijo nuevo a partir de un mes (ej: Omar + Martín $350.000 desde diciembre) */
+      const junto=c.junto&&DB.students[c.junto]?DB.students[c.junto].name:''; let f=+c.fijo; c.fijoDesde.slice().sort(function(a,b){ return a.desde<b.desde?-1:1; }).forEach(function(x){ if(ym>=x.desde) f=+x.monto; });
+      out.push({ id, mi:0, name:st.name+(junto?' + '+junto:''), monto:exento?0:f, detalle:'Monto fijo del mes'+(junto?' (los dos)':''), exento, paid:paidOf(0) }); return; }
     if(+c.fijo){ const junto=c.junto&&DB.students[c.junto]?DB.students[c.junto].name:''; const cl=(c.dias&&c.dias.length)?clasesMes(c,ym).n:0;
       /* el aumento es "por hora": sobre un monto fijo se suma por cada clase del mes */
       const sube=(c.aumento&&c.aumento.desde&&ym>=c.aumento.desde)?(conAumento(0,c,ym)*(cl||1)):0;
@@ -7709,6 +7719,7 @@ document.addEventListener('click',e=>{
     case 'planToday': planToday(); break;
     case 'saveTelefono': saveTelefono(); break;
     case 'waReminder': waReminder(el.dataset.id); break;
+    case 'copyMyLink': copyMyLink(); break;
     case 'cobroPrev': cobroMes=ymAdd(cobroMes||ymNow(),-1); cobroEditId=null; renderPagos(); break;
     case 'cobroNext': cobroMes=ymAdd(cobroMes||ymNow(),1); cobroEditId=null; renderPagos(); break;
     case 'cobroPagado': cobroPago(id,mi,'full'); break;
