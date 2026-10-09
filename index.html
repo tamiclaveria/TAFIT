@@ -458,6 +458,24 @@
   .pb-n{font-size:11.5px;color:var(--mute);margin-top:14px;line-height:1.5}
   .pb-others{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}.pb-sw{font-family:inherit;font-weight:700;border:1.5px solid var(--accent);background:#fff;color:var(--accentDk);border-radius:12px;padding:11px;cursor:pointer}
   .cobro-lock{font-size:10.5px;font-weight:800;color:#fff;background:var(--warn);border-radius:6px;padding:1px 6px;vertical-align:2px}
+  .lib-acc{border:1px solid var(--line);border-radius:12px;margin:8px 0;background:var(--card);overflow:hidden}
+  .lib-acc>summary{list-style:none;display:flex;align-items:center;gap:8px;padding:11px 12px;cursor:pointer;background:var(--tint2);font-weight:800;font-size:13.5px}
+  .lib-acc>summary::-webkit-details-marker{display:none}
+  .lib-acc>summary span{flex:1}.lib-acc>summary b{font-size:11px;background:var(--accentDk);color:#fff;border-radius:10px;padding:2px 8px}
+  .lib-acc>summary i{font-style:normal;color:var(--accentDk);transition:transform .2s}.lib-acc[open]>summary i{transform:rotate(180deg)}
+  .lib-acc>.lib-row,.lib-acc>.lib-edit-row{margin:0 10px}
+  .lib-acc.sub{margin:6px 8px;border-radius:10px}.lib-acc.sub>summary{background:#fff;font-size:12.5px;padding:9px 10px}
+  .cv{background:var(--tint2);border:1.5px solid var(--accent);border-radius:14px;padding:12px;margin-top:8px}
+  .cv-top{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:13px;color:var(--accentDk);margin-bottom:6px}
+  .cv-top b{background:var(--accentDk);color:#fff;border-radius:8px;padding:2px 8px;font-size:11px}
+  .cv-steps{margin:4px 0 10px;padding-left:20px;font-size:13px;line-height:1.5}.cv-steps li{margin:4px 0}
+  .cv-timer{display:block;width:100%;font-family:inherit;font-weight:800;font-size:14px;border:none;border-radius:12px;padding:12px;background:var(--accentDk);color:#fff;cursor:pointer}
+  .cv-res{background:#fff;border-radius:12px;padding:10px;margin-top:10px}.cv-lbl{font-size:11px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+  .cv-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.cv-grid label{font-size:11px;color:var(--mute);font-weight:700;display:flex;flex-direction:column;gap:4px}
+  .cv-grid input{font-family:inherit;font-size:16px;padding:9px;border:1px solid var(--line);border-radius:8px;width:100%;box-sizing:border-box}
+  .cv-done{display:block;width:100%;margin-top:8px;font-family:inherit;font-weight:800;border:1.5px solid var(--accent);background:#fff;color:var(--accentDk);border-radius:10px;padding:9px;cursor:pointer}
+  .cv-done.on{background:var(--accentDk);color:#fff;border-color:var(--accentDk)}
+  .cv-hist{font-size:12.5px;margin-top:10px}.cv-up{background:var(--accentDk);color:#fff;border-radius:6px;padding:1px 6px;font-weight:800;font-size:11px}
   .cobro-block{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:12px}
   .cobro-block.paid{background:var(--tint2);border-color:var(--accent)}
   .cobro-block.muted summary{list-style:none;cursor:pointer}
@@ -2473,7 +2491,17 @@ let DB={ order:[], students:{}, settings:{pin:""}, _seed:{}, exLib:[], templates
 /* Grupos musculares para clasificar la biblioteca de ejercicios. Un ejercicio puede tener uno o más
    (ej: estocada con bíceps → Piernas + Brazos). "groups" es el campo nuevo (array); "group" (string)
    se mantiene por compatibilidad con ejercicios cargados antes de este cambio. */
-const EXLIB_GROUPS=['Pecho','Espalda','Piernas','Glúteos','Hombros','Brazos','Core','Cardio','Otro'];
+const EXLIB_GROUPS=['Pecho','Espalda','Piernas','Glúteos','Hombros','Brazos','Core','Cardio','HIIT','Otro'];
+/* 09/10/2026: en la Biblioteca, Core se abre por tipo (como el selector de core del alumno) */
+const CORE_SUBS=['Abdominales superiores','Abdominales inferiores','Oblicuos','Planchas','Espinales','Core con otros grupos'];
+function coreSubOf(it){ if(it.coreSub&&CORE_SUBS.indexOf(it.coreSub)>=0) return it.coreSub;
+  const n=(it.n||'').toLowerCase();
+  if((groupsOf(it)[0]||'')!=='Core') return 'Core con otros grupos';
+  if(/plancha/.test(n)) return 'Planchas';
+  if(/espinal|superman|hiperext|bird dog|cuadrupedia|lumbar|nado|swimmer|buenos d/.test(n)) return 'Espinales';
+  if(/obl|giro|leñador|lenador|pallof|lateral|bicicleta|limpiaparabrisas|rotaci|windshield|cruzad/.test(n)) return 'Oblicuos';
+  if(/pierna|inferior|tijera|rodilla|colgad|invers|hollow|hueca|elevaci|pies|dead bug|bicho|flutter|patad|navaja|barquito|v-ups|en v|mountain/.test(n)) return 'Abdominales inferiores';
+  return 'Abdominales superiores'; }
 function groupsOf(it){ if(it.groups&&it.groups.length) return it.groups; return it.group?[it.group]:['Otro']; }
 /* Foto de "lo último que este dispositivo sabe que está sincronizado con la nube" —
    se usa en saveDB() para saber, alumno por alumno, si ESTE dispositivo lo tocó de
@@ -4302,6 +4330,12 @@ function runSeeds(){
     DB.exLib=DB.exLib.concat(more);
     DB._seed.libMore3_20261009=true;
   }
+  /* Grupo HIIT en la biblioteca (09/10/2026): ejercicios explosivos / por intervalos */
+  if(!DB._seed.libHiit20261009){
+    const H=/burpee|jumping|mountain|battle|soga|salto|slam|wall ball|swing|sprint|intervalos|skipping|programa cardio/i;
+    (DB.exLib||[]).forEach(function(it){ if(!H.test(it.n||'')) return; const g=groupsOf(it).slice(); if(g.indexOf('HIIT')<0){ g.push('HIIT'); it.groups=g; delete it.group; } });
+    DB._seed.libHiit20261009=true;
+  }
   if(!DB._seed.abBlockAllDays20261006){
     DB.order.forEach(function(sid){
       const st=DB.students[sid];
@@ -4741,6 +4775,48 @@ function setsTable(ex,ei,mi,objetivo){
   }
   return `<table class="sets"><tr><th class="s">Serie</th><th>${isDrop?'Pesos Drop':'Peso (kg)'}</th><th>Reps</th><th>✓</th></tr>${sets}</table>`;
 }
+/* ==== Cardio guiado (09/10/2026) ====
+   Los ejercicios de cardio de la biblioteca traen el paso a paso de la máquina del gimnasio
+   (cinta curva, cinta y elíptico Bodytone) y su temporizador. Se reconocen por el NOMBRE, así
+   que funcionan en cualquier rutina sin tocar nada más. Series = vueltas del intervalo (se
+   pueden variar por semana como cualquier ejercicio); en los continuos, las reps = minutos.
+   Al terminar, la alumna anota lo que marca la pantalla y queda en la Transcripta e Informe. */
+const CARDIO_PRESETS={
+  'cinta curva: sprints por intervalos':{maq:'Cinta curva',work:20,rest:40,mide:['km','kcal'],pasos:['Subite agarrada de la baranda y caminá suave 2 minutos para entrar en calor.','En la pantalla tocá INTERVAL, poné {work}″ de trabajo y {rest}″ de descanso, y START.','Trabajo: corré a fondo pisando ARRIBA de la curva. Descanso: caminá atrás, en la parte de abajo.','Hacé {rondas} vueltas. Usá el temporizador de abajo si querés que la app te avise.','Al terminar, anotá la distancia y las calorías que marca la pantalla.']},
+  'cinta curva: trote continuo':{maq:'Cinta curva',min:true,mide:['km','kcal'],pasos:['Tocá TARGET TIME, poné {min} minutos y START.','Troté pisando en el medio de la curva: más adelante = más rápido, más atrás = más lento.','Mantené un ritmo en el que puedas hablar.','Al terminar, anotá la distancia y las calorías.']},
+  'cinta: intervalos caminata y trote':{maq:'Cinta',work:60,rest:120,mide:['km','kcal'],pasos:['QUICK START y caminá 3 minutos a 5 km/h para entrar en calor.','Trote: tocá el 10 de SPEED (o +) y troté {work}″.','Caminata: tocá el 6 de SPEED y caminá {rest}″.','Hacé {rondas} vueltas con el temporizador de abajo y terminá con COOL DOWN.','Anotá la distancia y las calorías.']},
+  'cinta / caminadora (intervalos)':{maq:'Cinta',work:60,rest:120,mide:['km','kcal'],pasos:['QUICK START y caminá 3 minutos para entrar en calor.','Alterná {work}″ trotando (SPEED 9-10) y {rest}″ caminando (SPEED 5-6).','Hacé {rondas} vueltas y terminá con COOL DOWN.','Anotá la distancia y las calorías.']},
+  'cinta: caminata en pendiente':{maq:'Cinta',min:true,mide:['km','kcal'],pasos:['QUICK START y subí la velocidad a 5-5,5 km/h.','Tocá el 10 de INCLINE (o el 8 si recién empezás).','Caminá {min} minutos sin agarrarte de las barandas, pasos largos y empujando con el talón.','Bajá la pendiente a 0 y COOL DOWN. Anotá la distancia y las calorías.']},
+  'cinta: pirámide de pendiente':{maq:'Cinta',min:true,mide:['km','kcal'],pasos:['QUICK START a 5 km/h.','Cada minuto subí la pendiente: 2 → 4 → 6 → 8 → 10 → 12, y después bajá igual.','Total {min} minutos, sin agarrarte.','COOL DOWN y anotá la distancia y las calorías.']},
+  'elíptico: intervalos':{maq:'Elíptico',work:60,rest:90,mide:['km','kcal'],pasos:['Tocá MANUAL, poné el tiempo y ENTER.','Trabajo {work}″: subí la resistencia con + (8-10) y pedaleá rápido.','Suave {rest}″: bajá la resistencia con – (3-4).','{rondas} vueltas con el temporizador de abajo.','Anotá la distancia y las calorías.']},
+  'elíptico: programa fatburn':{maq:'Elíptico',min:true,mide:['km','kcal'],pasos:['Tocá FATBURN, poné {min} minutos y ENTER.','La máquina cambia la resistencia sola: mantené un ritmo parejo (60-70 RPM).','Postura derecha, empujá también con los brazos.','Al terminar, anotá la distancia y las calorías.']},
+  'elíptico: programa cardio (subidas)':{maq:'Elíptico',min:true,mide:['km','kcal'],pasos:['Tocá CARDIO, poné {min} minutos y ENTER.','Vas a sentir subidas y bajadas: en las subidas no dejes caer las RPM.','Al terminar, anotá la distancia y las calorías.']},
+  'elíptico hacia atrás':{maq:'Elíptico',work:120,rest:60,mide:['km','kcal'],pasos:['MANUAL, resistencia 5-6 y ENTER.','{work}″ pedaleando HACIA ATRÁS, cadera atrás y empujando con los talones.','{rest}″ hacia adelante, suave.','{rondas} vueltas. Anotá la distancia y las calorías.']},
+  'bicicleta fija':{maq:'Bicicleta',min:true,mide:['km','kcal'],pasos:['Ajustá el asiento a la altura de la cadera.','Pedaleá {min} minutos a ritmo moderado.','Anotá la distancia y las calorías.']}
+};
+const CARDIO_MIDE={km:'Distancia (km)',kcal:'Calorías',min:'Minutos'};
+function cardioOf(ex){ if(!ex||!ex.n) return null; return CARDIO_PRESETS[String(ex.n).trim().toLowerCase()]||null; }
+function cardioKey(ei,mi){ return 'cv|'+day+'|'+ei+'|m'+(mi||0); }
+function cardioVal(ei,mi){ const v=CACHE[cardioKey(ei,mi)]; return (v&&wOf(v)===+week)?v:{}; }
+function cardioRounds(ex){ return Math.max(1,+ex.s||8); }
+function cardioMins(ex){ const n=firstNum(ex.r); return (n&&n>=3&&n<=120)?Math.round(n):15; }
+function cardioHist(n,memberName){ const out=[]; LOGS.slice().reverse().forEach(function(l){ (l.ex||[]).forEach(function(x){ if(inf2Norm(x.n)!==inf2Norm(n)) return; let c=x.cardio; if(x.members){ const me=x.members.find(function(mm){ return mm.name===memberName; }); c=me&&me.cardio; } if(c&&(c.km||c.kcal)) out.push({d:l.date,km:c.km,kcal:c.kcal,min:c.min}); }); }); out.sort(function(a,b){ return new Date(a.d)-new Date(b.d); }); return out; }
+function cardioCardHTML(ex,ei,mi){
+  const P=cardioOf(ex); const v=cardioVal(ei,mi); const rondas=cardioRounds(ex), mins=cardioMins(ex);
+  const fill=function(t){ return t.replace(/\{work\}/g,P.work).replace(/\{rest\}/g,P.rest).replace(/\{rondas\}/g,rondas).replace(/\{min\}/g,mins); };
+  const memName=membersOf()[mi]||'';
+  const hist=cardioHist(ex.n,isDuo()?memName:null).slice(-5);
+  let h=`<div class="cv"><div class="cv-top"><span>🫀 Cardio guiado</span><b>${esc(P.maq)}</b></div><ol class="cv-steps">${P.pasos.map(function(p){ return '<li>'+esc(fill(p))+'</li>'; }).join('')}</ol>`;
+  if(P.work) h+=`<button type="button" class="cv-timer" data-act="openBlockTimer" data-title="${esc(ex.n)}" data-work="${P.work}" data-rest="${P.rest}" data-rounds="${rondas}" data-format="tabata">⏱ Temporizador · ${rondas} × ${P.work}″ / ${P.rest}″</button>`;
+  else h+=`<button type="button" class="cv-timer" data-act="openBlockTimer" data-title="${esc(ex.n)}" data-work="${mins*60}" data-rest="0" data-rounds="1" data-format="amrap">⏱ Temporizador · ${mins} minutos</button>`;
+  h+=`<div class="cv-res"><div class="cv-lbl">Lo que marcó la máquina hoy</div><div class="cv-grid">${P.mide.map(function(f){ return `<label>${esc(CARDIO_MIDE[f])}<input inputmode="decimal" value="${esc(v[f]||'')}" data-chg="cardio" data-i="${ei}" data-m="${mi}" data-f="${f}" placeholder="${f==='km'?'2,3':f==='kcal'?'180':mins}"></label>`; }).join('')}</div>
+    <button type="button" class="cv-done${v.done?' on':''}" data-act="cardioDone" data-i="${ei}" data-m="${mi}">${v.done?'✓ Hecho':'Marcar como hecho'}</button></div>`;
+  if(hist.length){ const last=hist[hist.length-1], first=hist[0]; const k=function(x){ return x?String(x).replace('.',','):'—'; };
+    h+=`<div class="cv-hist"><b>📈 Tu progreso:</b> ${hist.map(function(x){ return k(x.km)+' km'; }).join(' → ')}${(hist.length>1&&inf2Num(first.km)&&inf2Num(last.km))?` <span class="cv-up">${inf2Num(last.km)>=inf2Num(first.km)?'+':''}${Math.round((inf2Num(last.km)-inf2Num(first.km))/inf2Num(first.km)*100)}%</span>`:''}</div>`; }
+  return h+'</div>';
+}
+function updCardio(ei,mi,f,val){ const k=cardioKey(ei,mi); const cur=CACHE[k]; const v=(cur&&wOf(cur)===+week)?Object.assign({},cur):{_w:+week}; v[f]=String(val||'').trim(); v._w=+week; CACHE[k]=v; queueSave(); progress(); }
+function toggleCardioDone(ei,mi){ const k=cardioKey(ei,mi); const cur=CACHE[k]; const v=(cur&&wOf(cur)===+week)?Object.assign({},cur):{_w:+week}; v.done=!v.done; v._w=+week; CACHE[k]=v; queueSave(); renderApp(); }
 function renderApp(){
   const r=routine(), W=weeks(), members=membersOf(); const m=$('main'); m.innerHTML='';
   /* Verificar si alumno está pausado a mano, o si se le venció el plan (30 días desde el
@@ -4854,7 +4930,8 @@ function renderApp(){
     const obj=objFor(ex,selMi);
     const maxW=getMaxWeight(ex.n);
     const maxBadge=maxW?` · <span class="max-w">🏆 ${fmt(maxW)}</span>`:'';
-    const hdrMeta=`${ex.s}×${esc(ex.r)}${(obj&&obj!=='A definir')?' · '+esc(obj):''}${maxBadge}${setsTotal?(' · '+setsDone+'/'+setsTotal+' ✓'):''}`;
+    if(cardioOf(ex)){ const cp_=cardioOf(ex), cv_=cardioVal(ei,selMi); setsTotal=1; setsDone=cv_.done?1:0; progDots=`<i${cv_.done?' class="done"':''}></i>`; }
+    const hdrMeta=cardioOf(ex)?(`🫀 ${esc(cardioOf(ex).maq)} · `+(cardioOf(ex).work?`${cardioRounds(ex)} × ${cardioOf(ex).work}″/${cardioOf(ex).rest}″`:`${cardioMins(ex)} min`)+(setsDone?' · ✓':'')):`${ex.s}×${esc(ex.r)}${(obj&&obj!=='A definir')?' · '+esc(obj):''}${maxBadge}${setsTotal?(' · '+setsDone+'/'+setsTotal+' ✓'):''}`;
     const wCmp=weightCmpHTML(ex.n,member);
     /* 07/10/2026: Tami pidió sacar las miniaturas (tanto el frame real de YouTube como el
        ícono genérico de grupo muscular) de la lista de ejercicios — no las quiere por ahora. */
@@ -4864,12 +4941,12 @@ function renderApp(){
     if(trainer){
       html+=`<div class="quick-edit"><div class="qe-title">✏ Edición rápida</div><div class="form-grid"><div class="form-field full"><div class="form-lbl">Ejercicio</div><input class="form-inp" value="${esc(ex.n)}" data-chg="qedit" data-ei="${ei}" data-f="n"></div><div class="form-field"><div class="form-lbl">Series</div><input class="form-inp" value="${esc(ex.s)}" data-chg="qedit" data-ei="${ei}" data-f="s"></div><div class="form-field"><div class="form-lbl">Reps</div><input class="form-inp" value="${esc(ex.r)}" data-chg="qedit" data-ei="${ei}" data-f="r"></div><div class="form-field"><div class="form-lbl">Peso obj.</div><input class="form-inp" value="${esc(ex.w)}" data-chg="qedit" data-ei="${ei}" data-f="w"></div><div class="form-field"><div class="form-lbl">Descanso</div><input class="form-inp" value="${esc(ex.rest)}" data-chg="qedit" data-ei="${ei}" data-f="rest"></div><div class="form-field full"><div class="form-lbl">Observación / Técnica</div><textarea class="form-inp" data-chg="qedit" data-ei="${ei}" data-f="tip" placeholder="Ej: rodillas semi rígidas, no bloquear codos...">${esc(ex.tip||'')}</textarea></div></div></div>`;
     }
-    html+=`<div class="meta">${ex.s} series · objetivo ${esc(ex.r)} reps${(obj&&obj!=='A definir')?' · '+esc(obj):''}</div>`;
+    if(!cardioOf(ex)) html+=`<div class="meta">${ex.s} series · objetivo ${esc(ex.r)} reps${(obj&&obj!=='A definir')?' · '+esc(obj):''}</div>`;
     if(ex.alt) html+=`<div class="alt"><b>Alternativo:</b> <span class="alt-tap" data-act="playVideo" data-url="${esc(ex.altVid||YT(ex.alt))}" data-name="${esc(ex.alt)}">🎬 ${esc(ex.alt)}</span></div>`;
     html+=tipAccordionHTML(tipFor(ex),!(ex.tip&&ex.tip.trim()));
     const restChip = `<span class="rest" data-act="rest" data-sec="${restSec(ex.rest)||60}">⏱ Descanso ${ex.rest?esc(ex.rest):'60 s'}</span>`;
-    html+=`<div class="chips">${restChip}<button type="button" class="vid" data-act="playVideo" data-url="${esc(ex.vid||YT(ex.n))}" data-name="${esc(ex.n)}">▶ Ver técnica</button>${waExLink(ex.n)}</div>`;
-    const last=lastFor(ex.n);
+    html+=`<div class="chips">${cardioOf(ex)?'':restChip}<button type="button" class="vid" data-act="playVideo" data-url="${esc(ex.vid||YT(ex.n))}" data-name="${esc(ex.n)}">▶ Ver técnica</button>${waExLink(ex.n)}</div>`;
+    const last=cardioOf(ex)?null:lastFor(ex.n);
     const lastHasWeight=!!(last&&last.sets&&last.sets.some(s=>s.w));
     if(last){
       /* 07/10/2026: botón para precargar los pesos de la última vez en las series de hoy —
@@ -4880,8 +4957,9 @@ function renderApp(){
       const fillBtn=(lastHasWeight&&!isDropSet(ex))?`<button type="button" class="lastw-fill" data-act="fillLastWeights" data-i="${ei}" data-m="${selMi}">↩ Usar estos pesos</button>`:'';
       html+=`<div class="lastw"><b>📈 Última vez (${fmtShort(last.date)}):</b> ${setsLine(last.sets)}${fillBtn}</div>`;
     }
-    html+=setsTable(ex,ei,selMi,obj);
-    html+=`<details class="rm" id="rm-${ei}-${selMi}">${rmHTML(ei,selMi)}</details>`;
+    if(cardioOf(ex)) html+=cardioCardHTML(ex,ei,selMi);
+    else { html+=setsTable(ex,ei,selMi,obj);
+    html+=`<details class="rm" id="rm-${ei}-${selMi}">${rmHTML(ei,selMi)}</details>`; }
     html+=`</div>`;
     c.innerHTML=html; m.appendChild(c);
   });
@@ -5834,8 +5912,11 @@ function computeInforme2(cycle,memberName){
   const coreSes=logs.filter(function(l){ return l.core&&l.core.done&&l.core.done.length; });
   const coreFmt={}, coreEx={};
   coreSes.forEach(function(l){ coreFmt[l.core.fmt]=(coreFmt[l.core.fmt]||0)+1; (l.core.done||[]).forEach(function(n){ coreEx[n]=(coreEx[n]||0)+1; }); });
+  /* cardio guiado (09/10/2026): distancia de cada sesión por ejercicio */
+  const cardio={};
+  logs.forEach(function(l){ (l.ex||[]).forEach(function(x){ let c=x.cardio; if(x.members){ const me=memberName&&x.members.find(function(mm){ return mm.name===memberName; }); c=me&&me.cardio; } const km=c&&inf2Num(c.km); if(km>0) (cardio[x.n]=cardio[x.n]||[]).push({d:l.date,w:km,kcal:inf2Num(c.kcal)||0}); }); });
   const obs=logs.map(function(l){ return (l.obs||'').trim(); }).filter(Boolean);
-  return { sessions:sessions, uniqueDays:uniqueDays, planned:planned, adher:adher, weekIdx:weekIdx, weekDays:weekDays, weeksArr:weeksArr,
+  return { cardio:cardio, sessions:sessions, uniqueDays:uniqueDays, planned:planned, adher:adher, weekIdx:weekIdx, weekDays:weekDays, weeksArr:weeksArr,
     routineDays:routineDays, prog:prog, ups:ups, downs:downs, avgUp:avgUp, weekVol:weekVol, groupVol:groupVol, totalVol:totalVol,
     coreSes:coreSes, coreFmt:coreFmt, coreEx:coreEx, obs:obs,
     first:sessions.length?sessions[0].date:null, last:sessions.length?sessions[sessions.length-1].date:null };
@@ -5940,6 +6021,7 @@ function informe2HTML(d,opts){
       ${review?`<div class="card avoid"><h3>Para revisar juntas</h3><p>Bajaron respecto del inicio (puede ser por un cambio de máquina o de técnica).${obsHint}</p><ul class="rv">${review}</ul></div>`:''}
     </div>
     ${coreH?`<div class="sec avoid">${coreH}</div>`:''}
+    ${(function(){ const ks=Object.keys(d.cardio||{}); if(!ks.length) return ''; return `<div class="sec avoid"><h2>Cardio <small>distancia de cada sesión</small></h2><div class="smalls">${ks.map(function(n){ const v=d.cardio[n], a=v[0].w, b=v[v.length-1].w; const fk=function(x){ return x.toFixed(2).replace('.',','); }; return `<div class="sm"><div class="sm-n">${esc(n)}</div><div class="sm-v">${fk(a)} → <b class="br">${fk(b)} km</b>${v.length>1&&a>0?' · '+(b>=a?'+':'')+Math.round((b-a)/a*100)+'%':''}</div>${v.length>1?inf2Spark(v):''}<div class="sm-d">${v.length} ${v.length===1?'sesión':'sesiones'}</div></div>`; }).join('')}</div></div>`; })()}
     ${cmpH}
     ${goals?`<div class="sec avoid"><h2>Próximo ciclo</h2><div class="card"><p>Objetivos sugeridos según cómo terminó el ciclo (un pasito más en sus ejercicios más fuertes):</p><ul class="goals">${goals}</ul></div></div>`:''}
     ${opts.pdf?'':foot}
@@ -6342,7 +6424,7 @@ function toggleSet(ei,si,mi,el){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CAC
      siguientes — cada serie se tilda SOLO cuando la toca el alumno, así se ve clarito cuál
      hizo y cuál le falta. (El peso y las reps sí se siguen copiando a las series vacías.) */
   progress(); queueSave(); }
-function progress(){ const r=routine(); let total=0,done=0; const mi=isDuo()?member:0; let exDone=0,realExCount=0; const _hid=abPresetIdx(r[day]); r[day].ex.forEach((ex,ei)=>{ if(isBlockRow(ex)||_hid.has(ei)) return; realExCount++; let allDone=true; for(let si=0;si<ex.s;si++){ total++; const _rp=(CACHE[K(ei,si,mi)]||{}); if(wOf(_rp)===+week&&_rp.done) done++; else allDone=false; } if(allDone&&ex.s>0) exDone++; }); const pct=total?Math.round(done/total*100):0; if($('prog')) $('prog').style.width=pct+'%'; if($('proglbl')) $('proglbl').textContent=`${done}/${total} series · ${exDone}/${realExCount} ejercicios · ${pct}%`; if($('progbar2')) $('progbar2').textContent=`Vas ${exDone} de ${realExCount} ejercicios · ${pct}% completado`; const b=$('closebtn'); if(b){ b.classList.toggle('ready',pct===100); b.textContent=pct===100?'✓ Sesión completa · guardar en transcripta':'Cerrar sesión y guardar en transcripta'; } }
+function progress(){ const r=routine(); let total=0,done=0; const mi=isDuo()?member:0; let exDone=0,realExCount=0; const _hid=abPresetIdx(r[day]); r[day].ex.forEach((ex,ei)=>{ if(isBlockRow(ex)||_hid.has(ei)) return; realExCount++; if(cardioOf(ex)){ total++; if(cardioVal(ei,mi).done){ done++; exDone++; } return; } let allDone=true; for(let si=0;si<ex.s;si++){ total++; const _rp=(CACHE[K(ei,si,mi)]||{}); if(wOf(_rp)===+week&&_rp.done) done++; else allDone=false; } if(allDone&&ex.s>0) exDone++; }); const pct=total?Math.round(done/total*100):0; if($('prog')) $('prog').style.width=pct+'%'; if($('proglbl')) $('proglbl').textContent=`${done}/${total} series · ${exDone}/${realExCount} ejercicios · ${pct}%`; if($('progbar2')) $('progbar2').textContent=`Vas ${exDone} de ${realExCount} ejercicios · ${pct}% completado`; const b=$('closebtn'); if(b){ b.classList.toggle('ready',pct===100); b.textContent=pct===100?'✓ Sesión completa · guardar en transcripta':'Cerrar sesión y guardar en transcripta'; } }
 
 function restSec(s){ if(!s) return 0; const str=String(s); if(str.includes(':')){ const p=str.split(':'); return (parseInt(p[0])||0)*60+(parseInt(p[1])||0); } const n=firstNum(str); return n?Math.round(n):0; }
 /* Vibración + beep (el contexto de audio se crea en el tap para que iPhone lo permita) */
@@ -6364,6 +6446,10 @@ async function closeSession(){
   r[day].ex.forEach((ex,ei)=>{
     if(isBlockRow(ex)) return;
     const mem=[];
+    if(cardioOf(ex)){ /* cardio guiado: lo que marcó la máquina */
+      members.forEach((mn,mi)=>{ const v=cardioVal(ei,mi); if(v.km||v.kcal||v.min||v.done) mem.push({name:mn,sets:[{s:1,w:'',r:'',rir:'',done:!!v.done}],cardio:{km:v.km||'',kcal:v.kcal||'',min:v.min||''}}); });
+      if(mem.length){ if(members.length>1) exs.push({n:ex.n,members:mem}); else exs.push({n:ex.n,sets:mem[0].sets,cardio:mem[0].cardio}); }
+      return; }
     members.forEach((mn,mi)=>{ const sets=[]; for(let si=0;si<ex.s;si++){ const v=CACHE[K(ei,si,mi)]||{}; if(v.w||v.r||v.rir||v.done) sets.push({s:si+1,w:v.w||'',r:v.r||'',rir:v.rir||'',done:!!v.done}); } if(sets.length) mem.push({name:mn,sets}); });
     if(mem.length){ if(members.length>1) exs.push({n:ex.n,members:mem}); else exs.push({n:ex.n,sets:mem[0].sets}); }
   });
@@ -6393,6 +6479,7 @@ async function closeSession(){
       }
     }
   });
+  Object.keys(CACHE).forEach(function(k){ if(k.indexOf('cv|'+day+'|')===0) delete CACHE[k]; });
   delete CACHE[OBSK()];
   delete CACHE[coreSessionKey()];
   await saveData();
@@ -6405,8 +6492,9 @@ function objLabel(ex){ const m=membersOf(); if(m.length>1){ const a=(ex.w&&ex.w!
 function setsLine(sets){ return sets.map(s=>`S${s.s}: ${s.w?esc(s.w)+'kg':'—'} × ${s.r?esc(s.r):'—'}${(s.rir!=null&&s.rir!=='')?' · RIR '+esc(s.rir):''}`).join(' &nbsp;|&nbsp; '); }
 function logEntryHTML(e,i){
   const exh=e.ex.map(x=>{
-    if(x.members){ const blocks=x.members.map(mm=>`<div class="lsets"><b>${esc(mm.name)}:</b> ${setsLine(mm.sets)}</div>`).join(''); return `<div class="log-ex"><div class="len">${esc(x.n)}</div>${blocks}</div>`; }
-    return `<div class="log-ex"><div class="len">${esc(x.n)}</div><div class="lsets">${setsLine(x.sets)}</div></div>`;
+    const cvL=function(c){ const p=[]; if(c.km) p.push(String(c.km).replace('.',',')+' km'); if(c.kcal) p.push(c.kcal+' kcal'); if(c.min) p.push(c.min+' min'); return '🫀 '+(p.join(' · ')||'hecho'); };
+    if(x.members){ const blocks=x.members.map(mm=>`<div class="lsets"><b>${esc(mm.name)}:</b> ${mm.cardio?esc(cvL(mm.cardio)):setsLine(mm.sets)}</div>`).join(''); return `<div class="log-ex"><div class="len">${esc(x.n)}</div>${blocks}</div>`; }
+    return `<div class="log-ex"><div class="len">${esc(x.n)}</div><div class="lsets">${x.cardio?esc(cvL(x.cardio)):setsLine(x.sets)}</div></div>`;
   }).join('');
   const obs=e.obs?`<div class="log-obs">📝 ${esc(e.obs)}</div>`:'';
   const coreFmtL=e.core?((CORE_FMTS.find(f=>f.v===e.core.fmt)||{}).l||e.core.fmt):'';
@@ -6831,8 +6919,9 @@ function renderEdit(){
     const items=exLibList().filter(function(it){ return !q || (it.n||'').toLowerCase().includes(q) || groupsOf(it).join(' ').toLowerCase().includes(q); });
     /* Cada ejercicio aparece UNA sola vez, agrupado bajo el primero de sus grupos musculares
        (puede tener varios, ej: Piernas + Brazos); los demás grupos se ven como texto en la fila. */
+    /* 09/10/2026: cada ejercicio aparece en TODOS sus grupos musculares, y cada grupo es un acordeón */
     const byGroup={};
-    items.forEach(function(it){ const g=groupsOf(it)[0]; (byGroup[g]=byGroup[g]||[]).push(it); });
+    items.forEach(function(it){ groupsOf(it).forEach(function(g){ (byGroup[g]=byGroup[g]||[]).push(it); }); });
     const groupChecksHTML=function(selected,namePrefix){
       return `<div class="lib-groups">${EXLIB_GROUPS.map(function(gg){ const on=selected.indexOf(gg)>-1; return `<label class="lib-gchk${on?' on':''}"><input type="checkbox" data-lf="groups" value="${esc(gg)}" ${on?'checked':''}>${esc(gg)}</label>`; }).join('')}</div>`;
     };
@@ -6842,10 +6931,7 @@ function renderEdit(){
     } else if(!items.length){
       listHtml='<p style="font-size:13px;color:var(--mute)">Ningún ejercicio coincide con la búsqueda.</p>';
     } else {
-      EXLIB_GROUPS.forEach(function(g){
-        const arr=byGroup[g]; if(!arr||!arr.length) return;
-        listHtml+=`<label class="lib-glabel" style="font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--steel);margin:12px 0 4px;display:block">${esc(g)} (${arr.length})</label>`;
-        arr.forEach(function(it){
+      const rowHTML=function(it){ let listHtml='';
           if(libEditId===it.id){
             listHtml+=`<div class="lib-edit-row" data-id="${esc(it.id)}">
               <div class="fld"><label>Nombre</label><input data-lf="n" value="${esc(it.n)}"></div>
@@ -6859,7 +6945,18 @@ function renderEdit(){
             const gr=groupsOf(it);
             listHtml+=`<div class="lib-row"><div class="ln"><div class="nm">${esc(it.n)}</div>${gr.length>1?`<div class="gp">${gr.map(esc).join(' · ')}</div>`:''}<div class="tp">${esc(it.tip||it.alt||'')}</div></div><button class="edb" data-act="editLibEx" data-id="${esc(it.id)}">Editar</button><button class="delb" data-act="delLibEx" data-id="${esc(it.id)}">Eliminar</button></div>`;
           }
-        });
+        return listHtml; };
+      const openAll=!!q;
+      EXLIB_GROUPS.forEach(function(g){
+        const arr=byGroup[g]; if(!arr||!arr.length) return;
+        const hasEdit=arr.some(function(it){ return it.id===libEditId; });
+        let inner='';
+        if(g==='Core'){
+          CORE_SUBS.forEach(function(sg){ const sub=arr.filter(function(it){ return coreSubOf(it)===sg; }); if(!sub.length) return;
+            const so=openAll||sub.some(function(it){ return it.id===libEditId; });
+            inner+=`<details class="lib-acc sub"${so?' open':''}><summary><span>${esc(sg)}</span><b>${sub.length}</b><i>▾</i></summary>${sub.map(rowHTML).join('')}</details>`; });
+        } else inner=arr.map(rowHTML).join('');
+        listHtml+=`<details class="lib-acc"${(openAll||hasEdit)?' open':''}><summary><span>${esc(g)}</span><b>${arr.length}</b><i>▾</i></summary>${inner}</details>`;
       });
     }
     const libHtml=`<p>Cargá cada ejercicio una sola vez (nombre, uno o más grupos musculares y técnica) y después elegilo de una lista al armar cualquier rutina, en vez de retipearlo cada vez.</p>
@@ -7197,12 +7294,15 @@ async function setPin(){ const np=((await uiPrompt(DB.settings.pin?"Nuevo PIN de
 function exLibList(){ return DB.exLib||[]; }
 function exLibOptionsHTML(){
   /* cada ejercicio aparece una sola vez, bajo el primero de sus grupos musculares */
+  /* 09/10/2026: cada ejercicio en todos sus grupos; Core separado por tipo */
   const groups={};
-  exLibList().forEach(function(it){ const g=groupsOf(it)[0]; (groups[g]=groups[g]||[]).push(it); });
+  exLibList().forEach(function(it){ groupsOf(it).forEach(function(g){ (groups[g]=groups[g]||[]).push(it); }); });
   let html='<option value="">📚 Elegir de la biblioteca…</option>';
+  const opt=function(it){ return '<option value="'+esc(it.id)+'">'+esc(it.n)+'</option>'; };
   EXLIB_GROUPS.forEach(function(g){
     const items=groups[g]; if(!items||!items.length) return;
-    html+='<optgroup label="'+esc(g)+'">'+items.map(function(it){ return '<option value="'+esc(it.id)+'">'+esc(it.n)+'</option>'; }).join('')+'</optgroup>';
+    if(g==='Core'){ CORE_SUBS.forEach(function(sg){ const sub=items.filter(function(it){ return coreSubOf(it)===sg; }); if(sub.length) html+='<optgroup label="Core · '+esc(sg)+'">'+sub.map(opt).join('')+'</optgroup>'; }); return; }
+    html+='<optgroup label="'+esc(g)+'">'+items.map(opt).join('')+'</optgroup>';
   });
   return html;
 }
@@ -7751,6 +7851,7 @@ document.addEventListener('click',e=>{
     case 'pickWeek': pickWeek(i); break;
     case 'pickMember': pickMember(i); break;
     case 'toggle': toggleSet(i,j,mi,el); break;
+    case 'cardioDone': toggleCardioDone(i,mi); break;
     case 'coreEx': coreToggleDraftEx(el.dataset.v); break;
     case 'coreFmt': coreSetDraftFmt(el.dataset.v); break;
     case 'coreGrp': coreToggleGrp(el.dataset.v); break;
@@ -7902,6 +8003,7 @@ document.addEventListener('change',e=>{
   const el=e.target.closest('[data-chg]'); if(el){ switch(el.dataset.chg){
     case 'switch': switchStudent(el.value); break;
     case 'cobroAlias': cobroAlias(el.value); break;
+    case 'cardio': updCardio(+el.dataset.i,+(el.dataset.m||0),el.dataset.f,el.value); break;
     case 'resumenCycle': resumenCycleIdx=+el.value; renderResumen(); break;
     case 'informeCycle': saveInformeCycle(+el.value); break;
     case 'resumenMember': resumenMemberIdx=+el.value; renderResumen(); break;
