@@ -4546,8 +4546,8 @@ async function tryResolveLockedLink(){
 function renderBlockedIfNeeded(){
   const st=DB.students[active]; if(!st) return false;
   /* 09/10/2026: el bloqueo por "plan vencido a los 30 días" se reemplazó por el de Cobros */
-  if(st.paused){
-    const m=$('main'); m.innerHTML=`<div style="text-align:center;padding:40px 20px"><div style="font-size:48px;margin-bottom:16px">⏸</div><div style="font-size:18px;font-weight:700;color:var(--navy);margin-bottom:12px">Tu rutina está pausada por el momento</div><div style="font-size:14px;color:var(--mute);line-height:1.6">Contactá a tu profe para más información.</div>${renderWhatsAppBtn()}</div>`;
+  if(st.paused||st.archived){ /* 09/10/2026: archivados también quedan bloqueados */
+    const m=$('main'); m.innerHTML=`<div style="text-align:center;padding:40px 20px"><div style="font-size:48px;margin-bottom:16px">⏸</div><div style="font-size:18px;font-weight:700;color:var(--navy);margin-bottom:12px">${st.archived?'Tu acceso está pausado':'Tu rutina está pausada por el momento'}</div><div style="font-size:14px;color:var(--mute);line-height:1.6">Contactá a tu profe para más información.</div>${renderWhatsAppBtn()}</div>`;
     return true; }
   if(tab==='chat') return false; /* el chat siempre queda abierto */
   const n=(st.members&&st.members.length>1)?st.members.length:1; const bl=blockedMembersOf(active);
@@ -4679,7 +4679,7 @@ function renderApp(){
     const others=members.map(function(nm,i){ return i===member?'':`<button class="pb-sw" data-act="pickMember" data-i="${i}">Ver la rutina de ${esc(nm)}</button>`; }).join('');
     m.innerHTML=payBlockHTML(active,member)+(others?`<div class="pb-others">${others}</div>`:''); return; }
   const planExpired=false;
-  if(DB.students[active].paused&&!trainer){
+  if((DB.students[active].paused||DB.students[active].archived)&&!trainer){
     const icon=planExpired&&!DB.students[active].paused?'🔒':'⏸';
     const title=planExpired&&!DB.students[active].paused?'Tu plan venció':'Tu rutina está pausada por el momento';
     const detail=planExpired&&!DB.students[active].paused?`Venció hace ${Math.abs(planDue.daysLeft)} día${Math.abs(planDue.daysLeft)===1?'':'s'}. Contactá a tu profe para renovarlo y seguir entrenando.`:'Contactá a tu profe para más información.';
