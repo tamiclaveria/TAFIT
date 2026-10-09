@@ -4547,7 +4547,14 @@ function renderBlockedIfNeeded(){
   const st=DB.students[active]; if(!st) return false;
   /* 09/10/2026: el bloqueo por "plan vencido a los 30 días" se reemplazó por el de Cobros */
   if(st.paused||st.archived){ /* 09/10/2026: archivados también quedan bloqueados */
-    const m=$('main'); m.innerHTML=`<div style="text-align:center;padding:40px 20px"><div style="font-size:48px;margin-bottom:16px">⏸</div><div style="font-size:18px;font-weight:700;color:var(--navy);margin-bottom:12px">${st.archived?'Tu acceso está pausado':'Tu rutina está pausada por el momento'}</div><div style="font-size:14px;color:var(--mute);line-height:1.6">Contactá a tu profe para más información.</div>${renderWhatsAppBtn()}</div>`;
+    const m=$('main');
+    if(st.archived){ const alias=(DB.settings&&DB.settings.alias)||'';
+      m.innerHTML=`<div class="payblock"><div class="pb-ico">🔒</div><div class="pb-t">Tu acceso está pausado</div>
+        <div class="pb-d">Se venció el plazo de pago de tu plan, por eso tu rutina quedó en pausa.<br><br>Para volver a tenerla, regularizá tu pago y avisame: apenas lo confirme, te habilito el acceso y seguís entrenando desde donde quedaste. Tu rutina, tus cargas y tu progreso siguen guardados.</div>
+        ${alias?`<button class="pb-alias" data-act="copyAlias">Alias: <b>${esc(alias)}</b> · copiar</button>`:''}
+        ${renderWhatsAppBtn()}<div class="pb-n">¡Te espero para volver a entrenar! 💪</div></div>`;
+      return true; }
+    m.innerHTML=`<div style="text-align:center;padding:40px 20px"><div style="font-size:48px;margin-bottom:16px">⏸</div><div style="font-size:18px;font-weight:700;color:var(--navy);margin-bottom:12px">Tu rutina está pausada por el momento</div><div style="font-size:14px;color:var(--mute);line-height:1.6">Contactá a tu profe para más información.</div>${renderWhatsAppBtn()}</div>`;
     return true; }
   if(tab==='chat') return false; /* el chat siempre queda abierto */
   const n=(st.members&&st.members.length>1)?st.members.length:1; const bl=blockedMembersOf(active);
