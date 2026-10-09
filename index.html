@@ -4224,6 +4224,19 @@ function runSeeds(){
     const sc=DB.students['sofia-catalan']; if(sc&&!sc.cobroExento) sc.cobroExento=['2026-10','2026-11'];
     DB._seed.cobroInit20261009=true;
   }
+  /* 4) Teléfonos que pasó Tami (09/10/2026) para los mensajes de cobro. Solo se cargan
+     donde todavía no hay uno. Formato WhatsApp Argentina: 549 + 261 + número. */
+  if(!DB._seed.telInit20261009){
+    const W=function(n){ return '549'+n; };
+    const T={ 'grupo-5':{0:'2615119802',1:'2612402266',2:'2616762774',3:'2614177584',4:'2615605702'},
+      'jus-yesi':{0:'2616912031',1:'2616820752'}, 'sofi-marti':{0:'2613336373',1:'2614708961'},
+      'sol':{0:'2616561031'}, 'cecilia':{0:'2615099605'}, 'flor':{0:'2616378908'}, 'claudia':{0:'2615040050'},
+      'marcela-balter':{0:'2615251717'}, 'martin':{0:'2616688652'}, 'joni-puebla':{0:'2615439233'}, 'sofia-catalan':{0:'2613393981'} };
+    Object.keys(T).forEach(function(id){ const st=DB.students[id]; if(!st) return; if(!st.telefonos) st.telefonos={};
+      Object.keys(T[id]).forEach(function(mi){ if(!st.telefonos[mi]) st.telefonos[mi]=W(T[id][mi]); });
+      if(!st.telefono) st.telefono=st.telefonos[0]; });
+    DB._seed.telInit20261009=true;
+  }
   if(!DB._seed.abBlockAllDays20261006){
     DB.order.forEach(function(sid){
       const st=DB.students[sid];
@@ -7405,7 +7418,7 @@ function cobroPayers(ym){
 }
 function cobroWaMsg(p,ym){ const alias=(DB.settings&&DB.settings.alias)||''; const first=String(p.name).split(/[ ,/]/)[0];
   return 'Hola '+first+'! Te paso la cuota de '+MESES[+ym.slice(5,7)-1].toLowerCase()+': '+(p.n!=null?p.n+' clase'+(p.n===1?'':'s')+' × '+money(p.precio)+' = ':'')+'*'+money(p.monto)+'*.'+(alias?' Podés transferir al alias *'+alias+'*.':'')+' ¡Gracias! 💪'; }
-function cobroTel(p){ const st=DB.students[p.id]; return ((st.telefonos||{})[p.mi])||(p.mi===0?st.telefono:'')||''; }
+function cobroTel(p){ const st=DB.students[p.id]; let t=((st.telefonos||{})[p.mi])||(p.mi===0?st.telefono:'')||''; if(!t&&st.cobro&&st.cobro.junto&&DB.students[st.cobro.junto]){ const o=DB.students[st.cobro.junto]; t=((o.telefonos||{})[0])||o.telefono||''; } return t; }
 async function cobroWa(id,mi){ const ym=cobroMes||ymNow(); const p=cobroPayers(ym).find(function(x){ return x.id===id&&x.mi===mi; }); if(!p) return; const st=DB.students[id];
   let tel=cobroTel(p);
   if(!tel){ const v=((await uiPrompt('Teléfono de '+p.name+' (con código de país, ej: 5492612345678):'))||'').trim(); if(!v) return; tel=v; if(!st.telefonos) st.telefonos={}; st.telefonos[mi]=v; if(mi===0&&!st.telefono) st.telefono=v; await saveDB(); }
@@ -7433,7 +7446,7 @@ async function cobroSave(id){ const st=DB.students[id]; const box=document.query
   if(junto&&c.fijo){ c.junto=junto; const o=DB.students[junto]; o.cobro=Object.assign({},o.cobro||{}, {parteDe:id}); } else delete c.junto;
   const ad=g('aumDesde'), am=num(g('aumMonto')), ac=num(g('aumCada'))||3; c.aumento=(ad&&am)?{desde:ad,monto:am,cada:ac}:null;
   const nb=box.querySelector('[data-cf="noBloq"]'); if(nb&&nb.checked) c.noBloquear=true; else delete c.noBloquear;
-  const tel=(g('tel')||'').trim(); if(tel) st.telefono=tel;
+  const tel=(g('tel')||'').trim(); if(tel){ st.telefono=tel; if(!st.telefonos) st.telefonos={}; st.telefonos[0]=tel; }
   st.cobro=c;
   const ym=cobroMes||ymNow(); const ex=parseInt(g('extra'),10)||0; if(!st.cobroExtra) st.cobroExtra={}; if(ex) st.cobroExtra[ym]=ex; else delete st.cobroExtra[ym];
   const exento=box.querySelector('[data-cf="exento"]'); if(exento){ const arr=(st.cobroExento||[]).filter(function(x){ return x!==ym; }); if(exento.checked) arr.push(ym); st.cobroExento=arr; }
