@@ -7767,8 +7767,10 @@ async function renderReport(){
     html+=`<div class="week-block"><div class="week-title">🗓 Agenda semanal</div>${wdWithData.map(w=>`<div class="week-row2"><b>${esc(w)}</b><span>${weekAgenda[w].map(esc).join(', ')}</span></div>`).join('')}</div>`;
   }
   /* Alerta de inactividad: alumnos con 2+ días sin sesión */
-  const inactivos=cards.filter(c=>{ if(!c.last) return true; return Math.floor((Date.now()-new Date(c.last.date).getTime())/86400000)>=2; });
-  if(inactivos.length){ html+=`<div class="inact-block"><div class="inact-title">⚠ Alumnos sin entrenar (2+ días)</div><div class="inact-list">${inactivos.map(c=>{ const d=c.last?Math.floor((Date.now()-new Date(c.last.date).getTime())/86400000):999; return `<span class="inact-chip">${esc(c.name)} · ${d>=999?'nunca':(d+' días')}</span>`; }).join('')}</div></div>`; }
+  /* 09/10/2026: solo los VIRTUALES (los presenciales los registra Tami, no cargan sesiones
+     solos, así que siempre salían "sin entrenar"). Avisa recién a la semana sin sesiones. */
+  const inactivos=cards.filter(c=>{ const st=DB.students[c.id]; if(!st||st.archived||!(st.cobro&&st.cobro.tipo==='virtual')) return false; if(!c.last) return true; return Math.floor((Date.now()-new Date(c.last.date).getTime())/86400000)>=7; });
+  if(inactivos.length){ html+=`<div class="inact-block"><div class="inact-title">⚠ Virtuales sin entrenar hace 7+ días</div><div class="inact-list">${inactivos.map(c=>{ const d=c.last?Math.floor((Date.now()-new Date(c.last.date).getTime())/86400000):999; return `<span class="inact-chip">${esc(c.name)} · ${d>=999?'nunca':(d+' días')}</span>`; }).join('')}</div></div>`; }
   /* Vencimiento de plan (30 días desde el último pago cargado en Editar) */
   const dueInfo=[]; /* 09/10/2026: el vencimiento a 30 días se reemplazó por la pestaña Pagos (Cobros) */
   const vencidos=dueInfo.filter(x=>x.due.status==='bad').sort((a,b)=>a.due.daysLeft-b.due.daysLeft);
