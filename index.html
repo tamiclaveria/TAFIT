@@ -3037,6 +3037,8 @@ async function saveDB(force){
         donde venga (una copia vieja nunca le gana a una edición más nueva);
      2) leer + juntar + escribir en la nube va en UN solo paso (transacción): si otro
         celular escribe en el medio, se vuelve a juntar con lo suyo antes de guardar. */
+  /* celular de alumna con link nuevo: hasta que llegue su alumno de la nube no se guarda nada */
+  if(LINK_TOK&&(!active||!DB.students[active]||urlLockPending||urlLockFailed)) return;
   if(force) stampAllFields(); else stampLocalEdits();
   let _mergedFromServer=false, _wroteCloud=false;
   if(fsDB){
@@ -3051,6 +3053,8 @@ async function saveDB(force){
         const remote=snap.exists?safeParse(snap.data().v,null):null;
         const out=(remote&&remote.students)?mergeDBWithRemote(localDB,remote,base):JSON.parse(JSON.stringify(localDB));
         out._ts=Date.now();
+        /* celular de alumna: a su casillero sube solo su propio alumno */
+        if(LINK_TOK&&active&&out.students&&out.students[active]){ const one={}; one[active]=out.students[active]; out.students=one; out.order=[active]; out.templates=[]; }
         t.set(ref,{v:JSON.stringify(out),ts:firebase.firestore.FieldValue.serverTimestamp(),dev:DEVICE_ID});
         return out;
       }); });
@@ -3533,6 +3537,23 @@ function watchPub(id){
   },function(e){ console.warn('watchPub',id,e); delete RELAY.unsub[tok]; });
 }
 function startRelay(){ if(locked||!PROFE_OK||!fsDB) return; (DB.order||[]).forEach(function(id){ if(tokOf(id)) watchPub(id); }); }
+/* celular de alumna con link nuevo: DB solo con su propio alumno (los parches de fábrica
+   del código crean otros alumnos en un celular nuevo; no deben quedar ni subirse) */
+function trimToLinked(){
+  if(!LINK_TOK||!DB||!DB.students) return;
+  const a=_URLP0.get('a')||'';
+  let id=(active&&DB.students[active])?active:(DB.students[a]?a:null);
+  if(!id&&a) id=(DB.order||[]).find(function(x){ return DB.students[x]&&String(DB.students[x].name||'').toLowerCase().includes(a.toLowerCase()); })||null;
+  if(!id) return; /* todavía no llegó su alumno de la nube */
+  const one={}; one[id]=DB.students[id]; DB.students=one; DB.order=[id]; DB.templates=[];
+}
+/* 10/10/2026: los guardados de alumnos van DE A UNO. Si se llamaba a saveDB() varias veces
+   seguidas (ej. copiar varios links rápido), cada una leía la nube antes de que la anterior
+   terminara de escribir y la última pisaba cambios de las otras (se perdía el token de algún
+   alumno). Ahora cada guardado espera al anterior. */
+let _saveDBQ=Promise.resolve();
+const _saveDBRaw=saveDB;
+saveDB=function(force){ const r=_saveDBQ.then(function(){ return _saveDBRaw(force); }); _saveDBQ=r.catch(function(){}); return r; };
 function shouldSync(k){ return k&&!k.includes('photo')&&k!=='tafit:devid'&&k!=='tafit:active'&&!k.startsWith('tafit:pos:')&&k!=='tafit:pending'&&k!=='tafit:dark'&&!k.startsWith('tafit:autobackup:'); }
 
 /* ===== Cola de pendientes: si no hay señal, el envío queda guardado y se reintenta solo ===== */
@@ -3854,7 +3875,7 @@ async function restoreAutoBackup(dateISO){
     return true;
   }catch(e){ console.warn('Restore:',e); return false; }
 }
-async function reloadFromRemote(){ try{ const raw=await Store.get('tafit:students'); if(raw){ const p=safeParse(raw,null); if(p&&p.order&&p.order.length){ /* 09/10/2026: siempre se junta por hora de cada campo (antes, si la hora general de este celular era más nueva —relojes distintos entre celulares— no se bajaba nada) */ DB=mergeStudentsByFt(DB,p,'remote'); setSyncBaseline(); if(_provisionalSeeds.size){ _provisionalSeeds=new Set(); const _b4=JSON.stringify(DB); try{ runSeeds(); }catch(e){} if(JSON.stringify(DB)!==_b4){ try{ saveDB(); }catch(e){} } } } } if(urlLockPending){ await tryResolveLockedLink(); return; } if(DB.students[active]){ CACHE=safeParse(await Store.get('tafit:data:'+active)||'{}',{}); migrateLegacyWeeks(); const remoteLogs=safeParse(await Store.get('tafit:logs:'+active)||'[]',[]); LOGS=mergeLogs(LOGS,remoteLogs); const remoteChat=safeParse(await Store.get('tafit:chat:'+active)||'[]',[]); CHAT=mergeChat(CHAT,remoteChat); } if(trainer&&tab==='edit'&&document.querySelector('.edit-day,.week-row,#healthsec,#membersfld')){ /* 08/10/2026: llegaron datos de otro celular mientras la profe edita — NO se redibuja el formulario (se perdía lo que estaba escribiendo). Al guardar, lo suyo gana por ser más nuevo. */ return; } render(); }catch(e){} }
+async function reloadFromRemote(){ try{ const raw=await Store.get('tafit:students'); if(raw){ const p=safeParse(raw,null); if(p&&p.order&&p.order.length){ /* 09/10/2026: siempre se junta por hora de cada campo (antes, si la hora general de este celular era más nueva —relojes distintos entre celulares— no se bajaba nada) */ DB=mergeStudentsByFt(DB,p,'remote'); trimToLinked(); setSyncBaseline(); if(_provisionalSeeds.size){ _provisionalSeeds=new Set(); const _b4=JSON.stringify(DB); try{ runSeeds(); }catch(e){} if(JSON.stringify(DB)!==_b4){ try{ saveDB(); }catch(e){} } } } } if(urlLockPending||urlLockFailed){ await tryResolveLockedLink(); return; } if(DB.students[active]){ CACHE=safeParse(await Store.get('tafit:data:'+active)||'{}',{}); migrateLegacyWeeks(); const remoteLogs=safeParse(await Store.get('tafit:logs:'+active)||'[]',[]); LOGS=mergeLogs(LOGS,remoteLogs); const remoteChat=safeParse(await Store.get('tafit:chat:'+active)||'[]',[]); CHAT=mergeChat(CHAT,remoteChat); } if(trainer&&tab==='edit'&&document.querySelector('.edit-day,.week-row,#healthsec,#membersfld')){ /* 08/10/2026: llegaron datos de otro celular mientras la profe edita — NO se redibuja el formulario (se perdía lo que estaba escribiendo). Al guardar, lo suyo gana por ser más nuevo. */ return; } render(); }catch(e){} }
 function updateSyncUI(on){ $('clouddot').className='dot'+(on?' on':''); $('cloudlbl').textContent=on?'Sincronizado':(Store.ls?'En este dispositivo':'Solo esta sesión'); }
 function myKeys(){ /* claves que necesita una alumna con link bloqueado */
   return ['tafit:students','tafit:data:'+active,'tafit:logs:'+active,'tafit:logsdel:'+active,'tafit:chat:'+active,'tafit:form:acuerdo:'+active,'tafit:form:anamnesis:'+active];
@@ -3895,7 +3916,7 @@ async function initFirebase(){
       docs.forEach(function(kv){ var k=kv[0],v=kv[1]; if(shouldSync(k)&&v!=null){ try{
         if(isMergedKey(k)&&localStorage.getItem(k)!=null){ v=mergeKeyStr(k,localStorage.getItem(k),v); }
         if(localStorage.getItem(k)!==v) localStorage.setItem(k,v);
-        if(k==='tafit:students'){ var p=safeParse(v,null); if(p&&p.order&&p.order.length){ DB=mergeStudentsByFt(DB,p,'remote'); setSyncBaseline(); _studentsMerged=true; } }
+        if(k==='tafit:students'){ var p=safeParse(v,null); if(p&&p.order&&p.order.length){ DB=mergeStudentsByFt(DB,p,'remote'); trimToLinked(); setSyncBaseline(); _studentsMerged=true; } }
       }catch(e){} } });
       if(_studentsMerged){ /* llegó la versión real de la nube: los parches de una sola vez que esa versión todavía no tenga se aplican ENCIMA de ella (nunca de la copia vieja de este celular). Lo que corrió al abrir sobre la copia local era provisorio y no cuenta. */ _provisionalSeeds=new Set(); try{ if(window.__runSeeds) window.__runSeeds(); }catch(e){ console.warn('Seeds:',e); } try{ if(urlLockPending) await tryResolveLockedLink(); else render(); }catch(e){} } else if(urlLockPending){ try{ await tryResolveLockedLink(); }catch(e){} } }catch(e){ console.warn('Pull:',e); }
     /* las transcriptas de la nube que este celular no tenía, también a la memoria
@@ -4716,6 +4737,7 @@ function runSeeds(){
   } else {
     active=(lastA&&DB.students[lastA])?lastA:DB.order[0];
   }
+  trimToLinked();
   if(!locked) trainer=!DB.settings.pin;
   if(!urlLockPending) await loadStudent();
   await loadNotifs();
@@ -4881,10 +4903,10 @@ function renderLinkFailed(){
    (pull inicial de Firestore o el listener en tiempo real). Si lo encuentra, recién ahí
    entra al modo alumno bloqueado; si de verdad no existe, avisa — nunca cae al modo Profe. */
 async function tryResolveLockedLink(){
-  if(!urlLockPending) return;
+  if(!urlLockPending&&!urlLockFailed) return;
   let found=DB.order.find(id=>id===urlLockA);
   if(!found) found=DB.order.find(id=>DB.students[id].name.toLowerCase().includes(urlLockA.toLowerCase()));
-  if(found){ active=found; locked=true; trainer=false; urlLockPending=false; await loadStudent(); render(); }
+  if(found){ active=found; locked=true; trainer=false; urlLockPending=false; urlLockFailed=false; trimToLinked(); await loadStudent(); render(); }
 }
 /* Pantalla de bloqueo (pausada a mano, o plan vencido) para CUALQUIER pestaña que vea
    una alumna — no solo la pestaña App. Antes esto vivía solo dentro de renderApp(), así
@@ -6980,9 +7002,15 @@ async function copyStudentLink(id){
   /* 10/10/2026: cada alumno tiene su token secreto; sin él el link no abre nada */
   /* el celular solo deja compartir/copiar en el mismo instante del toque: primero se arma
      el link (el token se crea acá mismo) y el guardado en la nube va de fondo, después */
-  const isNew=!st.tok; if(isNew) st.tok=genTok();
-  (async function(){ try{ if(isNew) await saveDB(); if(!RELAY.seeded[id]) await seedPub(id); watchPub(id); }catch(e){ console.warn('link seed',e); } })();
-  const url=location.origin+location.pathname+'?a='+encodeURIComponent(id)+'&t='+encodeURIComponent(st.tok)+'&lock=1';
+  const isNew=!st.tok; if(isNew){ st.tok=genTok(); st._ft=st._ft||{}; st._ft.tok=Date.now(); /* fechado: ninguna sincronización lo descarta */ }
+  const tok=st.tok;
+  (async function(){ try{
+    /* mientras otro guardado está en curso, DB se reemplaza por la versión juntada y un token
+       recién creado puede quedar afuera: se verifica después de guardar y se repone */
+    for(let i=0;i<4;i++){ await saveDB(); const cur=DB.students[id]; if(!cur) return; if(cur.tok===tok) break; cur.tok=tok; cur._ft=cur._ft||{}; cur._ft.tok=Date.now(); }
+    if(!RELAY.seeded[id]) await seedPub(id); watchPub(id);
+  }catch(e){ console.warn('link seed',e); } })();
+  const url=location.origin+location.pathname+'?a='+encodeURIComponent(id)+'&t='+encodeURIComponent(tok)+'&lock=1';
   const shareData={ title:'TaFit · '+st.name, text:'Hola '+st.name+'! Acá está tu link de TaFit 💪', url:url };
   try{
     if(navigator.share && navigator.canShare && navigator.canShare(shareData)){
