@@ -6978,8 +6978,10 @@ async function copyMyLink(){ const url=location.origin+location.pathname.replace
 async function copyStudentLink(id){
   const st=DB.students[id]; if(!st) return;
   /* 10/10/2026: cada alumno tiene su token secreto; sin él el link no abre nada */
-  if(!st.tok){ st.tok=genTok(); await saveDB(); }
-  try{ if(!RELAY.seeded[id]) await seedPub(id); watchPub(id); }catch(e){}
+  /* el celular solo deja compartir/copiar en el mismo instante del toque: primero se arma
+     el link (el token se crea acá mismo) y el guardado en la nube va de fondo, después */
+  const isNew=!st.tok; if(isNew) st.tok=genTok();
+  (async function(){ try{ if(isNew) await saveDB(); if(!RELAY.seeded[id]) await seedPub(id); watchPub(id); }catch(e){ console.warn('link seed',e); } })();
   const url=location.origin+location.pathname+'?a='+encodeURIComponent(id)+'&t='+encodeURIComponent(st.tok)+'&lock=1';
   const shareData={ title:'TaFit · '+st.name, text:'Hola '+st.name+'! Acá está tu link de TaFit 💪', url:url };
   try{
