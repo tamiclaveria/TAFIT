@@ -7,7 +7,7 @@
    2) la página (index.html) se pide primero a la red, con un límite de 3 segundos; si no hay
       señal o tarda, se abre la copia guardada. Así, con señal, siempre se ve la última
       versión publicada, y sin señal la app sigue abriendo igual que antes. */
-const CACHE = 'tafit-v8-122';
+const CACHE = 'tafit-v8-123';
 const ASSETS = [
   './',
   './index.html',
@@ -18,6 +18,7 @@ const ASSETS = [
   './favicon.ico',
   'https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js',
   'https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js',
+  'https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
 ];
 const NET_TIMEOUT_MS = 3000;

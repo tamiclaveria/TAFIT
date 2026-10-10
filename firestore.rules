@@ -1,0 +1,19 @@
+rules_version = '2';
+// Reglas de seguridad de TaFit (10/10/2026)
+// - kv/*            → datos de todos los alumnos: SOLO la cuenta de la profe.
+// - pub/<token>/kv/* → casillero de cada alumna: la profe, o quien tenga el token
+//                      secreto de 28 caracteres que viaja en el link de esa alumna.
+// Todo lo demás está cerrado.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isProfe() {
+      return request.auth != null && request.auth.uid == '__PROFE_UID__';
+    }
+    match /kv/{doc} {
+      allow read, write: if isProfe();
+    }
+    match /pub/{tok}/kv/{doc} {
+      allow read, write: if isProfe() || tok.size() >= 20;
+    }
+  }
+}

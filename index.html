@@ -1044,12 +1044,24 @@
   #bootsplash{position:fixed;inset:0;background:#15110D;display:flex;align-items:center;justify-content:center;z-index:99999;transition:opacity .4s ease}
   #bootsplash img{width:42vw;max-width:220px;min-width:120px;display:block;border-radius:50%;box-shadow:0 10px 40px rgba(0,0,0,.5);animation:bootpulse 1.6s ease-in-out infinite}
   #bootsplash.hide{opacity:0;pointer-events:none}
+  #authgate{position:fixed;inset:0;z-index:9998;background:#0a0908;color:#FAF7F2;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px 20px;text-align:center}
+  #authgate.show{display:flex}
+  #authgate .ag-logo{width:120px;height:120px;border-radius:50%;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+  #authgate .ag-t{font-size:20px;font-weight:700;color:#E3C3A5}
+  #authgate .ag-p{font-size:14px;line-height:1.5;max-width:340px;color:#d9cfc2}
+  #authgate .ag-p.small{font-size:12px;color:#8A7866;margin-top:6px}
+  #authgate form{display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px}
+  #authgate input{font-size:16px;padding:12px 14px;border-radius:10px;border:1px solid #3a3128;background:#17130f;color:#FAF7F2}
+  #authgate button{font-size:16px;font-weight:700;padding:12px;border-radius:10px;border:0;background:#E3C3A5;color:#241F18;cursor:pointer}
+  #authgate button:disabled{opacity:.6}
+  #authgate .ag-err{min-height:18px;font-size:13px;color:#f2a29b}
   footer.legal{text-align:center;font-size:11px;line-height:1.4;color:var(--mute);padding:10px 16px 18px;border-top:1px solid var(--line)}
   @keyframes bootpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
 </style>
 </head>
 <body>
 <div id="bootsplash"><img src="./logo-principal.png" alt="TaFiT"></div>
+<div id="authgate"></div>
 <div id="app">
   <header>
     <div class="topline">
@@ -1098,6 +1110,7 @@
 
 <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 /* ====================================================================
@@ -3028,12 +3041,12 @@ async function saveDB(force){
   let _mergedFromServer=false, _wroteCloud=false;
   if(fsDB){
     try{
-      const ref=fsDB.collection('kv').doc(CLOUD_DB_ID);
+      const ref=kvCol().doc(CLOUD_DB_ID);
       const localDB=DB, base=safeParse(_syncBaseline,null);
       const tx=fsDB.runTransaction(function(t){ return t.get(ref).then(function(snap){
         if(snap.exists) return snap;
         /* primera vez con el documento nuevo: se parte de lo último del documento viejo */
-        return t.get(fsDB.collection('kv').doc(LEGACY_DB_ID));
+        return t.get(kvCol().doc(LEGACY_DB_ID));
       }).then(function(snap){
         const remote=snap.exists?safeParse(snap.data().v,null):null;
         const out=(remote&&remote.students)?mergeDBWithRemote(localDB,remote,base):JSON.parse(JSON.stringify(localDB));
@@ -3050,6 +3063,7 @@ async function saveDB(force){
     /* ya quedó en la nube: solo lo dejamos también en este celular (sin volver a subirlo) */
     try{ localStorage.setItem('tafit:students', JSON.stringify(DB)); }catch(e){}
     clearPending('tafit:students');
+    try{ relayOut('tafit:students', JSON.stringify(DB)); }catch(e){} /* casilleros de alumnos */
   } else {
     DB._ts=Date.now();
     await Store.set('tafit:students', JSON.stringify(DB)); /* sube por _pushRaw, que también junta con la nube */
@@ -3349,7 +3363,176 @@ let fsDB=null;
 const CLOUD_DB_ID='tafit:students:v2', LEGACY_DB_ID='tafit:students';
 function cid(k){ return k==='tafit:students'?CLOUD_DB_ID:k; }
 function fromCid(id){ if(id===CLOUD_DB_ID) return 'tafit:students'; if(id===LEGACY_DB_ID) return null; return id; }
-function mirrorLegacyDB(v){ try{ if(fsDB) fsDB.collection('kv').doc(LEGACY_DB_ID).set({v:v,ts:firebase.firestore.FieldValue.serverTimestamp(),dev:DEVICE_ID}).catch(function(){}); }catch(e){} }
+function mirrorLegacyDB(v){ try{ if(fsDB&&!PUB_TOK) kvCol().doc(LEGACY_DB_ID).set({v:v,ts:firebase.firestore.FieldValue.serverTimestamp(),dev:DEVICE_ID}).catch(function(){}); }catch(e){} }
+/* ==== Seguridad de datos (10/10/2026) ====
+   Antes, la base de Firebase estaba abierta (cualquiera podía leerla) y cada alumna, al
+   abrir su link, bajaba a su celular el documento con TODOS los alumnos (salud, teléfono,
+   cobros...). Ahora:
+   - La profe entra con mail y contraseña (Firebase Authentication). Solo esa cuenta puede
+     leer/escribir la colección 'kv' (los datos de todos).
+   - Cada alumna tiene un "casillero" propio en 'pub/<token>/kv', donde está SOLO lo suyo.
+     El token es largo y al azar, viaja en su link (?a=<id>&t=<token>&lock=1) y es lo único
+     que abre ese casillero. Su celular nunca más ve datos de otros.
+   - El celular de la profe hace de puente ("relay"): lo que la profe cambia de un alumno se
+     copia a su casillero, y lo que la alumna carga (pesos, sesiones, chat, fichas) se
+     junta con los datos de la profe, con las mismas reglas de merge de siempre. */
+const PROFE_UID='__PROFE_UID__';
+const _URLP0=new URLSearchParams(location.search);
+const LINK_LOCK=_URLP0.get('lock')==='1';
+const LINK_TOK=(LINK_LOCK&&_URLP0.get('t'))?String(_URLP0.get('t')):null;
+const LINK_OLD=LINK_LOCK&&!LINK_TOK; /* link viejo, sin token: ya no da acceso */
+let PUB_TOK=LINK_TOK;
+let PROFE_OK=false;
+function kvCol(){ return (PUB_TOK&&locked)?fsDB.collection('pub').doc(PUB_TOK).collection('kv'):fsDB.collection('kv'); }
+function pubCol(tok){ return fsDB.collection('pub').doc(tok).collection('kv'); }
+function genTok(){ const a='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'; let s=''; try{ const r=new Uint32Array(28); crypto.getRandomValues(r); r.forEach(function(x){ s+=a[x%a.length]; }); }catch(e){ for(let i=0;i<28;i++) s+=a[Math.floor(Math.random()*a.length)]; } return s; }
+/* dueño de una clave por alumno (tafit:data:<id>, tafit:form:anamnesis:<id>:<n>, ...) */
+function keyOwner(k){ const m=/^tafit:(?:data|logs|logsdel|chat|form:acuerdo|form:anamnesis):([^:]+)/.exec(k||''); return m?m[1]:null; }
+function studentKeysFor(id){ const ks=['tafit:data:'+id,'tafit:logs:'+id,'tafit:logsdel:'+id,'tafit:chat:'+id,'tafit:form:acuerdo:'+id,'tafit:form:anamnesis:'+id]; const s=DB.students&&DB.students[id]; if(s&&s.members&&s.members.length>1){ for(let mi=0;mi<s.members.length;mi++) ks.push('tafit:form:acuerdo:'+id+':'+mi,'tafit:form:anamnesis:'+id+':'+mi); } return ks; }
+/* lo que ve una alumna: solo su ficha de alumno + biblioteca de ejercicios + alias/whatsapp de pago (sin PIN) */
+function projectFor(src,id){
+  const st=src&&src.students&&src.students[id]; if(!st) return null;
+  const s=Object.assign({},src.settings||{}); delete s.pin; s._t=0;
+  const one={}; one[id]=JSON.parse(JSON.stringify(st));
+  return { order:[id], students:one, settings:s, _seed:Object.assign({},src._seed||{}), _deleted:{}, _tomb:{}, exLib:(src.exLib||[]).slice(), templates:[], _ts:+src._ts||0 };
+}
+/* celular de alumna con link nuevo: se borra todo lo que no sea suyo (versiones viejas de la
+   app guardaban acá el documento completo de alumnos y avisos de otros) */
+function sanitizeStudentDevice(a){
+  try{
+    const p=safeParse(localStorage.getItem('tafit:students')||'null',null);
+    if(p&&p.students){
+      let id=(a&&p.students[a])?a:null;
+      if(!id&&a){ id=(p.order||[]).find(function(x){ return p.students[x]&&String(p.students[x].name||'').toLowerCase().includes(String(a).toLowerCase()); })||null; }
+      const proj=id?projectFor(p,id):null;
+      if(proj) localStorage.setItem('tafit:students',JSON.stringify(proj)); else localStorage.removeItem('tafit:students');
+    }
+    const keep=a?String(a):'';
+    Object.keys(localStorage).forEach(function(k){
+      if(k.indexOf('tafit:autobackup:')===0||k==='tafit:lastAutoBackup'){ localStorage.removeItem(k); return; }
+      const o=keyOwner(k); if(o&&o!==keep) localStorage.removeItem(k);
+    });
+    const ns=safeParse(localStorage.getItem('tafit:notifs')||'[]',[]);
+    localStorage.setItem('tafit:notifs',JSON.stringify((ns||[]).filter(function(n){ return n&&n.id===keep; })));
+  }catch(e){ console.warn('sanitize:',e); }
+}
+/* ---- Login de profe ---- */
+function gateEl(){ return document.getElementById('authgate'); }
+function showGate(html){ const g=gateEl(); if(!g) return; g.innerHTML=html; g.classList.add('show'); }
+function hideGate(){ const g=gateEl(); if(g){ g.classList.remove('show'); g.innerHTML=''; } }
+function gateLogo(){ return '<img class="ag-logo" src="./logo-principal.png" alt="TaFiT">'; }
+function showOldLinkScreen(){
+  showGate(gateLogo()+'<div class="ag-t">Tu link de TaFit cambió</div><div class="ag-p">Por seguridad, actualizamos los links de la app. Pedile a tu profe el link nuevo y abrilo desde acá. Tus datos no se pierden.</div>');
+}
+function showLogin(msg){
+  showGate(gateLogo()+'<div class="ag-t">Acceso de profe</div>'+
+    '<form id="agForm" autocomplete="on"><input id="agMail" type="email" placeholder="Mail" autocomplete="username" required>'+
+    '<input id="agPass" type="password" placeholder="Contraseña" autocomplete="current-password" required>'+
+    '<button type="submit" id="agBtn">Entrar</button></form><div class="ag-err" id="agErr">'+(msg?esc(msg):'')+'</div>'+
+    '<div class="ag-p small">¿Sos alumna/o? Abrí el link que te mandó tu profe.</div>');
+  const f=document.getElementById('agForm');
+  f.addEventListener('submit',function(ev){ ev.preventDefault();
+    const mail=document.getElementById('agMail').value.trim(), pass=document.getElementById('agPass').value;
+    const b=document.getElementById('agBtn'); b.disabled=true; b.textContent='Entrando…';
+    firebase.auth().signInWithEmailAndPassword(mail,pass).catch(function(err){
+      const c=(err&&err.code)||''; let t='No se pudo entrar. Probá de nuevo.';
+      if(/wrong-password|user-not-found|invalid-credential|invalid-email|invalid-login/.test(c)) t='Mail o contraseña incorrectos.';
+      else if(/too-many-requests/.test(c)) t='Demasiados intentos. Esperá unos minutos.';
+      else if(/network/.test(c)) t='Sin conexión. Revisá internet y probá de nuevo.';
+      b.disabled=false; b.textContent='Entrar'; const e=document.getElementById('agErr'); if(e) e.textContent=t;
+    });
+  });
+}
+function ensureProfeAuth(){
+  return new Promise(function(resolve){
+    if(!firebase.auth){ showGate(gateLogo()+'<div class="ag-t">Sin conexión</div><div class="ag-p">No se pudo cargar el inicio de sesión. Revisá internet y volvé a abrir la app.</div>'); resolve(false); return; }
+    let done=false;
+    firebase.auth().onAuthStateChanged(function(u){
+      if(u&&u.uid===PROFE_UID){ PROFE_OK=true; hideGate(); if(!done){ done=true; resolve(true); } }
+      else { PROFE_OK=false; if(u){ firebase.auth().signOut(); showLogin('Esta cuenta no tiene acceso de profe.'); } else showLogin(); }
+    });
+  });
+}
+async function profeLogout(){ if(!await uiConfirm('¿Cerrar la sesión de profe en este dispositivo? Para volver a entrar vas a necesitar tu mail y contraseña.')) return; try{ await firebase.auth().signOut(); }catch(e){} location.reload(); }
+/* ---- Puente profe ⇄ casilleros de alumnos ---- */
+const RELAY={ unsub:{}, lastProj:{}, seeded:{} };
+function tokOf(id){ const s=DB.students&&DB.students[id]; return (s&&s.tok)?s.tok:null; }
+function mergeForPub(k,id,localStr,remoteStr){
+  if(remoteStr==null) return localStr;
+  if(k==='tafit:students'){ const L=safeParse(localStr,null), R=safeParse(remoteStr,null); if(!L||!L.students) return remoteStr; if(!R||!R.students) return localStr; const m=mergeStudentsByFt(L,{order:[id],students:R.students[id]?{[id]:R.students[id]}:{}},'local'); return JSON.stringify(projectFor(m,id)||L); }
+  if(isMergedKey(k)) return mergeKeyStr(k,localStr,remoteStr);
+  if(k.indexOf('tafit:chat:')===0) return JSON.stringify(mergeChat(safeParse(localStr,[]),safeParse(remoteStr,[])));
+  return localStr;
+}
+function pushToPub(tok,id,k,v){
+  if(!fsDB||!PROFE_OK||!tok||v==null) return Promise.resolve(false);
+  const ref=pubCol(tok).doc(cid(k));
+  return fsDB.runTransaction(function(tx){ return tx.get(ref).then(function(doc){
+    const remote=(doc.exists&&doc.data()&&doc.data().v!=null)?doc.data().v:null;
+    const merged=mergeForPub(k,id,v,remote);
+    if(merged===remote) return false;
+    tx.set(ref,{v:merged,ts:firebase.firestore.FieldValue.serverTimestamp(),dev:DEVICE_ID}); return true;
+  }); }).catch(function(e){ console.warn('pub push',k,e); return false; });
+}
+async function seedPub(id){
+  const tok=tokOf(id); if(!tok) return;
+  const proj=projectFor(DB,id); if(!proj) return;
+  const ps=JSON.stringify(proj); RELAY.lastProj[id]=ps;
+  await pushToPub(tok,id,'tafit:students',ps);
+  for(const k of studentKeysFor(id)){ let v=null; try{ v=localStorage.getItem(k); }catch(e){} if(v&&v!=='{}'&&v!=='[]'&&v!=='""') await pushToPub(tok,id,k,v); }
+  RELAY.seeded[id]=true;
+}
+function relayOut(k,v){
+  if(locked||!PROFE_OK||!fsDB) return;
+  if(k==='tafit:students'){
+    const P=safeParse(v,null); if(!P||!P.students) return;
+    (P.order||Object.keys(P.students)).forEach(function(id){ const st=P.students[id]; if(!st||!st.tok) return;
+      const proj=projectFor(P,id); const ps=JSON.stringify(proj); if(RELAY.lastProj[id]===ps) return; RELAY.lastProj[id]=ps;
+      pushToPub(st.tok,id,'tafit:students',ps); });
+    return;
+  }
+  const id=keyOwner(k); if(!id) return; const tok=tokOf(id); if(!tok) return;
+  pushToPub(tok,id,k,v);
+}
+let _relayReloadT=null;
+function relayReload(){ clearTimeout(_relayReloadT); _relayReloadT=setTimeout(function(){ if(!_fromRemote){ _fromRemote=true; reloadFromRemote().then(function(){ _fromRemote=false; }); } },400); }
+async function relayIn(id,k,v){
+  try{
+    if(k==='tafit:students'){
+      const P=safeParse(v,null); if(!P||!P.students||!P.students[id]||!DB.students[id]) return;
+      const inc=JSON.parse(JSON.stringify(P.students[id])); inc.tok=DB.students[id].tok; /* el token lo maneja solo la profe */
+      if(inc._ft) delete inc._ft.tok;
+      const before=JSON.stringify(DB.students[id]);
+      DB=mergeStudentsByFt(DB,{order:[id],students:{[id]:inc}},'local');
+      if(JSON.stringify(DB.students[id])!==before){ await saveDB(); render(); }
+      return;
+    }
+    if(k==='tafit:notifs'){
+      const inc=safeParse(v,[]).filter(function(n){ return n&&n.id===id; }); if(!inc.length) return;
+      const seen=new Set(NOTIFS.map(function(n){ return n.id+'|'+n.date; })); let add=false;
+      inc.forEach(function(n){ if(!seen.has(n.id+'|'+n.date)){ NOTIFS.push(n); add=true; } });
+      if(add){ NOTIFS.sort(function(a,b){ return new Date(b.date)-new Date(a.date); }); NOTIFS=NOTIFS.slice(0,50); await Store.set('tafit:notifs',JSON.stringify(NOTIFS)); renderChrome(); }
+      return;
+    }
+    if(keyOwner(k)!==id) return; /* un casillero solo puede traer datos de su propio alumno */
+    let local=null; try{ local=localStorage.getItem(k); }catch(e){}
+    let merged=v;
+    if(local!=null){ if(isMergedKey(k)) merged=mergeKeyStr(k,local,v); else if(k.indexOf('tafit:chat:')===0) merged=JSON.stringify(mergeChat(safeParse(local,[]),safeParse(v,[]))); }
+    if(merged!==local){ await Store.set(k,merged); if(id===active) relayReload(); }
+  }catch(e){ console.warn('relayIn',k,e); }
+}
+function watchPub(id){
+  const tok=tokOf(id); if(!tok||RELAY.unsub[tok]) return;
+  let first=true;
+  RELAY.unsub[tok]=pubCol(tok).onSnapshot(function(snap){
+    if(first){ first=false; if(!snap.docs.some(function(d){ return d.id===CLOUD_DB_ID; })) seedPub(id); }
+    snap.docChanges().forEach(function(ch){
+      if(ch.type==='removed') return; const d=ch.doc.data(); if(!d||d.v==null||d.dev===DEVICE_ID) return;
+      const k=fromCid(ch.doc.id); if(!k) return; relayIn(id,k,d.v);
+    });
+  },function(e){ console.warn('watchPub',id,e); delete RELAY.unsub[tok]; });
+}
+function startRelay(){ if(locked||!PROFE_OK||!fsDB) return; (DB.order||[]).forEach(function(id){ if(tokOf(id)) watchPub(id); }); }
 function shouldSync(k){ return k&&!k.includes('photo')&&k!=='tafit:devid'&&k!=='tafit:active'&&!k.startsWith('tafit:pos:')&&k!=='tafit:pending'&&k!=='tafit:dark'&&!k.startsWith('tafit:autobackup:'); }
 
 /* ===== Cola de pendientes: si no hay señal, el envío queda guardado y se reintenta solo ===== */
@@ -3426,10 +3609,10 @@ function mergeKeyStr(k,localStr,remoteStr){
 }
 function isMergedKey(k){ return k==='tafit:students'||isLogsKey(k)||isLogsDelKey(k)||isDataKey(k); }
 function _pushMergedRaw(k,v){ return new Promise(res=>{ let done=false; const t=setTimeout(()=>{ if(!done){ done=true; res(false); } },10000);
-  const ref=fsDB.collection('kv').doc(cid(k));
+  const ref=kvCol().doc(cid(k));
   fsDB.runTransaction(function(tx){ return tx.get(ref).then(function(doc){
     if(doc.exists||k!=='tafit:students') return doc;
-    return tx.get(fsDB.collection('kv').doc(LEGACY_DB_ID)); /* primera vez con el documento nuevo */
+    return tx.get(kvCol().doc(LEGACY_DB_ID)); /* primera vez con el documento nuevo */
   }).then(function(doc){
     const remote=(doc.exists&&doc.data()&&doc.data().v!=null)?doc.data().v:null;
     const merged=remote==null?v:mergeKeyStr(k,v,remote);
@@ -3444,7 +3627,7 @@ function _pushMergedRaw(k,v){ return new Promise(res=>{ let done=false; const t=
   }).catch(function(){ if(!done){ done=true; clearTimeout(t); res(false); } });
 }); }
 function _pushRaw(k,v){ if(isMergedKey(k)) return _pushMergedRaw(k,v); return new Promise(res=>{ let done=false; const t=setTimeout(()=>{ if(!done){ done=true; res(false); } },8000);
-  fsDB.collection('kv').doc(cid(k)).set({v:v,ts:firebase.firestore.FieldValue.serverTimestamp(),dev:DEVICE_ID})
+  kvCol().doc(cid(k)).set({v:v,ts:firebase.firestore.FieldValue.serverTimestamp(),dev:DEVICE_ID})
     .then(()=>{ if(!done){ done=true; clearTimeout(t); res(true); } })
     .catch(()=>{ if(!done){ done=true; clearTimeout(t); res(false); } });
 }); }
@@ -3456,7 +3639,7 @@ async function flushPending(){ if(!fsDB||!PENDING.length) return; const list=PEN
 }
 window.addEventListener('online',()=>setTimeout(flushPending,800));
 setInterval(()=>{ if(navigator.onLine) flushPending(); },30000);
-async function cloudDel(k){ if(!fsDB||_fromRemote) return; try{ fsDB.collection('kv').doc(cid(k)).delete(); }catch(e){} }
+async function cloudDel(k){ if(!fsDB||_fromRemote) return; try{ kvCol().doc(cid(k)).delete(); }catch(e){} }
 async function pushAllLocal(){ if(!fsDB) return; let keys;
   if(locked&&active){ keys=myKeys(); }
   else { keys=['tafit:students']; DB.order.forEach(id=>{ keys.push('tafit:data:'+id,'tafit:logs:'+id,'tafit:logsdel:'+id,'tafit:chat:'+id,'tafit:form:acuerdo:'+id,'tafit:form:anamnesis:'+id); const s=DB.students[id]; if(s&&s.members&&s.members.length>1){ for(let mi=0;mi<s.members.length;mi++){ keys.push('tafit:form:acuerdo:'+id+':'+mi,'tafit:form:anamnesis:'+id+':'+mi); } } }); }
@@ -3512,7 +3695,7 @@ async function dailyBackupIfNeeded(){
     const idx=safeParse(localStorage.getItem('tafit:autobackupIndex')||'[]',[]);
     if(idx.indexOf(today)<0) idx.push(today);
     idx.sort();
-    while(idx.length>7){ const old=idx.shift(); try{ fsDB.collection('kv').doc('tafit:autobackup:'+old).delete(); }catch(e){} }
+    while(idx.length>7){ const old=idx.shift(); try{ kvCol().doc('tafit:autobackup:'+old).delete(); }catch(e){} }
     localStorage.setItem('tafit:autobackupIndex', JSON.stringify(idx));
   }catch(e){ console.warn('AutoBackup:',e); }
 }
@@ -3525,7 +3708,7 @@ async function listAutoBackups(){
   for(let i=0;i<10;i++){
     const dISO=d.toISOString().slice(0,10);
     try{
-      const snap=await fsDB.collection('kv').doc('tafit:autobackup:'+dISO).get();
+      const snap=await kvCol().doc('tafit:autobackup:'+dISO).get();
       if(snap.exists){ const v=safeParse(snap.data().v,null); if(v&&v.db) out.push({date:dISO, exported:v.exported, students:(v.db.order||[]).length}); }
     }catch(e){}
     d.setDate(d.getDate()-1);
@@ -3557,7 +3740,7 @@ async function recoverLogsForActive(){
   const d=new Date();
   for(let i=0;i<10;i++){
     const dISO=d.toISOString().slice(0,10);
-    try{ const snap=await fsDB.collection('kv').doc('tafit:autobackup:'+dISO).get();
+    try{ const snap=await kvCol().doc('tafit:autobackup:'+dISO).get();
       if(snap.exists){ const p=safeParse(snap.data().v,null); ((p&&p.logs&&p.logs[id])||[]).forEach(function(l){ if(l&&l.date&&!have.has(l.date)&&!dead.has(l.date)) found[l.date]=l; }); } }catch(e){}
     d.setDate(d.getDate()-1);
   }
@@ -3587,7 +3770,7 @@ async function shiftWoForCorePresets(){
     if(!pres.some(function(n){ return n>0; })) continue;
     const K2='tafit:data:'+sid;
     let cloudObj={};
-    try{ const snap=await fsDB.collection('kv').doc(K2).get({source:'server'}); if(snap.exists) cloudObj=safeParse(snap.data().v,{}); }catch(e){ return; /* sin señal: se reintenta la próxima vez */ }
+    try{ const snap=await kvCol().doc(K2).get({source:'server'}); if(snap.exists) cloudObj=safeParse(snap.data().v,{}); }catch(e){ return; /* sin señal: se reintenta la próxima vez */ }
     const localObj=(active===sid)?CACHE:safeParse(localStorage.getItem(K2)||'{}',{});
     const obj=mergeDataObj(localObj,cloudObj);
     const now=Date.now(); let changed=false;
@@ -3611,7 +3794,7 @@ async function restoreSofiMartiWeeks(){
   const st=DB.students[SID]; if(!st||!st.routine||!st.routine.length) return;
   const live=function(o){ return Object.keys(o||{}).filter(function(k){ return k.indexOf('wo_')===0&&o[k]&&!o[k]._del; }); };
   let cloudObj={};
-  try{ const snap=await fsDB.collection('kv').doc(K2).get({source:'server'}); if(snap.exists) cloudObj=safeParse(snap.data().v,{}); }catch(e){ return; /* sin señal: se reintenta la próxima vez */ }
+  try{ const snap=await kvCol().doc(K2).get({source:'server'}); if(snap.exists) cloudObj=safeParse(snap.data().v,{}); }catch(e){ return; /* sin señal: se reintenta la próxima vez */ }
   const localObj=(active===SID)?CACHE:safeParse(localStorage.getItem(K2)||'{}',{});
   const merged=mergeDataObj(localObj,cloudObj);
   if(live(merged).length){ DB._seed.smWeeksRestore20261007=true; await saveDB(); return; }
@@ -3620,7 +3803,7 @@ async function restoreSofiMartiWeeks(){
   for(let i=0;i<10&&!src;i++){
     const dISO=d.toISOString().slice(0,10);
     try{
-      const snap=await fsDB.collection('kv').doc('tafit:autobackup:'+dISO).get();
+      const snap=await kvCol().doc('tafit:autobackup:'+dISO).get();
       if(snap.exists){ const p=safeParse(snap.data().v,null); const dd=p&&p.data&&p.data[SID]; if(dd&&live(dd).length){ src={}; live(dd).forEach(function(k){ src[k]=dd[k]; }); srcLabel='backup automático del '+dISO.split('-').reverse().join('/'); } }
     }catch(e){}
     d.setDate(d.getDate()-1);
@@ -3650,7 +3833,7 @@ async function restoreSofiMartiWeeks(){
 async function restoreAutoBackup(dateISO){
   if(!fsDB) return false;
   try{
-    const snap=await fsDB.collection('kv').doc('tafit:autobackup:'+dateISO).get();
+    const snap=await kvCol().doc('tafit:autobackup:'+dateISO).get();
     if(!snap.exists) return false;
     const p=safeParse(snap.data().v,null);
     if(!p||!p.db||!p.db.order) return false;
@@ -3677,7 +3860,7 @@ function myKeys(){ /* claves que necesita una alumna con link bloqueado */
   return ['tafit:students','tafit:data:'+active,'tafit:logs:'+active,'tafit:logsdel:'+active,'tafit:chat:'+active,'tafit:form:acuerdo:'+active,'tafit:form:anamnesis:'+active];
 }
 function kvQuery(){ /* alumna bloqueada: baja solo lo suyo (mucho más liviano). Profe: baja todo. */
-  const col=fsDB.collection('kv');
+  const col=kvCol();
   if(locked&&active){ try{ return col.where(firebase.firestore.FieldPath.documentId(),'in',myKeys().map(cid).concat([LEGACY_DB_ID])); }catch(e){ return col; } }
   return col;
 }
@@ -3685,7 +3868,14 @@ async function initFirebase(){
   if(typeof firebase==='undefined'||!firebase.initializeApp){ updateSyncUI(false); return; }
   try{
     firebase.initializeApp(FIREBASE_CONFIG);
+    /* 10/10/2026: link viejo sin token → ya no da acceso (ver "Seguridad de datos") */
+    if(LINK_OLD){ showOldLinkScreen(); updateSyncUI(false); return; }
+    /* profe: primero tiene que entrar con su cuenta; sin eso la base no deja leer nada */
+    if(!locked){ const ok=await ensureProfeAuth(); if(!ok){ updateSyncUI(false); return; } }
     fsDB=firebase.firestore();
+    /* celular de alumna: la caché offline de Firestore de versiones viejas guardaba el
+       documento con TODOS los alumnos — se borra una sola vez antes de usarla */
+    if(LINK_TOK){ try{ if(localStorage.getItem('tafit:sec1')!=='1'){ await fsDB.clearPersistence(); localStorage.setItem('tafit:sec1','1'); } }catch(e){} }
     /* caché offline de Firestore: la app abre y lee aunque no haya señal */
     try{ await fsDB.enablePersistence({synchronizeTabs:true}); }catch(e){}
     /* test de escritura (sin bloquear el arranque si no hay señal) */
@@ -3759,7 +3949,9 @@ async function initFirebase(){
       if(changed&&!_fromRemote){ _fromRemote=true; reloadFromRemote().then(function(){ _fromRemote=false; }); }
     });
     /* activar hooks */
-    fireSync=function(k,v){ if(!_fromRemote&&shouldSync(k)) cloudPush(k,v); };
+    fireSync=function(k,v){ if(!_fromRemote&&shouldSync(k)){ cloudPush(k,v); relayOut(k,v); } };
+    /* profe: escuchar los casilleros de los alumnos con link nuevo (ver "Seguridad de datos") */
+    startRelay();
     fireDel=function(k){ if(!_fromRemote&&shouldSync(k)) cloudDel(k); };
     if(navigator.onLine){ updateSyncUI(true); syncBadge(); toast('Sync activado ✓','ok'); }
     else { $('clouddot').className='dot pend'; $('cloudlbl').textContent='Sin señal · guardando acá'; }
@@ -3769,6 +3961,9 @@ async function initFirebase(){
 (async function init(){
   $('clouddot').className='dot';
   $('cloudlbl').textContent='Conectando…';
+  /* 10/10/2026 (seguridad): antes de leer nada del celular */
+  if(LINK_LOCK){ sanitizeStudentDevice(_URLP0.get('a')); if(LINK_OLD) showOldLinkScreen(); }
+  else showGate(gateLogo()+'<div class="ag-p">Cargando…</div>'); /* profe: oculto hasta confirmar la sesión */
   const raw=await Store.get('tafit:students');
   if(raw){ const p=safeParse(raw,null); if(p&&p.order&&p.order.length) DB=p; }
   if(!DB.order||!DB.order.length){ DB={ order:['omar'], students:{ omar:{ name:'Omar', routine:tmplOmar(), theme:'m' } }, settings:{pin:""}, _seed:{} }; }
@@ -6782,7 +6977,10 @@ async function copyMyLink(){ const url=location.origin+location.pathname.replace
   try{ await navigator.clipboard.writeText(url); toast('Tu link quedó copiado ✓','ok'); }catch(e){ uiPrompt('Tu link de TaFit:', url); } }
 async function copyStudentLink(id){
   const st=DB.students[id]; if(!st) return;
-  const url=location.origin+location.pathname+'?a='+encodeURIComponent(id)+'&lock=1';
+  /* 10/10/2026: cada alumno tiene su token secreto; sin él el link no abre nada */
+  if(!st.tok){ st.tok=genTok(); await saveDB(); }
+  try{ if(!RELAY.seeded[id]) await seedPub(id); watchPub(id); }catch(e){}
+  const url=location.origin+location.pathname+'?a='+encodeURIComponent(id)+'&t='+encodeURIComponent(st.tok)+'&lock=1';
   const shareData={ title:'TaFit · '+st.name, text:'Hola '+st.name+'! Acá está tu link de TaFit 💪', url:url };
   try{
     if(navigator.share && navigator.canShare && navigator.canShare(shareData)){
@@ -6962,7 +7160,7 @@ function renderEdit(){
       return `<div class="stu-row"><span class="sn">${esc(s.name)}</span><span class="tg">${s.theme==='f'?'🌸':'🔵'}${duo?' 👯':''}${s.health&&s.health.enabled?' ⚕':''}</span>${btns}</div>`;
     };
     SEC('alumnos','Alumnos',`<p>Cada alumno/dúo tiene su propia rutina, progresión, registro y fotos.</p>`+
-      `<div class="my-link"><div><b>🔗 Tu link de la app (profe)</b><span>${esc(location.origin+location.pathname.replace(/index\.html$/,''))}</span></div><button class="lnk" data-act="copyMyLink" title="Copiar/compartir tu link">Copiar</button></div>`+
+      `<div class="my-link"><div><b>🔗 Tu link de la app (profe)</b><span>${esc(location.origin+location.pathname.replace(/index\.html$/,''))}</span></div><button class="lnk" data-act="copyMyLink" title="Copiar/compartir tu link">Copiar</button><button class="lnk" data-act="profeLogout" title="Cerrar la sesión de profe en este dispositivo">Salir</button></div>`+
       activeIds.map(id=>rowHtml(id,false)).join('')+
       `<div class="edit-actions mt8"><button data-act="addStudent">+ Agregar alumno / dúo</button></div>`+
       (archivedIds.length?`<details class="tacc mt8" style="border-top:1px solid var(--line);padding-top:8px"><summary><h2 style="font-size:13px">📦 Archivados (${archivedIds.length})</h2><span class="tchev">▾</span></summary><div class="tacc-body"><p style="font-size:11.5px;color:var(--mute)">Ya no entrenan por ahora, pero sus rutinas y datos quedan a salvo — "Reactivar" los vuelve a la lista de arriba tal cual estaban.</p>${archivedIds.map(id=>rowHtml(id,true)).join('')}</div></details>`:''));
@@ -8042,7 +8240,7 @@ document.addEventListener('click',e=>{
     case 'planToday': planToday(); break;
     case 'saveTelefono': saveTelefono(); break;
     case 'waReminder': waReminder(el.dataset.id); break;
-    case 'copyMyLink': copyMyLink(); break;
+    case 'copyMyLink': copyMyLink(); break; case 'profeLogout': profeLogout(); break;
     case 'yaTransferi': yaTransferi(mi); break;
     case 'copyAlias': copyAlias(); break;
     case 'cobroPrev': cobroMes=ymAdd(cobroMes||ymNow(),-1); cobroEditId=null; renderPagos(); break;
