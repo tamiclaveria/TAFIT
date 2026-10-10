@@ -3921,7 +3921,7 @@ async function initFirebase(){
       if(_studentsMerged){ /* llegó la versión real de la nube: los parches de una sola vez que esa versión todavía no tenga se aplican ENCIMA de ella (nunca de la copia vieja de este celular). Lo que corrió al abrir sobre la copia local era provisorio y no cuenta. */ _provisionalSeeds=new Set(); try{ if(window.__runSeeds) window.__runSeeds(); }catch(e){ console.warn('Seeds:',e); } try{ if(urlLockPending) await tryResolveLockedLink(); else render(); }catch(e){} } else if(urlLockPending){ try{ await tryResolveLockedLink(); }catch(e){} } }catch(e){ console.warn('Pull:',e); }
     /* las transcriptas de la nube que este celular no tenía, también a la memoria
        (antes quedaban solo en localStorage y el próximo guardado las pisaba) */
-    try{ if(active&&DB.students[active]){ LOGS=mergeLogs(LOGS,safeParse(localStorage.getItem('tafit:logs:'+active)||'[]',[])); CACHE=mergeDataObj(CACHE,safeParse(localStorage.getItem('tafit:data:'+active)||'{}',{})); } }catch(e){}
+    try{ if(active&&DB.students[active]){ LOGS=mergeLogs(LOGS,safeParse(localStorage.getItem('tafit:logs:'+active)||'[]',[])); const _lsD=safeParse(localStorage.getItem('tafit:data:'+active)||'{}',{}); Object.keys(_lsD).forEach(function(k){ if(!(k in CACHE)) CACHE[k]=_lsD[k]; }); /* 10/10/2026: celular nuevo — también las cargas que no son variantes semanales */ CACHE=mergeDataObj(CACHE,_lsD); } }catch(e){}
     /* recuperar las semanas de Sofi/Marti si quedaron vacías (ver restoreSofiMartiWeeks) */
     try{ if(!locked) await restoreSofiMartiWeeks(); }catch(e){ console.warn('SM weeks:',e); }
     try{ if(!locked) await shiftWoForCorePresets(); }catch(e){ console.warn('WO shift:',e); }
@@ -4015,7 +4015,7 @@ async function initFirebase(){
      'tafit:data:lola-anto'), separado de DB, así que no se puede sembrar dentro de
      runSeeds() — se hace acá, una sola vez, mezclando con lo que ya haya (nunca pisa
      series reales que hayan cargado). */
-  if(!DB._seed.lolaAntoProg){
+  if(!LINK_TOK&&!DB._seed.lolaAntoProg){
     DB._seed.lolaAntoProg=true;
     try{
       const existingProg=safeParse(await Store.get('tafit:data:lola-anto')||'{}',{});
@@ -4065,6 +4065,10 @@ function urgentFixSofiMarti20260925(){
       en el historial y Tami pueda deshacerlo ella misma con un toque si algo salió mal.
    Nunca escribir `st.routine = algo()` sin las dos cosas de arriba. */
 function runSeeds(){
+  /* 10/10/2026: en el celular de una alumna (link nuevo) NO corren los parches de fábrica:
+     corrían antes de que llegaran sus datos reales y podían crear alumnos o sesiones falsas
+     (ej. una sesión de Jus/Yesi con fecha de hoy). Todo lo suyo viene de la nube. */
+  if(LINK_TOK) return;
   if(!DB._seed) DB._seed={};
   if(!DB._seed.delfina){ if(!DB.students['delfina']){ DB.students['delfina']=delfinaStudent(); DB.order.push('delfina'); } DB._seed.delfina=true; }
   if(!DB._seed.delfina_d3){ const d=DB.students['delfina']; if(d&&d.routine&&d.routine.length<3) d.routine.push(delfinaDay3()); DB._seed.delfina_d3=true; }
