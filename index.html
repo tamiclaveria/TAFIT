@@ -1055,6 +1055,20 @@
   #authgate button{font-size:16px;font-weight:700;padding:12px;border-radius:10px;border:0;background:#E3C3A5;color:#241F18;cursor:pointer}
   #authgate button:disabled{opacity:.6}
   #authgate .ag-err{min-height:18px;font-size:13px;color:#f2a29b}
+  #privbox{position:fixed;inset:0;z-index:9997;background:rgba(10,9,8,.72);display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px 16px}
+  #privbox.show{display:flex}
+  #privbox .pv-card{position:relative;background:var(--card);color:var(--ink);max-width:560px;width:100%;border-radius:14px;padding:22px 20px 18px;font-size:14px;line-height:1.55;box-shadow:0 12px 40px rgba(0,0,0,.4)}
+  #privbox h2{font-size:19px;margin:0 30px 2px 0}
+  #privbox h3{font-size:15px;margin:16px 0 4px}
+  #privbox p,#privbox li{margin:4px 0}
+  #privbox ul{padding-left:18px;margin:4px 0}
+  #privbox .pv-small{font-size:12px;color:var(--mute)}
+  #privbox .pv-legal{font-size:12px;color:var(--mute);border-top:1px solid var(--line);padding-top:10px;margin-top:16px}
+  #privbox .pv-x{position:absolute;top:12px;right:12px;border:0;background:none;font-size:18px;color:var(--mute);cursor:pointer}
+  #privbox .pv-ok{display:block;width:100%;margin-top:14px;padding:12px;border:0;border-radius:10px;background:var(--accent);color:#241F18;font-weight:700;font-size:15px;cursor:pointer}
+  footer.legal .lnk-priv{background:none;border:0;padding:0;margin-top:2px;font:inherit;color:var(--mute);text-decoration:underline;cursor:pointer}
+  .form-priv{font-size:13px;line-height:1.5;background:var(--tint2);border-radius:10px;padding:10px 12px}
+  .form-priv button{margin-top:6px;background:none;border:0;padding:0;font:inherit;font-weight:700;text-decoration:underline;color:var(--ink);cursor:pointer}
   footer.legal{text-align:center;font-size:11px;line-height:1.4;color:var(--mute);padding:10px 16px 18px;border-top:1px solid var(--line)}
   @keyframes bootpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
 </style>
@@ -1076,7 +1090,7 @@
   </header>
   <nav id="nav"></nav>
   <main id="main"><div class="focus">Cargando…</div></main>
-  <footer class="legal">© 2026 Tamara Claveria · TaFiT, marca en trámite · Todos los derechos reservados</footer>
+  <footer class="legal">© 2026 Tamara Claveria · TaFiT, marca en trámite · Todos los derechos reservados<br><button class="lnk-priv" data-act="showPrivacy">Política de privacidad</button></footer>
 </div>
 <div class="toast" id="toast"></div>
 <div id="rest"><span>⏱ Descanso</span><b id="restnum">0 s</b><button data-act="restStop">Saltar</button></div>
@@ -3186,6 +3200,7 @@ const FORM_ACUERDO=[
 ];
 const FORM_ANAMNESIS=[
   {title:'📋 Datos personales',accordion:true,fields:[
+    {k:'_priv',l:'',type:'privinfo',full:1},
     {k:'nombre',l:'Nombre',type:'text',req:1},{k:'apellido',l:'Apellido',type:'text',req:1},
     {k:'fecha_nac',l:'Fecha de nacimiento',type:'date'},{k:'edad',l:'Edad',type:'number'},
     {k:'dni',l:'DNI',type:'text'},{k:'nacionalidad',l:'Nacionalidad',type:'text'},
@@ -3235,6 +3250,7 @@ const FORM_ANAMNESIS=[
     {k:'extra',l:'¿Algo más que quieras contarnos?',type:'textarea',full:1},
   ]},
   {title:'✍ Declaración y firma',accordion:true,fields:[
+    {k:'consent_datos',l:'Leí la Política de privacidad y doy mi consentimiento libre, expreso e informado para que Tamara Claveria trate los datos de esta ficha, incluidos los de salud que decida informar, con las finalidades indicadas.',type:'check',req:1,full:1},
     {k:'lugar',l:'Lugar',type:'text'},{k:'fecha_firma',l:'Fecha',type:'date',req:1},
     {k:'firma',l:'Nombre completo (firma digital)',type:'text',req:1,full:1},
   ]},
@@ -3254,7 +3270,9 @@ function renderFormHTML(schema,data,type,editable){
       const val=data[f.k]||'';
       const cls='form-field'+(f.full?' full':'');
       const req=f.req?'<span class="req"> *</span>':'';
-      if(f.type==='fixed'){
+      if(f.type==='privinfo'){
+        h+=`<div class="${cls}"><div class="form-priv">🔒 Tus datos los ve solo tu profe y se usan para entrenarte de forma segura y actuar ante una emergencia. Las preguntas de salud son voluntarias. Al final de la ficha te pido tu consentimiento.<br><button type="button" data-act="showPrivacy">Leer la política de privacidad</button></div></div>`;
+      } else if(f.type==='fixed'){
         h+=`<div class="${cls}"><div class="form-lbl">${esc(f.l)}</div><div class="form-view-val" style="font-weight:600">${esc(f.value)}</div></div>`;
       } else if(!editable){
         let display=val;
@@ -3330,6 +3348,8 @@ async function handleSaveForm(type){
   const container=$('formContainer');
   if(!container) return;
   const data=collectFormData(container);
+  /* 14/10/2026 (Ley 25.326): la alumna tiene que dar su consentimiento para guardar la ficha */
+  if(type==='anamnesis'&&locked&&!data.consent_datos){ toast('Para guardar, marcá el consentimiento al final de la ficha','warn'); const c=container.querySelector('[data-fk="consent_datos"]'); if(c){ try{ c.closest('.form-body').style.display=''; c.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){} } return; }
   await saveForm(type,data);
   await autoBackup('form:'+type);
   toast(type==='acuerdo'?'Acuerdo guardado ✓':'Anamnesis guardada ✓','ok');
@@ -3368,6 +3388,43 @@ const CLOUD_DB_ID='tafit:students:v2', LEGACY_DB_ID='tafit:students';
 function cid(k){ return k==='tafit:students'?CLOUD_DB_ID:k; }
 function fromCid(id){ if(id===CLOUD_DB_ID) return 'tafit:students'; if(id===LEGACY_DB_ID) return null; return id; }
 function mirrorLegacyDB(v){ try{ if(fsDB&&!PUB_TOK) kvCol().doc(LEGACY_DB_ID).set({v:v,ts:firebase.firestore.FieldValue.serverTimestamp(),dev:DEVICE_ID}).catch(function(){}); }catch(e){} }
+/* ==== Política de privacidad (14/10/2026) — Ley 25.326 de Protección de Datos Personales ==== */
+const PRIVACY_HTML=`
+<h2>Política de privacidad de TaFiT</h2>
+<p class="pv-small">Última actualización: 14 de octubre de 2026</p>
+<h3>¿Quién es responsable de tus datos?</h3>
+<p>Tamara Claveria, entrenadora y titular de TaFiT. Soy la única persona que accede a los datos que cargás en la app.</p>
+<h3>¿Qué datos se guardan?</h3>
+<ul>
+<li><b>Identificación y contacto:</b> nombre, apellido, fecha de nacimiento, edad, DNI (opcional), nacionalidad, domicilio, email, teléfono y ocupación.</li>
+<li><b>Contacto de emergencia y obra social / prepaga.</b></li>
+<li><b>Datos de salud (voluntarios):</b> condiciones médicas, medicamentos, cirugías, lesiones, antecedentes familiares y cuestionario de aptitud física (PAR-Q).</li>
+<li><b>Hábitos y objetivos:</b> actividad física, sueño, estrés, alimentación y metas de entrenamiento.</li>
+<li><b>Entrenamiento:</b> rutinas, pesos, repeticiones, sesiones realizadas, asistencia y mensajes del chat.</li>
+<li><b>Pagos:</b> registro de cuotas y método de pago (nunca datos de tarjetas).</li>
+<li><b>Fotos:</b> solo si las autorizás en el Acuerdo de clases.</li>
+</ul>
+<h3>¿Para qué se usan?</h3>
+<ul>
+<li>Conocer tu condición antes de entrenar y adaptar el plan para que sea seguro.</li>
+<li>Poder actuar ante una emergencia: avisar a tu contacto de emergencia y dar a un servicio médico o ambulancia la información que necesite (obra social, condiciones, medicación).</li>
+<li>Hacer el seguimiento de tu progreso, organizar las clases y administrar los pagos.</li>
+<li>Comunicarme con vos.</li>
+</ul>
+<p>Tus datos <b>no se venden ni se comparten</b> con nadie, salvo en una emergencia médica o si una ley lo exige.</p>
+<h3>Datos de salud: son voluntarios</h3>
+<p>Nadie está obligado a dar datos de salud. Podés no completar esas preguntas; en ese caso no voy a poder adaptar el entrenamiento a tu condición y, por seguridad, puede que algunas actividades no sean recomendables. Para cargarlos te pido tu consentimiento expreso en la ficha de Anamnesis. Para que la ficha esté completa solo son obligatorios tu nombre, email y teléfono.</p>
+<h3>¿Dónde se guardan y cómo se protegen?</h3>
+<p>Se almacenan en servidores de Google (Firebase), que pueden estar ubicados fuera de Argentina. La base de datos está cerrada: solo yo, con mi cuenta y contraseña, puedo ver los datos de todos; cada alumna/o entra con un link personal que abre únicamente sus propios datos. <b>No compartas tu link</b>: funciona como una llave. Si lo perdiste o lo compartiste por error, avisame y te genero uno nuevo.</p>
+<h3>¿Cuánto tiempo se guardan?</h3>
+<p>Mientras entrenes conmigo y un tiempo razonable después, para poder retomar tu seguimiento. Podés pedir que se borren cuando quieras.</p>
+<h3>Tus derechos</h3>
+<p>Podés pedirme ver tus datos, corregirlos, actualizarlos o borrarlos. Te respondo un pedido de acceso dentro de los 10 días corridos y uno de corrección o borrado dentro de los 5 días hábiles. Escribime por el chat de la app o por WhatsApp.</p>
+<p class="pv-legal">El titular de los datos personales tiene la facultad de ejercer el derecho de acceso a los mismos en forma gratuita a intervalos no inferiores a seis meses, salvo que se acredite un interés legítimo al efecto conforme lo establecido en el artículo 14, inciso 3 de la Ley Nº 25.326. La AGENCIA DE ACCESO A LA INFORMACIÓN PÚBLICA, en su carácter de Órgano de Control de la Ley Nº 25.326, tiene la atribución de atender las denuncias y reclamos que interpongan quienes resulten afectados en sus derechos por incumplimiento de las normas vigentes en materia de protección de datos personales.</p>
+`;
+function showPrivacy(){ let o=document.getElementById('privbox'); if(!o){ o=document.createElement('div'); o.id='privbox'; document.body.appendChild(o); o.addEventListener('click',function(e){ if(e.target===o) closePrivacy(); }); }
+  o.innerHTML='<div class="pv-card"><button class="pv-x" data-act="closePrivacy" aria-label="Cerrar">✕</button>'+PRIVACY_HTML+'<button class="pv-ok" data-act="closePrivacy">Entendido</button></div>'; o.classList.add('show'); }
+function closePrivacy(){ const o=document.getElementById('privbox'); if(o) o.classList.remove('show'); }
 /* ==== Seguridad de datos (10/10/2026) ====
    Antes, la base de Firebase estaba abierta (cualquiera podía leerla) y cada alumna, al
    abrir su link, bajaba a su celular el documento con TODOS los alumnos (salud, teléfono,
@@ -8166,6 +8223,8 @@ document.addEventListener('click',e=>{
     case 'accordion': openEx=(openEx===+el.dataset.i)?-1:+el.dataset.i; renderApp(); break;
     case 'editAccordion': syncFromForms(); openEditEx=(openEditEx===+el.dataset.i)?-1:+el.dataset.i; renderEdit(); break;
     case 'lock': toggleTrainer(); break;
+    case 'showPrivacy': showPrivacy(); break;
+    case 'closePrivacy': closePrivacy(); break;
     case 'addStudent': addStudent(); break;
     case 'renameStudent': renameStudent(id); break;
     case 'deleteStudent': deleteStudent(id); break;
