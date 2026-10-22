@@ -382,6 +382,9 @@
   .routine-hist-row{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:9px;padding:8px 11px}
   .routine-hist-row b{display:block;font-size:12px;color:var(--navy)}
   .routine-hist-row small{font-size:11px;color:var(--mute);line-height:1.4}
+  .rh-btns{display:flex;gap:6px;flex:none}.routine-hist-row button.rh-del{border-color:var(--line);color:var(--mute);padding:6px 9px}
+  .rh-clear{margin-top:4px;align-self:flex-start;font-family:inherit;border:1px solid #B5523B;background:var(--card);color:#B5523B;border-radius:8px;padding:7px 12px;font-size:11.5px;font-weight:700;cursor:pointer}
+  .rh-note{font-size:11px;color:var(--mute);line-height:1.4}
   .routine-hist-row button{border:1px solid var(--accentDk);background:var(--card);color:var(--accentDk);border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:700;cursor:pointer;flex:none}
   .medidas-hist{margin-top:8px}
   .med-row{display:flex;gap:10px;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid var(--line);font-size:12px;color:var(--navy)}
@@ -1177,7 +1180,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-129'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-130'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -2917,6 +2920,17 @@ function snapshotRoutine(studentId,reason){
   st.routineVersions.push({ at:new Date().toISOString(), reason:reason||'cambio', routine:cp(st.routine||[]) });
   if(st.routineVersions.length>8) st.routineVersions=st.routineVersions.slice(-8);
 }
+/* 22/10/2026: borrar versiones del historial (una o todas). Solo saca las fotos guardadas:
+   la rutina actual y la Transcripta no se tocan. */
+async function delRoutineVersion(studentId,idx){
+  const st=DB.students[studentId]; if(!st||!st.routineVersions||!st.routineVersions[idx]) return;
+  if(!await uiConfirm('¿Borrar la versión del '+fmtShort(st.routineVersions[idx].at)+' del historial? No se puede deshacer. La rutina actual no cambia.')) return;
+  st.routineVersions=st.routineVersions.filter(function(_,i){ return i!==idx; });
+  window._rhOpen=true; await saveDB(); toast('Versión borrada ✓','ok'); renderEdit(); }
+async function clearRoutineHistory(studentId){
+  const st=DB.students[studentId]; if(!st||!(st.routineVersions||[]).length) return;
+  if(!await uiConfirm('¿Borrar TODO el historial de la rutina de '+st.name+' ('+st.routineVersions.length+' versiones)? No se puede deshacer. La rutina actual y la Transcripta no cambian.')) return;
+  st.routineVersions=[]; await saveDB(); toast('Historial borrado ✓','ok'); renderEdit(); }
 async function restoreRoutineVersion(studentId,idx){
   const st=DB.students[studentId]; if(!st||!st.routineVersions||!st.routineVersions[idx]) return;
   const v=st.routineVersions[idx];
@@ -7834,10 +7848,11 @@ function renderEdit(){
     let histHtml='<summary>🕓 Historial de la rutina ('+rv.length+')</summary><div class="routine-hist-body">';
     for(let i=rv.length-1;i>=0;i--){
       const v=rv[i];
-      histHtml+=`<div class="routine-hist-row"><div><b>${esc(fmtShort(v.at))}</b><small>${esc(v.reason||'')} · ${v.routine.length} día(s)</small></div><button type="button" data-act="restoreRoutineVersion" data-i="${i}">↩ Restaurar</button></div>`;
+      histHtml+=`<div class="routine-hist-row"><div><b>${esc(fmtShort(v.at))}</b><small>${esc(v.reason||'')} · ${v.routine.length} día(s)</small></div><div class="rh-btns"><button type="button" data-act="restoreRoutineVersion" data-i="${i}">↩ Restaurar</button><button type="button" class="rh-del" data-act="delRoutineVersion" data-i="${i}" title="Borrar esta versión">🗑</button></div></div>`;
     }
-    histHtml+='</div>';
+    histHtml+='<button type="button" class="rh-clear" data-act="clearRoutineHistory">🗑 Borrar todo el historial</button><div class="rh-note">Borrar el historial no cambia la rutina actual ni lo que tu alumno/a registró en la Transcripta.</div></div>';
     histEl.innerHTML=histHtml;
+    if(window._rhOpen){ histEl.open=true; window._rhOpen=false; }
     m.appendChild(histEl);
   }
 }
@@ -8653,6 +8668,8 @@ document.addEventListener('click',e=>{
     case 'removeRule': removeRule(i); break;
     case 'saveRoutine': saveRoutine(); break;
     case 'restoreRoutineVersion': restoreRoutineVersion(active,i); break;
+    case 'delRoutineVersion': delRoutineVersion(active,i); break;
+    case 'clearRoutineHistory': clearRoutineHistory(active); break;
     case 'saveWeeks': saveWeeks(); break;
     case 'saveUnlockWeek': { const sel=$('unlockWeekSel'); if(sel){ DB.students[active].unlockWeek=+sel.value; saveDB(); toast('Desbloqueo guardado ✓ · ya puede entrar a esa semana','ok'); } break; }
     case 'saveHealth': saveHealth(); break;
