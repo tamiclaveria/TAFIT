@@ -3705,9 +3705,13 @@ function syncBadge(){ if(!fsDB) return; if(PENDING.length){ $('clouddot').classN
 function isLogsKey(k){ return typeof k==='string'&&k.indexOf('tafit:logs:')===0; }
 function isLogsDelKey(k){ return typeof k==='string'&&k.indexOf('tafit:logsdel:')===0; }
 function logsDelFor(id){ try{ return safeParse(localStorage.getItem('tafit:logsdel:'+id)||'[]',[]); }catch(e){ return []; } }
+/* 22/10/2026 · corrección puntual autorizada por Tami: sesión de running de "Yo" del 20/10
+   cargada como 148 km (faltó la coma) → 1,48 km. Solo si coincide exactamente con lo verificado
+   en el backup del 22/10; se aplica en cada celular al leer, así ninguna copia vieja lo revierte. */
+function fixKnownLog(l){ if(l&&l.date==='2026-10-20T14:30:44.479Z'&&l.dayName==='Día 2'&&l.ses&&l.ses.tipo==='run'&&l.ses.km==='148'&&l.ses.min==='25'){ l=Object.assign({},l); l.ses=Object.assign({},l.ses,{km:'1,48'}); } return l; }
 function unionLogsArr(a,b,tomb){
   const dead=new Set(tomb||[]); const seen=new Set(); const out=[];
-  (a||[]).concat(b||[]).forEach(function(l){ if(!l||!l.date||dead.has(l.date)||seen.has(l.date)) return; seen.add(l.date); out.push(l); });
+  (a||[]).concat(b||[]).forEach(function(l){ if(!l||!l.date||dead.has(l.date)||seen.has(l.date)) return; seen.add(l.date); out.push(fixKnownLog(l)); });
   out.sort(function(x,y){ return new Date(y.date)-new Date(x.date); });
   return out;
 }
@@ -4973,7 +4977,7 @@ async function clearStaleUnlock(){
   while(natural<W.length-1 && weekDone(natural)) natural++;
   if(natural>=st.unlockWeek){ st.unlockWeek=0; await saveDB(); }
 }
-async function loadStudent(){ CACHE=safeParse(await Store.get('tafit:data:'+active)||'{}',{}); migrateLegacyWeeks(); LOGS=safeParse(await Store.get('tafit:logs:'+active)||'[]',[]); CHAT=safeParse(await Store.get('tafit:chat:'+active)||'[]',[]); openEx=-1;
+async function loadStudent(){ CACHE=safeParse(await Store.get('tafit:data:'+active)||'{}',{}); migrateLegacyWeeks(); { const _raw=safeParse(await Store.get('tafit:logs:'+active)||'[]',[]); LOGS=_raw.map(fixKnownLog); if(LOGS.some(function(l,i){ return l!==_raw[i]; })) await Store.set('tafit:logs:'+active,JSON.stringify(LOGS)); } CHAT=safeParse(await Store.get('tafit:chat:'+active)||'[]',[]); openEx=-1;
   await clearStaleUnlock();
   /* recordar dónde quedó: integrante, día y semana */
   let pos={}; try{ pos=safeParse(localStorage.getItem('tafit:pos:'+active)||'{}',{}); }catch(e){}
