@@ -384,6 +384,7 @@
   .routine-hist-row small{font-size:11px;color:var(--mute);line-height:1.4}
   .rh-btns{display:flex;gap:6px;flex:none}.routine-hist-row button.rh-del{border-color:var(--line);color:var(--mute);padding:6px 9px}
   .rh-clear{margin-top:4px;align-self:flex-start;font-family:inherit;border:1px solid #B5523B;background:var(--card);color:#B5523B;border-radius:8px;padding:7px 12px;font-size:11.5px;font-weight:700;cursor:pointer}
+  .ses-sub{display:block;font-family:inherit;font-size:12px;font-weight:700;color:var(--accentDk);margin-top:3px}
   .rh-note{font-size:11px;color:var(--mute);line-height:1.4}
   .routine-hist-row button{border:1px solid var(--accentDk);background:var(--card);color:var(--accentDk);border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:700;cursor:pointer;flex:none}
   .medidas-hist{margin-top:8px}
@@ -5308,7 +5309,16 @@ function zonasHTML(edad){ const fc=edad?220-edad:null;
 function sesKey(){ return 'ses|'+day+'|m'+(isDuo()?member:0); }
 function sesVal(){ const v=CACHE[sesKey()]; return (v&&wOf(v)===+week)?v:{}; }
 function updSes(f,val){ const k=sesKey(); const cur=CACHE[k]; const v=(cur&&wOf(cur)===+week)?Object.assign({},cur):{}; v[f]=String(val||'').trim(); v._w=+week; CACHE[k]=v; queueSave(); const rr=$('sesRitmo'); if(rr) rr.textContent=ritmoTxt(v); }
-function ritmoTxt(v){ const km=inf2Num(v.km), mn=inf2Num(v.min); if(!(km>0&&mn>0)) return ''; const p=mn/km; const mm=Math.floor(p), ss=Math.round((p-mm)*60); return 'Ritmo: '+mm+':'+String(ss).padStart(2,'0')+' min/km'; }
+/* 22/10/2026: en la Transcripta, un día de running/natación/movilidad muestra su plan (zonas,
+   series o ejercicios), no la lista de ejercicios de gimnasio que quedó guardada de antes. */
+function sesTransDayHTML(d){ const t=sesTpl(d.ses||sesDefault(d.type))||sesTpl(sesDefault(d.type)); if(!t) return '';
+  const ic=t.tipo==='swim'?'🏊':t.tipo==='mob'?'🧘':'🏃'; let body='';
+  if(t.tipo==='run') body=t.bl.map(function(b){ if(b.rep) return `<div class="trow"><div class="tn">${b.rep} veces: ${b.bl.map(function(x){ return x.min+'′ '+esc(x.n.toLowerCase())+` <span class="zt" style="background:${ZONAS[x.z-1].c}">Z${x.z}</span>`; }).join(' + ')}</div></div>`; return `<div class="trow"><div class="tn">${esc(b.n)} <span class="zt" style="background:${ZONAS[b.z-1].c}">Z${b.z}</span></div><div class="tv">${b.min}′</div></div>`; }).join('');
+  else if(t.tipo==='swim') body=t.ser.map(function(x){ return `<div class="trow"><div class="tn">${esc(x.q)}${x.p?`<small>pausa ${x.p}″</small>`:''}</div><div class="tv">${x.rep>1?x.rep+' × ':''}${x.m} m</div></div>`; }).join('');
+  else body=t.mov.map(function(n){ return `<div class="trow"><div class="tn">${esc(n)}</div><div class="tv">${MOV_SEG}″</div></div>`; }).join('');
+  const tot=t.tipo==='swim'?swimTotal(t)+' m':t.tipo==='mob'?t.mov.length+' ejercicios':sesMins(t)+' min';
+  return `<details class="tcard tacc"><summary><h2>${esc(d.day)}<small class="ses-sub">${ic} ${esc(t.n)} · ${tot}</small></h2><span class="tchev">▾</span></summary><div class="tacc-body">${body}</div></details>`; }
+function ritmoTxt(v){ const km=inf2Num(v.km), mn=inf2Num(v.min); if(!(km>0&&mn>0)) return ''; const p=mn/km; if(p<2&&km>=10) return '⚠️ Revisá la distancia: ¿faltó la coma? (ej: 1,48 km)'; const mm=Math.floor(p), ss=Math.round((p-mm)*60); return 'Ritmo: '+mm+':'+String(ss).padStart(2,'0')+' min/km'; }
 function exVidByName(n){ const it=exLibList().find(function(x){ return inf2Norm(x.n)===inf2Norm(n); }); return it&&it.vid?it.vid:YT(n); }
 function renderSesDay(m,d){
   const t=sesTpl(d.ses||sesDefault(d.type))||sesTpl(sesDefault(d.type)); const v=sesVal();
@@ -7198,7 +7208,7 @@ function renderTrans(){
     const r=cycle.routine||[], W=cycle.weeksArr||DEFAULT_WEEKS;
 
     let inner='';
-    r.forEach(d=>{ inner+=`<details class="tcard tacc"><summary><h2>${esc(d.day)}</h2><span class="tchev">▾</span></summary><div class="tacc-body">`+d.ex.map(ex=>`<div class="trow"><div class="tn">${esc(ex.n)}<small>${ex.alt?'alt: '+esc(ex.alt):''}${ex.rest?(ex.alt?' · ':'')+'⏱ '+esc(ex.rest):''}</small></div><div class="tv">${ex.s}×${esc(ex.r)}<br>${objLabel(ex)}</div></div>`).join('')+`</div></details>`; });
+    r.forEach(d=>{ if(isSesDay(d)){ inner+=sesTransDayHTML(d); return; } inner+=`<details class="tcard tacc"><summary><h2>${esc(d.day)}</h2><span class="tchev">▾</span></summary><div class="tacc-body">`+d.ex.map(ex=>`<div class="trow"><div class="tn">${esc(ex.n)}<small>${ex.alt?'alt: '+esc(ex.alt):''}${ex.rest?(ex.alt?' · ':'')+'⏱ '+esc(ex.rest):''}</small></div><div class="tv">${ex.s}×${esc(ex.r)}<br>${objLabel(ex)}</div></div>`).join('')+`</div></details>`; });
 
     inner+=`<details class="tcard tacc"><summary><h2>Progresión (${W.length} semanas)</h2><span class="tchev">▾</span></summary><div class="tacc-body prog-list">${W.map(w=>`<p><b>${esc(w.t)} · ${esc(w.n)}</b> — ${esc(w.d)}</p>`).join('')}</div></details>`;
 
