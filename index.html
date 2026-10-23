@@ -394,6 +394,9 @@
   .rec-all{padding:0 12px 10px}.rec-all .rec-row{border-top:1px solid #E8DFD0}.rec-tot{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px;text-align:center}.rec-tot div{background:#fff;border-radius:10px;padding:8px 2px}.rec-tot b{display:block;font-family:Georgia,serif;font-size:18px}.rec-tot span{font-size:10px;color:var(--mute)}
   .sum-btns button:first-child{background:#241F18}.story-box{max-width:360px;width:100%;text-align:center}.story-box img{width:100%;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.6)}.story-dl{flex:1;font-weight:800;font-size:13px;border-radius:12px;padding:12px 6px;background:var(--accentDk);color:#fff;text-decoration:none}
   #storyPrev{z-index:97}
+  .cin-chip{display:inline-block;font-size:10.5px;font-weight:800;background:#241F18;color:#F2ECE0;border-radius:6px;padding:1px 6px;margin-left:4px;white-space:nowrap}
+  .cin-vel{background:#fff;border:1.5px solid #E8DFD0;border-radius:12px;padding:10px 12px;margin:0 0 10px}.cin-vel.new{border-color:var(--accentDk);background:#FAF7F2}.cin-vel .cv-grid label{font-size:11.5px}
+  .sp-cin{display:inline-flex;gap:8px;align-items:baseline;background:#241F18;color:#F2ECE0;border-radius:12px;padding:8px 16px;margin:4px 0 2px;font-size:14px}.sp-cin b{font-family:Georgia,serif;font-size:28px;color:#E3C3A5}.sp-cin span{opacity:.5}
   .rh-note{font-size:11px;color:var(--mute);line-height:1.4}
   .routine-hist-row button{border:1px solid var(--accentDk);background:var(--card);color:var(--accentDk);border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:700;cursor:pointer;flex:none}
   .medidas-hist{margin-top:8px}
@@ -1190,7 +1193,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-131'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-132'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -2646,7 +2649,7 @@ function libAccHTML(items,rowFn,opts){
   LIB_ELEM.forEach(function(x){ const sub=items.filter(function(it){ return x[1].test(it.n||''); }); if(!sub.length) return; sub.forEach(function(it){ tot.add(it.id); }); el+=acc(x[0],sub,sub.map(rowFn).join(''),'sub',openAll&&false); });
   if(el) h+=`<details class="lib-acc elem"><summary><span>🧰 Por elemento</span><b>${tot.size}</b><i>▾</i></summary>${el}</details>`;
   if(opts.sesiones){ /* 15/10/2026: sesiones armadas (running, natación, movilidad) */
-    const sec=function(tipo,tit){ const ts=SES_TPL.filter(function(t){ return t.tipo===tipo; }); let inner=''; ['Principiante','Intermedio','Avanzado','Todos'].forEach(function(nv){ const g=ts.filter(function(t){ return t.niv===nv; }); if(!g.length) return; inner+=acc(nv==='Todos'?'Para todos':nv,g,g.map(function(t){ return `<div class="lib-row"><div class="ln"><div class="nm">${esc(t.n)}</div><div class="tp">${t.tipo==='swim'?swimTotal(t)+' m':sesMins(t)+' min'} · ${t.bl?t.bl.map(function(b){ return b.rep?b.rep+'×('+b.bl.map(function(x){ return x.min+'′ Z'+x.z; }).join('+')+')':b.min+'′ Z'+b.z; }).join(' → '):t.ser?t.ser.map(function(x){ return (x.rep>1?x.rep+'×':'')+x.m+' '+x.q.toLowerCase(); }).join(' · '):t.mov.join(' · ')}</div></div></div>`; }).join(''),'sub',false); }); return acc(tit,ts,inner,'elem',false); };
+    const sec=function(tipo,tit){ const ts=SES_TPL.filter(function(t){ return t.tipo===tipo; }); let inner=''; ['Principiante','Intermedio','Avanzado','Todos'].forEach(function(nv){ const g=ts.filter(function(t){ return t.niv===nv; }); if(!g.length) return; inner+=acc(nv==='Todos'?'Para todos':nv,g,g.map(function(t){ return `<div class="lib-row"><div class="ln"><div class="nm">${esc(t.n)}</div><div class="tp">${t.tipo==='swim'?swimTotal(t)+' m':sesMins(t)+' min'} · ${t.bl?t.bl.map(function(b){ return b.rep?b.rep+'×('+b.bl.map(function(x){ return minTxt(x.min)+' Z'+x.z; }).join('+')+')':minTxt(b.min)+' Z'+b.z; }).join(' → '):t.ser?t.ser.map(function(x){ return (x.rep>1?x.rep+'×':'')+x.m+' '+x.q.toLowerCase(); }).join(' · '):t.mov.join(' · ')}</div></div></div>`; }).join(''),'sub',false); }); return acc(tit,ts,inner,'elem',false); };
     h+=sec('run','🏃 Running y caminata (sesiones)')+sec('swim','🏊 Natación (sesiones)')+sec('mob','🧘 Movilidad (sesiones)'); }
   return h;
 }
@@ -5242,7 +5245,7 @@ function setsTable(ex,ei,mi,objetivo){
    Al terminar, la alumna anota lo que marca la pantalla y queda en la Transcripta e Informe. */
 const CARDIO_PRESETS={
   'cinta curva: sprints por intervalos':{maq:'Cinta curva',work:20,rest:40,mide:['km','kcal'],pasos:['Subite agarrada de la baranda y caminá suave 2 minutos para entrar en calor.','En la pantalla tocá INTERVAL, poné {work}″ de trabajo y {rest}″ de descanso, y START.','Trabajo: corré a fondo pisando ARRIBA de la curva. Descanso: caminá atrás, en la parte de abajo.','Hacé {rondas} vueltas. Usá el temporizador de abajo si querés que la app te avise.','Al terminar, anotá la distancia y las calorías que marca la pantalla.']},
-  'cinta curva: trote continuo':{maq:'Cinta curva',min:true,mide:['km','kcal'],pasos:['Tocá TARGET TIME, poné {min} minutos y START.','Troté pisando en el medio de la curva: más adelante = más rápido, más atrás = más lento.','Mantené un ritmo en el que puedas hablar.','Al terminar, anotá la distancia y las calorías.']},
+  'cinta curva: trote continuo':{maq:'Cinta curva',min:true,mide:['km','kcal'],pasos:['Tocá TARGET TIME, poné {min} minutos y START.','Trotá pisando en el medio de la curva: más adelante = más rápido, más atrás = más lento.','Mantené un ritmo en el que puedas hablar.','Al terminar, anotá la distancia y las calorías.']},
   'cinta: intervalos caminata y trote':{maq:'Cinta',work:60,rest:120,mide:['km','kcal'],pasos:['QUICK START y caminá 3 minutos a 5 km/h para entrar en calor.','Trote: tocá el 10 de SPEED (o +) y troté {work}″.','Caminata: tocá el 6 de SPEED y caminá {rest}″.','Hacé {rondas} vueltas con el temporizador de abajo y terminá con COOL DOWN.','Anotá la distancia y las calorías.']},
   'cinta / caminadora (intervalos)':{maq:'Cinta',work:60,rest:120,mide:['km','kcal'],pasos:['QUICK START y caminá 3 minutos para entrar en calor.','Alterná {work}″ trotando (SPEED 9-10) y {rest}″ caminando (SPEED 5-6).','Hacé {rondas} vueltas y terminá con COOL DOWN.','Anotá la distancia y las calorías.']},
   'cinta: caminata en pendiente':{maq:'Cinta',min:true,mide:['km','kcal'],pasos:['QUICK START y subí la velocidad a 5-5,5 km/h.','Tocá el 10 de INCLINE (o el 8 si recién empezás).','Caminá {min} minutos sin agarrarte de las barandas, pasos largos y empujando con el talón.','Bajá la pendiente a 0 y COOL DOWN. Anotá la distancia y las calorías.']},
@@ -5284,16 +5287,25 @@ function toggleCardioDone(ei,mi){ const k=cardioKey(ei,mi); const cur=CACHE[k]; 
    d.mov). Al terminar se anota distancia/tiempo/pulso o metros → Transcripta e Informe. */
 const ZONAS=[{z:1,n:'Zona 1',t:'Muy suave',p:[50,60],d:'Podés charlar tranquila. Recuperación.',c:'#8FB8A8'},{z:2,n:'Zona 2',t:'Suave',p:[60,70],d:'Hablás de corrido pero se nota el esfuerzo. Base aeróbica.',c:'#A9C47F'},{z:3,n:'Zona 3',t:'Moderada',p:[70,80],d:'Solo frases cortas. Ritmo cómodo pero exigente.',c:'#E3C3A5'},{z:4,n:'Zona 4',t:'Fuerte',p:[80,90],d:'Pocas palabras. Duro, se sostiene unos minutos.',c:'#D98E4C'},{z:5,n:'Zona 5',t:'Máxima',p:[90,100],d:'A fondo, no podés hablar. Muy corto.',c:'#B5523B'}];
 const B=function(n,min,z,acc){ return {n:n,min:min,z:z,acc:acc||''}; };
+const C=function(n,min,z,acc,o){ return Object.assign(B(n,min,z,acc),o||{}); };
 const SES_TPL=[
   {id:'run-p1',tipo:'run',niv:'Principiante',n:'Caminata rápida 30′',bl:[B('Caminata suave',10,1,'Caminá'),B('Caminata rápida',15,2,'Caminá rápido'),B('Vuelta a la calma',5,1,'Caminá suave')]},
-  {id:'run-p2',tipo:'run',niv:'Principiante',n:'Caminata + trote 25′',bl:[B('Caminata suave',5,1,'Caminá'),{rep:6,bl:[B('Trote suave',1,3,'Troté'),B('Caminata rápida',2,2,'Caminá')]},B('Vuelta a la calma',2,1,'Caminá suave')]},
-  {id:'run-p3',tipo:'run',niv:'Principiante',n:'Trote continuo 20′',bl:[B('Caminata',5,1,'Caminá'),B('Trote suave',15,2,'Troté'),B('Vuelta a la calma',5,1,'Caminá suave')]},
-  {id:'run-i1',tipo:'run',niv:'Intermedio',n:'Fondo 35′ en zona 2',bl:[B('Entrada en calor',5,1,'Troté muy suave'),B('Fondo',30,2,'Corré'),B('Vuelta a la calma',5,1,'Caminá')]},
-  {id:'run-i2',tipo:'run',niv:'Intermedio',n:'Intervalos 5 × 3′ en zona 4',bl:[B('Entrada en calor',10,2,'Troté'),{rep:5,bl:[B('Intervalo fuerte',3,4,'Corré fuerte'),B('Recuperación',2,2,'Troté suave')]},B('Vuelta a la calma',5,1,'Caminá')]},
-  {id:'run-i3',tipo:'run',niv:'Intermedio',n:'Progresivo 30′',bl:[B('Base',10,2,'Troté'),B('Subí el ritmo',10,3,'Corré'),B('Fuerte',5,4,'Corré fuerte'),B('Vuelta a la calma',5,1,'Caminá')]},
-  {id:'run-a1',tipo:'run',niv:'Avanzado',n:'Series 8 × 2′ en zona 5',bl:[B('Entrada en calor',12,2,'Troté'),{rep:8,bl:[B('Serie a fondo',2,5,'Corré a fondo'),B('Recuperación',2,1,'Troté muy suave')]},B('Vuelta a la calma',8,1,'Caminá')]},
-  {id:'run-a2',tipo:'run',niv:'Avanzado',n:'Tempo 3 × 8′ en zona 4',bl:[B('Entrada en calor',10,2,'Troté'),{rep:3,bl:[B('Tempo',8,4,'Corré fuerte y parejo'),B('Recuperación',3,2,'Troté suave')]},B('Vuelta a la calma',6,1,'Caminá')]},
-  {id:'run-a3',tipo:'run',niv:'Avanzado',n:'Fondo largo 60′',bl:[B('Entrada en calor',5,1,'Troté suave'),B('Fondo largo',50,2,'Corré parejo'),B('Vuelta a la calma',5,1,'Caminá')]},
+  {id:'run-p2',tipo:'run',niv:'Principiante',n:'Caminata + trote 25′',bl:[B('Caminata suave',5,1,'Caminá'),{rep:6,bl:[B('Trote suave',1,3,'Trotá'),B('Caminata rápida',2,2,'Caminá')]},B('Vuelta a la calma',2,1,'Caminá suave')]},
+  {id:'run-p3',tipo:'run',niv:'Principiante',n:'Trote continuo 20′',bl:[B('Caminata',5,1,'Caminá'),B('Trote suave',15,2,'Trotá'),B('Vuelta a la calma',5,1,'Caminá suave')]},
+  {id:'run-i1',tipo:'run',niv:'Intermedio',n:'Fondo 35′ en zona 2',bl:[B('Entrada en calor',5,1,'Trotá muy suave'),B('Fondo',30,2,'Corré'),B('Vuelta a la calma',5,1,'Caminá')]},
+  {id:'run-i2',tipo:'run',niv:'Intermedio',n:'Intervalos 5 × 3′ en zona 4',bl:[B('Entrada en calor',10,2,'Trotá'),{rep:5,bl:[B('Intervalo fuerte',3,4,'Corré fuerte'),B('Recuperación',2,2,'Trotá suave')]},B('Vuelta a la calma',5,1,'Caminá')]},
+  {id:'run-i3',tipo:'run',niv:'Intermedio',n:'Progresivo 30′',bl:[B('Base',10,2,'Trotá'),B('Subí el ritmo',10,3,'Corré'),B('Fuerte',5,4,'Corré fuerte'),B('Vuelta a la calma',5,1,'Caminá')]},
+  {id:'run-a1',tipo:'run',niv:'Avanzado',n:'Series 8 × 2′ en zona 5',bl:[B('Entrada en calor',12,2,'Trotá'),{rep:8,bl:[B('Serie a fondo',2,5,'Corré a fondo'),B('Recuperación',2,1,'Trotá muy suave')]},B('Vuelta a la calma',8,1,'Caminá')]},
+  {id:'run-a2',tipo:'run',niv:'Avanzado',n:'Tempo 3 × 8′ en zona 4',bl:[B('Entrada en calor',10,2,'Trotá'),{rep:3,bl:[B('Tempo',8,4,'Corré fuerte y parejo'),B('Recuperación',3,2,'Trotá suave')]},B('Vuelta a la calma',6,1,'Caminá')]},
+  {id:'run-a3',tipo:'run',niv:'Avanzado',n:'Fondo largo 60′',bl:[B('Entrada en calor',5,1,'Trotá suave'),B('Fondo largo',50,2,'Corré parejo'),B('Vuelta a la calma',5,1,'Caminá')]},
+  /* 23/10/2026 · sesiones pensadas para la CINTA del gimnasio. inc = inclinación (%), k = 'walk'/'run',
+     dv = km/h de más o de menos sobre la velocidad de esa zona. curva = cinta curva (sin motor). */
+  {id:'cin-p1',tipo:'run',cinta:true,niv:'Principiante',n:'Cinta: caminata en pendiente 30′',bl:[C('Caminata suave',5,1,'Caminá',{k:'walk',inc:0}),{rep:4,bl:[C('Subida',3,2,'Caminá en subida',{k:'walk',inc:6,dv:-0.5}),C('Llano',2,1,'Caminá en llano',{k:'walk',inc:1})]},C('Vuelta a la calma',5,1,'Caminá suave',{k:'walk',inc:0})]},
+  {id:'cin-p2',tipo:'run',cinta:true,niv:'Principiante',n:'Cinta: caminata + trote 24′',bl:[C('Caminata',5,1,'Caminá',{k:'walk',inc:1}),{rep:5,bl:[C('Trote suave',1,2,'Trotá',{k:'run',dv:-1}),C('Caminata rápida',2,2,'Caminá rápido',{k:'walk',inc:1})]},C('Vuelta a la calma',4,1,'Caminá suave',{k:'walk',inc:0})]},
+  {id:'cin-i1',tipo:'run',cinta:true,niv:'Intermedio',n:'Cinta: cuestas 6 × 1′',bl:[C('Entrada en calor',8,2,'Trotá',{k:'run'}),{rep:6,bl:[C('Cuesta',1,4,'Corré en subida',{k:'run',inc:6,dv:-2}),C('Recuperación',2,2,'Trotá suave en llano',{k:'run',inc:1,dv:-0.5})]},C('Vuelta a la calma',4,1,'Caminá',{k:'walk',inc:0})]},
+  {id:'cin-i2',tipo:'run',cinta:true,niv:'Intermedio',n:'Cinta: escalera de velocidad 30′',bl:[C('Entrada en calor',8,2,'Trotá',{k:'run'}),C('Subí',1,3,'Corré',{k:'run'}),C('Recuperá',1,2,'Trotá suave',{k:'run',dv:-0.5}),C('Subí más',2,4,'Corré fuerte',{k:'run'}),C('Recuperá',2,2,'Trotá suave',{k:'run',dv:-0.5}),C('Arriba',3,4,'Corré fuerte',{k:'run',dv:0.5}),C('Recuperá',2,2,'Trotá suave',{k:'run',dv:-0.5}),C('Subí más',2,4,'Corré fuerte',{k:'run'}),C('Recuperá',1,2,'Trotá suave',{k:'run',dv:-0.5}),C('Último esfuerzo',1,5,'Corré a fondo',{k:'run'}),C('Vuelta a la calma',7,1,'Caminá',{k:'walk',inc:0})]},
+  {id:'cin-a1',tipo:'run',cinta:true,curva:true,niv:'Avanzado',n:'Cinta curva: sprints 10 × 30″',bl:[C('Entrada en calor',8,2,'Trotá',{k:'run'}),{rep:10,bl:[C('Sprint',0.5,5,'Sprint a fondo',{k:'run'}),C('Recuperación',1.5,1,'Caminá',{k:'walk'})]},C('Vuelta a la calma',5,1,'Caminá',{k:'walk'})]},
+  {id:'cin-a2',tipo:'run',cinta:true,niv:'Avanzado',n:'Cinta: tempo 3 × 6′',bl:[C('Entrada en calor',10,2,'Trotá',{k:'run'}),{rep:3,bl:[C('Tempo',6,4,'Corré fuerte y parejo',{k:'run'}),C('Recuperación',2,2,'Trotá suave',{k:'run',dv:-0.5})]},C('Vuelta a la calma',6,1,'Caminá',{k:'walk',inc:0})]},
   {id:'swim-p1',tipo:'swim',niv:'Principiante',n:'Técnica y respiración 600 m',ser:[{rep:4,m:25,q:'Flotación y deslizamiento',p:30,ex:'Natación: flotación y deslizamiento (principiantes)'},{rep:4,m:25,q:'Patada de crol con tabla',p:30,ex:'Natación: patada de crol con tabla'},{rep:4,m:25,q:'Respiración en crol',p:30,ex:'Natación: respiración en crol'},{rep:4,m:50,q:'Crol suave',p:40,ex:'Natación: técnica de crol'},{rep:1,m:100,q:'Libre suave',p:0}]},
   {id:'swim-i1',tipo:'swim',niv:'Intermedio',n:'Resistencia 1200 m',ser:[{rep:1,m:200,q:'Entrada en calor libre suave',p:30},{rep:4,m:50,q:'Patada con tabla',p:20,ex:'Natación: patada de crol con tabla'},{rep:4,m:100,q:'Crol ritmo parejo',p:20,ex:'Natación: técnica de crol'},{rep:4,m:50,q:'Crol con pull buoy',p:20,ex:'Natación: crol con pull buoy'},{rep:1,m:200,q:'Espalda suave',p:0,ex:'Natación: técnica de espalda'}]},
   {id:'swim-a1',tipo:'swim',niv:'Avanzado',n:'Series 2000 m',ser:[{rep:1,m:300,q:'Entrada en calor libre',p:30},{rep:4,m:50,q:'Patada fuerte con tabla',p:15,ex:'Natación: patada de crol con tabla'},{rep:10,m:100,q:'Crol fuerte',p:15,ex:'Natación: técnica de crol'},{rep:4,m:100,q:'Crol con pull buoy',p:20,ex:'Natación: crol con pull buoy'},{rep:1,m:100,q:'Suave',p:0}]},
@@ -5306,11 +5318,25 @@ const MOV_SEG=40;
 function sesTpl(id){ return SES_TPL.find(function(t){ return t.id===id; })||null; }
 function sesDefault(tipo){ return tipo==='swim'?'swim-p1':tipo==='mob'?'mob-c':'run-p2'; }
 function sesSteps(t){ const out=[];
-  if(t.bl){ const add=function(b){ out.push({n:b.n,s:Math.round(b.min*60),z:b.z,acc:b.acc}); }; t.bl.forEach(function(b){ if(b.rep){ for(let i=0;i<b.rep;i++) b.bl.forEach(function(x,j){ const st={n:x.n+' · '+(i+1)+' de '+b.rep,s:Math.round(x.min*60),z:x.z,acc:x.acc}; out.push(st); }); } else add(b); }); }
+  if(t.bl){ const xt=function(b,o){ ['k','inc','dv'].forEach(function(f){ if(b[f]!==undefined) o[f]=b[f]; }); return o; }; const add=function(b){ out.push(xt(b,{n:b.n,s:Math.round(b.min*60),z:b.z,acc:b.acc})); }; t.bl.forEach(function(b){ if(b.rep){ for(let i=0;i<b.rep;i++) b.bl.forEach(function(x,j){ const st=xt(x,{n:x.n+' · '+(i+1)+' de '+b.rep,s:Math.round(x.min*60),z:x.z,acc:x.acc}); out.push(st); }); } else add(b); }); }
   if(t.mov) t.mov.forEach(function(n){ out.push({n:n,s:MOV_SEG,mov:true}); });
   return out; }
 function sesMins(t){ return Math.round(sesSteps(t).reduce(function(a,x){ return a+x.s; },0)/60); }
 function swimTotal(t){ return (t.ser||[]).reduce(function(a,x){ return a+x.rep*x.m; },0); }
+/* ==== Modo cinta (23/10/2026) ====
+   Cada alumno pone UNA vez a qué velocidad camina rápido y a qué velocidad trota cómodo; la app
+   calcula la velocidad de cada zona y la voz dice "subí a 8,5 km/h, inclinación 1". Se guarda en
+   el celular del alumno. En la cinta curva (sin motor) no hay velocidad: se guía por esfuerzo. */
+function cintaVel(){ let v=null; try{ v=JSON.parse(localStorage.getItem('tafit:cinta:'+active)||'null'); }catch(e){} return {walk:(v&&+v.walk)||6,run:(v&&+v.run)||8,set:!!v}; }
+function setCintaVel(f,val){ const n=inf2Num(val); if(!(n>=2&&n<=25)){ toast('Poné una velocidad entre 2 y 25 km/h','warn'); return; } const v=cintaVel(); const o={walk:v.walk,run:v.run}; o[f]=Math.round(n*2)/2; try{ localStorage.setItem('tafit:cinta:'+active,JSON.stringify(o)); }catch(e){} renderApp(); }
+function lugarPref(){ try{ return localStorage.getItem('tafit:lugar:'+active)==='cinta'?'cinta':'afuera'; }catch(e){ return 'afuera'; } }
+function isCintaT(t){ return !!(t&&t.tipo==='run'&&(t.cinta||lugarPref()==='cinta')); }
+function velTxt(n){ return String(n).replace('.',','); }
+function stepKind(st){ return st.k||(/camin/i.test((st.acc||'')+' '+st.n)?'walk':'run'); }
+function stepSpeed(st,t){ if(!st||st.mov) return null; const k=stepKind(st); const inc=st.inc!==undefined?st.inc:(k==='run'?1:0); if(t&&t.curva) return {v:0,inc:0,k:k,curva:true};
+  const V=cintaVel(); const off=k==='walk'?{1:-1,2:0,3:0.5,4:0.5,5:0.5}:{1:-1.5,2:0,3:1,4:2,5:3}; let v=(k==='walk'?V.walk:V.run)+(off[st.z]||0)+(st.dv||0); v=Math.max(3,Math.round(v*2)/2); return {v:v,inc:inc,k:k}; }
+function speedChip(sp){ if(!sp) return ''; if(sp.curva) return `<span class="cin-chip">${sp.k==='walk'?'caminá':'a tu ritmo'}</span>`; return `<span class="cin-chip">${velTxt(sp.v)} km/h${sp.inc?' · '+sp.inc+'%':''}</span>`; }
+function minTxt(m){ const sec=Math.round(m*60), mm=Math.floor(sec/60), ss=sec%60; return !mm?ss+'″':ss?mm+'′'+ss+'″':mm+'′'; }
 let _sesEdad={};
 async function sesLoadEdad(){ const id=active; if(_sesEdad[id]!==undefined) return _sesEdad[id]; let edad=null;
   const keys=['tafit:form:anamnesis:'+id,'tafit:form:anamnesis:'+id+':'+(member||0),'tafit:form:acuerdo:'+id];
@@ -5321,12 +5347,12 @@ function zonasHTML(edad){ const fc=edad?220-edad:null;
   return `<div class="zn-box"><div class="zn-h">Tus zonas ${fc?`<small>(pulsaciones calculadas con tu edad: ${edad} años)</small>`:'<small>(cargá tu edad en la Anamnesis para ver tus pulsaciones)</small>'}</div>${ZONAS.map(function(z){ return `<div class="zn"><i style="background:${z.c}">${z.z}</i><div><b>${z.n} · ${z.t}${fc?` · ${Math.round(fc*z.p[0]/100)}-${Math.round(fc*z.p[1]/100)} ppm`:''}</b><span>${esc(z.d)}</span></div></div>`; }).join('')}</div>`; }
 function sesKey(){ return 'ses|'+day+'|m'+(isDuo()?member:0); }
 function sesVal(){ const v=CACHE[sesKey()]; return (v&&wOf(v)===+week)?v:{}; }
-function updSes(f,val){ const k=sesKey(); const cur=CACHE[k]; const v=(cur&&wOf(cur)===+week)?Object.assign({},cur):{}; v[f]=String(val||'').trim(); v._w=+week; CACHE[k]=v; queueSave(); const rr=$('sesRitmo'); if(rr) rr.textContent=ritmoTxt(v); }
+function updSes(f,val){ const k=sesKey(); const cur=CACHE[k]; const v=(cur&&wOf(cur)===+week)?Object.assign({},cur):{}; v[f]=String(val||'').trim(); if(f==='km') delete v.kmEst; v._w=+week; CACHE[k]=v; queueSave(); const rr=$('sesRitmo'); if(rr) rr.textContent=ritmoTxt(v); }
 /* 22/10/2026: en la Transcripta, un día de running/natación/movilidad muestra su plan (zonas,
    series o ejercicios), no la lista de ejercicios de gimnasio que quedó guardada de antes. */
 function sesTransDayHTML(d){ const t=sesTpl(d.ses||sesDefault(d.type))||sesTpl(sesDefault(d.type)); if(!t) return '';
   const ic=t.tipo==='swim'?'🏊':t.tipo==='mob'?'🧘':'🏃'; let body='';
-  if(t.tipo==='run') body=t.bl.map(function(b){ if(b.rep) return `<div class="trow"><div class="tn">${b.rep} veces: ${b.bl.map(function(x){ return x.min+'′ '+esc(x.n.toLowerCase())+` <span class="zt" style="background:${ZONAS[x.z-1].c}">Z${x.z}</span>`; }).join(' + ')}</div></div>`; return `<div class="trow"><div class="tn">${esc(b.n)} <span class="zt" style="background:${ZONAS[b.z-1].c}">Z${b.z}</span></div><div class="tv">${b.min}′</div></div>`; }).join('');
+  if(t.tipo==='run') body=t.bl.map(function(b){ if(b.rep) return `<div class="trow"><div class="tn">${b.rep} veces: ${b.bl.map(function(x){ return minTxt(x.min)+' '+esc(x.n.toLowerCase())+` <span class="zt" style="background:${ZONAS[x.z-1].c}">Z${x.z}</span>`; }).join(' + ')}</div></div>`; return `<div class="trow"><div class="tn">${esc(b.n)} <span class="zt" style="background:${ZONAS[b.z-1].c}">Z${b.z}</span></div><div class="tv">${minTxt(b.min)}</div></div>`; }).join('');
   else if(t.tipo==='swim') body=t.ser.map(function(x){ return `<div class="trow"><div class="tn">${esc(x.q)}${x.p?`<small>pausa ${x.p}″</small>`:''}</div><div class="tv">${x.rep>1?x.rep+' × ':''}${x.m} m</div></div>`; }).join('');
   else body=t.mov.map(function(n){ return `<div class="trow"><div class="tn">${esc(n)}</div><div class="tv">${MOV_SEG}″</div></div>`; }).join('');
   const tot=t.tipo==='swim'?swimTotal(t)+' m':t.tipo==='mob'?t.mov.length+' ejercicios':sesMins(t)+' min';
@@ -5337,14 +5363,19 @@ function renderSesDay(m,d){
   const t=sesTpl(d.ses||sesDefault(d.type))||sesTpl(sesDefault(d.type)); const v=sesVal();
   const box=document.createElement('div'); box.className='ex ses-card'; let h='';
   if(t.tipo==='run'){
-    h+=`<div class="ses-top"><span>🏃 ${esc(t.niv)}</span><b>${esc(t.n)}</b><em>${sesMins(t)} min</em></div><details class="acc-lite"><summary>📈 Tus zonas de pulso <i>▾</i></summary><div id="znWrap">${zonasHTML(null)}</div></details><ol class="ses-steps">${t.bl.map(function(b){ if(b.rep) return `<li><b>${b.rep} veces:</b> ${b.bl.map(function(x){ return `${x.min}′ ${esc(x.n.toLowerCase())} <span class="zt" style="background:${ZONAS[x.z-1].c}">Z${x.z}</span>`; }).join(' + ')}</li>`; return `<li>${b.min}′ ${esc(b.n.toLowerCase())} <span class="zt" style="background:${ZONAS[b.z-1].c}">Z${b.z}</span></li>`; }).join('')}</ol>`;
-    const gOn=gpsPref();
-    h+=`<div class="gps-opt"><div><b>📍 Usar GPS</b><small>${gOn?'Mide distancia, ritmo por km y dibuja tu recorrido en el mapa.':'La app no usa tu ubicación. Podés activarlo cuando quieras.'}</small></div><div class="gseg"><button type="button" data-act="gpsSet" data-v="on" class="${gOn?'on':''}">Sí</button><button type="button" data-act="gpsSet" data-v="off" class="${gOn?'':'on'}">No</button></div></div>`;
-    h+=`<button type="button" class="ses-go" data-act="sesStart">▶ Empezar con guía de voz${gOn?' + GPS':''}</button>${gOn?'<button type="button" class="ses-go ghost" data-act="gpsFree">📍 Correr libre con GPS (sin plan)</button>':''}<div class="ses-mini">Te avisa con voz y vibración cada cambio de zona${gOn?' y cada kilómetro':''}. Dejá la app abierta y la pantalla encendida.</div>`;
+    const cin=isCintaT(t), sc=function(x){ return cin?speedChip(stepSpeed(x,t)):''; };
+    h+=`<div class="ses-top"><span>${cin?'🏋️':'🏃'} ${esc(t.niv)}</span><b>${esc(t.n)}</b><em>${sesMins(t)} min</em></div>`;
+    if(!t.cinta) h+=`<div class="gps-opt"><div><b>¿Dónde vas a correr?</b><small>${cin?'En la cinta te digo la velocidad y la inclinación de cada tramo.':'Al aire libre, guiado por zonas.'}</small></div><div class="gseg"><button type="button" data-act="lugarSet" data-v="afuera" class="${cin?'':'on'}">🌳 Afuera</button><button type="button" data-act="lugarSet" data-v="cinta" class="${cin?'on':''}">🏋️ Cinta</button></div></div>`;
+    if(cin&&!t.curva){ const V=cintaVel(); h+=`<div class="cin-vel${V.set?'':' new'}"><div class="cv-lbl">${V.set?'Tus velocidades en la cinta':'👋 Contame tus velocidades (una sola vez)'}</div><div class="cv-grid"><label>Caminata rápida (km/h)<input inputmode="decimal" data-chg="cintaVel" data-f="walk" value="${velTxt(V.walk)}"></label><label>Trote cómodo (km/h)<input inputmode="decimal" data-chg="cintaVel" data-f="run" value="${velTxt(V.run)}"></label></div><div class="ses-mini" style="text-align:left">Trote cómodo = el que podés sostener charlando. Con esto calculo la velocidad de cada zona.</div></div>`; }
+    if(t.curva) h+=`<div class="ses-mini" style="text-align:left">🏋️ Cinta curva: no tiene motor, la velocidad la marcás vos con tu paso. Te guío por esfuerzo.</div>`;
+    h+=`<details class="acc-lite"><summary>📈 Tus zonas de pulso <i>▾</i></summary><div id="znWrap">${zonasHTML(null)}</div></details><ol class="ses-steps">${t.bl.map(function(b){ if(b.rep) return `<li><b>${b.rep} veces:</b> ${b.bl.map(function(x){ return `${minTxt(x.min)} ${esc(x.n.toLowerCase())} <span class="zt" style="background:${ZONAS[x.z-1].c}">Z${x.z}</span>${sc(x)}`; }).join(' + ')}</li>`; return `<li>${minTxt(b.min)} ${esc(b.n.toLowerCase())} <span class="zt" style="background:${ZONAS[b.z-1].c}">Z${b.z}</span>${sc(b)}</li>`; }).join('')}</ol>`;
+    const gOn=gpsPref()&&!cin;
+    if(!cin) h+=`<div class="gps-opt"><div><b>📍 Usar GPS</b><small>${gOn?'Mide distancia, ritmo por km y dibuja tu recorrido en el mapa.':'La app no usa tu ubicación. Podés activarlo cuando quieras.'}</small></div><div class="gseg"><button type="button" data-act="gpsSet" data-v="on" class="${gOn?'on':''}">Sí</button><button type="button" data-act="gpsSet" data-v="off" class="${gOn?'':'on'}">No</button></div></div>`;
+    h+=`<button type="button" class="ses-go" data-act="sesStart">▶ Empezar con guía de voz${gOn?' + GPS':''}</button>${gOn?'<button type="button" class="ses-go ghost" data-act="gpsFree">📍 Correr libre con GPS (sin plan)</button>':''}<div class="ses-mini">Te avisa con voz y vibración cada cambio de ${cin&&!t.curva?'velocidad y zona':'zona'}${gOn?' y cada kilómetro':''}. Dejá la app abierta y la pantalla encendida.</div>`;
     if(v.route&&v.route.length>1) h+=routeMapHTML(v.route,false);
     if(v.km||v.zn||v.route) h+=`<button type="button" class="ses-go ghost" data-act="sesSumOpen">📊 Ver resumen de la salida</button>`;
     h+=myRecordsHTML();
-    h+=`<div class="cv-res"><div class="cv-lbl">Al terminar, anotá</div><div class="cv-grid three"><label>Distancia (km)<input inputmode="decimal" data-chg="ses" data-f="km" value="${esc(v.km||'')}" placeholder="4,2"></label><label>Tiempo (min)<input inputmode="numeric" data-chg="ses" data-f="min" value="${esc(v.min||'')}" placeholder="${sesMins(t)}"></label><label>Pulso prom.<input inputmode="numeric" data-chg="ses" data-f="fc" value="${esc(v.fc||'')}" placeholder="opcional"></label></div><div class="ses-ritmo" id="sesRitmo">${ritmoTxt(v)}</div></div>`;
+    h+=`<div class="cv-res"><div class="cv-lbl">Al terminar, anotá${cin?' (mirá la pantalla de la cinta)':''}</div><div class="cv-grid three"><label>Distancia (km)${v.kmEst?' <small>aprox.</small>':''}<input inputmode="decimal" data-chg="ses" data-f="km" value="${esc(v.km||'')}" placeholder="4,2"></label><label>Tiempo (min)<input inputmode="numeric" data-chg="ses" data-f="min" value="${esc(v.min||'')}" placeholder="${sesMins(t)}"></label><label>Pulso prom.<input inputmode="numeric" data-chg="ses" data-f="fc" value="${esc(v.fc||'')}" placeholder="opcional"></label></div><div class="ses-ritmo" id="sesRitmo">${ritmoTxt(v)}</div></div>`;
   } else if(t.tipo==='swim'){
     h+=`<div class="ses-top"><span>🏊 ${esc(t.niv)}</span><b>${esc(t.n)}</b><em>${swimTotal(t)} m</em></div><ol class="ses-steps">${t.ser.map(function(x,i){ const dn=(v['s'+i]||0); return `<li><div class="sw-row"><div><b>${x.rep>1?x.rep+' × ':''}${x.m} m</b> ${esc(x.q)}${x.p?` <small>· pausa ${x.p}″</small>`:''}${x.ex?` <span class="alt-tap" data-act="playVideo" data-url="${esc(exVidByName(x.ex))}" data-name="${esc(x.ex)}">🎬 video</span><span class="rd-tech" data-act="readTech" data-name="${esc(x.ex)}">📖 leer</span>`:''}</div><button type="button" class="sw-chk${dn?' on':''}" data-act="swimChk" data-i="${i}">${dn?'✓':'○'}</button></div></li>`; }).join('')}</ol>`;
     h+=`<div class="cv-res"><div class="cv-lbl">Al terminar, anotá</div><div class="cv-grid"><label>Metros nadados<input inputmode="numeric" data-chg="ses" data-f="m" value="${esc(v.m||'')}" placeholder="${swimTotal(t)}"></label><label>Tiempo (min)<input inputmode="numeric" data-chg="ses" data-f="min" value="${esc(v.min||'')}" placeholder="40"></label></div></div>`;
@@ -5422,7 +5453,7 @@ function mountMaps(root){ const els=(root||document).querySelectorAll('.route-ma
     L.circleMarker(pts[pts.length-1],{radius:7,color:'#fff',weight:3,fillColor:'#B5523B',fillOpacity:1}).addTo(m).bindTooltip('Llegada');
     m.fitBounds(pl.getBounds(),{padding:[18,18]}); setTimeout(function(){ try{ m.invalidateSize(); m.fitBounds(pl.getBounds(),{padding:[18,18]}); }catch(e){} },250); }); }).catch(function(){}); }
 function gpsApply(res){ if(!res) return; const k=sesKey(); const cur=CACHE[k]; const v=(cur&&wOf(cur)===+week)?Object.assign({},cur):{};
-  ['km','min','sec','route','splits','rest','zn','plan','gpsOn','at'].forEach(function(f){ if(res[f]!==undefined&&res[f]!==null) v[f]=res[f]; }); if(!(v.route&&v.route.length>1)) delete v.route;
+  ['km','min','sec','route','splits','rest','zn','plan','gpsOn','at','kmEst'].forEach(function(f){ if(res[f]!==undefined&&res[f]!==null) v[f]=res[f]; }); if(!(v.route&&v.route.length>1)) delete v.route;
   v._w=+week; CACHE[k]=v; queueSave(); }
 /* correr libre: solo GPS, sin plan de zonas */
 async function gpsFree(){ if(!gpsStart()) return; window._sesBusy=true; await sesWakeOn();
@@ -5439,19 +5470,22 @@ document.addEventListener('visibilitychange',function(){ if(!sesP) return; if(do
   else { sesWakeOn(); if(!sesP.paused&&!sesP.free) sesTick(); } });
 function sesSay(txt){ try{ if(localStorage.getItem('tafit:voz')==='off') return; }catch(e){} try{ const u=new SpeechSynthesisUtterance(txt); u.lang='es-AR'; const vs=speechSynthesis.getVoices().filter(function(v){ return /^es/i.test(v.lang); }); const pref=vs.find(function(v){ return /AR|419|MX|US/.test(v.lang); })||vs[0]; if(pref) u.voice=pref; u.rate=1; speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){} }
 function sesVib(p){ try{ if(navigator.vibrate) navigator.vibrate(p||[300,120,300]); }catch(e){} }
-function stepSpeech(st){ if(st.mov) return st.n+'. '+st.s+' segundos.'; const z=ZONAS[st.z-1]; const mins=Math.round(st.s/60); return 'Cambiá a zona '+st.z+'. '+(st.acc||st.n)+', '+(st.s>=60?mins+(mins===1?' minuto':' minutos'):st.s+' segundos')+'. '+z.d.split('.')[0]+'.'; }
+function stepSpeech(st){ if(st.mov) return st.n+'. '+st.s+' segundos.'; const z=ZONAS[st.z-1]; const mins=Math.round(st.s/60); let cv='';
+  if(sesP&&sesP.cinta){ const sp=stepSpeed(st,sesP.t); if(sp&&!sp.curva) cv=' Poné la cinta a '+velTxt(sp.v)+' kilómetros por hora'+(sp.inc?', inclinación '+sp.inc:', sin inclinación')+'.'; }
+  return 'Cambiá a zona '+st.z+'.'+cv+' '+(st.acc||st.n)+', '+(st.s>=60?mins+(mins===1?' minuto':' minutos'):st.s+' segundos')+'. '+z.d.split('.')[0]+'.'; }
 async function sesStart(movId){
   const d=routine()[day]; const t=movId?sesTpl(movId):(sesTpl(d.ses||sesDefault(d.type))); if(!t) return;
-  sesP={t:t,steps:sesSteps(t),i:0,end:0,paused:false,left:0,zn:{},stT:0,stD:0,pz:0,pAt:0,t0:Date.now()};
+  sesP={t:t,steps:sesSteps(t),i:0,end:0,paused:false,left:0,zn:{},stT:0,stD:0,pz:0,pAt:0,t0:Date.now(),cinta:!movId&&isCintaT(t)};
   window._sesBusy=true; await sesWakeOn();
   let o=$('sesPlayer'); if(!o){ o=document.createElement('div'); o.id='sesPlayer'; o.className='ses-player'; document.body.appendChild(o); }
-  o.style.display='flex'; audioWarm&&audioWarm(); if(!t.mov&&t.tipo==='run'&&gpsPref()) gpsStart(); sesGo(0);
+  o.style.display='flex'; audioWarm&&audioWarm(); if(!t.mov&&t.tipo==='run'&&gpsPref()&&!sesP.cinta) gpsStart(); sesGo(0);
   if(sesP.int) clearInterval(sesP.int); sesP.int=setInterval(sesTick,250);
 }
 /* cierra el tramo actual y suma su tiempo (y km, con GPS) a la zona correspondiente */
 function sesCloseStep(fullSec){ if(!sesP||sesP.free) return; const st=sesP.steps[sesP.i]; if(!st||st.mov) return; const now=Date.now();
   const secs=fullSec!==undefined?fullSec:Math.max(0,(now-sesP.stT-sesP.pz-(sesP.pAt?now-sesP.pAt:0))/1000); const z=sesP.zn[st.z]||(sesP.zn[st.z]={s:0,m:0});
-  z.s+=Math.round(Math.min(secs,st.s)); if(gps){ z.m+=Math.max(0,Math.round(gps.dist-sesP.stD)); sesP.stD=gps.dist; } }
+  z.s+=Math.round(Math.min(secs,st.s)); if(gps){ z.m+=Math.max(0,Math.round(gps.dist-sesP.stD)); sesP.stD=gps.dist; }
+  else if(sesP.cinta){ const sp=stepSpeed(st,sesP.t); if(sp&&sp.v) z.m+=Math.round(sp.v*Math.min(secs,st.s)/3.6); } }
 function sesGo(i,endAt){ if(!sesP) return; if(sesP.stT) sesCloseStep(); if(sesP.paused){ gpsPauseTog(false); sesP.pAt=0; } if(i>=sesP.steps.length){ sesFinish(); return; } sesP.i=i; const st=sesP.steps[i];
   sesP.end=endAt||Date.now()+st.s*1000; sesP.stT=Date.now(); sesP.pz=0; if(gps) sesP.stD=gps.dist; sesP.paused=false; sesP.warned=false; sesVib();
   sesSay((i===0?(sesP.t.mov?'Arrancamos con la movilidad. ':'Arrancamos. '):'')+stepSpeech(st)); sesPaint(); }
@@ -5459,13 +5493,13 @@ function sesTick(){ if(!sesP||sesP.paused||sesP.free) return; if(gps&&Date.now()
   if(left<=3&&left>0&&!sesP.warned&&sesP.steps[sesP.i].s>=20){ sesP.warned=true; sesVib([120]); }
   if(left<=0){ /* si la pantalla estuvo apagada pueden haber pasado varios tramos: se saltan sin hablar */
     let end=sesP.end; sesCloseStep(); sesP.stT=0; let i=sesP.i+1;
-    while(i<sesP.steps.length&&end+sesP.steps[i].s*1000<=now){ const st=sesP.steps[i]; if(!st.mov){ const z=sesP.zn[st.z]||(sesP.zn[st.z]={s:0,m:0}); z.s+=st.s; } end+=st.s*1000; i++; }
+    while(i<sesP.steps.length&&end+sesP.steps[i].s*1000<=now){ const st=sesP.steps[i]; if(!st.mov){ const z=sesP.zn[st.z]||(sesP.zn[st.z]={s:0,m:0}); z.s+=st.s; if(sesP.cinta){ const sp=stepSpeed(st,sesP.t); if(sp&&sp.v) z.m+=Math.round(sp.v*st.s/3.6); } } end+=st.s*1000; i++; }
     if(i>=sesP.steps.length){ sesFinish(); return; } sesGo(i,end+sesP.steps[i].s*1000); return; }
   sesP.left=left; sesPaintTime(left); }
 function sesPaintTime(left){ const el=$('spTime'); if(el){ const mm=Math.floor(left/60), ss=left%60; el.textContent=(mm?mm+':'+String(ss).padStart(2,'0'):ss+'″'); } }
 function sesPaint(){ const o=$('sesPlayer'); if(!o||!sesP) return; if(sesP.free){ gpsFreePaint(); return; } const st=sesP.steps[sesP.i], nx=sesP.steps[sesP.i+1]; const z=st.mov?null:ZONAS[st.z-1];
   const tot=sesP.steps.length, pct=Math.round(sesP.i/tot*100);
-  o.innerHTML=`<div class="sp-box" style="${z?`border-color:${z.c}`:''}"><div class="sp-h">${esc(sesP.t.n)}<span>${sesP.i+1} / ${tot}</span></div><div class="sp-prog"><i style="width:${pct}%"></i></div>${z?`<div class="sp-z" style="background:${z.c}">ZONA ${z.z} · ${esc(z.t.toUpperCase())}</div><div class="sp-zd">${esc(z.d)}</div>`:'<div class="sp-z mov">🧘 MOVILIDAD</div>'}<div class="sp-n">${esc(st.acc&&!st.mov?st.acc+' · '+st.n:st.n)}</div><div class="sp-t" id="spTime">—</div>${nx?`<div class="sp-next">Después: ${esc(nx.n)}${nx.mov?'':' · Z'+nx.z}</div>`:'<div class="sp-next">¡Último tramo!</div>'}${gps?'<div id="gpsLive" class="gps-live"></div>':''}
+  o.innerHTML=`<div class="sp-box" style="${z?`border-color:${z.c}`:''}"><div class="sp-h">${esc(sesP.t.n)}<span>${sesP.i+1} / ${tot}</span></div><div class="sp-prog"><i style="width:${pct}%"></i></div>${z?`<div class="sp-z" style="background:${z.c}">ZONA ${z.z} · ${esc(z.t.toUpperCase())}</div><div class="sp-zd">${esc(z.d)}</div>`:'<div class="sp-z mov">🧘 MOVILIDAD</div>'}<div class="sp-n">${esc(st.acc&&!st.mov?st.acc+' · '+st.n:st.n)}</div>${(function(){ if(!sesP.cinta||st.mov) return ''; const sp=stepSpeed(st,sesP.t); if(!sp) return ''; if(sp.curva) return '<div class="sp-cin">🏋️ Cinta curva · marcá vos el ritmo</div>'; return `<div class="sp-cin"><b>${velTxt(sp.v)}</b> km/h<span>·</span><b>${sp.inc}</b> % inclinación</div>`; })()}<div class="sp-t" id="spTime">—</div>${nx?`<div class="sp-next">Después: ${esc(nx.n)}${nx.mov?'':' · Z'+nx.z}${sesP.cinta&&!nx.mov&&!sesP.t.curva?(function(){ const sp=stepSpeed(nx,sesP.t); return sp?' · '+velTxt(sp.v)+' km/h'+(sp.inc?' '+sp.inc+'%':''):''; })():''}</div>`:'<div class="sp-next">¡Último tramo!</div>'}${gps?'<div id="gpsLive" class="gps-live"></div>':''}
     <div class="sp-btns"><button type="button" data-act="sesPause">${sesP.paused?'▶ Seguir':'⏸ Pausa'}</button><button type="button" data-act="sesNext">⏭ Siguiente</button><button type="button" data-act="sesStop">✕ Terminar</button></div><button type="button" class="sp-voz" data-act="sesVoz">${sesVozLbl()}</button></div>`;
   sesPaintTime(sesP.paused?sesP.left:Math.max(0,Math.ceil((sesP.end-Date.now())/1000))); gpsPaint(); }
 function sesPause(){ if(!sesP) return; if(sesP.free){ sesP.paused=!sesP.paused; gpsPauseTog(sesP.paused); sesSay(sesP.paused?'Pausa.':'Seguimos.'); gpsFreePaint(); return; }
@@ -5479,14 +5513,16 @@ function sesStop(){ const P=sesP; if(P&&P.int) clearInterval(P.int);
   if(!P||(P.t&&P.t.mov)) return;
   const zn=P.zn&&Object.keys(P.zn).length?P.zn:null; const guided=!P.free;
   if(!res&&guided){ const s=Math.round((Date.now()-P.t0)/1000); if(s<60) return; res={min:String(Math.round(s/60)),sec:s}; }
-  if(!res) return; if(zn) res.zn=zn; res.plan=P.free?'Correr libre':P.t.n; res.gpsOn=!!res.route; res.at=Date.now();
-  const cur=sesVal(); if(guided&&!res.km&&cur.min) delete res.min;  /* no pisar lo que anotó a mano */
+  if(!res) return; if(zn) res.zn=zn;
+  if(P.cinta&&zn&&!res.km){ const m=Object.keys(zn).reduce(function(a,z){ return a+(zn[z].m||0); },0); if(m>=100){ res.km=(m/1000).toFixed(2).replace('.',','); res.kmEst=true; } }
+  res.plan=P.free?'Correr libre':P.t.n; res.gpsOn=!!res.route; res.at=Date.now();
+  const cur=sesVal(); if(guided&&!res.km&&cur.min) delete res.min; if(res.kmEst&&cur.km&&!cur.kmEst){ delete res.km; delete res.kmEst; }  /* no pisar lo que anotó a mano */
   gpsApply(res); setTimeout(function(){ renderApp(); sesSummary(sesVal(),null,{live:true}); },60); }
 function sesFinish(){ const mov=sesP&&sesP.t.mov; sesVib([400,150,400,150,400]); sesSay(mov?'¡Listo! Terminaste la movilidad. A entrenar.':'¡Terminaste! Muy bien. Mirá tu resumen.'); sesStop(); if(mov) toast('✓ Movilidad completa','ok'); }
 function sesVoz(){ try{ const off=localStorage.getItem('tafit:voz')==='off'; localStorage.setItem('tafit:voz',off?'on':'off'); if(off) sesSay('Voz encendida.'); }catch(e){} sesPaint(); }
 /* ---- resumen al terminar (también se abre desde el día y desde la Transcripta) ---- */
 function sesSumHTML(v){ const km=inf2Num(v.km), sec=v.sec||(inf2Num(v.min)*60)||0; const pace=km>0&&sec?paceTxt(sec,km*1000):'';
-  let h=`<div class="sum-stats"><div><b>${km>0?String(v.km).replace('.',','):'—'}</b><span>km</span></div><div><b>${sec?durTxt(sec):'—'}</b><span>tiempo</span></div><div><b>${pace||'—'}</b><span>ritmo /km</span></div></div>`;
+  let h=`<div class="sum-stats"><div><b>${km>0?String(v.km).replace('.',','):'—'}</b><span>km${v.kmEst?' aprox.':''}</span></div><div><b>${sec?durTxt(sec):'—'}</b><span>tiempo</span></div><div><b>${pace||'—'}</b><span>ritmo /km</span></div></div>`;
   if(v.route&&v.route.length>1) h+=routeMapHTML(v.route,true);
   const spl=(v.splits||[]).slice(); if(spl.length||v.rest){ const rows=spl.map(function(s,i){ return {l:'Km '+(i+1),p:s}; }); if(v.rest&&v.rest[0]>=50) rows.push({l:'+'+(v.rest[0]/1000).toFixed(2).replace('.',',')+' km',p:v.rest[1]/(v.rest[0]/1000)});
     const ps=rows.map(r=>r.p).filter(p=>p>0), best=Math.min(...ps), worst=Math.max(...ps);
@@ -8673,6 +8709,7 @@ document.addEventListener('click',e=>{
     case 'readTech': openTechModal(el.dataset.name); break;
     case 'gpsFree': gpsFree(); break;
     case 'gpsSet': setGpsPref(el.dataset.v==='on'); renderApp(); break;
+    case 'lugarSet': try{ localStorage.setItem('tafit:lugar:'+active,el.dataset.v); }catch(e){} renderApp(); break;
     case 'sesSumOpen': sesSummary(sesVal(),'Tu salida',{live:true}); break;
     case 'sesSumLog': { const x=(window._sumReg||[])[+el.dataset.i]; if(x) sesSummary(x,'Resumen de la salida',{at:+x.at||Date.parse(x._d)}); } break;
     case 'sesSumClose': { const o=$('sesSum'); if(o){ o.style.display='none'; o.innerHTML=''; } } break;
@@ -8845,6 +8882,7 @@ document.addEventListener('change',e=>{
     case 'cardio': updCardio(+el.dataset.i,+(el.dataset.m||0),el.dataset.f,el.value); break;
     case 'ses': updSes(el.dataset.f,el.value); break;
     case 'gpsPref': setGpsPref(el.checked); break;
+    case 'cintaVel': setCintaVel(el.dataset.f,el.value); break;
     case 'dayType': syncFromForms(); renderEdit(); break;
     case 'resumenCycle': resumenCycleIdx=+el.value; renderResumen(); break;
     case 'informeCycle': saveInformeCycle(+el.value); break;
