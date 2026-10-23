@@ -405,6 +405,11 @@
   .rz-row{display:flex;align-items:center;gap:8px;padding:4px 0;border-top:1px solid #F2ECE0}.rz-row span:nth-child(2){flex:1}.rz-row b{font-size:12.5px}
   .sp-coach{display:inline-block;font-size:12.5px;border-radius:10px;padding:5px 10px;margin:6px 0 0;background:#fff;color:#241F18}.sp-coach.fast{background:#F6DED6;color:#8A3A28}.sp-coach.slow{background:#F5E8CF;color:#7A5418}.sp-coach.ok{background:#E2EEE6;color:#2F5A49}
   .prog-box{background:var(--tint2);border-radius:12px;padding:10px 12px;margin:-2px 0 10px}.prog-h{display:flex;justify-content:space-between;font-size:13px}.prog-h span{color:var(--mute);font-size:12px;font-weight:700}.prog-hint{font-size:11px;color:var(--mute)}.prog-bar{height:8px;background:#fff;border-radius:6px;overflow:hidden;margin:6px 0 2px}.prog-bar i{display:block;height:100%;background:var(--accentDk)}
+  .fin-box{background:#FAF7F2;border:1px solid #E8DFD0;border-radius:18px;padding:22px 18px;text-align:center;margin:8px 0}.fin-ic{font-size:46px}.fin-t{font-family:Georgia,serif;font-size:23px;color:#241F18;margin:6px 0 2px}.fin-s{font-size:12.5px;color:var(--mute)}
+  .fin-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:14px 0}.fin-stats div{background:#fff;border-radius:12px;padding:10px 4px}.fin-stats b{display:block;font-family:Georgia,serif;font-size:24px;color:#241F18}.fin-stats span{font-size:10.5px;color:var(--mute);text-transform:uppercase;letter-spacing:.05em}
+  .fin-imp{background:#fff;border-radius:12px;padding:10px 12px;text-align:left}.fin-h{font-weight:800;font-size:13.5px;margin-bottom:6px}.fin-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;font-size:12.5px;padding:5px 0;border-top:1px solid #F2ECE0}.fin-row b{white-space:nowrap}.fin-row em{font-style:normal;font-weight:800;color:#5E8C7A;font-size:12px}
+  .fin-msg{font-size:13px;line-height:1.5;color:#3a3128;margin:14px 0 10px}
+  .fin-prof{background:#241F18;color:#F2ECE0;border-radius:14px;margin:0 0 12px;padding:0}.fin-prof>summary{list-style:none;cursor:pointer;padding:12px 14px;font-size:13px;line-height:1.4}.fin-prof>summary::-webkit-details-marker{display:none}.fin-prof>summary u{color:#E3C3A5}.fin-prof .fin-box{margin:0 8px 8px}
   .rh-note{font-size:11px;color:var(--mute);line-height:1.4}
   .routine-hist-row button{border:1px solid var(--accentDk);background:var(--card);color:var(--accentDk);border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:700;cursor:pointer;flex:none}
   .medidas-hist{margin-top:8px}
@@ -1201,7 +1206,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-133'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-134'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -5018,7 +5023,7 @@ async function loadStudent(){ CACHE=safeParse(await Store.get('tafit:data:'+acti
   let pos={}; try{ pos=safeParse(localStorage.getItem('tafit:pos:'+active)||'{}',{}); }catch(e){}
   const r=(DB.students[active]&&DB.students[active].routine)||[];
   day=(pos.day>=0&&pos.day<r.length)?pos.day:0;
-  const W=weeks(); week=(pos.week>=0&&pos.week<W.length)?pos.week:0;
+  const W=weeks(); const _cur=currentWeekGuess(); week=(pos.week>=0&&pos.week<W.length&&pos.week>_cur)?pos.week:_cur;
   while(week>0&&wkLocked(week)) week--;
   member=(pos.member>=0&&pos.member<membersOf().length)?pos.member:0;
 }
@@ -5176,7 +5181,7 @@ function setTab(t){
 
 async function toggleTrainer(){
   if(locked) return;
-  if(trainer){ let pin=DB.settings.pin||''; if(!pin){ const np=((await uiPrompt("Creá un PIN de profe para bloquear la edición:"))||'').trim(); if(!np) return; DB.settings.pin=np; await saveDB(); } trainer=false; if(tab==='edit'||tab==='rep') tab='app'; render(); toast("Bloqueado · modo alumno",'ok'); }
+  if(trainer){ let pin=DB.settings.pin||''; if(!pin){ const np=((await uiPrompt("Creá un PIN de profe para bloquear la edición:"))||'').trim(); if(!np) return; DB.settings.pin=np; await saveDB(); } trainer=false; if(tab==='edit'||tab==='rep') tab='app'; try{ const _cw=currentWeekGuess(); if(_cw>week) week=_cw; }catch(e){} render(); toast("Bloqueado · modo alumno",'ok'); }
   else { const pin=DB.settings.pin||''; if(!pin){ const np=((await uiPrompt("Creá un PIN de profe:"))||'').trim(); if(!np) return; DB.settings.pin=np; await saveDB(); trainer=true; render(); return; } const p=((await uiPrompt("PIN de profe:","",true))||'').trim(); if(p===pin){ trainer=true; render(); } else toast("PIN incorrecto",'warn'); }
 }
 
@@ -5704,6 +5709,9 @@ function renderApp(){
     return;
   }
   if(member>=members.length) member=0;
+  if(routineFinished()){
+    if(!trainer){ m.innerHTML=finishHTML(false); return; }
+    const fb=document.createElement('div'); fb.innerHTML=`<details class="fin-prof"><summary>🏁 <b>${esc(DB.students[active].name)} terminó esta rutina${finishedDate()?' el '+fmtShort(finishedDate()):''}</b> · ya no la ve · <u>ver resumen</u></summary>${finishHTML(true)}</details>`; m.appendChild(fb); }
   const f=document.createElement('div'); f.className='focus'; f.innerHTML=`<b>${esc(isDuo()?members[member]:DB.students[active].name)}</b> · cargá peso y reps de cada serie`; m.appendChild(f);
   /* Tarjeta "tablero" del día: mismo look bordó/azul del Informe (degradé + serif), con el
      día de hoy, la racha/días sin entrenar como chips, y la frase motivacional del día.
@@ -6095,6 +6103,34 @@ function weekDone(wi){
   }); });
 }
 /* Para alumnas: la semana i se desbloquea SOLO al completar TODOS los días de la anterior. La profe ve todo. */
+/* 23/10/2026: la app abre en la semana en la que va el alumno (no en S1 por no tener guardada
+   la posición en ese celular). La última semana con sesiones de este ciclo, o la siguiente si
+   esa ya está completa. */
+function currentWeekGuess(){
+  const W=weeks(); const st=DB.students[active]; const cut=(st&&st.cycleStart)?Date.parse(st.cycleStart):0;
+  let mx=-1; LOGS.forEach(function(l){ const t=l.date?Date.parse(l.date):0; if(cut&&!(t>=cut)) return; const w=+l.week; if(w>=0&&w<W.length&&w>mx) mx=w; });
+  if(mx<0) return 0;
+  return (weekDone(mx)&&mx<W.length-1)?mx+1:mx; }
+/* 23/10/2026: rutina terminada = cerró todos los días de la ÚLTIMA semana de este ciclo. El
+   alumno deja de verla (ve su resumen final) hasta que la profe le carga la siguiente
+   (plantilla o "Iniciar nuevo ciclo", que reinician el ciclo). */
+function routineFinished(){ const r=routine(), W=weeks(); return r.length>0&&W.length>0&&weekDone(W.length-1); }
+function cycleLogs(){ const st=DB.students[active]; const cut=(st&&st.cycleStart)?Date.parse(st.cycleStart):0; return LOGS.filter(function(l){ const t=Date.parse(l.date); return !cut||t>=cut; }); }
+function finishedDate(){ const W=weeks(), r=routine(), last=W.length-1; let mx=0; cycleLogs().forEach(function(l){ if(+l.week===last){ const t=Date.parse(l.date); if(t>mx) mx=t; } }); return mx?new Date(mx).toISOString():null; }
+function baseExName(n){ return String(n||'').replace(/\s*\(.*?\)\s*/g,' ').replace(/\s+/g,' ').trim(); }
+function cycleImprovements(){ const L=cycleLogs().slice().sort(function(a,b){ return Date.parse(a.date)-Date.parse(b.date); }); const mm=membersOf(), me=mm[isDuo()&&member>=0?member:0]; const first={}, last={};
+  L.forEach(function(l){ (l.ex||[]).forEach(function(x){ let sets=x.sets; if(x.members){ const m2=x.members.find(function(q){ return q.name===me; }); sets=m2?m2.sets:null; } if(!sets) return; let mx=0; sets.forEach(function(z){ const w=inf2Num(z.w); if(w>mx) mx=w; }); if(!mx) return; const k=baseExName(x.n); if(!(k in first)) first[k]=mx; last[k]=mx; }); });
+  return Object.keys(first).map(function(k){ return {n:k,a:first[k],b:last[k],d:last[k]-first[k],p:first[k]?(last[k]-first[k])/first[k]:0}; }).filter(function(o){ return o.d>0; }).sort(function(a,b){ return b.p-a.p; }); }
+function kgTxt(n){ return String(Math.round(n*10)/10).replace('.',','); }
+function finishHTML(forTrainer){ const st=DB.students[active], W=weeks(), r=routine(); const L=cycleLogs(); const fd=finishedDate(); const imp=cycleImprovements().slice(0,5);
+  const st0=st.cycleStart?fmtShort(st.cycleStart):''; const runs=L.filter(function(l){ return l.ses&&l.ses.tipo==='run'; }); const km=runs.reduce(function(a,l){ return a+(inf2Num(l.ses.km)||0); },0);
+  const plan=W.length*r.length, pct=plan?Math.min(100,Math.round(L.length/plan*100)):0; const nm=isDuo()?membersOf()[member]:st.name;
+  const box=`<div class="fin-box"><div class="fin-ic">🏁</div><div class="fin-t">${forTrainer?esc(st.name)+' terminó su rutina':'¡Terminaste tu rutina, '+esc(String(nm).split(' ')[0])+'!'}</div><div class="fin-s">${W.length} semanas${st0?' · del '+st0:''}${fd?' al '+fmtShort(fd):''}</div>
+    <div class="fin-stats"><div><b>${L.length}</b><span>sesiones</span></div><div><b>${pct}%</b><span>cumplido</span></div><div><b>${km>0?kgTxt(km):W.length}</b><span>${km>0?'km corridos':'semanas'}</span></div></div>
+    ${imp.length?`<div class="fin-imp"><div class="fin-h">💪 Lo que más subiste</div>${imp.map(function(o){ return `<div class="fin-row"><span>${esc(o.n)}</span><b>${kgTxt(o.a)} → ${kgTxt(o.b)} kg</b><em>+${Math.round(o.p*100)}%</em></div>`; }).join('')}</div>`:''}
+    ${forTrainer?`<div class="fin-msg">Ya no la ve en su App: ve este resumen y el aviso de que viene una nueva. Cargale la próxima desde <b>Editar</b> (plantilla o "Iniciar nuevo ciclo") y se le habilita sola.</div><button type="button" class="ses-go" data-act="finGoEdit">✏️ Cargar la próxima rutina</button>`
+      :`<div class="fin-msg">¡Felicitaciones por la constancia! 👏 Tu profe ya sabe que terminaste y te va a cargar la próxima rutina. Mientras tanto, todo lo que hiciste queda en tu <b>Transcripta</b>.</div><div class="sp-btns"><button type="button" data-act="tab" data-tab="trans">📖 Ver mi Transcripta</button><button type="button" data-act="tab" data-tab="chat">💬 Escribirle a mi profe</button></div>`}</div>`;
+  return box; }
 function wkLocked(i){ if(trainer) return false; const unlockW=(DB.students[active]&&DB.students[active].unlockWeek)||0; if(i<=unlockW) return false; return i>0 && !weekDone(i-1); }
 function pickMember(i){ member=i; openEx=-1; savePos(); renderApp(); }
 
@@ -7336,7 +7372,9 @@ async function closeSession(){
   await saveLogs();
   await autoBackup('sesion');
   /* Avisá al profe (aviso interno, no push): si quien cierra es el alumno, no la profe */
-  if(!trainer){ await pushNotif({ id:active, name:DB.students[active].name, date:new Date().toISOString(), dayName:r[day].day, sum:sesNotifTxt(ses) }); }
+  const _fin=routineFinished();
+  if(!trainer){ await pushNotif({ id:active, name:DB.students[active].name, date:new Date().toISOString(), dayName:r[day].day, sum:_fin?'🏁 ¡Terminó toda la rutina! Cargale la próxima.':sesNotifTxt(ses) }); }
+  if(_fin) setTimeout(function(){ try{ sesVib([200,100,200,100,400]); }catch(e){} toast(trainer?'🏁 Con esta sesión terminó la rutina':'🏁 ¡Terminaste toda tu rutina! 🎉','ok'); },400);
   /* Limpiar tildes Y pesos del día cerrado para que no aparezcan en semanas/días siguientes */
   r[day].ex.forEach(function(ex,ei){
     for(var mi2=0;mi2<members.length;mi2++){
@@ -8927,6 +8965,7 @@ document.addEventListener('click',e=>{
     case 'sendChat': sendChatMessage(); break;
     case 'openNotifTrans': (async function(){ const sid=el.dataset.id; if(sid&&DB.students[sid]&&sid!==active){ active=sid; await Store.set('tafit:active',active); await loadStudent(); } $('notifOv').classList.remove('show'); tab='trans'; render(); })(); break;
     case 'logComment': logComment(i); break;
+    case 'finGoEdit': setTab('edit'); break;
     case 'openNotifChat': (async function(){ const sid=el.dataset.id; if(sid&&DB.students[sid]&&sid!==active){ active=sid; await Store.set('tafit:active',active); await loadStudent(); } $('notifOv').classList.remove('show'); tab='chat'; render(); })(); break;
     case 'tabataStart': startTabata(); break;
     case 'tabataStop': stopTabata(); break;
