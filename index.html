@@ -397,6 +397,14 @@
   .cin-chip{display:inline-block;font-size:10.5px;font-weight:800;background:#241F18;color:#F2ECE0;border-radius:6px;padding:1px 6px;margin-left:4px;white-space:nowrap}
   .cin-vel{background:#fff;border:1.5px solid #E8DFD0;border-radius:12px;padding:10px 12px;margin:0 0 10px}.cin-vel.new{border-color:var(--accentDk);background:#FAF7F2}.cin-vel .cv-grid label{font-size:11.5px}
   .sp-cin{display:inline-flex;gap:8px;align-items:baseline;background:#241F18;color:#F2ECE0;border-radius:12px;padding:8px 16px;margin:4px 0 2px;font-size:14px}.sp-cin b{font-family:Georgia,serif;font-size:28px;color:#E3C3A5}.sp-cin span{opacity:.5}
+  .ses-opts{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 10px}.gseg.sm{align-items:center}.gseg.sm button{padding:6px 10px;font-size:12px}.gseg.sm span{font-size:12px;font-weight:800;padding:0 4px 0 6px;color:var(--mute)}.opt-fixed{font-size:12px;font-weight:800;background:#241F18;color:#F2ECE0;border-radius:10px;padding:7px 10px}
+  .ses-link{display:block;margin:6px auto 0;font-family:inherit;font-size:12.5px;font-weight:700;color:var(--accentDk);background:none;border:none;text-decoration:underline;cursor:pointer}
+  .acc-stack{margin-top:10px}.acc-stack .acc-lite{margin:0 0 6px}.acc-lite>summary small{font-weight:600;color:var(--mute);margin-left:6px;font-size:11.5px;flex:1}.acc-in{padding:0 12px 10px}.acc-in .ses-steps{margin:0}.acc-in .route-map{margin-top:0}.acc-in .ses-go.ghost{margin-top:8px}.acc-in .zn-box{margin:0}
+  .notif-sum{display:block;font-size:12px;color:#9B5F26;font-weight:700;margin-top:2px}div.log-del{display:flex;justify-content:flex-end;gap:12px;align-items:center}.log-cmt{color:#9B5F26!important;font-weight:800}
+  .rz-box{background:#fff;border-radius:10px;padding:10px 12px;margin:0 0 8px;font-size:12.5px}.rz-box>b{display:block;font-size:13px;margin-bottom:4px}.rz-box>b small{display:block;font-weight:600;color:var(--mute);font-size:11px}.rz-box>span{display:block;color:var(--mute);line-height:1.45}.rz-box .ses-go{margin-top:8px;font-size:13.5px;padding:10px}
+  .rz-row{display:flex;align-items:center;gap:8px;padding:4px 0;border-top:1px solid #F2ECE0}.rz-row span:nth-child(2){flex:1}.rz-row b{font-size:12.5px}
+  .sp-coach{display:inline-block;font-size:12.5px;border-radius:10px;padding:5px 10px;margin:6px 0 0;background:#fff;color:#241F18}.sp-coach.fast{background:#F6DED6;color:#8A3A28}.sp-coach.slow{background:#F5E8CF;color:#7A5418}.sp-coach.ok{background:#E2EEE6;color:#2F5A49}
+  .prog-box{background:var(--tint2);border-radius:12px;padding:10px 12px;margin:-2px 0 10px}.prog-h{display:flex;justify-content:space-between;font-size:13px}.prog-h span{color:var(--mute);font-size:12px;font-weight:700}.prog-hint{font-size:11px;color:var(--mute)}.prog-bar{height:8px;background:#fff;border-radius:6px;overflow:hidden;margin:6px 0 2px}.prog-bar i{display:block;height:100%;background:var(--accentDk)}
   .rh-note{font-size:11px;color:var(--mute);line-height:1.4}
   .routine-hist-row button{border:1px solid var(--accentDk);background:var(--card);color:var(--accentDk);border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:700;cursor:pointer;flex:none}
   .medidas-hist{margin-top:8px}
@@ -1193,7 +1201,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-132'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-133'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -2711,6 +2719,20 @@ function unseenChatCount(){
   return CHAT.filter(function(m){ return m.from===otherRole && new Date(m.ts).getTime()>ts; }).length;
 }
 function fmtChatTime(iso){ try{ return new Date(iso).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}); }catch(e){ return ''; } }
+/* 23/10/2026: el aviso a la profe trae el resumen de la salida, y la profe puede comentar una
+   sesión desde la Transcripta: el comentario le llega al alumno por el chat. */
+function sesNotifTxt(x){ if(!x) return ''; const p=[]; const ic=x.tipo==='swim'?'🏊':x.tipo==='mob'?'🧘':'🏃';
+  if(x.km) p.push(String(x.km).replace('.',',')+' km'); if(x.m) p.push(x.m+' m'); if(x.min&&!x.km) p.push(x.min+' min');
+  const km=inf2Num(x.km), sc=+x.sec||inf2Num(x.min)*60; if(km>=0.5&&sc&&km<60) p.push(paceTxt(sc,km*1000)+'/km');
+  if(x.rpe) p.push('esfuerzo '+x.rpe+'/10'); if(x.feel){ const fe=FEELS.find(function(f){ return f[0]===x.feel; }); if(fe) p.push(fe[1]); } if(x.test) p.push('test 12′: '+(x.test/1000).toFixed(2).replace('.',',')+' km');
+  try{ if(x.tipo==='run'&&x.at){ const h=runHist(+x.at); if(h.length){ const R=runRecords(h), c=runEntry(x,+x.at); if((c.bk&&(!R.bk||c.bk<R.bk))||c.km>R.km||(c.b5&&(!R.b5||c.b5<R.b5))) p.push('🏆 récord'); } } }catch(e){}
+  return p.length?ic+' '+p.join(' · '):''; }
+async function logComment(i){ const e=LOGS[i]; if(!e) return; const st=DB.students[active]; if(!st) return;
+  const txt=((await uiPrompt('Tu comentario para '+st.name+' sobre "'+e.dayName+'" del '+fmtShort(e.date)+' (le llega por el chat):'))||'').trim(); if(!txt) return;
+  const det=e.ses?sesNotifTxt(e.ses):''; const text='💬 Sobre tu sesión "'+e.dayName+'" del '+fmtShort(e.date)+(det?' ('+det+')':'')+':\n'+txt;
+  const remote=safeParse(await Store.get('tafit:chat:'+active)||'[]',[]); CHAT=mergeChat(CHAT,remote);
+  CHAT.push({ id:newChatId(), from:'trainer', text:text, ts:new Date().toISOString() }); await Store.set('tafit:chat:'+active,JSON.stringify(CHAT));
+  toast('Comentario enviado ✓ · lo ve en su chat','ok'); }
 async function sendChatMessage(){
   const inp=$('chatInput'); if(!inp) return;
   const text=inp.value.trim(); if(!text) return;
@@ -2806,7 +2828,8 @@ function renderNotifList(){
       const clickable=!!DB.students[n.id];
       return `<div class="notif-row${clickable?' notif-click':''}"${clickable?` data-act="openNotifChat" data-id="${esc(n.id)}"`:''}><b>💬 ${esc(n.name)}</b><span>"${preview}" · ${fmtShort(n.date)}</span></div>`;
     }
-    return `<div class="notif-row"><b>${esc(n.name)}</b><span>Cerró "${esc(n.dayName||'')}" · ${fmtShort(n.date)}</span></div>`;
+    const ck=!!DB.students[n.id];
+    return `<div class="notif-row${ck?' notif-click':''}"${ck?` data-act="openNotifTrans" data-id="${esc(n.id)}"`:''}><b>${esc(n.name)}</b><span>Cerró "${esc(n.dayName||'')}" · ${fmtShort(n.date)}</span>${n.sum?`<span class="notif-sum">${esc(n.sum)}</span>`:''}</div>`;
   }).join('');
 }
 let locked=false;
@@ -5298,6 +5321,9 @@ const SES_TPL=[
   {id:'run-a1',tipo:'run',niv:'Avanzado',n:'Series 8 × 2′ en zona 5',bl:[B('Entrada en calor',12,2,'Trotá'),{rep:8,bl:[B('Serie a fondo',2,5,'Corré a fondo'),B('Recuperación',2,1,'Trotá muy suave')]},B('Vuelta a la calma',8,1,'Caminá')]},
   {id:'run-a2',tipo:'run',niv:'Avanzado',n:'Tempo 3 × 8′ en zona 4',bl:[B('Entrada en calor',10,2,'Trotá'),{rep:3,bl:[B('Tempo',8,4,'Corré fuerte y parejo'),B('Recuperación',3,2,'Trotá suave')]},B('Vuelta a la calma',6,1,'Caminá')]},
   {id:'run-a3',tipo:'run',niv:'Avanzado',n:'Fondo largo 60′',bl:[B('Entrada en calor',5,1,'Trotá suave'),B('Fondo largo',50,2,'Corré parejo'),B('Vuelta a la calma',5,1,'Caminá')]},
+  {id:'run-test',tipo:'run',test:true,niv:'Todos',n:'Test de 12 minutos',bl:[B('Entrada en calor',10,2,'Trotá suave'),B('Test: lo más lejos que puedas',12,5,'Corré parejo y lo más fuerte que puedas sostener'),B('Vuelta a la calma',5,1,'Caminá')]},
+  {id:'prog-5k',tipo:'run',prog:true,niv:'Plan que avanza solo',n:'Plan: de caminar a correr 5 km (8 semanas)',bl:[B('Caminata',5,1,'Caminá'),{rep:8,bl:[B('Trote',1,2,'Trotá suave'),B('Caminata',1.5,1,'Caminá')]},B('Vuelta a la calma',5,1,'Caminá suave')]},
+  {id:'prog-10k',tipo:'run',prog:true,niv:'Plan que avanza solo',n:'Plan: de 5 a 10 km (8 semanas)',bl:[B('Entrada en calor',8,2,'Trotá suave'),B('Fondo',23,2,'Corré parejo'),B('Vuelta a la calma',5,1,'Caminá')]},
   /* 23/10/2026 · sesiones pensadas para la CINTA del gimnasio. inc = inclinación (%), k = 'walk'/'run',
      dv = km/h de más o de menos sobre la velocidad de esa zona. curva = cinta curva (sin motor). */
   {id:'cin-p1',tipo:'run',cinta:true,niv:'Principiante',n:'Cinta: caminata en pendiente 30′',bl:[C('Caminata suave',5,1,'Caminá',{k:'walk',inc:0}),{rep:4,bl:[C('Subida',3,2,'Caminá en subida',{k:'walk',inc:6,dv:-0.5}),C('Llano',2,1,'Caminá en llano',{k:'walk',inc:1})]},C('Vuelta a la calma',5,1,'Caminá suave',{k:'walk',inc:0})]},
@@ -5333,10 +5359,47 @@ function lugarPref(){ try{ return localStorage.getItem('tafit:lugar:'+active)===
 function isCintaT(t){ return !!(t&&t.tipo==='run'&&(t.cinta||lugarPref()==='cinta')); }
 function velTxt(n){ return String(n).replace('.',','); }
 function stepKind(st){ return st.k||(/camin/i.test((st.acc||'')+' '+st.n)?'walk':'run'); }
-function stepSpeed(st,t){ if(!st||st.mov) return null; const k=stepKind(st); const inc=st.inc!==undefined?st.inc:(k==='run'?1:0); if(t&&t.curva) return {v:0,inc:0,k:k,curva:true};
+function stepSpeed(st,t){ if(!st||st.mov) return null; const k=stepKind(st); const inc=st.inc!==undefined?st.inc:(k==='run'?1:0); if(t&&(t.curva||t.test)) return {v:0,inc:0,k:k,curva:true};
   const V=cintaVel(); const off=k==='walk'?{1:-1,2:0,3:0.5,4:0.5,5:0.5}:{1:-1.5,2:0,3:1,4:2,5:3}; let v=(k==='walk'?V.walk:V.run)+(off[st.z]||0)+(st.dv||0); v=Math.max(3,Math.round(v*2)/2); return {v:v,inc:inc,k:k}; }
 function speedChip(sp){ if(!sp) return ''; if(sp.curva) return `<span class="cin-chip">${sp.k==='walk'?'caminá':'a tu ritmo'}</span>`; return `<span class="cin-chip">${velTxt(sp.v)} km/h${sp.inc?' · '+sp.inc+'%':''}</span>`; }
 function minTxt(m){ const sec=Math.round(m*60), mm=Math.floor(sec/60), ss=sec%60; return !mm?ss+'″':ss?mm+'′'+ss+'″':mm+'′'; }
+/* ==== 23/10/2026 · v8-133: ritmos por zona (test de 12′) y planes que avanzan solos ==== */
+/* --- Test de 12 minutos → ritmo de cada zona, para los que no tienen reloj. Con GPS, la voz
+   avisa si va muy rápido o muy lento para la zona del tramo. --- */
+const RZ_F={1:[1.40,1.75],2:[1.25,1.40],3:[1.12,1.25],4:[1.03,1.12],5:[0.90,1.03]};
+function ritmoData(){ try{ const r=JSON.parse(localStorage.getItem('tafit:ritmo:'+active)||'null'); return r&&+r.d>=800?r:null; }catch(e){ return null; } }
+function setRitmoData(m){ try{ localStorage.setItem('tafit:ritmo:'+active,JSON.stringify({d:Math.round(m),at:Date.now()})); }catch(e){} }
+function ritmoZonas(){ const r=ritmoData(); if(!r) return null; const pt=720/(r.d/1000); const z={}; Object.keys(RZ_F).forEach(function(k){ z[k]=[Math.round(pt*RZ_F[k][0]),Math.round(pt*RZ_F[k][1])]; }); return {pt:pt,d:r.d,at:r.at,z:z}; }
+function pRange(a){ return paceTxt(a[0],1000)+'–'+paceTxt(a[1],1000); }
+function ritmoBoxHTML(){ const R=ritmoZonas();
+  if(!R) return `<div class="rz-box"><b>⏱️ ¿No tenés reloj?</b><span>Hacé una vez el <b>test de 12 minutos</b> y te digo a qué ritmo ir en cada zona. Con el GPS, la voz te avisa si vas muy rápido o muy lento.</span><button type="button" class="ses-go ghost" data-act="sesStart" data-tpl="run-test">▶ Hacer el test de 12′ (27 min en total)</button></div>`;
+  return `<div class="rz-box"><b>⏱️ Tus ritmos por zona <small>test: ${(R.d/1000).toFixed(2).replace('.',',')} km en 12′ · ${fmtShort(new Date(R.at).toISOString())}</small></b>${[1,2,3,4,5].map(function(k){ const Z=ZONAS[k-1]; return `<div class="rz-row"><span class="zt" style="background:${Z.c}">Z${k}</span><span>${esc(Z.t)}</span><b>${pRange(R.z[k])} /km</b></div>`; }).join('')}<button type="button" class="ses-link" data-act="sesStart" data-tpl="run-test">Rehacer el test (cada 6-8 semanas)</button></div>`; }
+/* ritmo de los últimos ~60 s */
+function gpsNowPace(){ if(!gps||!gps.trk||gps.trk.length<2) return 0; const last=gps.trk[gps.trk.length-1]; let j=gps.trk.length-2; while(j>0&&last[0]-gps.trk[j][0]<60) j--; const a=gps.trk[j]; const dd=last[1]-a[1], dt=last[0]-a[0]; return dd>=60&&dt>=20?dt/(dd/1000):0; }
+function sesCoach(){ if(!sesP||sesP.free||sesP.paused||!gps) return; const st=sesP.steps[sesP.i]; if(!st||st.mov||stepKind(st)!=='run') return; const R=ritmoZonas(); if(!R) return;
+  const now=Date.now(); const inStep=(now-sesP.stT)/1000, left=(sesP.end-now)/1000; if(inStep<75||left<10||(sesP.lastCoach&&now-sesP.lastCoach<80000)) return;
+  const p=gpsNowPace(); if(!p) return; const a=R.z[st.z]; let msg='';
+  if(p<a[0]*0.97) msg='Vas rápido para zona '+st.z+'. Bajá un poco: buscá '+paceSay(paceTxt(a[0],1000))+' por kilómetro.';
+  else if(p>a[1]*1.04) msg='Podés apurar un poco para zona '+st.z+'. Buscá '+paceSay(paceTxt(a[1],1000))+' por kilómetro.';
+  if(msg){ sesP.lastCoach=now; sesVib([80,60,80]); sesSay(msg); } else if(!sesP.okSaid||now-sesP.okSaid>300000){ sesP.okSaid=now; sesP.lastCoach=now; } }
+function coachLineHTML(st){ if(!st||st.mov||stepKind(st)!=='run'||(sesP&&sesP.cinta)) return ''; const R=ritmoZonas(); if(!R) return ''; const a=R.z[st.z]; const p=gps?gpsNowPace():0;
+  const cls=!p?'':p<a[0]*0.97?'fast':p>a[1]*1.04?'slow':'ok'; return `<div class="sp-coach ${cls}">🎯 Ritmo para Z${st.z}: <b>${pRange(a)}</b> /km${p?` · ahora <b>${paceTxt(p,1000)}</b>${cls==='fast'?' ↓ bajá':cls==='slow'?' ↑ apurá':' ✓'}`:''}</div>`; }
+/* --- Planes que avanzan solos: cada sesión superada pasa a la siguiente. Si le costó mucho
+   (😫 o esfuerzo 9-10) se repite la misma. 3 sesiones por semana. --- */
+const PROG={
+  'prog-5k':{n:'De caminar a correr 5 km',sem:8,mk:function(w,s){ const W=B('Caminata',5,1,'Caminá'), CD=B('Vuelta a la calma',5,1,'Caminá suave'); const run=function(m){ return B('Trote',m,2,'Trotá suave, que puedas hablar'); }, walk=function(m){ return B('Caminata',m,1,'Caminá'); };
+    const plan={1:[{rep:8,bl:[run(1),walk(1.5)]}],2:[{rep:6,bl:[run(1.5),walk(2)]}],3:[{rep:2,bl:[run(1.5),walk(1.5),run(3),walk(3)]}],4:[run(3),walk(1.5),run(5),walk(2.5),run(3),walk(1.5),run(5)],5:s===3?[run(20)]:[{rep:3,bl:[run(5),walk(3)]}],6:s===3?[run(25)]:[run(5),walk(3),run(8),walk(3),run(5)],7:[run(25)],8:[run(30)]};
+    return [W].concat(plan[w]).concat([CD]); }},
+  'prog-10k':{n:'De 5 a 10 km',sem:8,mk:function(w,s){ const WU=B('Entrada en calor',8,2,'Trotá suave'), CD=B('Vuelta a la calma',5,1,'Caminá');
+    if(s===1) return [WU,B('Fondo',20+3*w,2,'Corré parejo'),CD];
+    if(s===2) return [WU,{rep:3+Math.ceil(w/2),bl:[B('Intervalo',3,4,'Corré fuerte'),B('Recuperación',2,2,'Trotá suave')]},CD];
+    return [WU,B('Fondo largo',30+5*w,2,'Corré parejo y tranquilo'),CD]; }}
+};
+function progCount(id){ return (LOGS||[]).filter(function(l){ return l.ses&&l.ses.prog===id&&!(+l.ses.rpe>=9||l.ses.feel==='mal'); }).length; }
+function progResolve(t){ if(!t||!t.prog) return t; const P=PROG[t.id]; if(!P) return t; const tot=P.sem*3; const n=Math.min(progCount(t.id),tot-1); const w=Math.floor(n/3)+1, s=n%3+1;
+  return Object.assign({},t,{n:P.n+' · semana '+w+', sesión '+s,pTitle:P.n,bl:P.mk(w,s),pw:w,ps:s,pn:n,ptot:tot}); }
+function sesDayTpl(d){ return progResolve(sesTpl(d.ses||sesDefault(d.type))||sesTpl(sesDefault(d.type))); }
+function progBarHTML(t){ if(!t||!t.prog) return ''; const pct=Math.round(t.pn/t.ptot*100); return `<div class="prog-box"><div class="prog-h"><b>📅 Semana ${t.pw} de ${PROG[t.id].sem}</b><span>sesión ${t.ps} de 3</span></div><div class="prog-bar"><i style="width:${pct}%"></i></div><div class="prog-hint">Avanza sola al terminar · si te costó mucho (😫 o 9-10) se repite</div></div>`; }
 let _sesEdad={};
 async function sesLoadEdad(){ const id=active; if(_sesEdad[id]!==undefined) return _sesEdad[id]; let edad=null;
   const keys=['tafit:form:anamnesis:'+id,'tafit:form:anamnesis:'+id+':'+(member||0),'tafit:form:acuerdo:'+id];
@@ -5360,22 +5423,24 @@ function sesTransDayHTML(d){ const t=sesTpl(d.ses||sesDefault(d.type))||sesTpl(s
 function ritmoTxt(v){ const km=inf2Num(v.km), mn=inf2Num(v.min); if(!(km>0&&mn>0)) return ''; const p=mn/km; if(p<2&&km>=10) return '⚠️ Revisá la distancia: ¿faltó la coma? (ej: 1,48 km)'; const mm=Math.floor(p), ss=Math.round((p-mm)*60); return 'Ritmo: '+mm+':'+String(ss).padStart(2,'0')+' min/km'; }
 function exVidByName(n){ const it=exLibList().find(function(x){ return inf2Norm(x.n)===inf2Norm(n); }); return it&&it.vid?it.vid:YT(n); }
 function renderSesDay(m,d){
-  const t=sesTpl(d.ses||sesDefault(d.type))||sesTpl(sesDefault(d.type)); const v=sesVal();
+  const t=sesDayTpl(d); const v=sesVal();
   const box=document.createElement('div'); box.className='ex ses-card'; let h='';
   if(t.tipo==='run'){
-    const cin=isCintaT(t), sc=function(x){ return cin?speedChip(stepSpeed(x,t)):''; };
-    h+=`<div class="ses-top"><span>${cin?'🏋️':'🏃'} ${esc(t.niv)}</span><b>${esc(t.n)}</b><em>${sesMins(t)} min</em></div>`;
-    if(!t.cinta) h+=`<div class="gps-opt"><div><b>¿Dónde vas a correr?</b><small>${cin?'En la cinta te digo la velocidad y la inclinación de cada tramo.':'Al aire libre, guiado por zonas.'}</small></div><div class="gseg"><button type="button" data-act="lugarSet" data-v="afuera" class="${cin?'':'on'}">🌳 Afuera</button><button type="button" data-act="lugarSet" data-v="cinta" class="${cin?'on':''}">🏋️ Cinta</button></div></div>`;
-    if(cin&&!t.curva){ const V=cintaVel(); h+=`<div class="cin-vel${V.set?'':' new'}"><div class="cv-lbl">${V.set?'Tus velocidades en la cinta':'👋 Contame tus velocidades (una sola vez)'}</div><div class="cv-grid"><label>Caminata rápida (km/h)<input inputmode="decimal" data-chg="cintaVel" data-f="walk" value="${velTxt(V.walk)}"></label><label>Trote cómodo (km/h)<input inputmode="decimal" data-chg="cintaVel" data-f="run" value="${velTxt(V.run)}"></label></div><div class="ses-mini" style="text-align:left">Trote cómodo = el que podés sostener charlando. Con esto calculo la velocidad de cada zona.</div></div>`; }
-    if(t.curva) h+=`<div class="ses-mini" style="text-align:left">🏋️ Cinta curva: no tiene motor, la velocidad la marcás vos con tu paso. Te guío por esfuerzo.</div>`;
-    h+=`<details class="acc-lite"><summary>📈 Tus zonas de pulso <i>▾</i></summary><div id="znWrap">${zonasHTML(null)}</div></details><ol class="ses-steps">${t.bl.map(function(b){ if(b.rep) return `<li><b>${b.rep} veces:</b> ${b.bl.map(function(x){ return `${minTxt(x.min)} ${esc(x.n.toLowerCase())} <span class="zt" style="background:${ZONAS[x.z-1].c}">Z${x.z}</span>${sc(x)}`; }).join(' + ')}</li>`; return `<li>${minTxt(b.min)} ${esc(b.n.toLowerCase())} <span class="zt" style="background:${ZONAS[b.z-1].c}">Z${b.z}</span>${sc(b)}</li>`; }).join('')}</ol>`;
-    const gOn=gpsPref()&&!cin;
-    if(!cin) h+=`<div class="gps-opt"><div><b>📍 Usar GPS</b><small>${gOn?'Mide distancia, ritmo por km y dibuja tu recorrido en el mapa.':'La app no usa tu ubicación. Podés activarlo cuando quieras.'}</small></div><div class="gseg"><button type="button" data-act="gpsSet" data-v="on" class="${gOn?'on':''}">Sí</button><button type="button" data-act="gpsSet" data-v="off" class="${gOn?'':'on'}">No</button></div></div>`;
-    h+=`<button type="button" class="ses-go" data-act="sesStart">▶ Empezar con guía de voz${gOn?' + GPS':''}</button>${gOn?'<button type="button" class="ses-go ghost" data-act="gpsFree">📍 Correr libre con GPS (sin plan)</button>':''}<div class="ses-mini">Te avisa con voz y vibración cada cambio de ${cin&&!t.curva?'velocidad y zona':'zona'}${gOn?' y cada kilómetro':''}. Dejá la app abierta y la pantalla encendida.</div>`;
-    if(v.route&&v.route.length>1) h+=routeMapHTML(v.route,false);
-    if(v.km||v.zn||v.route) h+=`<button type="button" class="ses-go ghost" data-act="sesSumOpen">📊 Ver resumen de la salida</button>`;
+    /* 23/10/2026: tarjeta compacta — arriba solo lo necesario para arrancar; el resto en desplegables */
+    const cin=isCintaT(t), sc=function(x){ return cin?speedChip(stepSpeed(x,t)):''; }; const gOn=gpsPref()&&!cin;
+    const acc=function(tit,body,open,cls){ return `<details class="acc-lite${cls?' '+cls:''}"${open?' open':''}><summary>${tit} <i>▾</i></summary><div class="acc-in">${body}</div></details>`; };
+    h+=`<div class="ses-top"><span>${cin?'🏋️':'🏃'} ${esc(t.niv)}</span><b>${esc(t.pTitle||t.n)}</b><em>${sesMins(t)} min</em></div>`+progBarHTML(t);
+    h+=`<div class="ses-opts">${t.cinta?`<span class="opt-fixed">🏋️ Sesión de cinta${t.curva?' curva':''}</span>`:`<div class="gseg sm"><button type="button" data-act="lugarSet" data-v="afuera" class="${cin?'':'on'}">🌳 Afuera</button><button type="button" data-act="lugarSet" data-v="cinta" class="${cin?'on':''}">🏋️ Cinta</button></div>`}${cin?'':`<div class="gseg sm"><span>📍 GPS</span><button type="button" data-act="gpsSet" data-v="on" class="${gOn?'on':''}">Sí</button><button type="button" data-act="gpsSet" data-v="off" class="${gOn?'':'on'}">No</button></div>`}</div>`;
+    const V=cintaVel(); if(cin&&!t.curva&&!V.set) h+=`<div class="cin-vel new"><div class="cv-lbl">👋 Antes de arrancar: tus velocidades (una sola vez)</div><div class="cv-grid"><label>Caminata rápida (km/h)<input inputmode="decimal" data-chg="cintaVel" data-f="walk" value="${velTxt(V.walk)}"></label><label>Trote cómodo (km/h)<input inputmode="decimal" data-chg="cintaVel" data-f="run" value="${velTxt(V.run)}"></label></div><div class="ses-mini" style="text-align:left">Trote cómodo = el que podés sostener charlando.</div></div>`;
+    h+=`<button type="button" class="ses-go" data-act="sesStart">▶ Empezar con guía de voz${gOn?' + GPS':''}</button>${gOn?'<button type="button" class="ses-link" data-act="gpsFree">o correr libre con GPS, sin plan</button>':''}<div class="ses-mini">${t.curva?'Cinta curva: la velocidad la marcás vos con tu paso. ':''}Dejá la app abierta y la pantalla encendida.</div>`;
+    h+=`<div class="acc-stack">`;
+    h+=acc(`📋 El plan <small>${t.bl.length} bloques</small>`,`<ol class="ses-steps">${t.bl.map(function(b){ if(b.rep) return `<li><b>${b.rep} veces:</b> ${b.bl.map(function(x){ return `${minTxt(x.min)} ${esc(x.n.toLowerCase())} <span class="zt" style="background:${ZONAS[x.z-1].c}">Z${x.z}</span>${sc(x)}`; }).join(' + ')}</li>`; return `<li>${minTxt(b.min)} ${esc(b.n.toLowerCase())} <span class="zt" style="background:${ZONAS[b.z-1].c}">Z${b.z}</span>${sc(b)}</li>`; }).join('')}</ol>`);
+    if(cin&&!t.curva&&V.set) h+=acc(`⚙️ Tus velocidades <small>${velTxt(V.walk)} · ${velTxt(V.run)} km/h</small>`,`<div class="cv-grid"><label>Caminata rápida (km/h)<input inputmode="decimal" data-chg="cintaVel" data-f="walk" value="${velTxt(V.walk)}"></label><label>Trote cómodo (km/h)<input inputmode="decimal" data-chg="cintaVel" data-f="run" value="${velTxt(V.run)}"></label></div>`);
+    h+=acc(`📈 Tus zonas${!cin&&ritmoZonas()?' <small>pulso y ritmo</small>':''}`,`${cin?'':ritmoBoxHTML()}<div id="znWrap">${zonasHTML(null)}</div>`);
+    if(v.km||v.zn||v.route){ const kk=inf2Num(v.km), ss=+v.sec||inf2Num(v.min)*60; h+=acc(`📊 Tu salida <small>${kk>0?String(v.km).replace('.',',')+' km':''}${kk>0&&ss?' · '+paceTxt(ss,kk*1000)+'/km':''}</small>`,`${v.route&&v.route.length>1?routeMapHTML(v.route,false):''}<button type="button" class="ses-go ghost" data-act="sesSumOpen">Ver el resumen completo</button>`,false,'sal-acc'); }
     h+=myRecordsHTML();
-    h+=`<div class="cv-res"><div class="cv-lbl">Al terminar, anotá${cin?' (mirá la pantalla de la cinta)':''}</div><div class="cv-grid three"><label>Distancia (km)${v.kmEst?' <small>aprox.</small>':''}<input inputmode="decimal" data-chg="ses" data-f="km" value="${esc(v.km||'')}" placeholder="4,2"></label><label>Tiempo (min)<input inputmode="numeric" data-chg="ses" data-f="min" value="${esc(v.min||'')}" placeholder="${sesMins(t)}"></label><label>Pulso prom.<input inputmode="numeric" data-chg="ses" data-f="fc" value="${esc(v.fc||'')}" placeholder="opcional"></label></div><div class="ses-ritmo" id="sesRitmo">${ritmoTxt(v)}</div></div>`;
+    h+=acc(`✏️ Anotar a mano <small>${v.km||v.min?esc([v.km?String(v.km).replace('.',',')+' km':'',v.min?v.min+' min':''].filter(Boolean).join(' · ')):cin?'lo que marca la cinta':'si no usaste la guía'}</small>`,`<div class="cv-grid three"><label>Distancia (km)${v.kmEst?' <small>aprox.</small>':''}<input inputmode="decimal" data-chg="ses" data-f="km" value="${esc(v.km||'')}" placeholder="4,2"></label><label>Tiempo (min)<input inputmode="numeric" data-chg="ses" data-f="min" value="${esc(v.min||'')}" placeholder="${sesMins(t)}"></label><label>Pulso prom.<input inputmode="numeric" data-chg="ses" data-f="fc" value="${esc(v.fc||'')}" placeholder="opcional"></label></div><div class="ses-ritmo" id="sesRitmo">${ritmoTxt(v)}</div>`);
+    h+=`</div>`;
   } else if(t.tipo==='swim'){
     h+=`<div class="ses-top"><span>🏊 ${esc(t.niv)}</span><b>${esc(t.n)}</b><em>${swimTotal(t)} m</em></div><ol class="ses-steps">${t.ser.map(function(x,i){ const dn=(v['s'+i]||0); return `<li><div class="sw-row"><div><b>${x.rep>1?x.rep+' × ':''}${x.m} m</b> ${esc(x.q)}${x.p?` <small>· pausa ${x.p}″</small>`:''}${x.ex?` <span class="alt-tap" data-act="playVideo" data-url="${esc(exVidByName(x.ex))}" data-name="${esc(x.ex)}">🎬 video</span><span class="rd-tech" data-act="readTech" data-name="${esc(x.ex)}">📖 leer</span>`:''}</div><button type="button" class="sw-chk${dn?' on':''}" data-act="swimChk" data-i="${i}">${dn?'✓':'○'}</button></div></li>`; }).join('')}</ol>`;
     h+=`<div class="cv-res"><div class="cv-lbl">Al terminar, anotá</div><div class="cv-grid"><label>Metros nadados<input inputmode="numeric" data-chg="ses" data-f="m" value="${esc(v.m||'')}" placeholder="${swimTotal(t)}"></label><label>Tiempo (min)<input inputmode="numeric" data-chg="ses" data-f="min" value="${esc(v.min||'')}" placeholder="40"></label></div></div>`;
@@ -5413,7 +5478,7 @@ function gpsStart(){ if(!navigator.geolocation){ toast('Este celular no tiene GP
         if(d>200){ const ok=gps.gap&&d<=(Date.now()-gps.gap)/1000*6.5+200; if(!ok){ gps.last=pt; return; } }
         gps.dist+=d; }
       if(document.visibilityState==='visible') gps.gap=0;
-      gps.last=pt; gps.pts.push(pt);
+      gps.last=pt; gps.pts.push(pt); (gps.trk=gps.trk||[]).push([gpsMov(),gps.dist]); if(gps.trk.length>400) gps.trk=gps.trk.slice(-200);
       const k=Math.floor(gps.dist/1000); if(k>gps.km){ const mv=gpsMov(); for(let j=gps.km;j<k;j++) gps.spl.push(Math.round((mv-gps.kmT)/(k-gps.km))); gps.km=k; gps.kmT=mv;
         const lastP=paceTxt(gps.spl[gps.spl.length-1],1000); let msg='Kilómetro '+k+'. Este kilómetro a '+paceSay(lastP)+'.';
         if(sesP&&!sesP.free&&sesP.steps[sesP.i]&&!sesP.steps[sesP.i].mov) msg+=' Seguís en zona '+sesP.steps[sesP.i].z+'.';
@@ -5442,7 +5507,9 @@ function loadLeaflet(){ if(window.L&&window.L.map) return Promise.resolve(); if(
     const to=setTimeout(rej,8000); inf2LoadScript('https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js').then(function(){ clearTimeout(to); res(); },function(){ clearTimeout(to); rej(); }); });
   _leafP.catch(function(){ _leafP=null; }); return _leafP; }
 function routeMapHTML(pts,big){ return pts&&pts.length>1?`<div class="route-map${big?' big':''}" data-route="${esc(JSON.stringify(pts))}">${routeSVG(pts)}</div>`:''; }
-function mountMaps(root){ const els=(root||document).querySelectorAll('.route-map:not(.map-on)'); if(!els.length) return;
+function mountMaps(root){ let els=[].slice.call((root||document).querySelectorAll('.route-map:not(.map-on)'));
+  /* los mapas dentro de un desplegable cerrado se arman recién cuando se abre (si no, Leaflet los dibuja de tamaño 0) */
+  els=els.filter(function(el){ const d=el.closest('details:not([open])'); if(d){ if(!d._mapHook){ d._mapHook=1; d.addEventListener('toggle',function(){ if(d.open) mountMaps(d); }); } return false; } return true; }); if(!els.length) return;
   loadLeaflet().then(function(){ els.forEach(function(el){ if(el.classList.contains('map-on')||!el.isConnected) return; let pts; try{ pts=JSON.parse(el.dataset.route); }catch(e){ return; }
     el.classList.add('map-on'); el.innerHTML='';
     const m=L.map(el,{zoomControl:false,attributionControl:true,scrollWheelZoom:false,dragging:el.classList.contains('big'),tap:false,touchZoom:el.classList.contains('big'),doubleClickZoom:el.classList.contains('big')});
@@ -5453,7 +5520,7 @@ function mountMaps(root){ const els=(root||document).querySelectorAll('.route-ma
     L.circleMarker(pts[pts.length-1],{radius:7,color:'#fff',weight:3,fillColor:'#B5523B',fillOpacity:1}).addTo(m).bindTooltip('Llegada');
     m.fitBounds(pl.getBounds(),{padding:[18,18]}); setTimeout(function(){ try{ m.invalidateSize(); m.fitBounds(pl.getBounds(),{padding:[18,18]}); }catch(e){} },250); }); }).catch(function(){}); }
 function gpsApply(res){ if(!res) return; const k=sesKey(); const cur=CACHE[k]; const v=(cur&&wOf(cur)===+week)?Object.assign({},cur):{};
-  ['km','min','sec','route','splits','rest','zn','plan','gpsOn','at','kmEst'].forEach(function(f){ if(res[f]!==undefined&&res[f]!==null) v[f]=res[f]; }); if(!(v.route&&v.route.length>1)) delete v.route;
+  ['km','min','sec','route','splits','rest','zn','plan','gpsOn','at','kmEst','test'].forEach(function(f){ if(res[f]!==undefined&&res[f]!==null) v[f]=res[f]; }); if(!(v.route&&v.route.length>1)) delete v.route;
   v._w=+week; CACHE[k]=v; queueSave(); }
 /* correr libre: solo GPS, sin plan de zonas */
 async function gpsFree(){ if(!gpsStart()) return; window._sesBusy=true; await sesWakeOn();
@@ -5473,8 +5540,8 @@ function sesVib(p){ try{ if(navigator.vibrate) navigator.vibrate(p||[300,120,300
 function stepSpeech(st){ if(st.mov) return st.n+'. '+st.s+' segundos.'; const z=ZONAS[st.z-1]; const mins=Math.round(st.s/60); let cv='';
   if(sesP&&sesP.cinta){ const sp=stepSpeed(st,sesP.t); if(sp&&!sp.curva) cv=' Poné la cinta a '+velTxt(sp.v)+' kilómetros por hora'+(sp.inc?', inclinación '+sp.inc:', sin inclinación')+'.'; }
   return 'Cambiá a zona '+st.z+'.'+cv+' '+(st.acc||st.n)+', '+(st.s>=60?mins+(mins===1?' minuto':' minutos'):st.s+' segundos')+'. '+z.d.split('.')[0]+'.'; }
-async function sesStart(movId){
-  const d=routine()[day]; const t=movId?sesTpl(movId):(sesTpl(d.ses||sesDefault(d.type))); if(!t) return;
+async function sesStart(movId,tplId){
+  const d=routine()[day]; const t=movId?sesTpl(movId):tplId?sesTpl(tplId):sesDayTpl(d); if(!t) return;
   sesP={t:t,steps:sesSteps(t),i:0,end:0,paused:false,left:0,zn:{},stT:0,stD:0,pz:0,pAt:0,t0:Date.now(),cinta:!movId&&isCintaT(t)};
   window._sesBusy=true; await sesWakeOn();
   let o=$('sesPlayer'); if(!o){ o=document.createElement('div'); o.id='sesPlayer'; o.className='ses-player'; document.body.appendChild(o); }
@@ -5489,7 +5556,7 @@ function sesCloseStep(fullSec){ if(!sesP||sesP.free) return; const st=sesP.steps
 function sesGo(i,endAt){ if(!sesP) return; if(sesP.stT) sesCloseStep(); if(sesP.paused){ gpsPauseTog(false); sesP.pAt=0; } if(i>=sesP.steps.length){ sesFinish(); return; } sesP.i=i; const st=sesP.steps[i];
   sesP.end=endAt||Date.now()+st.s*1000; sesP.stT=Date.now(); sesP.pz=0; if(gps) sesP.stD=gps.dist; sesP.paused=false; sesP.warned=false; sesVib();
   sesSay((i===0?(sesP.t.mov?'Arrancamos con la movilidad. ':'Arrancamos. '):'')+stepSpeech(st)); sesPaint(); }
-function sesTick(){ if(!sesP||sesP.paused||sesP.free) return; if(gps&&Date.now()%1000<260) gpsPaint(); const now=Date.now(); const left=Math.max(0,Math.ceil((sesP.end-now)/1000));
+function sesTick(){ if(!sesP||sesP.paused||sesP.free) return; if(gps&&Date.now()%1000<260){ gpsPaint(); sesCoach(); const cl=$('spCoach'); if(cl) cl.innerHTML=coachLineHTML(sesP.steps[sesP.i]); } const now=Date.now(); const left=Math.max(0,Math.ceil((sesP.end-now)/1000));
   if(left<=3&&left>0&&!sesP.warned&&sesP.steps[sesP.i].s>=20){ sesP.warned=true; sesVib([120]); }
   if(left<=0){ /* si la pantalla estuvo apagada pueden haber pasado varios tramos: se saltan sin hablar */
     let end=sesP.end; sesCloseStep(); sesP.stT=0; let i=sesP.i+1;
@@ -5499,7 +5566,7 @@ function sesTick(){ if(!sesP||sesP.paused||sesP.free) return; if(gps&&Date.now()
 function sesPaintTime(left){ const el=$('spTime'); if(el){ const mm=Math.floor(left/60), ss=left%60; el.textContent=(mm?mm+':'+String(ss).padStart(2,'0'):ss+'″'); } }
 function sesPaint(){ const o=$('sesPlayer'); if(!o||!sesP) return; if(sesP.free){ gpsFreePaint(); return; } const st=sesP.steps[sesP.i], nx=sesP.steps[sesP.i+1]; const z=st.mov?null:ZONAS[st.z-1];
   const tot=sesP.steps.length, pct=Math.round(sesP.i/tot*100);
-  o.innerHTML=`<div class="sp-box" style="${z?`border-color:${z.c}`:''}"><div class="sp-h">${esc(sesP.t.n)}<span>${sesP.i+1} / ${tot}</span></div><div class="sp-prog"><i style="width:${pct}%"></i></div>${z?`<div class="sp-z" style="background:${z.c}">ZONA ${z.z} · ${esc(z.t.toUpperCase())}</div><div class="sp-zd">${esc(z.d)}</div>`:'<div class="sp-z mov">🧘 MOVILIDAD</div>'}<div class="sp-n">${esc(st.acc&&!st.mov?st.acc+' · '+st.n:st.n)}</div>${(function(){ if(!sesP.cinta||st.mov) return ''; const sp=stepSpeed(st,sesP.t); if(!sp) return ''; if(sp.curva) return '<div class="sp-cin">🏋️ Cinta curva · marcá vos el ritmo</div>'; return `<div class="sp-cin"><b>${velTxt(sp.v)}</b> km/h<span>·</span><b>${sp.inc}</b> % inclinación</div>`; })()}<div class="sp-t" id="spTime">—</div>${nx?`<div class="sp-next">Después: ${esc(nx.n)}${nx.mov?'':' · Z'+nx.z}${sesP.cinta&&!nx.mov&&!sesP.t.curva?(function(){ const sp=stepSpeed(nx,sesP.t); return sp?' · '+velTxt(sp.v)+' km/h'+(sp.inc?' '+sp.inc+'%':''):''; })():''}</div>`:'<div class="sp-next">¡Último tramo!</div>'}${gps?'<div id="gpsLive" class="gps-live"></div>':''}
+  o.innerHTML=`<div class="sp-box" style="${z?`border-color:${z.c}`:''}"><div class="sp-h">${esc(sesP.t.n)}<span>${sesP.i+1} / ${tot}</span></div><div class="sp-prog"><i style="width:${pct}%"></i></div>${z?`<div class="sp-z" style="background:${z.c}">ZONA ${z.z} · ${esc(z.t.toUpperCase())}</div><div class="sp-zd">${esc(z.d)}</div>`:'<div class="sp-z mov">🧘 MOVILIDAD</div>'}<div class="sp-n">${esc(st.acc&&!st.mov?st.acc+' · '+st.n:st.n)}</div>${(function(){ if(!sesP.cinta||st.mov) return ''; const sp=stepSpeed(st,sesP.t); if(!sp) return ''; if(sp.curva) return '<div class="sp-cin">🏋️ Cinta curva · marcá vos el ritmo</div>'; return `<div class="sp-cin"><b>${velTxt(sp.v)}</b> km/h<span>·</span><b>${sp.inc}</b> % inclinación</div>`; })()}<div id="spCoach">${coachLineHTML(st)}</div><div class="sp-t" id="spTime">—</div>${nx?`<div class="sp-next">Después: ${esc(nx.n)}${nx.mov?'':' · Z'+nx.z}${sesP.cinta&&!nx.mov&&!sesP.t.curva?(function(){ const sp=stepSpeed(nx,sesP.t); return sp?' · '+velTxt(sp.v)+' km/h'+(sp.inc?' '+sp.inc+'%':''):''; })():''}</div>`:'<div class="sp-next">¡Último tramo!</div>'}${gps?'<div id="gpsLive" class="gps-live"></div>':''}
     <div class="sp-btns"><button type="button" data-act="sesPause">${sesP.paused?'▶ Seguir':'⏸ Pausa'}</button><button type="button" data-act="sesNext">⏭ Siguiente</button><button type="button" data-act="sesStop">✕ Terminar</button></div><button type="button" class="sp-voz" data-act="sesVoz">${sesVozLbl()}</button></div>`;
   sesPaintTime(sesP.paused?sesP.left:Math.max(0,Math.ceil((sesP.end-Date.now())/1000))); gpsPaint(); }
 function sesPause(){ if(!sesP) return; if(sesP.free){ sesP.paused=!sesP.paused; gpsPauseTog(sesP.paused); sesSay(sesP.paused?'Pausa.':'Seguimos.'); gpsFreePaint(); return; }
@@ -5515,9 +5582,12 @@ function sesStop(){ const P=sesP; if(P&&P.int) clearInterval(P.int);
   if(!res&&guided){ const s=Math.round((Date.now()-P.t0)/1000); if(s<60) return; res={min:String(Math.round(s/60)),sec:s}; }
   if(!res) return; if(zn) res.zn=zn;
   if(P.cinta&&zn&&!res.km){ const m=Object.keys(zn).reduce(function(a,z){ return a+(zn[z].m||0); },0); if(m>=100){ res.km=(m/1000).toFixed(2).replace('.',','); res.kmEst=true; } }
+  if(P.t&&P.t.test){ const m5=zn&&zn[5]&&zn[5].m||0; if(m5>=800){ setRitmoData(m5); res.test=m5; } else { res._askTest=true; } }
   res.plan=P.free?'Correr libre':P.t.n; res.gpsOn=!!res.route; res.at=Date.now();
   const cur=sesVal(); if(guided&&!res.km&&cur.min) delete res.min; if(res.kmEst&&cur.km&&!cur.kmEst){ delete res.km; delete res.kmEst; }  /* no pisar lo que anotó a mano */
-  gpsApply(res); setTimeout(function(){ renderApp(); sesSummary(sesVal(),null,{live:true}); },60); }
+  const ask=res._askTest; delete res._askTest; gpsApply(res);
+  setTimeout(async function(){ if(ask){ const a=((await uiPrompt('¿Cuántos metros hiciste en los 12 minutos del test? (ej: 2100, o 2,1 si es en km)'))||'').trim(); let m=inf2Num(a); if(m>0&&m<30) m*=1000; if(m>=800&&m<=6000){ setRitmoData(m); const k=sesKey(); const c=CACHE[k]; if(c&&wOf(c)===+week){ c.test=Math.round(m); queueSave(); } toast('✓ Listo: ya tenés tus ritmos por zona','ok'); } }
+    renderApp(); sesSummary(sesVal(),null,{live:true}); },60); }
 function sesFinish(){ const mov=sesP&&sesP.t.mov; sesVib([400,150,400,150,400]); sesSay(mov?'¡Listo! Terminaste la movilidad. A entrenar.':'¡Terminaste! Muy bien. Mirá tu resumen.'); sesStop(); if(mov) toast('✓ Movilidad completa','ok'); }
 function sesVoz(){ try{ const off=localStorage.getItem('tafit:voz')==='off'; localStorage.setItem('tafit:voz',off?'on':'off'); if(off) sesSay('Voz encendida.'); }catch(e){} sesPaint(); }
 /* ---- resumen al terminar (también se abre desde el día y desde la Transcripta) ---- */
@@ -5532,7 +5602,7 @@ function sesSumHTML(v){ const km=inf2Num(v.km), sec=v.sec||(inf2Num(v.min)*60)||
   return h; }
 function sesSummary(v,title,opt){ opt=opt||{}; if(!v||!(v.km||v.zn||v.route||v.sec)) return; let o=$('sesSum'); if(!o){ o=document.createElement('div'); o.id='sesSum'; o.className='ses-player'; document.body.appendChild(o); }
   const at=+opt.at||+v.at||0; let body=sesSumHTML(v); const i=body.indexOf('</div></div>')+12; /* después de los números: sensación + récords */
-  body=body.slice(0,i)+feelBlockHTML(v,!!opt.live)+recordsHTML(v,at)+body.slice(i);
+  body=body.slice(0,i)+(v.test&&opt.live&&ritmoZonas()?`<div class="sum-sec">${ritmoBoxHTML()}</div>`:'')+feelBlockHTML(v,!!opt.live)+recordsHTML(v,at)+body.slice(i);
   o.style.display='flex'; o.scrollTop=0; o.innerHTML=`<div class="sp-box sum-box"><div class="sum-h">🏁 ${esc(title||'¡Sesión terminada!')}<small>${esc(v.plan||'')}</small></div>${body}<div class="sp-btns sum-btns"><button type="button" data-act="sesStory">📸 Historia</button><button type="button" data-act="sesSumShare">📤 Texto</button><button type="button" data-act="sesSumClose">Cerrar</button></div></div>`;
   o._v=v; o._live=!!opt.live; o._at=at; mountMaps(o); }
 function sesSumShare(){ const o=$('sesSum'); const v=o&&o._v; if(!v) return; const km=inf2Num(v.km), sec=v.sec||inf2Num(v.min)*60;
@@ -7255,7 +7325,7 @@ async function closeSession(){
   let core=null;
   if(hasCoreDay(r[day])){ const ch=DB.students[active].abChoice, dn=coreDoneList(); if(coreChoiceValid(ch)&&dn.length){ core={fmt:ch.fmt, ex:ch.ex.map(id=>{ const it=coreItem(id); return it?it.n:id; }), done:dn.map(id=>{ const it=coreItem(id); return it?it.n:id; })}; } }
   let ses=null;
-  if(isSesDay(r[day])){ const t=sesTpl(r[day].ses||sesDefault(r[day].type)); const v=sesVal(); if(t&&(v.km||v.min||v.m||v.fc||t.tipo==='mob')){ ses={tipo:t.tipo, n:t.n, km:v.km||'', min:v.min||'', fc:v.fc||'', m:v.m||''}; if(v.route) ses.route=v.route; ['sec','splits','rest','zn','plan','rpe','feel','at'].forEach(function(f){ if(v[f]) ses[f]=v[f]; }); if(t.tipo==='swim'&&!ses.m){ const done=(t.ser||[]).reduce(function(a,x,i){ return a+(v['s'+i]?x.rep*x.m:0); },0); if(done) ses.m=String(done); } } }
+  if(isSesDay(r[day])){ const t=sesDayTpl(r[day]); const v=sesVal(); if(t&&(v.km||v.min||v.m||v.fc||t.tipo==='mob')){ ses={tipo:t.tipo, n:(v.plan&&(v.test||v.plan==='Correr libre'))?v.plan:t.n, km:v.km||'', min:v.min||'', fc:v.fc||'', m:v.m||''}; if(v.route) ses.route=v.route; ['sec','splits','rest','zn','plan','rpe','feel','at','test'].forEach(function(f){ if(v[f]) ses[f]=v[f]; }); if(t.prog&&!v.test) ses.prog=t.id; if(t.tipo==='swim'&&!ses.m){ const done=(t.ser||[]).reduce(function(a,x,i){ return a+(v['s'+i]?x.rep*x.m:0); },0); if(done) ses.m=String(done); } } }
   if(!exs.length && !obs && !hh && !core && !ses){ toast("No hay nada cargado en esta sesión todavía",'warn'); return; }
   /* 07/10/2026: aviso de sesión repetida — había días cerrados dos veces seguidas (mismo
      día de rutina, misma semana, minutos de diferencia), que duplicaban la Transcripta. */
@@ -7266,7 +7336,7 @@ async function closeSession(){
   await saveLogs();
   await autoBackup('sesion');
   /* Avisá al profe (aviso interno, no push): si quien cierra es el alumno, no la profe */
-  if(!trainer){ await pushNotif({ id:active, name:DB.students[active].name, date:new Date().toISOString(), dayName:r[day].day }); }
+  if(!trainer){ await pushNotif({ id:active, name:DB.students[active].name, date:new Date().toISOString(), dayName:r[day].day, sum:sesNotifTxt(ses) }); }
   /* Limpiar tildes Y pesos del día cerrado para que no aparezcan en semanas/días siguientes */
   r[day].ex.forEach(function(ex,ei){
     for(var mi2=0;mi2<members.length;mi2++){
@@ -7295,11 +7365,11 @@ function logEntryHTML(e,i){
   }).join('');
   const obs=e.obs?`<div class="log-obs">📝 ${esc(e.obs)}</div>`:'';
   const coreFmtL=e.core?((CORE_FMTS.find(f=>f.v===e.core.fmt)||{}).l||e.core.fmt):'';
-  const sesH=e.ses?(function(x){ const p=[]; if(x.km) p.push(String(x.km).replace('.',',')+' km'); if(x.m) p.push(x.m+' m'); if(x.min) p.push(x.min+' min'); if(x.fc) p.push('♥ '+x.fc); const rt=ritmoTxt(x); if(rt) p.push(rt.replace('Ritmo: ','')); if(x.rpe) p.push('esfuerzo '+x.rpe+'/10'); if(x.feel){ const fe=FEELS.find(function(f){ return f[0]===x.feel; }); if(fe) p.push(fe[1]); } return `<div class="log-ex"><div class="len">${x.tipo==='swim'?'🏊':x.tipo==='mob'?'🧘':'🏃'} ${esc(x.n)}</div><div class="lsets">${esc(p.join(' · ')||'hecho')}</div>${x.route?`<div class="gps-mini">${routeSVG(x.route)}</div>`:''}${(x.splits||x.zn||x.route)?`<button type="button" class="sum-open" data-act="sesSumLog" data-i="${(window._sumReg=window._sumReg||[]).push(Object.assign({_d:e.date},x))-1}">📊 Ver resumen</button>`:''}</div>`; })(e.ses):'';
+  const sesH=e.ses?(function(x){ const p=[]; if(x.km) p.push(String(x.km).replace('.',',')+' km'); if(x.m) p.push(x.m+' m'); if(x.min) p.push(x.min+' min'); if(x.fc) p.push('♥ '+x.fc); const rt=ritmoTxt(x); if(rt) p.push(rt.replace('Ritmo: ','')); if(x.rpe) p.push('esfuerzo '+x.rpe+'/10'); if(x.feel){ const fe=FEELS.find(function(f){ return f[0]===x.feel; }); if(fe) p.push(fe[1]); } if(x.test) p.push('test 12′: '+(x.test/1000).toFixed(2).replace('.',',')+' km'); return `<div class="log-ex"><div class="len">${x.tipo==='swim'?'🏊':x.tipo==='mob'?'🧘':'🏃'} ${esc(x.n)}</div><div class="lsets">${esc(p.join(' · ')||'hecho')}</div>${x.route?`<div class="gps-mini">${routeSVG(x.route)}</div>`:''}${(x.splits||x.zn||x.route)?`<button type="button" class="sum-open" data-act="sesSumLog" data-i="${(window._sumReg=window._sumReg||[]).push(Object.assign({_d:e.date},x))-1}">📊 Ver resumen</button>`:''}</div>`; })(e.ses):'';
   const coreH=e.core?`<div class="log-ex"><div class="len">🔥 Core · ${esc(coreFmtL)}</div><div class="lsets">${(e.core.ex||[]).map(n=>((e.core.done||[]).indexOf(n)>=0?'✓ ':'— ')+esc(n)).join(' &nbsp;|&nbsp; ')}</div></div>`:'';
   let hh='';
   if(e.health){ const fl=(e.health.alarms&&e.health.alarms.length)||e.health.pre==='warn'||e.health.post==='warn'; hh=`<div class="log-health ${fl?'flag':'ok'}">⚕ Pierna · antes: ${esc(e.health.pre||'—')} · después: ${esc(e.health.post||'—')}${(e.health.alarms&&e.health.alarms.length)?' · alarmas: '+esc(e.health.alarms.join(', ')):''}</div>`; }
-  const del=trainer?`<div class="log-del"><button data-act="delLog" data-i="${i}">eliminar</button></div>`:'';
+  const del=trainer?`<div class="log-del"><button class="log-cmt" data-act="logComment" data-i="${i}">💬 Comentar</button><button data-act="delLog" data-i="${i}">eliminar</button></div>`:'';
   return `<details class="log-entry"><summary><span class="le-day">${esc(e.dayName)}<small>${fmtDate(e.date)}</small></span><span class="le-meta">${esc(e.weekName||'')}${e.obs?'<br>📝 obs':''}${(e.health&&((e.health.alarms&&e.health.alarms.length)||e.health.pre==='warn'||e.health.post==='warn'))?'<br>⚕ revisar':''}</span></summary><div class="log-body">${sesH}${coreH}${exh}${obs}${hh}${del}</div></details>`;
 }
 function renderTrans(){
@@ -8705,7 +8775,7 @@ document.addEventListener('click',e=>{
     case 'pickMember': pickMember(i); break;
     case 'toggle': toggleSet(i,j,mi,el); break;
     case 'cardioDone': toggleCardioDone(i,mi); break;
-    case 'sesStart': sesStart(el.dataset.mov||null); break;
+    case 'sesStart': sesStart(el.dataset.mov||null,el.dataset.tpl||null); break;
     case 'readTech': openTechModal(el.dataset.name); break;
     case 'gpsFree': gpsFree(); break;
     case 'gpsSet': setGpsPref(el.dataset.v==='on'); renderApp(); break;
@@ -8855,6 +8925,8 @@ document.addEventListener('click',e=>{
     case 'openNotifs': renderNotifList(); $('notifOv').classList.add('show'); markNotifsSeen(); break;
     case 'closeNotifs': $('notifOv').classList.remove('show'); break;
     case 'sendChat': sendChatMessage(); break;
+    case 'openNotifTrans': (async function(){ const sid=el.dataset.id; if(sid&&DB.students[sid]&&sid!==active){ active=sid; await Store.set('tafit:active',active); await loadStudent(); } $('notifOv').classList.remove('show'); tab='trans'; render(); })(); break;
+    case 'logComment': logComment(i); break;
     case 'openNotifChat': (async function(){ const sid=el.dataset.id; if(sid&&DB.students[sid]&&sid!==active){ active=sid; await Store.set('tafit:active',active); await loadStudent(); } $('notifOv').classList.remove('show'); tab='chat'; render(); })(); break;
     case 'tabataStart': startTabata(); break;
     case 'tabataStop': stopTabata(); break;
