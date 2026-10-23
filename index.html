@@ -385,6 +385,15 @@
   .rh-btns{display:flex;gap:6px;flex:none}.routine-hist-row button.rh-del{border-color:var(--line);color:var(--mute);padding:6px 9px}
   .rh-clear{margin-top:4px;align-self:flex-start;font-family:inherit;border:1px solid #B5523B;background:var(--card);color:#B5523B;border-radius:8px;padding:7px 12px;font-size:11.5px;font-weight:700;cursor:pointer}
   .ses-sub{display:block;font-family:inherit;font-size:12px;font-weight:700;color:var(--accentDk);margin-top:3px}
+  .feel-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.feel-b{font-family:inherit;font-size:11.5px;font-weight:700;border:1.5px solid #E8DFD0;background:#FAF7F2;border-radius:12px;padding:8px 4px;color:#241F18;cursor:pointer}.feel-b i{display:block;font-style:normal;font-size:26px;line-height:1.2}.feel-b.on{border-color:var(--accentDk);background:var(--tint2)}
+  .sum-t.sm{font-size:12.5px;margin:12px 0 6px}.rpe-row{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}.rpe-b{font-family:inherit;font-weight:800;font-size:13px;border:none;border-radius:8px;padding:9px 0;background:color-mix(in srgb,var(--c) 28%,#fff);color:#241F18;cursor:pointer}.rpe-b.on{background:var(--c);color:#fff;transform:scale(1.08)}
+  .rpe-lbl{font-size:12px;font-weight:800;margin-top:6px}.sum-mini{font-size:11px;color:var(--mute);margin-top:6px}
+  .rpe-pill,.feel-pill{display:inline-block;font-size:12px;font-weight:800;border-radius:10px;padding:4px 10px;color:#fff}.feel-pill{background:var(--tint2);color:#241F18}
+  .sum-sec.rec-box{background:linear-gradient(135deg,#241F18,#3a2c1f);color:#F2ECE0}.rec-box .sum-t{color:#E3C3A5}.rec-box .sum-mini{color:#d9cfc2}.rec-row{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:5px 0;border-top:1px solid rgba(227,195,165,.18)}.rec-row:first-of-type{border-top:none}.rec-row span{opacity:.85}
+  .cmp-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.cmp-row div{background:#FAF7F2;border-radius:10px;padding:8px 10px}.cmp-row span{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute)}.cmp-row b{display:block;font-size:13.5px;margin:2px 0}.cmp-row b.up{color:#5E8C7A}.cmp-row b.down{color:#B5523B}.cmp-row em{font-style:normal;font-size:11px;color:var(--mute)}
+  .rec-all{padding:0 12px 10px}.rec-all .rec-row{border-top:1px solid #E8DFD0}.rec-tot{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px;text-align:center}.rec-tot div{background:#fff;border-radius:10px;padding:8px 2px}.rec-tot b{display:block;font-family:Georgia,serif;font-size:18px}.rec-tot span{font-size:10px;color:var(--mute)}
+  .sum-btns button:first-child{background:#241F18}.story-box{max-width:360px;width:100%;text-align:center}.story-box img{width:100%;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.6)}.story-dl{flex:1;font-weight:800;font-size:13px;border-radius:12px;padding:12px 6px;background:var(--accentDk);color:#fff;text-decoration:none}
+  #storyPrev{z-index:97}
   .rh-note{font-size:11px;color:var(--mute);line-height:1.4}
   .routine-hist-row button{border:1px solid var(--accentDk);background:var(--card);color:var(--accentDk);border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:700;cursor:pointer;flex:none}
   .medidas-hist{margin-top:8px}
@@ -1181,7 +1190,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-130'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-131'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -5334,6 +5343,7 @@ function renderSesDay(m,d){
     h+=`<button type="button" class="ses-go" data-act="sesStart">▶ Empezar con guía de voz${gOn?' + GPS':''}</button>${gOn?'<button type="button" class="ses-go ghost" data-act="gpsFree">📍 Correr libre con GPS (sin plan)</button>':''}<div class="ses-mini">Te avisa con voz y vibración cada cambio de zona${gOn?' y cada kilómetro':''}. Dejá la app abierta y la pantalla encendida.</div>`;
     if(v.route&&v.route.length>1) h+=routeMapHTML(v.route,false);
     if(v.km||v.zn||v.route) h+=`<button type="button" class="ses-go ghost" data-act="sesSumOpen">📊 Ver resumen de la salida</button>`;
+    h+=myRecordsHTML();
     h+=`<div class="cv-res"><div class="cv-lbl">Al terminar, anotá</div><div class="cv-grid three"><label>Distancia (km)<input inputmode="decimal" data-chg="ses" data-f="km" value="${esc(v.km||'')}" placeholder="4,2"></label><label>Tiempo (min)<input inputmode="numeric" data-chg="ses" data-f="min" value="${esc(v.min||'')}" placeholder="${sesMins(t)}"></label><label>Pulso prom.<input inputmode="numeric" data-chg="ses" data-f="fc" value="${esc(v.fc||'')}" placeholder="opcional"></label></div><div class="ses-ritmo" id="sesRitmo">${ritmoTxt(v)}</div></div>`;
   } else if(t.tipo==='swim'){
     h+=`<div class="ses-top"><span>🏊 ${esc(t.niv)}</span><b>${esc(t.n)}</b><em>${swimTotal(t)} m</em></div><ol class="ses-steps">${t.ser.map(function(x,i){ const dn=(v['s'+i]||0); return `<li><div class="sw-row"><div><b>${x.rep>1?x.rep+' × ':''}${x.m} m</b> ${esc(x.q)}${x.p?` <small>· pausa ${x.p}″</small>`:''}${x.ex?` <span class="alt-tap" data-act="playVideo" data-url="${esc(exVidByName(x.ex))}" data-name="${esc(x.ex)}">🎬 video</span><span class="rd-tech" data-act="readTech" data-name="${esc(x.ex)}">📖 leer</span>`:''}</div><button type="button" class="sw-chk${dn?' on':''}" data-act="swimChk" data-i="${i}">${dn?'✓':'○'}</button></div></li>`; }).join('')}</ol>`;
@@ -5412,7 +5422,7 @@ function mountMaps(root){ const els=(root||document).querySelectorAll('.route-ma
     L.circleMarker(pts[pts.length-1],{radius:7,color:'#fff',weight:3,fillColor:'#B5523B',fillOpacity:1}).addTo(m).bindTooltip('Llegada');
     m.fitBounds(pl.getBounds(),{padding:[18,18]}); setTimeout(function(){ try{ m.invalidateSize(); m.fitBounds(pl.getBounds(),{padding:[18,18]}); }catch(e){} },250); }); }).catch(function(){}); }
 function gpsApply(res){ if(!res) return; const k=sesKey(); const cur=CACHE[k]; const v=(cur&&wOf(cur)===+week)?Object.assign({},cur):{};
-  ['km','min','sec','route','splits','rest','zn','plan','gpsOn'].forEach(function(f){ if(res[f]!==undefined&&res[f]!==null) v[f]=res[f]; }); if(!(v.route&&v.route.length>1)) delete v.route;
+  ['km','min','sec','route','splits','rest','zn','plan','gpsOn','at'].forEach(function(f){ if(res[f]!==undefined&&res[f]!==null) v[f]=res[f]; }); if(!(v.route&&v.route.length>1)) delete v.route;
   v._w=+week; CACHE[k]=v; queueSave(); }
 /* correr libre: solo GPS, sin plan de zonas */
 async function gpsFree(){ if(!gpsStart()) return; window._sesBusy=true; await sesWakeOn();
@@ -5469,9 +5479,9 @@ function sesStop(){ const P=sesP; if(P&&P.int) clearInterval(P.int);
   if(!P||(P.t&&P.t.mov)) return;
   const zn=P.zn&&Object.keys(P.zn).length?P.zn:null; const guided=!P.free;
   if(!res&&guided){ const s=Math.round((Date.now()-P.t0)/1000); if(s<60) return; res={min:String(Math.round(s/60)),sec:s}; }
-  if(!res) return; if(zn) res.zn=zn; res.plan=P.free?'Correr libre':P.t.n; res.gpsOn=!!res.route;
+  if(!res) return; if(zn) res.zn=zn; res.plan=P.free?'Correr libre':P.t.n; res.gpsOn=!!res.route; res.at=Date.now();
   const cur=sesVal(); if(guided&&!res.km&&cur.min) delete res.min;  /* no pisar lo que anotó a mano */
-  gpsApply(res); setTimeout(function(){ renderApp(); sesSummary(sesVal()); },60); }
+  gpsApply(res); setTimeout(function(){ renderApp(); sesSummary(sesVal(),null,{live:true}); },60); }
 function sesFinish(){ const mov=sesP&&sesP.t.mov; sesVib([400,150,400,150,400]); sesSay(mov?'¡Listo! Terminaste la movilidad. A entrenar.':'¡Terminaste! Muy bien. Mirá tu resumen.'); sesStop(); if(mov) toast('✓ Movilidad completa','ok'); }
 function sesVoz(){ try{ const off=localStorage.getItem('tafit:voz')==='off'; localStorage.setItem('tafit:voz',off?'on':'off'); if(off) sesSay('Voz encendida.'); }catch(e){} sesPaint(); }
 /* ---- resumen al terminar (también se abre desde el día y desde la Transcripta) ---- */
@@ -5484,12 +5494,81 @@ function sesSumHTML(v){ const km=inf2Num(v.km), sec=v.sec||(inf2Num(v.min)*60)||
   if(v.zn){ const zs=Object.keys(v.zn).map(Number).sort(); const tot=zs.reduce((a,z)=>a+v.zn[z].s,0)||1;
     h+=`<div class="sum-sec"><div class="sum-t">❤️ Tiempo en cada zona</div><div class="zn-stack">${zs.map(z=>`<i style="width:${v.zn[z].s/tot*100}%;background:${ZONAS[z-1].c}"></i>`).join('')}</div>${zs.map(function(z){ const x=v.zn[z], Z=ZONAS[z-1]; return `<div class="zn-row"><span class="zt" style="background:${Z.c}">Z${z}</span><span class="zn-n">${esc(Z.t)}</span><b>${durTxt(x.s)}</b>${x.m>30?`<em>${(x.m/1000).toFixed(2).replace('.',',')} km · ${paceTxt(x.s,x.m)}/km</em>`:''}</div>`; }).join('')}</div>`; }
   return h; }
-function sesSummary(v,title){ if(!v||!(v.km||v.zn||v.route||v.sec)) return; let o=$('sesSum'); if(!o){ o=document.createElement('div'); o.id='sesSum'; o.className='ses-player'; document.body.appendChild(o); }
-  o.style.display='flex'; o.innerHTML=`<div class="sp-box sum-box"><div class="sum-h">🏁 ${esc(title||'¡Sesión terminada!')}<small>${esc(v.plan||'')}</small></div>${sesSumHTML(v)}<div class="sp-btns"><button type="button" data-act="sesSumShare">📤 Compartir</button><button type="button" data-act="sesSumClose">Cerrar</button></div></div>`;
-  o._v=v; mountMaps(o); }
+function sesSummary(v,title,opt){ opt=opt||{}; if(!v||!(v.km||v.zn||v.route||v.sec)) return; let o=$('sesSum'); if(!o){ o=document.createElement('div'); o.id='sesSum'; o.className='ses-player'; document.body.appendChild(o); }
+  const at=+opt.at||+v.at||0; let body=sesSumHTML(v); const i=body.indexOf('</div></div>')+12; /* después de los números: sensación + récords */
+  body=body.slice(0,i)+feelBlockHTML(v,!!opt.live)+recordsHTML(v,at)+body.slice(i);
+  o.style.display='flex'; o.scrollTop=0; o.innerHTML=`<div class="sp-box sum-box"><div class="sum-h">🏁 ${esc(title||'¡Sesión terminada!')}<small>${esc(v.plan||'')}</small></div>${body}<div class="sp-btns sum-btns"><button type="button" data-act="sesStory">📸 Historia</button><button type="button" data-act="sesSumShare">📤 Texto</button><button type="button" data-act="sesSumClose">Cerrar</button></div></div>`;
+  o._v=v; o._live=!!opt.live; o._at=at; mountMaps(o); }
 function sesSumShare(){ const o=$('sesSum'); const v=o&&o._v; if(!v) return; const km=inf2Num(v.km), sec=v.sec||inf2Num(v.min)*60;
   const txt='🏃 '+(v.plan||'Salida')+' · '+(km>0?String(v.km).replace('.',',')+' km · ':'')+durTxt(sec)+(km>0?' · ritmo '+paceTxt(sec,km*1000)+'/km':'')+' — entrenado con TaFiT';
   if(navigator.share) navigator.share({text:txt}).catch(function(){}); else { try{ navigator.clipboard.writeText(txt); toast('Copiado para pegar donde quieras','ok'); }catch(e){} } }
+/* ==== 23/10/2026 · v8-131: sensación, récords y tarjeta para historias ==== */
+const FEELS=[['mal','😫','Me costó'],['ok','😐','Normal'],['bien','😄','¡Me sentí bien!']];
+function rpeCol(n){ return n<=3?'#8FB8A8':n<=5?'#A9C47F':n<=7?'#E3B04B':n<=8?'#D98A4A':'#B5523B'; }
+function rpeTxt(n){ return n<=2?'Muy suave':n<=4?'Suave':n<=6?'Moderado':n<=8?'Duro':'Al máximo'; }
+function feelBlockHTML(v,edit){ const rpe=+v.rpe||0, fe=FEELS.find(f=>f[0]===v.feel);
+  if(!edit){ if(!rpe&&!fe) return ''; return `<div class="sum-sec feel-ro"><div class="sum-t">💬 Cómo se sintió</div>${rpe?`<span class="rpe-pill" style="background:${rpeCol(rpe)}">Esfuerzo ${rpe}/10 · ${rpeTxt(rpe)}</span>`:''}${fe?` <span class="feel-pill">${fe[1]} ${esc(fe[2])}</span>`:''}</div>`; }
+  return `<div class="sum-sec" id="feelBox"><div class="sum-t">💬 ¿Cómo te sentiste?</div><div class="feel-row">${FEELS.map(f=>`<button type="button" class="feel-b${v.feel===f[0]?' on':''}" data-act="sesFeel" data-f="feel" data-v="${f[0]}"><i>${f[1]}</i>${esc(f[2])}</button>`).join('')}</div>
+    <div class="sum-t sm">¿Qué tan dura fue? <small>1 = muy suave · 10 = al máximo</small></div><div class="rpe-row">${[1,2,3,4,5,6,7,8,9,10].map(n=>`<button type="button" class="rpe-b${rpe===n?' on':''}" style="--c:${rpeCol(n)}" data-act="sesFeel" data-f="rpe" data-v="${n}">${n}</button>`).join('')}</div>${rpe?`<div class="rpe-lbl" style="color:${rpeCol(rpe)}">${rpeTxt(rpe)}</div>`:''}<div class="sum-mini">Tu profe lo ve en tu Transcripta.</div></div>`; }
+function sesFeel(f,val){ const o=$('sesSum'); if(!o||!o._live) return; const k=sesKey(); const cur=CACHE[k]; const v=(cur&&wOf(cur)===+week)?Object.assign({},cur):{};
+  v[f]=f==='rpe'?+val:val; v._w=+week; CACHE[k]=v; queueSave(); o._v=Object.assign({},o._v,{[f]:v[f]}); const b=$('feelBox'); if(b) b.outerHTML=feelBlockHTML(o._v,true); sesVib([30]); }
+/* ---- récords y comparación (contra las salidas de running ANTERIORES a esta) ---- */
+function runEntry(x,at){ const km=inf2Num(x.km), sec=+x.sec||inf2Num(x.min)*60||0; const sp=(x.splits||[]).filter(s=>s>0); let b5=0; if(sp.length>=5){ for(let i=0;i+5<=sp.length;i++){ const t=sp.slice(i,i+5).reduce((a,c)=>a+c,0); if(!b5||t<b5) b5=t; } }
+  return {at:at,km:km,sec:sec,bk:sp.length?Math.min(...sp):0,b5:b5,pace:km>=1&&sec?sec/km:0}; }
+function runHist(before){ return (LOGS||[]).filter(l=>l.ses&&l.ses.tipo==='run').map(l=>runEntry(l.ses,+l.ses.at||Date.parse(l.date))).filter(e=>e.at<before&&(e.km>0||e.sec>0)).sort((a,b)=>b.at-a.at); }
+function runRecords(list){ const r={km:0,sec:0,bk:0,b5:0}; list.forEach(e=>{ if(e.km>r.km) r.km=e.km; if(e.sec>r.sec) r.sec=e.sec; if(e.bk&&(!r.bk||e.bk<r.bk)) r.bk=e.bk; if(e.b5&&(!r.b5||e.b5<r.b5)) r.b5=e.b5; }); return r; }
+function kmTxt(n){ return n.toFixed(2).replace('.',','); }
+function recordsHTML(v,at){ if(!at) return ''; const cur=runEntry(v,at); if(!(cur.km>0||cur.sec>0)) return ''; const hist=runHist(at);
+  if(!hist.length) return `<div class="sum-sec rec-box"><div class="sum-t">🎉 ¡Primera salida registrada!</div><div class="sum-mini">Desde la próxima te muestro tus récords y cuánto mejoraste.</div></div>`;
+  const R=runRecords(hist), news=[];
+  if(cur.km>R.km&&cur.km>=0.5) news.push(['Distancia más larga',kmTxt(cur.km)+' km']);
+  if(cur.bk&&R.bk&&cur.bk<R.bk) news.push(['Km más rápido',paceTxt(cur.bk,1000)+' min/km']); else if(cur.bk&&!R.bk) news.push(['Km más rápido',paceTxt(cur.bk,1000)+' min/km']);
+  if(cur.b5&&(!R.b5||cur.b5<R.b5)) news.push(['Mejor 5 km',durTxt(cur.b5)]);
+  if(cur.sec>R.sec&&cur.sec>=300) news.push(['Más tiempo en movimiento',durTxt(cur.sec)]);
+  let h='';
+  if(news.length) h+=`<div class="sum-sec rec-box"><div class="sum-t">🏆 ¡Nuevo récord!</div>${news.map(n=>`<div class="rec-row"><span>${esc(n[0])}</span><b>${esc(n[1])}</b></div>`).join('')}</div>`;
+  const prev=hist.find(e=>e.pace>0);
+  if(prev&&cur.pace>0){ const d=Math.round(prev.pace-cur.pace), dk=cur.km-prev.km; const ad=Math.abs(d); const pd=ad<3?'mismo ritmo':((ad<60?ad+' s':durTxt(ad))+(d>0?' más rápido':' más lento')+' por km');
+    h+=`<div class="sum-sec"><div class="sum-t">📈 Comparado con tu salida anterior <small>${fmtShort(new Date(prev.at).toISOString())}</small></div><div class="cmp-row"><div><span>Ritmo</span><b class="${d>=3?'up':d<=-3?'down':''}">${d>=3?'▲ ':d<=-3?'▼ ':''}${esc(pd)}</b><em>${paceTxt(prev.pace,1000)} → ${paceTxt(cur.pace,1000)}</em></div><div><span>Distancia</span><b class="${dk>0.05?'up':dk<-0.05?'down':''}">${Math.abs(dk)<0.05?'igual':(dk>0?'+':'−')+kmTxt(Math.abs(dk))+' km'}</b><em>${kmTxt(prev.km)} → ${kmTxt(cur.km)} km</em></div></div></div>`; }
+  return h; }
+/* récords de siempre, para la tarjeta del día de running */
+function myRecordsHTML(){ const v=sesVal(); const list=runHist(Infinity); if(v.at&&!list.some(e=>e.at===+v.at)) list.push(runEntry(v,+v.at)); if(!list.length) return '';
+  const R=runRecords(list), tk=list.reduce((a,e)=>a+e.km,0); const now=new Date(); const m0=new Date(now.getFullYear(),now.getMonth(),1).getTime(); const w0=Date.now()-7*864e5;
+  const km30=list.filter(e=>e.at>=m0).reduce((a,e)=>a+e.km,0), km7=list.filter(e=>e.at>=w0).reduce((a,e)=>a+e.km,0);
+  const rows=[['Distancia más larga',R.km?kmTxt(R.km)+' km':'—'],['Km más rápido',R.bk?paceTxt(R.bk,1000)+' min/km':'—'],['Mejor 5 km',R.b5?durTxt(R.b5):'—'],['Más tiempo',R.sec?durTxt(R.sec):'—']];
+  return `<details class="acc-lite"><summary>🏆 Tus récords y kilómetros <i>▾</i></summary><div class="rec-all"><div class="rec-tot"><div><b>${kmTxt(km7)}</b><span>km últimos 7 días</span></div><div><b>${kmTxt(km30)}</b><span>km este mes</span></div><div><b>${kmTxt(tk)}</b><span>km en total</span></div></div>${rows.map(r=>`<div class="rec-row"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('')}</div></details>`; }
+/* ---- tarjeta para historias de Instagram (1080×1920) ---- */
+function loadImg(src){ return new Promise(function(res){ const i=new Image(); i.onload=function(){ res(i); }; i.onerror=function(){ res(null); }; i.src=src; }); }
+async function storyCanvas(v,at){ const W=1080,H=1920; const c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d');
+  try{ await Promise.all([document.fonts.load('900 150px "Playfair Display"'),document.fonts.load('700 60px "Playfair Display"')]); }catch(e){}
+  const g=x.createLinearGradient(0,0,0,H); g.addColorStop(0,'#17120E'); g.addColorStop(.55,'#0E0B09'); g.addColorStop(1,'#241A12'); x.fillStyle=g; x.fillRect(0,0,W,H);
+  const ser='"Playfair Display",Georgia,serif', sans='-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif';
+  const logo=await loadImg('./logo-principal.png'); if(logo){ x.save(); x.beginPath(); x.arc(W/2,190,120,0,Math.PI*2); x.clip(); x.drawImage(logo,W/2-120,70,240,240); x.restore(); x.strokeStyle='#E3C3A5'; x.lineWidth=4; x.beginPath(); x.arc(W/2,190,122,0,Math.PI*2); x.stroke(); }
+  x.textAlign='center'; x.fillStyle='#E3C3A5'; x.font='700 34px '+sans; x.fillText(((v.plan||'Salida')+'').toUpperCase().slice(0,40),W/2,388);
+  x.fillStyle='#8A7866'; x.font='500 30px '+sans; const d=new Date(+at||Date.now()); x.fillText(d.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'}),W/2,436);
+  /* recorrido */
+  const top=490, bh=760, pts=v.route||[];
+  if(pts.length>1){ const la=pts.map(p=>p[0]), lo=pts.map(p=>p[1]); const mnA=Math.min(...la), mxA=Math.max(...la), mnO=Math.min(...lo), mxO=Math.max(...lo); const k=Math.cos((mnA+mxA)/2*Math.PI/180);
+    const w=(mxO-mnO)*k||1e-6, h=(mxA-mnA)||1e-6, sc=Math.min(860/w,bh/h); const ox=(W-w*sc)/2, oy=top+(bh-h*sc)/2; const P=pts.map(p=>[ox+(p[1]-mnO)*k*sc, oy+(mxA-p[0])*sc]);
+    x.lineJoin='round'; x.lineCap='round'; x.shadowColor='rgba(227,195,165,.55)'; x.shadowBlur=36; x.strokeStyle='#E3C3A5'; x.lineWidth=16; x.beginPath(); P.forEach((q,i)=>i?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1])); x.stroke(); x.shadowBlur=0;
+    [[P[0],'#5E8C7A'],[P[P.length-1],'#B5523B']].forEach(function(o){ x.fillStyle='#F2ECE0'; x.beginPath(); x.arc(o[0][0],o[0][1],22,0,Math.PI*2); x.fill(); x.fillStyle=o[1]; x.beginPath(); x.arc(o[0][0],o[0][1],14,0,Math.PI*2); x.fill(); }); }
+  else if(v.zn){ const zs=Object.keys(v.zn).map(Number).sort(); const tot=zs.reduce((a,z)=>a+v.zn[z].s,0)||1; let cx=110; x.fillStyle='#F2ECE0'; x.font='700 40px '+sans; x.fillText('Tiempo en cada zona',W/2,top+260);
+    zs.forEach(function(z){ const ww=860*v.zn[z].s/tot; x.fillStyle=ZONAS[z-1].c; x.fillRect(cx,top+310,ww,70); if(ww>90){ x.fillStyle='#17120E'; x.font='800 34px '+sans; x.fillText('Z'+z,cx+ww/2,top+358); } cx+=ww; }); }
+  /* números */
+  const km=inf2Num(v.km), sec=+v.sec||inf2Num(v.min)*60||0; const cols=[[km>0?String(v.km).replace('.',','):'—','KM'],[sec?durTxt(sec):'—','TIEMPO'],[km>0&&sec?paceTxt(sec,km*1000):'—','RITMO /KM']];
+  cols.forEach(function(cc,i){ const cx=W/2+(i-1)*330; x.fillStyle='#F2ECE0'; x.font='900 '+(i===0?120:92)+'px '+ser; x.fillText(cc[0],cx,1400); x.fillStyle='#E3C3A5'; x.font='700 28px '+sans; x.fillText(cc[1],cx,1450); });
+  /* récord o sensación */
+  let badge=''; try{ const hist=runHist(+at||Date.now()); if(hist.length){ const R=runRecords(hist), cur=runEntry(v,+at); if(cur.bk&&(!R.bk||cur.bk<R.bk)) badge='🏆 Nuevo récord: km más rápido'; else if(cur.km>R.km) badge='🏆 Nuevo récord: distancia más larga'; else if(cur.b5&&(!R.b5||cur.b5<R.b5)) badge='🏆 Nuevo récord: mejor 5 km'; } }catch(e){}
+  if(!badge&&v.feel){ const fe=FEELS.find(f=>f[0]===v.feel); if(fe) badge=fe[1]+' '+fe[2]; }
+  if(badge){ x.font='800 38px '+sans; const bw=x.measureText(badge).width+80; x.fillStyle='rgba(227,195,165,.16)'; x.strokeStyle='#E3C3A5'; x.lineWidth=3; const bx=(W-bw)/2, by=1530; x.beginPath(); x.roundRect?x.roundRect(bx,by,bw,84,42):x.rect(bx,by,bw,84); x.fill(); x.stroke(); x.fillStyle='#F2ECE0'; x.fillText(badge,W/2,by+56); }
+  x.fillStyle='#E3C3A5'; x.font='italic 700 46px '+ser; x.fillText('Entrenado con TaFiT',W/2,1770); x.fillStyle='#8A7866'; x.font='500 26px '+sans; x.fillText('by Tamara Claveria',W/2,1815);
+  return c; }
+async function sesStory(){ const o=$('sesSum'); const v=o&&o._v; if(!v) return; toast('Armando tu imagen…'); const c=await storyCanvas(v,o._at||v.at||Date.now());
+  c.toBlob(async function(b){ if(!b) return; const f=new File([b],'tafit-salida.png',{type:'image/png'});
+    try{ if(navigator.canShare&&navigator.canShare({files:[f]})){ await navigator.share({files:[f],title:'Mi salida con TaFiT'}); return; } }catch(e){ if(e&&e.name==='AbortError') return; }
+    const u=URL.createObjectURL(b); let p=$('storyPrev'); if(!p){ p=document.createElement('div'); p.id='storyPrev'; p.className='ses-player'; document.body.appendChild(p); }
+    p.style.display='flex'; p.innerHTML=`<div class="story-box"><img src="${u}" alt="Tu salida"><div class="sum-mini" style="color:#d9cfc2">Guardala y subila a tus historias 📸</div><div class="sp-btns"><a class="story-dl" href="${u}" download="tafit-salida.png">⬇ Guardar imagen</a><button type="button" data-act="storyClose">Cerrar</button></div></div>`; },'image/png'); }
+
 function renderApp(){
   const r=routine(), W=weeks(), members=membersOf(); const m=$('main'); m.innerHTML='';
   /* Verificar si alumno está pausado a mano, o si se le venció el plan (30 días desde el
@@ -7140,7 +7219,7 @@ async function closeSession(){
   let core=null;
   if(hasCoreDay(r[day])){ const ch=DB.students[active].abChoice, dn=coreDoneList(); if(coreChoiceValid(ch)&&dn.length){ core={fmt:ch.fmt, ex:ch.ex.map(id=>{ const it=coreItem(id); return it?it.n:id; }), done:dn.map(id=>{ const it=coreItem(id); return it?it.n:id; })}; } }
   let ses=null;
-  if(isSesDay(r[day])){ const t=sesTpl(r[day].ses||sesDefault(r[day].type)); const v=sesVal(); if(t&&(v.km||v.min||v.m||v.fc||t.tipo==='mob')){ ses={tipo:t.tipo, n:t.n, km:v.km||'', min:v.min||'', fc:v.fc||'', m:v.m||''}; if(v.route) ses.route=v.route; ['sec','splits','rest','zn','plan'].forEach(function(f){ if(v[f]) ses[f]=v[f]; }); if(t.tipo==='swim'&&!ses.m){ const done=(t.ser||[]).reduce(function(a,x,i){ return a+(v['s'+i]?x.rep*x.m:0); },0); if(done) ses.m=String(done); } } }
+  if(isSesDay(r[day])){ const t=sesTpl(r[day].ses||sesDefault(r[day].type)); const v=sesVal(); if(t&&(v.km||v.min||v.m||v.fc||t.tipo==='mob')){ ses={tipo:t.tipo, n:t.n, km:v.km||'', min:v.min||'', fc:v.fc||'', m:v.m||''}; if(v.route) ses.route=v.route; ['sec','splits','rest','zn','plan','rpe','feel','at'].forEach(function(f){ if(v[f]) ses[f]=v[f]; }); if(t.tipo==='swim'&&!ses.m){ const done=(t.ser||[]).reduce(function(a,x,i){ return a+(v['s'+i]?x.rep*x.m:0); },0); if(done) ses.m=String(done); } } }
   if(!exs.length && !obs && !hh && !core && !ses){ toast("No hay nada cargado en esta sesión todavía",'warn'); return; }
   /* 07/10/2026: aviso de sesión repetida — había días cerrados dos veces seguidas (mismo
      día de rutina, misma semana, minutos de diferencia), que duplicaban la Transcripta. */
@@ -7180,7 +7259,7 @@ function logEntryHTML(e,i){
   }).join('');
   const obs=e.obs?`<div class="log-obs">📝 ${esc(e.obs)}</div>`:'';
   const coreFmtL=e.core?((CORE_FMTS.find(f=>f.v===e.core.fmt)||{}).l||e.core.fmt):'';
-  const sesH=e.ses?(function(x){ const p=[]; if(x.km) p.push(String(x.km).replace('.',',')+' km'); if(x.m) p.push(x.m+' m'); if(x.min) p.push(x.min+' min'); if(x.fc) p.push('♥ '+x.fc); const rt=ritmoTxt(x); if(rt) p.push(rt.replace('Ritmo: ','')); return `<div class="log-ex"><div class="len">${x.tipo==='swim'?'🏊':x.tipo==='mob'?'🧘':'🏃'} ${esc(x.n)}</div><div class="lsets">${esc(p.join(' · ')||'hecho')}</div>${x.route?`<div class="gps-mini">${routeSVG(x.route)}</div>`:''}${(x.splits||x.zn||x.route)?`<button type="button" class="sum-open" data-act="sesSumLog" data-i="${(window._sumReg=window._sumReg||[]).push(x)-1}">📊 Ver resumen</button>`:''}</div>`; })(e.ses):'';
+  const sesH=e.ses?(function(x){ const p=[]; if(x.km) p.push(String(x.km).replace('.',',')+' km'); if(x.m) p.push(x.m+' m'); if(x.min) p.push(x.min+' min'); if(x.fc) p.push('♥ '+x.fc); const rt=ritmoTxt(x); if(rt) p.push(rt.replace('Ritmo: ','')); if(x.rpe) p.push('esfuerzo '+x.rpe+'/10'); if(x.feel){ const fe=FEELS.find(function(f){ return f[0]===x.feel; }); if(fe) p.push(fe[1]); } return `<div class="log-ex"><div class="len">${x.tipo==='swim'?'🏊':x.tipo==='mob'?'🧘':'🏃'} ${esc(x.n)}</div><div class="lsets">${esc(p.join(' · ')||'hecho')}</div>${x.route?`<div class="gps-mini">${routeSVG(x.route)}</div>`:''}${(x.splits||x.zn||x.route)?`<button type="button" class="sum-open" data-act="sesSumLog" data-i="${(window._sumReg=window._sumReg||[]).push(Object.assign({_d:e.date},x))-1}">📊 Ver resumen</button>`:''}</div>`; })(e.ses):'';
   const coreH=e.core?`<div class="log-ex"><div class="len">🔥 Core · ${esc(coreFmtL)}</div><div class="lsets">${(e.core.ex||[]).map(n=>((e.core.done||[]).indexOf(n)>=0?'✓ ':'— ')+esc(n)).join(' &nbsp;|&nbsp; ')}</div></div>`:'';
   let hh='';
   if(e.health){ const fl=(e.health.alarms&&e.health.alarms.length)||e.health.pre==='warn'||e.health.post==='warn'; hh=`<div class="log-health ${fl?'flag':'ok'}">⚕ Pierna · antes: ${esc(e.health.pre||'—')} · después: ${esc(e.health.post||'—')}${(e.health.alarms&&e.health.alarms.length)?' · alarmas: '+esc(e.health.alarms.join(', ')):''}</div>`; }
@@ -8594,10 +8673,13 @@ document.addEventListener('click',e=>{
     case 'readTech': openTechModal(el.dataset.name); break;
     case 'gpsFree': gpsFree(); break;
     case 'gpsSet': setGpsPref(el.dataset.v==='on'); renderApp(); break;
-    case 'sesSumOpen': sesSummary(sesVal(),'Tu salida'); break;
-    case 'sesSumLog': { const x=(window._sumReg||[])[+el.dataset.i]; if(x) sesSummary(x,'Resumen de la salida'); } break;
+    case 'sesSumOpen': sesSummary(sesVal(),'Tu salida',{live:true}); break;
+    case 'sesSumLog': { const x=(window._sumReg||[])[+el.dataset.i]; if(x) sesSummary(x,'Resumen de la salida',{at:+x.at||Date.parse(x._d)}); } break;
     case 'sesSumClose': { const o=$('sesSum'); if(o){ o.style.display='none'; o.innerHTML=''; } } break;
     case 'sesSumShare': sesSumShare(); break;
+    case 'sesFeel': sesFeel(el.dataset.f,el.dataset.v); break;
+    case 'sesStory': sesStory(); break;
+    case 'storyClose': { const o=$('storyPrev'); if(o){ o.style.display='none'; o.innerHTML=''; } } break;
     case 'sesPause': sesPause(); break;
     case 'sesNext': if(sesP) sesGo(sesP.i+1); break;
     case 'sesStop': sesStop(); break;
