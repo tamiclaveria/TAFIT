@@ -413,6 +413,14 @@
   #cycleWelcome{z-index:98}.cw-box{text-align:center}.cw-ic{font-size:44px}.cw-t{font-family:Georgia,serif;font-size:23px;color:#241F18;margin:4px 0 8px}.cw-prev{font-size:13px;color:#3a3128;line-height:1.5;background:#fff;border-radius:12px;padding:10px 12px}
   .cw-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0}.cw-stats div{background:#fff;border-radius:12px;padding:8px 4px}.cw-stats b{display:block;font-family:Georgia,serif;font-size:22px;color:#241F18}.cw-stats span{font-size:10px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em}
   .cw-w{font-size:12.5px;color:#9B5F26;background:var(--tint2);border-radius:10px;padding:8px 10px}.cw-tips{text-align:left;font-size:13px;line-height:1.5;color:#241F18;padding-left:18px;margin:12px 0}.cw-tips li{margin:5px 0;list-style:none;margin-left:-18px}.cw-sign{font-weight:800;color:#9B5F26;margin:6px 0 12px}
+  .fin-box{color:#241F18}.panel-block .inact-row b{color:#F2ECE0}.panel-block .inact-row{border-top-color:rgba(242,236,224,.15)}.panel-block .inact-h{color:#C9B49C}
+  .inact-h{font-size:12px;font-weight:800;color:var(--mute);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.04em}.inact-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}.inact-row>div:first-child{flex:1}.inact-row b{display:block;font-size:13.5px}.inact-row span{font-size:11.5px;color:var(--mute)}.inact-bs{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}.inact-b{font-family:inherit;font-weight:800;font-size:12px;border:1px solid var(--accentDk);background:var(--card);color:var(--accentDk);border-radius:9px;padding:7px 10px;cursor:pointer;white-space:nowrap}.inact-b.wa{background:var(--accentDk);color:#fff}
+  .sugw{font-size:12px;background:#FAF3E8;border:1px dashed #E3C3A5;border-radius:10px;padding:7px 10px;margin:6px 0;color:#241F18;line-height:1.45}.sugw span{color:var(--mute)}
+  #ncOv{z-index:97;overflow-y:auto;align-items:flex-start}.nc-box{text-align:left;margin:auto 0;max-width:520px}.nc-h{font-size:18px;font-weight:900;color:#241F18}.nc-h small{display:block;font-size:12px;font-weight:600;color:var(--mute);margin-top:4px;line-height:1.4}
+  .nc-day{font-family:Georgia,serif;font-size:17px;margin:14px 0 4px;color:#9B5F26}.nc-blk{font-size:12.5px;background:var(--tint2);border-radius:10px;padding:8px 10px;margin:4px 0}.nc-blk small{color:var(--mute)}
+  .nc-ex{background:#fff;border-radius:12px;padding:10px;margin:6px 0}.nc-old{font-size:12px;color:var(--mute);margin-bottom:6px}.nc-old b{color:#241F18}.nc-chips{display:flex;flex-wrap:wrap;gap:5px}.nc-chip{font-family:inherit;font-size:12px;font-weight:700;border:1.5px solid #E8DFD0;background:#FAF7F2;color:#241F18;border-radius:9px;padding:6px 9px;cursor:pointer;text-align:left}.nc-chip.on{border-color:var(--accentDk);background:var(--accentDk);color:#fff}.nc-chip.keep{color:var(--mute)}.nc-chip.keep.on{background:#241F18;border-color:#241F18;color:#fff}
+  .nc-vid{font-family:inherit;font-size:12px;font-weight:700;color:var(--accentDk);background:none;border:none;padding:6px 0 0;cursor:pointer}.nc-none{font-size:11.5px;color:var(--mute);margin-top:4px}.nc-foot{font-size:12px;color:var(--mute);margin:12px 0 4px}
+  .wk-ed{background:var(--tint2);border-radius:10px;margin-top:8px;padding:0 10px}.wk-ed>summary{cursor:pointer;font-size:12.5px;font-weight:800;padding:9px 0;color:var(--accentDk)}.wk-help{font-size:11px;color:var(--mute);margin-bottom:6px;line-height:1.4}.wk-row{display:grid;grid-template-columns:28px 1fr 1fr;gap:4px;align-items:center;margin-bottom:8px}.wk-row b{grid-row:span 2}.wk-row input[data-wf=n]{grid-column:2 / 4}.wk-row b{font-size:11px}.wk-row input{font-family:inherit;font-size:12.5px;padding:8px;min-width:0;border:1.5px solid #E8DFD0;border-radius:8px;background:#fff;color:#241F18}
   .rh-note{font-size:11px;color:var(--mute);line-height:1.4}
   .routine-hist-row button{border:1px solid var(--accentDk);background:var(--card);color:var(--accentDk);border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:700;cursor:pointer;flex:none}
   .medidas-hist{margin-top:8px}
@@ -1209,7 +1217,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-136'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-137'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -5773,7 +5781,7 @@ function renderApp(){
   if(member>=members.length) member=0;
   if(routineFinished()){
     if(!trainer){ m.innerHTML=finishHTML(false); return; }
-    const fb=document.createElement('div'); fb.innerHTML=`<details class="fin-prof"><summary>🏁 <b>${esc(DB.students[active].name)} terminó esta rutina${finishedDate()?' el '+fmtShort(finishedDate()):''}</b> · ya no la ve · <u>ver resumen</u></summary>${finishHTML(true)}</details>`; m.appendChild(fb); }
+    const fb=document.createElement('div'); fb.innerHTML=`<details class="fin-prof"${window._finOpen?' open':''}><summary>🏁 <b>${esc(DB.students[active].name)} terminó esta rutina${finishedDate()?' el '+fmtShort(finishedDate()):''}</b> · ya no la ve · <u>ver resumen</u></summary>${finishHTML(true)}</details>`; m.appendChild(fb); window._finOpen=false; }
   setTimeout(maybeCycleWelcome,400);
   const f=document.createElement('div'); f.className='focus'; f.innerHTML=`<b>${esc(isDuo()?members[member]:DB.students[active].name)}</b> · cargá peso y reps de cada serie`; m.appendChild(f);
   /* Tarjeta "tablero" del día: mismo look bordó/azul del Informe (degradé + serif), con el
@@ -5876,6 +5884,7 @@ function renderApp(){
       html+=`<div class="quick-edit"><div class="qe-title">✏ Edición rápida</div><div class="form-grid"><div class="form-field full"><div class="form-lbl">Ejercicio</div><input class="form-inp" value="${esc(ex.n)}" data-chg="qedit" data-ei="${ei}" data-f="n"></div><div class="form-field"><div class="form-lbl">Series</div><input class="form-inp" value="${esc(ex.s)}" data-chg="qedit" data-ei="${ei}" data-f="s"></div><div class="form-field"><div class="form-lbl">Reps</div><input class="form-inp" value="${esc(ex.r)}" data-chg="qedit" data-ei="${ei}" data-f="r"></div><div class="form-field"><div class="form-lbl">Peso obj.</div><input class="form-inp" value="${esc(ex.w)}" data-chg="qedit" data-ei="${ei}" data-f="w"></div><div class="form-field"><div class="form-lbl">Descanso</div><input class="form-inp" value="${esc(ex.rest)}" data-chg="qedit" data-ei="${ei}" data-f="rest"></div><div class="form-field full"><div class="form-lbl">Observación / Técnica</div><textarea class="form-inp" data-chg="qedit" data-ei="${ei}" data-f="tip" placeholder="Ej: rodillas semi rígidas, no bloquear codos...">${esc(ex.tip||'')}</textarea></div></div></div>`;
     }
     if(!cardioOf(ex)) html+=`<div class="meta">${ex.s} series · objetivo ${esc(ex.r)} reps${(obj&&obj!=='A definir')?' · '+esc(obj):''}</div>`;
+    if(!cardioOf(ex)){ const sw=suggestedStartW(rawEx); if(sw) html+=`<div class="sugw">💡 ${sw.w?`Para arrancar: <b>~${kgTxt(sw.w)} kg</b>${implOf(ex.n)==='m'?' por mano':''} `:'Ejercicio nuevo: '}<span>(venías haciendo ${kgTxt(sw.prev.w)} kg en ${esc(sw.from)}${sw.w?'':'; arrancá más liviano y ajustá'}). En S1 priorizá la técnica.</span></div>`; }
     if(ex.alt) html+=`<div class="alt"><b>Alternativo:</b> <span class="alt-tap" data-act="playVideo" data-url="${esc(ex.altVid||YT(ex.alt))}" data-name="${esc(ex.alt)}">🎬 ${esc(ex.alt)}</span></div>`;
     html+=tipAccordionHTML(tipFor(ex),!(ex.tip&&ex.tip.trim()));
     const restChip = `<span class="rest" data-act="rest" data-sec="${restSec(ex.rest)||60}">⏱ Descanso ${ex.rest?esc(ex.rest):'60 s'}</span>`;
@@ -6177,6 +6186,97 @@ function currentWeekGuess(){
 /* 23/10/2026: rutina terminada = cerró todos los días de la ÚLTIMA semana de este ciclo. El
    alumno deja de verla (ve su resumen final) hasta que la profe le carga la siguiente
    (plantilla o "Iniciar nuevo ciclo", que reinician el ciclo). */
+/* ==== 26/10/2026 · v8-137 ==== */
+/* rutina terminada para cualquier alumno (sin tener que abrirlo): cerró todos los días de la última semana de este ciclo */
+function routineFinishedFor(st,logs){ const r=(st&&st.routine)||[], W=(st&&st.weeks)||[]; if(!r.length||!W.length) return false; const last=W.length-1; const cut=st.cycleStart?Date.parse(st.cycleStart):0;
+  return r.every(function(d,di){ return (logs||[]).some(function(l){ if(+l.week!==last||!(l.dayName===d.day||(l.dayIdx!=null&&+l.dayIdx===di))) return false; const t=Date.parse(l.date); return !cut||t>=cut; }); }); }
+async function inactWa(id,mi){ const st=DB.students[id]; if(!st) return; const mm=(st.members&&st.members.length>1)?st.members:[st.name]; const nm=String(mm[mi]||st.name).split(' ')[0];
+  let tel=((st.telefonos||{})[mi])||(mi===0?st.telefono:'')||'';
+  if(!tel){ const v=((await uiPrompt('Teléfono de '+(mm[mi]||st.name)+' (con código de país, ej: 5492612345678):'))||'').trim(); if(!v) return; tel=v; st.telefonos=st.telefonos||{}; st.telefonos[mi]=v; if(mi===0&&!st.telefono) st.telefono=v; await saveDB(); }
+  const msg='¡Hola '+nm+'! 👋 ¿Cómo venís? Hace unos días que no veo entrenamientos en TaFiT. Tu rutina te está esperando 💪 Si necesitás que ajustemos algo (horarios, ejercicios, cargas), contame y lo vemos.';
+  window.open('https://wa.me/'+tel.replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(msg),'_blank'); }
+
+/* ---- (9) peso sugerido para arrancar: lo último que levantó en ese mismo ejercicio en un ciclo anterior ---- */
+/* Si el ejercicio ya lo hizo, eso lo muestra "Última vez" (con "Usar estos pesos"). Esto es para un
+   ejercicio NUEVO que reemplazó a otro en el ciclo nuevo (ex.from): calcula con qué peso arrancar a
+   partir de lo que levantaba en el anterior, según el implemento. */
+function lastMaxW(name){ const k=baseExName(name).toLowerCase(); const mm=membersOf(), me=mm[isDuo()&&member>=0?member:0];
+  for(const l of LOGS){ const x=(l.ex||[]).find(function(x){ return baseExName(x.n).toLowerCase()===k; }); if(!x) continue;
+    let sets=x.sets; if(x.members){ const q=x.members.find(function(q){ return q.name===me; }); sets=q?q.sets:null; } if(!sets) continue;
+    let mx=0, reps=''; sets.forEach(function(z){ const w=inf2Num(z.w); if(w>mx){ mx=w; reps=z.r||''; } }); if(mx>0) return {w:mx,r:reps,date:l.date}; }
+  return null; }
+function implOf(n){ n=String(n||'').toLowerCase(); return /mancuern/.test(n)?'m':/barra|smith/.test(n)?'b':/polea|cuerda|soga/.test(n)?'p':/m[aá]quina|prensa|hack/.test(n)?'q':''; }
+function suggestedStartW(ex){ if(!ex||!ex.from||+week>1) return null; if(lastMaxW(ex.n)) return null; const prev=lastMaxW(ex.from); if(!prev) return null;
+  const a=implOf(ex.from), b=implOf(ex.n); let f=null; if(a&&a===b) f=0.85; else if(a==='b'&&b==='m') f=0.4; else if(a==='m'&&b==='b') f=1.7;
+  const w=f?Math.max(1,Math.round(prev.w*f/2.5)*2.5):null; return {w:w,prev:prev,from:ex.from}; }
+
+/* ---- (7) Nuevo ciclo a partir del anterior: misma estructura, ejercicios nuevos sugeridos con video ---- */
+const NC_GROUPS=['Pecho','Espalda','Piernas','Glúteos','Hombros','Brazos','Core'];
+function ncKeysOf(name){ let out=[]; const it0=exLibList().find(function(x){ return inf2Norm(x.n)===inf2Norm(name); });
+  const isCore=/abdom|crunch|plancha|oblic|giro ruso|v-?ups?\b|hollow|dead ?bug|tijera|bicicleta|mountain|espinal|superman|bird ?dog|barquito|rueda abdominal|elevaci[oó]n de piernas/i.test(name)||(it0&&groupsOf(it0)[0]==='Core');
+  if(isCore) return ['Core|'+coreSubOf({n:name,groups:['Core']})];
+  NC_GROUPS.forEach(function(g){ if(g==='Core') return; if(it0&&groupsOf(it0).indexOf(g)<0) return; const L=LIB_SUBS[g]; L.filter(function(x){ return x[1].test(name); }).forEach(function(x){ out.push(g+'|'+x[0]); }); });
+  /* si el nombre dice el músculo, manda ese grupo (ej. "Press cerrado (tríceps)" no es de pecho) */
+  const spec=[]; if(/tr[ií]ceps|b[ií]ceps|curl(?! femoral)|franc[eé]s|martillo|copa/i.test(name)) spec.push('Brazos'); if(/hombro|lateral|posterior|face ?pull|militar|arnold|vuelo|volada|p[aá]jaro/i.test(name)) spec.push('Hombros'); if(/femoral|isquio/i.test(name)) spec.push('Piernas'); if(/gl[uú]te|hip thrust|abduc/i.test(name)) spec.push('Glúteos');
+  if(spec.length){ const f=out.filter(function(k){ return spec.indexOf(k.split('|')[0])>=0; }); if(f.length) out=f; }
+  if(/posterior|face ?pull|p[aá]jaro/i.test(name)) out=out.filter(function(k){ return k!=='Hombros|Elevaciones'; });
+  if(/tr[ií]ceps|franc[eé]s|copa/i.test(name)) out=out.filter(function(k){ return k!=='Brazos|Bíceps'; });
+  if(/b[ií]ceps|curl(?! femoral)|martillo/i.test(name)&&!/tr[ií]ceps/i.test(name)) out=out.filter(function(k){ return k!=='Brazos|Tríceps'; });
+  return out; }
+/* clave "parecida" para no sugerir el mismo ejercicio con otro nombre (Aductor máquina = Aductores en máquina,
+   Volada lateral = Elevación lateral, Dorsalera = Jalón al pecho) */
+function ncSim(n){ const SYN={volada:'elevacion',vuelo:'elevacion',vuelos:'elevacion',elevaciones:'elevacion',dorsalera:'jalon',jalones:'jalon',maquinas:'maquina',mancuernas:'mancuerna',poleas:'polea',barras:'barra'};
+  return inf2Norm(baseExName(n)).replace(/[^a-z0-9 ]/g,' ').split(/\s+/).filter(Boolean).map(function(w){ w=w.replace(/(es|s)$/,''); return SYN[w]!==undefined?SYN[w]:(SYN[w+'s']!==undefined?SYN[w+'s']:w); }).filter(function(w){ return w&&['en','con','de','la','el','a','al','del','y','o'].indexOf(w)<0; }).sort().join(' '); }
+function ncSuggest(name,used){ const keys=ncKeysOf(name); if(!keys.length) return [];
+  const hasVid=function(it){ return !!extractYouTubeId(it.vid||''); };
+  const me=ncSim(name); const sc=exLibList().filter(function(it){ if(!hasVid(it)) return false; const b=baseExName(it.n).toLowerCase(); if(used.has(b)||used.has('~'+ncSim(it.n))||ncSim(it.n)===me) return false;
+    return groupsOf(it).some(function(g){ if(g==='Core'&&groupsOf(it)[0]!=='Core') return false; const subs=g==='Core'?[coreSubOf(it)]:(libSubsOf(it,g)||[]); return subs.some(function(sb){ return keys.indexOf(g+'|'+sb)>=0; }); }); });
+  /* primero los que comparten implemento (barra, mancuerna, polea, máquina…) con el original */
+  const imp=function(n){ const m=String(n).toLowerCase().match(/barra|mancuern|polea|m[aá]quina|smith|banda|fitball|kettlebell|disco/g); return m?m:[]; };
+  const mi=imp(name); sc.sort(function(a,b){ const ia=imp(a.n).filter(function(x){ return mi.indexOf(x)>=0; }).length, ib=imp(b.n).filter(function(x){ return mi.indexOf(x)>=0; }).length; return ib-ia; });
+  return sc.slice(0,6); }
+let NC=null;
+function ncOpen(){ const st=DB.students[active]; if(!st||!st.routine||!st.routine.length){ toast('Primero cargale una rutina','warn'); return; }
+  const used=new Set(); (st.cycleHistory||[]).slice(-1).concat([{routine:st.routine}]).forEach(function(c){ (c.routine||[]).forEach(function(d){ (d.ex||[]).forEach(function(e){ used.add(baseExName(e.n).toLowerCase()); used.add('~'+ncSim(e.n)); (e.wk||[]).forEach(function(v){ if(v&&v.n) used.add(baseExName(v.n).toLowerCase()); }); }); }); });
+  const taken=new Set();
+  NC={days:st.routine.map(function(d){ return (d.ex||[]).map(function(e){ if(isBlockRow(e)) return {blk:true,ex:e}; const sug=ncSuggest(e.n,used); let pick=-1; for(let k=0;k<sug.length;k++){ const b=baseExName(sug[k].n).toLowerCase(); if(!taken.has(b)){ pick=k; taken.add(b); break; } } return {ex:e,sug:sug,pick:pick}; }); })};
+  ncPaint(); }
+function ncPaint(){ if(!NC) return; let o=$('ncOv'); if(!o){ o=document.createElement('div'); o.id='ncOv'; o.className='ses-player'; document.body.appendChild(o); }
+  const st=DB.students[active]; const r=st.routine; let nChg=0;
+  let h=`<div class="sp-box nc-box"><div class="nc-h">🔄 Nuevo ciclo para ${esc(st.name)}<small>Misma estructura (días, series, progresión y pausas activas). Elegí el reemplazo de cada ejercicio o tocá “Mantener”. Todos los sugeridos tienen video.</small></div>`;
+  NC.days.forEach(function(d,di){ h+=`<div class="nc-day">${esc(r[di].day)}</div>`;
+    d.forEach(function(x,ei){ if(x.blk){ h+=`<div class="nc-blk">🔁 ${esc(blockTitleClean(x.ex))} <small>(se mantiene)</small></div>`; return; }
+      if(x.pick>=0) nChg++;
+      h+=`<div class="nc-ex"><div class="nc-old">Antes: <b>${esc(x.ex.n)}</b></div><div class="nc-chips"><button type="button" class="nc-chip keep${x.pick<0?' on':''}" data-act="ncPick" data-d="${di}" data-e="${ei}" data-k="-1">Mantener</button>${x.sug.map(function(it,k){ return `<button type="button" class="nc-chip${x.pick===k?' on':''}" data-act="ncPick" data-d="${di}" data-e="${ei}" data-k="${k}">${esc(it.n)}</button>`; }).join('')}</div>${x.pick>=0?`<button type="button" class="nc-vid" data-act="ncVid" data-url="${esc(x.sug[x.pick].vid)}" data-name="${esc(x.sug[x.pick].n)}">▶ Ver video de ${esc(x.sug[x.pick].n)}</button>`:''}${!x.sug.length?'<div class="nc-none">Sin sugerencias en la biblioteca para este: se mantiene (lo podés cambiar después en Editar).</div>':''}</div>`; }); });
+  h+=`<div class="nc-foot">${nChg} ejercicio${nChg===1?'':'s'} nuevo${nChg===1?'':'s'}. La rutina actual queda guardada en su Transcripta y en el historial.</div><div class="sp-btns"><button type="button" data-act="ncCreate">✓ Crear el ciclo nuevo</button><button type="button" data-act="ncClose">Cancelar</button></div></div>`;
+  o.innerHTML=h; o.style.display='flex'; }
+function ncPick(di,ei,k){ if(!NC) return; const o=$('ncOv'); const y=o?o.scrollTop:0; NC.days[di][ei].pick=k; ncPaint(); if(o) o.scrollTop=y; }
+function ncPausas(tip){ return String(tip||'').split(/\n+/).filter(function(l){ return /pausa activa/i.test(l); }).join('\n'); }
+async function ncCreate(){ if(!NC) return; const st=DB.students[active]; const W=weeks();
+  if(!await uiConfirm('¿Crear el ciclo nuevo de '+st.name+'? La rutina actual pasa a su historial (Transcripta) y arranca desde la S1 con la nueva.')) return;
+  const lib=exLibList(); const findLib=function(n){ return lib.find(function(x){ return inf2Norm(x.n)===inf2Norm(n||''); }); };
+  const routineNew=st.routine.map(function(d,di){ const nd=Object.assign({},cp(d)); nd.ex=(d.ex||[]).map(function(e,ei){ const x=NC.days[di][ei]; if(x.blk) return cp(e);
+      /* progresión por semana: la que tenía (variantes de la rutina + ajustes de semana) */
+      const wk=[]; for(let w=0;w<W.length;w++){ const ov=CACHE['wo_w'+w+'_'+di+'_'+ei]; const base=(Array.isArray(e.wk)&&e.wk[w])||{}; const o={}; if(base.r) o.r=base.r; if(base.s) o.s=base.s; if(ov&&!ov._del){ if(ov.r) o.r=ov.r; if(ov.s) o.s=ov.s; } if(x.pick<0){ ['n','vid','tip'].forEach(function(f){ if(base[f]) o[f]=base[f]; }); } wk.push(o); }
+      let ne;
+      if(x.pick<0){ ne=cp(e); }
+      else { const it=x.sug[x.pick]; const altIt=it.alt?findLib(it.alt):null; const pa=ncPausas(e.tip);
+        ne={ n:it.n, s:e.s, r:e.r, w:'A definir', alt:it.alt||'', tip:[it.tip||'',pa].filter(Boolean).join('\n'), rest:e.rest||'', vid:it.vid, altVid:(altIt&&altIt.vid)||'', from:baseExName(e.n) }; }
+      if(wk.some(function(o){ return Object.keys(o).length; })) ne.wk=wk; else delete ne.wk;
+      return ne; });
+    /* el cartel del bloque nombra sus ejercicios ("Tabata 4′ · Plancha + Mountain climbers…"): si cambiaron, se actualiza */
+    nd.ex.forEach(function(b,bi){ if(!isBlockRow(b)) return; const old=(d.ex||[]); let names=[], newNames=[]; const tl=String(b.n).toLowerCase(); for(let j=bi+1;j<old.length&&!isBlockRow(old[j]);j++){ const w1=baseExName(old[j].n).toLowerCase().split(' ')[0]; if(!w1||tl.indexOf(w1)<0) break; names.push(baseExName(old[j].n)); newNames.push(baseExName(nd.ex[j].n)); }
+      if(!names.length) return; let t=b.n; let changed=false; names.forEach(function(on,k){ const short=on.split(' (')[0]; const ix=t.toLowerCase().indexOf(short.toLowerCase().split(' ')[0]); if(on!==newNames[k]&&ix>=0){ changed=true; } });
+      if(changed){ const m=String(b.n).match(/^(──\s*)?(.*?·)\s*.*?(\s*──)?$/); if(m) b.n=(m[1]||'── ')+m[2]+' '+newNames.map(function(x){ return x.split(' (')[0]; }).join(' + ')+(m[3]||' ──'); } });
+    return nd; });
+  snapshotRoutine(active,'antes del ciclo nuevo a partir del anterior');
+  const now=new Date().toISOString(); st.cycleHistory=st.cycleHistory||[];
+  st.cycleHistory.push({ start:st.cycleStart||null, end:now, routine:cp(st.routine), weeks:cp(st.weeks) });
+  st.cycleStart=now; st.routine=routineNew; st.unlockWeek=0;
+  CACHE=clearedCache(CACHE); await saveData(); await saveDB();
+  try{ localStorage.removeItem('tafit:pos:'+active); }catch(e){}
+  NC=null; const o=$('ncOv'); if(o){ o.style.display='none'; o.innerHTML=''; }
+  week=0; day=0; toast('✓ Ciclo nuevo creado · revisalo y ajustá lo que quieras','ok'); renderEdit(); }
 function routineFinished(){ const r=routine(), W=weeks(); return r.length>0&&W.length>0&&weekDone(W.length-1); }
 function cycleLogs(){ const st=DB.students[active]; const cut=(st&&st.cycleStart)?Date.parse(st.cycleStart):0; return LOGS.filter(function(l){ const t=Date.parse(l.date); return !cut||t>=cut; }); }
 function finishedDate(){ const W=weeks(), r=routine(), last=W.length-1; let mx=0; cycleLogs().forEach(function(l){ if(+l.week===last){ const t=Date.parse(l.date); if(t>mx) mx=t; } }); return mx?new Date(mx).toISOString():null; }
@@ -6191,8 +6291,8 @@ function finishHTML(forTrainer){ const st=DB.students[active], W=weeks(), r=rout
   const box=`<div class="fin-box"><div class="fin-ic">🏁</div><div class="fin-t">${forTrainer?esc(st.name)+' terminó su rutina':'¡Terminaste tu rutina, '+esc(String(nm).split(' ')[0])+'!'}</div><div class="fin-s">${W.length} semanas${st0?' · del '+st0:''}${fd?' al '+fmtShort(fd):''}</div>
     <div class="fin-stats"><div><b>${L.length}</b><span>sesiones</span></div><div><b>${pct}%</b><span>cumplido</span></div><div><b>${km>0?kgTxt(km):W.length}</b><span>${km>0?'km corridos':'semanas'}</span></div></div>
     ${imp.length?`<div class="fin-imp"><div class="fin-h">💪 Lo que más subiste</div>${imp.map(function(o){ return `<div class="fin-row"><span>${esc(o.n)}</span><b>${kgTxt(o.a)} → ${kgTxt(o.b)} kg</b><em>+${Math.round(o.p*100)}%</em></div>`; }).join('')}</div>`:''}
-    ${forTrainer?`<div class="fin-msg">Ya no la ve en su App: ve este resumen y el aviso de que viene una nueva. Cargale la próxima desde <b>Editar</b> (plantilla o "Iniciar nuevo ciclo") y se le habilita sola.</div><button type="button" class="ses-go" data-act="finGoEdit">✏️ Cargar la próxima rutina</button>`
-      :`<div class="fin-msg">¡Felicitaciones por la constancia! 👏 Tu profe ya sabe que terminaste y te va a cargar la próxima rutina. Mientras tanto, todo lo que hiciste queda en tu <b>Transcripta</b>.</div><div class="sp-btns"><button type="button" data-act="tab" data-tab="trans">📖 Ver mi Transcripta</button><button type="button" data-act="tab" data-tab="chat">💬 Escribirle a mi profe</button></div>`}</div>`;
+    ${forTrainer?`<div class="fin-msg">Ya no la ve en su App: ve este resumen y el aviso de que viene una nueva. Cuando le cargues la próxima (con el botón de abajo, una plantilla o "Iniciar nuevo ciclo" en Editar) se le habilita sola.</div><div class="sp-btns"><button type="button" data-act="finInforme">🏆 Ver su informe</button><button type="button" data-act="finInfShare">${informeEnabledForStudent()?'✓ Él ya lo puede ver':'👁 Que lo vea él también'}</button></div><button type="button" class="ses-go" data-act="ncOpen" style="margin-top:10px">✨ Armar la próxima a partir de esta</button><button type="button" class="ses-link" data-act="finGoEdit">o cargarla a mano en Editar</button>`
+      :`<div class="fin-msg">¡Felicitaciones por la constancia! 👏 Tu profe ya sabe que terminaste y te va a cargar la próxima rutina. Mientras tanto, todo lo que hiciste queda en tu <b>Transcripta</b>.</div>${informeEnabledForStudent()?'<button type="button" class="ses-go" data-act="tab" data-tab="resumen" style="margin-bottom:10px">🏆 Ver mi Informe de Evolución</button>':''}<div class="sp-btns"><button type="button" data-act="tab" data-tab="trans">📖 Ver mi Transcripta</button><button type="button" data-act="tab" data-tab="chat">💬 Escribirle a mi profe</button></div>`}</div>`;
   return box; }
 function wkLocked(i){ if(trainer) return false; const unlockW=(DB.students[active]&&DB.students[active].unlockWeek)||0; if(i<=unlockW) return false; return i>0 && !weekDone(i-1); }
 function pickMember(i){ member=i; openEx=-1; savePos(); renderApp(); }
@@ -8023,7 +8123,7 @@ function renderEdit(){
   {
     const cycleStart=DB.students[active].cycleStart;
     const cycleInfo=cycleStart?`<div class="note" style="margin:0 0 10px">📍 Ciclo actual iniciado el ${fmtShort(cycleStart)} — el informe solo cuenta los datos desde esa fecha (el historial anterior sigue completo en Transcripta).</div>`:'';
-    SEC('resumen','🏆 Informe de Evolución',`<p>Generá el Informe de Evolución de ${esc(DB.students[active].name)}: asistencia, adherencia, progreso y una conclusión redactada sola con sus datos reales de entrenamiento. Lo podés descargar como PDF o compartirlo directo por WhatsApp.</p>${cycleInfo}<div class="edit-actions"><button data-act="genResumen">🏆 Generar informe</button><button data-act="newCycle" style="background:var(--card);border:1px solid var(--line);color:var(--steel)">🔄 Iniciar nuevo ciclo</button></div>`);
+    SEC('resumen','🏆 Informe de Evolución',`<p>Generá el Informe de Evolución de ${esc(DB.students[active].name)}: asistencia, adherencia, progreso y una conclusión redactada sola con sus datos reales de entrenamiento. Lo podés descargar como PDF o compartirlo directo por WhatsApp.</p>${cycleInfo}<div class="edit-actions"><button data-act="genResumen">🏆 Generar informe</button><button data-act="newCycle" style="background:var(--card);border:1px solid var(--line);color:var(--steel)">🔄 Iniciar nuevo ciclo</button></div><div class="edit-actions mt8"><button data-act="ncOpen">✨ Nuevo ciclo a partir de este (con ejercicios sugeridos)</button></div>`);
   }
 
   {
@@ -8126,6 +8226,7 @@ function renderEdit(){
         <div class="fld mt8"><label>Tip / técnica</label><textarea data-field="tip" placeholder="Punto clave a tener en cuenta (una por línea)">${esc(ex.tip)}</textarea></div>
         <div class="fld mt8"><label>Video del ejercicio (link de YouTube puntual, opcional)</label><input data-field="vid" value="${esc(ex.vid&&!/results\?search_query/.test(ex.vid)?ex.vid:'')}" placeholder="https://youtu.be/…"></div>
         <div class="fld mt8"><label>Video del alternativo (opcional)</label><input data-field="altVid" value="${esc(ex.altVid||'')}" placeholder="https://youtu.be/…"></div>
+        <details class="wk-ed"${Array.isArray(ex.wk)&&ex.wk.some(function(v){ return v&&(v.n||v.r||v.vid); })?' open':''}><summary>📅 Cambia por semana (opcional)</summary><div class="wk-help">Dejá en blanco lo que no cambia. Ej: Dominadas → S2 "Dominadas con pausa arriba", S3 "Dominadas supinas"… o solo las reps de cada semana.</div>${weeks().map(function(w,wi){ const v=(Array.isArray(ex.wk)&&ex.wk[wi])||{}; return `<div class="wk-row"><b>${esc(w.t)}</b><input data-wk="${wi}" data-wf="n" value="${esc(v.n||'')}" placeholder="Nombre de la variante"><input data-wk="${wi}" data-wf="r" value="${esc(v.r||'')}" placeholder="Reps"><input data-wk="${wi}" data-wf="vid" value="${esc(v.vid||'')}" placeholder="Video (link)"></div>`; }).join('')}</details>
         <p class="mt8" style="font-size:11px;color:var(--mute);line-height:1.5">Si pegás un link puntual (no una búsqueda), "Ver técnica" lo muestra adentro de la app, sin salir a YouTube. Si lo dejás vacío, se abre una búsqueda en YouTube como hasta ahora.</p>
         <button type="button" class="libsave-btn" data-act="saveExToLib" data-i="${di}" data-j="${ei}">💾 Guardar este ejercicio en la biblioteca</button>
         </div>
@@ -8174,7 +8275,7 @@ function collectForm(){ const out=[]; document.querySelectorAll('.edit-day').for
       const sParts=rawS.match(/(\d+)\s*[xX×]\s*(\d+)/g);
       if(sParts&&sParts.length>1){ let totalS=0; const repP=[]; sParts.forEach(function(p){ const m=p.match(/(\d+)\s*[xX×]\s*(\d+)/); if(m){ totalS+=parseInt(m[1]); repP.push(m[1]+'×'+m[2]); } }); finalS=totalS; finalR=repP.join(' + '); }
       const vidManual=(g('vid')||'').trim();
-      const obj={ n, s:finalS, r:finalR, w:(g('w')||'').trim()||'A definir', alt:(g('alt')||'').trim(), tip:(g('tip')||'').trim(), rest:(g('rest')||'').trim(), vid:vidManual||YT(n||'ejercicio'), altVid:(g('altVid')||'').trim() }; { const _o=_orig.find(function(x){ return x&&x.n===n&&Array.isArray(x.wk); }); if(_o) obj.wk=JSON.parse(JSON.stringify(_o.wk)); } const w2el=exEl.querySelector('[data-field="w2"]'); if(w2el) obj.w2=(w2el.value||'').trim()||'A definir'; exes.push(obj); }); out[di]={ day:dayName, ex:exes }; if(dayWd) out[di].wd=dayWd; if(dayType) out[di].type=dayType; { const cb=dayEl.querySelector('.corebox'); if(cb&&cb.checked) out[di].core=true; } { const se=dayEl.querySelector('.dayses'); if(se&&dayType&&['run','swim','mob'].indexOf(dayType)>=0) out[di].ses=se.value; const mv=dayEl.querySelector('.daymov'); if(mv&&mv.value!=='mob-c') out[di].mov=mv.value; } }); return out; }
+      const obj={ n, s:finalS, r:finalR, w:(g('w')||'').trim()||'A definir', alt:(g('alt')||'').trim(), tip:(g('tip')||'').trim(), rest:(g('rest')||'').trim(), vid:vidManual||YT(n||'ejercicio'), altVid:(g('altVid')||'').trim() }; { const wkIns=[...exEl.querySelectorAll('[data-wk]')]; if(wkIns.length){ const wk=[]; wkIns.forEach(function(i){ const wi=+i.dataset.wk; const v=(i.value||'').trim(); wk[wi]=wk[wi]||{}; if(v) wk[wi][i.dataset.wf]=v; }); for(let q=0;q<wk.length;q++){ wk[q]=wk[q]||{}; if(wk[q].n&&!wk[q].vid){ const li=exLibList().find(function(x){ return inf2Norm(x.n)===inf2Norm(wk[q].n); }); if(li&&li.vid) wk[q].vid=li.vid; } } if(wk.some(function(o){ return Object.keys(o).length; })) obj.wk=wk; } else { const _o=_orig.find(function(x){ return x&&x.n===n&&Array.isArray(x.wk); }); if(_o) obj.wk=JSON.parse(JSON.stringify(_o.wk)); } } { const _o2=_orig.find(function(x){ return x&&x.n===n&&x.from; }); if(_o2) obj.from=_o2.from; } const w2el=exEl.querySelector('[data-field="w2"]'); if(w2el) obj.w2=(w2el.value||'').trim()||'A definir'; exes.push(obj); }); out[di]={ day:dayName, ex:exes }; if(dayWd) out[di].wd=dayWd; if(dayType) out[di].type=dayType; { const cb=dayEl.querySelector('.corebox'); if(cb&&cb.checked) out[di].core=true; } { const se=dayEl.querySelector('.dayses'); if(se&&dayType&&['run','swim','mob'].indexOf(dayType)>=0) out[di].ses=se.value; const mv=dayEl.querySelector('.daymov'); if(mv&&mv.value!=='mob-c') out[di].mov=mv.value; } }); return out; }
 function collectWeeks(){ const out=[]; document.querySelectorAll('.week-row').forEach(wr=>{ const g=f=>{ const el=wr.querySelector('[data-wf="'+f+'"]'); return el?el.value.trim():''; }; out.push({ t:g('t')||'S', n:g('n')||'', d:g('d')||'' }); }); return out.length?out:cp(DEFAULT_WEEKS); }
 function collectHealth(){ const sec=$('healthsec'); if(!sec) return DB.students[active].health; const g=sel=>{ const el=sec.querySelector(sel); return el?el.value:''; }; const enabled=g('[data-hf="enabled"]')==='on'; const leg=g('[data-hf="leg"]')==='on'; const tag=g('[data-hf="tag"]').trim(); const alarms=g('[data-hf="alarms"]').split(',').map(s=>s.trim()).filter(Boolean); const warning=g('[data-hf="warning"]').trim(); const rules=[]; sec.querySelectorAll('.hrule').forEach(rr=>{ const t=(rr.querySelector('[data-hf="rt"]').value||'').trim(); const d=(rr.querySelector('[data-hf="rd"]').value||'').trim(); if(t||d) rules.push({t,d}); }); return { enabled, tag, leg, alarms, warning, rules }; }
 function collectMembers(){ const el=$('membersfld'); if(!el) return DB.students[active].members; const arr=el.value.split(',').map(s=>s.trim()).filter(Boolean); return arr; }
@@ -8749,6 +8850,21 @@ async function renderReport(){
     const sinMarcar=activos.filter(c=>tarifa(c.id).tipo!=='virtual'&&!c.attendedToday).map(c=>c.name);
     html+=`<div class="panel-block"><div class="panel-title">📋 Resumen de hoy</div><div class="panel-stats"><div class="panel-stat"><b>${activos.length}</b><span>Alumnos activos</span></div><div class="panel-stat"><b>${hoyNombres.length}</b><span>Entrenaron hoy</span></div><div class="panel-stat"><b>${semanaCount}</b><span>Entrenaron esta semana</span></div><div class="panel-stat"><b>${sinMarcar.length}</b><span>Sin marcar asistencia hoy</span></div></div>${hoyNombres.length?`<div class="panel-line">✓ Hoy entrenaron: ${hoyNombres.map(esc).join(', ')}</div>`:''}${sinMarcar.length?`<div class="panel-line warn">Falta marcar asistencia hoy: ${sinMarcar.map(esc).join(', ')}</div>`:''}</div>`;
   }
+  /* 26/10/2026: a quién hay que escribirle — los que terminaron la rutina (esperan la próxima) y
+     los que no registran entrenamiento hace 7 días o más, con WhatsApp de un toque. */
+  { const tarifa=function(id){ const st=DB.students[id]; if(!st||st.archived||st.paused) return null; let c=st.cobro; if(c&&c.parteDe&&DB.students[c.parteDe]) c=DB.students[c.parteDe].cobro; return (c&&(+c.precio||+c.fijo||+c.plan))?c:null; };
+    const fin=[], inact=[]; const now=Date.now();
+    for(const c of cards){ const tf=tarifa(c.id); if(!tf) continue; const st=DB.students[c.id]; const logs=c.id===active?LOGS:safeParse(await Store.get('tafit:logs:'+c.id)||'[]',[]);
+      if(routineFinishedFor(st,logs)){ fin.push(c); continue; }
+      if(tf.tipo!=='virtual') continue; /* presenciales: los entrenás vos y se controlan con la Asistencia */
+      const lt=c.last?Date.parse(c.last.date):0; const days=lt?Math.floor((now-lt)/864e5):null; if(days===null||days>=7) inact.push(Object.assign({days:days},c)); }
+    inact.sort(function(a,b){ return (b.days===null?999:b.days)-(a.days===null?999:a.days); });
+    if(fin.length||inact.length){
+      html+=`<div class="panel-block"><div class="panel-title">📣 Para escribirles</div>`;
+      if(fin.length) html+=`<div class="inact-h">🏁 Terminaron la rutina · cargales la próxima</div>`+fin.map(function(c){ return `<div class="inact-row"><div><b>${esc(c.name)}</b><span>Ya no ve la rutina, espera la nueva</span></div><button type="button" class="inact-b" data-act="inactOpen" data-id="${esc(c.id)}" data-t="edit">✏️ Armarla</button></div>`; }).join('');
+      if(inact.length) html+=`<div class="inact-h">😴 Virtuales sin entrenar hace 7 días o más</div>`+inact.map(function(c){ const st=DB.students[c.id]; const mm=(st.members&&st.members.length>1)?st.members:[st.name];
+        return `<div class="inact-row"><div><b>${esc(c.name)}</b><span>${c.days===null?'Todavía no registró ninguna sesión':'Hace '+c.days+' días · '+esc(c.last.dayName||'')}</span></div><div class="inact-bs">${mm.map(function(nm,mi){ return `<button type="button" class="inact-b wa" data-act="inactWa" data-id="${esc(c.id)}" data-mi="${mi}">💬${mm.length>1?' '+esc(String(nm).split(' ')[0]):''}</button>`; }).join('')}</div></div>`; }).join('');
+      html+=`</div>`; } }
   /* Próximos cumpleaños (30 días): toma la fecha cargada directo por la profe en Editar → Integrantes;
      si no está, busca en el formulario de Anamnesis o, si no está, en el de Acuerdo (por si el alumno ya lo completó). */
   const bdays=cards.map(c=>{
@@ -8805,6 +8921,7 @@ async function renderReport(){
   if(sinFecha) html+=`<div class="imp-note">🎂 ${sinFecha} alumno${sinFecha===1?'':'s'} sin fecha de nacimiento: cargala en Editar → Integrantes y te aviso de su cumple acá.</div>`;
   const vis=cards.filter(c=>DB.students[c.id]&&!DB.students[c.id].archived);
   html+=`<details class="lib-acc"><summary><span>👥 Todos los alumnos</span><b>${vis.length}</b><i>▾</i></summary>${vis.map(c=>`<div class="mini-row"><span>${esc(c.name)}</span><small>${c.sessions} ses. · última ${c.last?fmtShort(c.last.date):'—'}</small></div>`).join('')}</details>`;
+  if(tab!=='rep'||!trainer) return; /* 26/10: si mientras se calculaba se cambió de pestaña o de alumno, no pisar la pantalla nueva */
   m.innerHTML=html;
   /* Botón copiar informe semanal */
   var copyBtn=document.createElement('button'); copyBtn.className='copy-report'; copyBtn.dataset.act='copyReport'; copyBtn.textContent='📋 Copiar informe semanal para WhatsApp'; m.appendChild(copyBtn);
@@ -9029,6 +9146,15 @@ document.addEventListener('click',e=>{
     case 'openNotifTrans': (async function(){ const sid=el.dataset.id; if(sid&&DB.students[sid]&&sid!==active){ active=sid; await Store.set('tafit:active',active); await loadStudent(); } $('notifOv').classList.remove('show'); tab='trans'; render(); })(); break;
     case 'logComment': logComment(i); break;
     case 'finGoEdit': setTab('edit'); break;
+    case 'finInforme': resumenCycleIdx=studentCycles().length-1; resumenMemberIdx=null; tab='resumen'; render(); break;
+    case 'finInfShare': (async function(){ const st=DB.students[active]; st.forms=st.forms||{}; st.forms.informe=true; st.forms.informeCycle=studentCycles().length-1; await saveDB(); toast('✓ Ya puede ver su Informe desde su pantalla final','ok'); window._finOpen=true; renderApp(); })(); break;
+    case 'inactWa': inactWa(el.dataset.id,+el.dataset.mi); break;
+    case 'inactOpen': (async function(){ await switchStudent(el.dataset.id); setTab(el.dataset.t||'app'); })(); break;
+    case 'ncOpen': ncOpen(); break;
+    case 'ncPick': ncPick(+el.dataset.d,+el.dataset.e,+el.dataset.k); break;
+    case 'ncClose': { const o=$('ncOv'); if(o){ o.style.display='none'; o.innerHTML=''; } } break;
+    case 'ncCreate': ncCreate(); break;
+    case 'ncVid': playVideo(el.dataset.url,el.dataset.name); break;
     case 'cycleWelcomeOk': { const o=$('cycleWelcome'); if(o){ try{ localStorage.setItem(o._k,DB.students[active].cycleStart); }catch(e){} o.style.display='none'; o.innerHTML=''; } try{ sesVib([60]); }catch(e){} } break;
     case 'openNotifChat': (async function(){ const sid=el.dataset.id; if(sid&&DB.students[sid]&&sid!==active){ active=sid; await Store.set('tafit:active',active); await loadStudent(); } $('notifOv').classList.remove('show'); tab='chat'; render(); })(); break;
     case 'tabataStart': startTabata(); break;
