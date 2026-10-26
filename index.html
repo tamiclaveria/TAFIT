@@ -410,6 +410,9 @@
   .fin-imp{background:#fff;border-radius:12px;padding:10px 12px;text-align:left}.fin-h{font-weight:800;font-size:13.5px;margin-bottom:6px}.fin-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;font-size:12.5px;padding:5px 0;border-top:1px solid #F2ECE0}.fin-row b{white-space:nowrap}.fin-row em{font-style:normal;font-weight:800;color:#5E8C7A;font-size:12px}
   .fin-msg{font-size:13px;line-height:1.5;color:#3a3128;margin:14px 0 10px}
   .fin-prof{background:#241F18;color:#F2ECE0;border-radius:14px;margin:0 0 12px;padding:0}.fin-prof>summary{list-style:none;cursor:pointer;padding:12px 14px;font-size:13px;line-height:1.4}.fin-prof>summary::-webkit-details-marker{display:none}.fin-prof>summary u{color:#E3C3A5}.fin-prof .fin-box{margin:0 8px 8px}
+  #cycleWelcome{z-index:98}.cw-box{text-align:center}.cw-ic{font-size:44px}.cw-t{font-family:Georgia,serif;font-size:23px;color:#241F18;margin:4px 0 8px}.cw-prev{font-size:13px;color:#3a3128;line-height:1.5;background:#fff;border-radius:12px;padding:10px 12px}
+  .cw-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0}.cw-stats div{background:#fff;border-radius:12px;padding:8px 4px}.cw-stats b{display:block;font-family:Georgia,serif;font-size:22px;color:#241F18}.cw-stats span{font-size:10px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em}
+  .cw-w{font-size:12.5px;color:#9B5F26;background:var(--tint2);border-radius:10px;padding:8px 10px}.cw-tips{text-align:left;font-size:13px;line-height:1.5;color:#241F18;padding-left:18px;margin:12px 0}.cw-tips li{margin:5px 0;list-style:none;margin-left:-18px}.cw-sign{font-weight:800;color:#9B5F26;margin:6px 0 12px}
   .rh-note{font-size:11px;color:var(--mute);line-height:1.4}
   .routine-hist-row button{border:1px solid var(--accentDk);background:var(--card);color:var(--accentDk);border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:700;cursor:pointer;flex:none}
   .medidas-hist{margin-top:8px}
@@ -1206,7 +1209,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-135'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-136'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -5711,6 +5714,34 @@ async function sesStory(){ const o=$('sesSum'); const v=o&&o._v; if(!v) return; 
     const u=URL.createObjectURL(b); let p=$('storyPrev'); if(!p){ p=document.createElement('div'); p.id='storyPrev'; p.className='ses-player'; document.body.appendChild(p); }
     p.style.display='flex'; p.innerHTML=`<div class="story-box"><img src="${u}" alt="Tu salida"><div class="sum-mini" style="color:#d9cfc2">Guardala y subila a tus historias 📸</div><div class="sp-btns"><a class="story-dl" href="${u}" download="tafit-salida.png">⬇ Guardar imagen</a><button type="button" data-act="storyClose">Cerrar</button></div></div>`; },'image/png'); }
 
+/* 26/10/2026: bienvenida a la rutina nueva. La primera vez que el alumno abre la app después de
+   que la profe le carga un ciclo nuevo, ve UNA sola vez un mensaje con cómo le fue en la anterior,
+   qué tiene de nuevo esta y unos consejos. Queda marcado en su celular para ese ciclo. */
+function cycleWelcomeHTML(){ const st=DB.students[active]; const hist=st.cycleHistory||[]; if(!st.cycleStart||!hist.length) return '';
+  const prev=hist[hist.length-1]; const pS=prev.start?Date.parse(prev.start):0, pE=prev.end?Date.parse(prev.end):Date.parse(st.cycleStart);
+  const pLogs=LOGS.filter(function(l){ const t=Date.parse(l.date); return t>=pS&&t<=pE; });
+  const pDays=(prev.routine||[]).length, pWeeks=(prev.weeks||[]).length||4; const pct=pDays?Math.min(100,Math.round(pLogs.length/(pDays*pWeeks)*100)):0;
+  const prevNames=new Set(); (prev.routine||[]).forEach(function(d){ (d.ex||[]).forEach(function(e){ prevNames.add(baseExName(e.n).toLowerCase()); }); });
+  const r=routine(), W=weeks(); let nNew=0, nEx=0, nAlt=0, hasBlk=false;
+  r.forEach(function(d){ (d.ex||[]).forEach(function(e){ if(isBlockRow(e)){ hasBlk=true; return; } nEx++; if(!prevNames.has(baseExName(e.n).toLowerCase())) nNew++; if(e.alt) nAlt++; }); });
+  const nm=String(isDuo()?membersOf()[member]:st.name).split(' ')[0];
+  const w0=W[0]||{t:'S1',n:'',d:''};
+  const tips=['🎬 Mirá el video antes de cada ejercicio nuevo: tocá <b>▶ Ver técnica</b>.','📝 Anotá tus pesos en cada serie: así vemos cuánto vas subiendo.'];
+  if(nAlt) tips.push('🔁 Si una máquina está ocupada, usá la <b>alternativa</b> que tiene cada ejercicio.');
+  if(hasBlk) tips.push('⏱ El Tabata del principio es <b>opcional</b>: elegís vos los ejercicios de core.');
+  tips.push('💬 Cualquier duda, escribime por el chat.');
+  return `<div class="sp-box cw-box"><div class="cw-ic">🔥</div><div class="cw-t">¡Arranca tu nueva rutina, ${esc(nm)}!</div>
+    ${pLogs.length?`<div class="cw-prev">La anterior la cerraste con <b>${pLogs.length} sesiones</b>${pct?` y el <b>${pct}%</b> cumplido`:''}. 👏 Esa constancia es la que da resultados.</div>`:''}
+    <div class="cw-stats"><div><b>${W.length}</b><span>semanas</span></div><div><b>${r.length}</b><span>días</span></div><div><b>${nNew||nEx}</b><span>${nNew?'ejercicios nuevos':'ejercicios'}</span></div></div>
+    <div class="cw-w"><b>${esc(w0.t)}${w0.n?' · '+esc(w0.n):''}</b>${w0.d?' — '+esc(w0.d):''}</div>
+    <ul class="cw-tips">${tips.map(function(t){ return '<li>'+t+'</li>'; }).join('')}</ul>
+    <div class="cw-sign">¡A darle con todo! 💪 — Tami</div>
+    <button type="button" class="ses-go" data-act="cycleWelcomeOk">¡Vamos!</button></div>`; }
+function maybeCycleWelcome(){ if(trainer||!active) return; const st=DB.students[active]; if(!st||!st.cycleStart||!(st.cycleHistory||[]).length) return; if(routineFinished()) return;
+  const k='tafit:cyclewelcome:'+active+(isDuo()?':'+member:''); try{ if(localStorage.getItem(k)===st.cycleStart) return; }catch(e){ return; }
+  if(Date.now()-Date.parse(st.cycleStart)>21*864e5) { try{ localStorage.setItem(k,st.cycleStart); }catch(e){} return; } /* ciclos viejos: no molestar */
+  const h=cycleWelcomeHTML(); if(!h) return; let o=$('cycleWelcome'); if(!o){ o=document.createElement('div'); o.id='cycleWelcome'; o.className='ses-player'; document.body.appendChild(o); }
+  o.innerHTML=h; o.style.display='flex'; o._k=k; }
 function renderApp(){
   const r=routine(), W=weeks(), members=membersOf(); const m=$('main'); m.innerHTML='';
   /* Verificar si alumno está pausado a mano, o si se le venció el plan (30 días desde el
@@ -5743,6 +5774,7 @@ function renderApp(){
   if(routineFinished()){
     if(!trainer){ m.innerHTML=finishHTML(false); return; }
     const fb=document.createElement('div'); fb.innerHTML=`<details class="fin-prof"><summary>🏁 <b>${esc(DB.students[active].name)} terminó esta rutina${finishedDate()?' el '+fmtShort(finishedDate()):''}</b> · ya no la ve · <u>ver resumen</u></summary>${finishHTML(true)}</details>`; m.appendChild(fb); }
+  setTimeout(maybeCycleWelcome,400);
   const f=document.createElement('div'); f.className='focus'; f.innerHTML=`<b>${esc(isDuo()?members[member]:DB.students[active].name)}</b> · cargá peso y reps de cada serie`; m.appendChild(f);
   /* Tarjeta "tablero" del día: mismo look bordó/azul del Informe (degradé + serif), con el
      día de hoy, la racha/días sin entrenar como chips, y la frase motivacional del día.
@@ -8997,6 +9029,7 @@ document.addEventListener('click',e=>{
     case 'openNotifTrans': (async function(){ const sid=el.dataset.id; if(sid&&DB.students[sid]&&sid!==active){ active=sid; await Store.set('tafit:active',active); await loadStudent(); } $('notifOv').classList.remove('show'); tab='trans'; render(); })(); break;
     case 'logComment': logComment(i); break;
     case 'finGoEdit': setTab('edit'); break;
+    case 'cycleWelcomeOk': { const o=$('cycleWelcome'); if(o){ try{ localStorage.setItem(o._k,DB.students[active].cycleStart); }catch(e){} o.style.display='none'; o.innerHTML=''; } try{ sesVib([60]); }catch(e){} } break;
     case 'openNotifChat': (async function(){ const sid=el.dataset.id; if(sid&&DB.students[sid]&&sid!==active){ active=sid; await Store.set('tafit:active',active); await loadStudent(); } $('notifOv').classList.remove('show'); tab='chat'; render(); })(); break;
     case 'tabataStart': startTabata(); break;
     case 'tabataStop': stopTabata(); break;
