@@ -5745,7 +5745,7 @@ function cycleWelcomeHTML(){ const st=DB.students[active]; const hist=st.cycleHi
     <ul class="cw-tips">${tips.map(function(t){ return '<li>'+t+'</li>'; }).join('')}</ul>
     <div class="cw-sign">¡A darle con todo! 💪 — Tami</div>
     <button type="button" class="ses-go" data-act="cycleWelcomeOk">¡Vamos!</button></div>`; }
-function maybeCycleWelcome(){ if(trainer||!active) return; const st=DB.students[active]; if(!st||!st.cycleStart||!(st.cycleHistory||[]).length) return; if(routineFinished()) return;
+function maybeCycleWelcome(){ if(trainer||!active||!locked) return; /* solo en el link del alumno, no en tu celular en modo alumno */ const st=DB.students[active]; if(!st||!st.cycleStart||!(st.cycleHistory||[]).length) return; if(routineFinished()) return;
   const k='tafit:cyclewelcome:'+active+(isDuo()?':'+member:''); try{ if(localStorage.getItem(k)===st.cycleStart) return; }catch(e){ return; }
   if(Date.now()-Date.parse(st.cycleStart)>21*864e5) { try{ localStorage.setItem(k,st.cycleStart); }catch(e){} return; } /* ciclos viejos: no molestar */
   const h=cycleWelcomeHTML(); if(!h) return; let o=$('cycleWelcome'); if(!o){ o=document.createElement('div'); o.id='cycleWelcome'; o.className='ses-player'; document.body.appendChild(o); }
