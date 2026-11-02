@@ -1223,7 +1223,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-139'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-140'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -6259,7 +6259,7 @@ function showInstallBanner(container){
 }
 function pickDay(i){ day=i; openEx=-1; savePos(); renderApp(); }
 function pickWeek(i){
-  if(wkLocked(i)){ const W=weeks(); toast(`🔒 ${W[i].t} se abre al cerrar todas las sesiones de ${W[i-1].t} · ${W[i-1].n}`,'warn'); return; }
+  if(wkLocked(i)){ const W=weeks(); const miss=weekMissing(i-1); toast(`🔒 ${W[i].t} se abre al cerrar todas las sesiones de ${W[i-1].t}`+(miss.length?` · te falta: ${miss.join(', ')}`:''),'warn'); return; }
   week=i; savePos(); renderApp();
 }
 /* Una semana está completa cuando cada día de la rutina tiene su sesión cerrada en esa semana */
@@ -6268,6 +6268,9 @@ function pickWeek(i){
    (mismo índice de semana / mismo nombre de día, por coincidencia de posición) hacían que
    el desbloqueo progresivo de semanas se saltee de más — por eso una alumna con acceso
    manual limitado a la semana 3 terminaba viendo todas las semanas igual. */
+/* 02/11/2026: qué días le faltan cerrar de una semana (para decírselo cuando la siguiente está bloqueada) */
+function weekMissing(wi){ const r=routine(); const st=DB.students[active]; const cutoff=(st&&st.cycleStart)?Date.parse(st.cycleStart):0;
+  return r.filter(function(d,di){ return !LOGS.some(function(l){ if(+l.week!==+wi||!(l.dayName===d.day||(l.dayIdx!=null&&+l.dayIdx===di))) return false; if(!cutoff) return true; const t=l.date?Date.parse(l.date):0; return !isNaN(t)&&t>=cutoff; }); }).map(function(d){ return String(d.day).split('·')[0].trim(); }); }
 function weekDone(wi){
   const r=routine(); if(r.length===0) return false;
   const st=DB.students[active];
