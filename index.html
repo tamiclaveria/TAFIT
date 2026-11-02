@@ -3770,7 +3770,12 @@ function logsDelFor(id){ try{ return safeParse(localStorage.getItem('tafit:logsd
 /* 22/10/2026 · corrección puntual autorizada por Tami: sesión de running de "Yo" del 20/10
    cargada como 148 km (faltó la coma) → 1,48 km. Solo si coincide exactamente con lo verificado
    en el backup del 22/10; se aplica en cada celular al leer, así ninguna copia vieja lo revierte. */
-function fixKnownLog(l){ if(l&&l.date==='2026-10-20T14:30:44.479Z'&&l.dayName==='Día 2'&&l.ses&&l.ses.tipo==='run'&&l.ses.km==='148'&&l.ses.min==='25'){ l=Object.assign({},l); l.ses=Object.assign({},l.ses,{km:'1,48'}); } return l; }
+/* 02/11/2026 (pedido de Tami, verificado en su backup del 02/11): en su perfil "Yo" los Días 4 y 5 del 30/10 quedaron
+   guardados en S2 porque los agregó a la rutina después de cerrar los Días 1-3 (la app ya la había pasado a S2).
+   Eran de S1: vuelven a S1 y así S1 queda completa y se abre S2. */
+const FIX_YO_S1={'2026-10-30T14:40:06.534Z':'Día 4','2026-10-30T21:51:33.649Z':'Día 5'};
+function fixKnownLog(l){ if(l&&FIX_YO_S1[l.date]&&l.dayName===FIX_YO_S1[l.date]&&+l.week===1&&l.weekName==='S2 Volumen'){ l=Object.assign({},l,{week:0,weekName:'S1 Base'}); }
+  if(l&&l.date==='2026-10-20T14:30:44.479Z'&&l.dayName==='Día 2'&&l.ses&&l.ses.tipo==='run'&&l.ses.km==='148'&&l.ses.min==='25'){ l=Object.assign({},l); l.ses=Object.assign({},l.ses,{km:'1,48'}); } return l; }
 function unionLogsArr(a,b,tomb){
   const dead=new Set(tomb||[]); const seen=new Set(); const out=[];
   (a||[]).concat(b||[]).forEach(function(l){ if(!l||!l.date||dead.has(l.date)||seen.has(l.date)) return; seen.add(l.date); out.push(fixKnownLog(l)); });
@@ -6404,7 +6409,9 @@ function finishHTML(forTrainer){ const st=DB.students[active], W=weeks(), r=rout
     ${forTrainer?`<div class="fin-msg">Ya no la ve en su App: ve este resumen y el aviso de que viene una nueva. Cuando le cargues la próxima (con el botón de abajo, una plantilla o "Iniciar nuevo ciclo" en Editar) se le habilita sola.</div><div class="sp-btns"><button type="button" data-act="finInforme">🏆 Ver su informe</button><button type="button" data-act="finInfShare">${informeEnabledForStudent()?'✓ Él ya lo puede ver':'👁 Que lo vea él también'}</button></div><button type="button" class="ses-go" data-act="ncOpen" style="margin-top:10px">✨ Armar la próxima a partir de esta</button><button type="button" class="ses-link" data-act="finGoEdit">o cargarla a mano en Editar</button>`
       :`<div class="fin-msg">¡Felicitaciones por la constancia! 👏 Tu profe ya sabe que terminaste y te va a cargar la próxima rutina. Mientras tanto, todo lo que hiciste queda en tu <b>Transcripta</b>.</div>${informeEnabledForStudent()?'<button type="button" class="ses-go" data-act="tab" data-tab="resumen" style="margin-bottom:10px">🏆 Ver mi Informe de Evolución</button>':''}<div class="sp-btns"><button type="button" data-act="tab" data-tab="trans">📖 Ver mi Transcripta</button><button type="button" data-act="tab" data-tab="chat">💬 Escribirle a mi profe</button></div>`}</div>`;
   return box; }
-function wkLocked(i){ if(trainer) return false; const unlockW=(DB.students[active]&&DB.students[active].unlockWeek)||0; if(i<=unlockW) return false; return i>0 && !weekDone(i-1); }
+function wkLocked(i){ if(trainer) return false; const unlockW=(DB.students[active]&&DB.students[active].unlockWeek)||0; if(i<=unlockW) return false; if(i>0&&weekReached(i)) return false; return i>0 && !weekDone(i-1); }
+/* 02/11/2026: una semana en la que ya entrenaste (o una posterior) no se vuelve a bloquear — p. ej. si la profe agrega un día nuevo a la rutina después */
+function weekReached(i){ const st=DB.students[active]; const cut=(st&&st.cycleStart)?Date.parse(st.cycleStart):0; return LOGS.some(function(l){ if(+l.week<i) return false; if(!cut) return true; const t=l.date?Date.parse(l.date):0; return t>=cut; }); }
 function pickMember(i){ member=i; openEx=-1; savePos(); renderApp(); }
 
 /* Peso más alto registrado por ejercicio */
