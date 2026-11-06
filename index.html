@@ -4074,7 +4074,7 @@ async function addOmarPiernas_20261106(){
   const sets=function(w,n){ const a=[]; for(let i=0;i<(n||4);i++) a.push({s:i+1,w:String(w),r:'12',rir:'',done:true}); return a; };
   const W=(st.weeks&&st.weeks[0])||{t:'S1',n:''};
   const log={ date:'2026-11-06T19:00:00.000Z', dayName:di>=0?st.routine[di].day:'Piernas', dayIdx:di>=0?di:null, week:0, weekName:(W.t+' '+(W.n||'')).trim(),
-    ex:[{n:'Gemelos sentado en máquina',sets:sets('17,5 por lado')},{n:'Sentadilla hack',sets:sets(80)},{n:'Hip thrust de pie en máquina',sets:sets(80)},{n:'Buenos días con barra',sets:sets(20)},{n:'Prensa 45°',sets:sets(80)},{n:'Gemelos en prensa',sets:sets('')},{n:'Curl femoral acostado en máquina',sets:sets(32)},{n:'Aductores en máquina',sets:sets('')},{n:'Crunch en máquina',sets:sets('')}],
+    ex:[{n:'Gemelos sentado en máquina',sets:sets('17,5 por lado')},{n:'Sentadilla hack',sets:sets(80)},{n:'Hip thrust de pie en máquina',sets:sets(80)},{n:'Buenos días con barra',sets:sets(20)},{n:'Prensa 45°',sets:sets(80)},{n:'Gemelos en prensa',sets:sets('')},{n:'Curl femoral acostado en máquina',sets:sets(32)},{n:'Aductores en máquina',sets:sets(52)},{n:'Crunch en máquina',sets:sets(45)}],
     obs:'', health:null };
   const K='tafit:logs:'+SID; let cur=safeParse(await Store.get(K)||'[]',[]);
   if(!cur.some(function(l){ return String(l.date).slice(0,10)==='2026-11-06'; })){ cur=unionLogsArr([log],cur,logsDelFor(SID)); await Store.set(K,JSON.stringify(cur)); if(active===SID) LOGS=unionLogsArr(LOGS,cur,logsDelFor(SID)); }
