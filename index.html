@@ -923,7 +923,8 @@
   /* miniatura real del ejercicio (frame del video cargado), no del grupo muscular */
   .ex-prev~.ex-hdr-info .ex-hdr-name{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.25}
   .ex-prev{position:relative;flex:none;width:92px;height:58px;border-radius:10px;overflow:hidden;background:#E8DFD0;cursor:pointer}
-  .ex-prev img{width:100%;height:100%;object-fit:cover;display:block}
+  /* frame automático del medio del video (sin títulos ni letras de la portada), con zoom para verlo más de cerca */
+  .ex-prev img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.35);transform-origin:50% 45%}
   .ex-prev.noimg img{display:none}
   .ex-prev-n{position:absolute;top:4px;left:4px;background:var(--steel);color:#fff;font-style:normal;font-size:11px;font-weight:800;min-width:18px;height:18px;border-radius:6px;display:flex;align-items:center;justify-content:center;padding:0 4px}
   .ex-prev-p{position:absolute;right:5px;bottom:5px;width:22px;height:22px;border-radius:50%;background:rgba(23,18,14,.72);color:#fff;font-style:normal;font-size:10px;display:flex;align-items:center;justify-content:center}
@@ -1231,7 +1232,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-145'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-146'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -6104,7 +6105,7 @@ function renderApp(){
        mediano, con el número encima. Tocarla abre el video adentro de la app. Sin video puntual → solo el número. */
     const exNum=r[day].ex.slice(0,ei+1).filter(function(e2,i2){ return !isBlockRow(e2)&&!coreHidden.has(i2); }).length;
     const thId=cardioOf(ex)?null:(extractYouTubeId(ex.vid)||vidForName(ex.n));
-    const thumbHtml=thId?`<span class="ex-prev" data-act="playVideo" data-url="${esc(ex.vid||YT(ex.n))}" data-name="${esc(ex.n)}"><img src="https://i.ytimg.com/vi/${thId}/mqdefault.jpg" alt="" loading="lazy" onerror="this.parentNode.classList.add('noimg')"><i class="ex-prev-n">${exNum}</i><i class="ex-prev-p">▶</i></span>`:`<span class="num">${exNum}</span>`;
+    const thumbHtml=thId?`<span class="ex-prev" data-act="playVideo" data-url="${esc(ex.vid||YT(ex.n))}" data-name="${esc(ex.n)}"><img src="https://i.ytimg.com/vi/${thId}/mq2.jpg" alt="" loading="lazy" onerror="if(!this.dataset.f){ this.dataset.f=1; this.src='https://i.ytimg.com/vi/${thId}/mqdefault.jpg'; } else this.parentNode.classList.add('noimg')"><i class="ex-prev-n">${exNum}</i><i class="ex-prev-p">▶</i></span>`:`<span class="num">${exNum}</span>`;
     let html=`<div class="ex-hdr" data-act="accordion" data-i="${ei}">${thumbHtml}<div class="ex-hdr-info"><div class="ex-hdr-name">${esc(ex.n)}</div><div class="ex-hdr-meta">${hdrMeta}${hdrPA}</div>${wCmp}<div class="ex-hdr-prog">${progDots}</div></div><span class="ex-chev${isOpen?' open':''}">▾</span></div>`;
     html+=`<div class="ex-body${isOpen?' open':''}">`;
     if(trainer){
