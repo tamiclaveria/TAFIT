@@ -4117,6 +4117,17 @@ async function applyOmarPlan8_20261111(){
   done(); await saveDB();
   if(active===SID){ week=0; day=0; render(); }
 }
+/* 19/11/2026 — pedido de Tami: alumna nueva Ceci Castro, por ahora solo con Anamnesis y Acuerdo (sin rutina). */
+async function addCeciCastro_20261119(){
+  if(DB._seed&&DB._seed.ceciCastro_20261119) return;
+  const done=function(){ DB._seed=DB._seed||{}; DB._seed.ceciCastro_20261119=true; };
+  const ya=Object.keys(DB.students).some(function(k){ return /^ceci(lia)?\s+castro$/i.test(String(DB.students[k].name||'').trim()); });
+  if(!ya&&!(DB._deleted&&DB._deleted['ceci-castro'])&&!DB.students['ceci-castro']){
+    DB.students['ceci-castro']={ name:'Ceci Castro', theme:'f', routine:[], weeks:cp(DEFAULT_WEEKS), forms:{acuerdo:true,anamnesis:true} };
+    DB.order.push('ceci-castro');
+  }
+  done(); await saveDB(); render();
+}
 async function addYoDia3_20261028(){
   if(DB._seed&&DB._seed.yoDia3_20261028) return;
   const SID='dani', st=DB.students[SID]; if(!st||!st.routine||String(st.name).trim()!=='Yo') return;
@@ -4273,6 +4284,7 @@ async function initFirebase(){
     try{ if(!locked) await applyOmarAdapt_20261029(); }catch(e){ console.warn('Omar adapt:',e); }
     try{ if(!locked) await addGapGrupo5_20261105(); }catch(e){ console.warn('GAP G5:',e); }
     try{ if(!locked) await addOmarPiernas_20261106(); }catch(e){ console.warn('Omar piernas:',e); }
+    try{ if(!locked) await addCeciCastro_20261119(); }catch(e){ console.warn('Ceci Castro:',e); }
     try{ if(!locked) await applyOmarPlan8_20261111(); }catch(e){ console.warn('Omar plan 8:',e); }
     try{ if(!locked) await shiftWoForCorePresets(); }catch(e){ console.warn('WO shift:',e); }
     /* push: local → cloud */
