@@ -162,6 +162,28 @@
 
   /* ---- Bloque / circuito: cartel de sección, no un ejercicio con peso y series ---- */
   .block-banner-wrap{margin-bottom:12px}
+  /* 20/11/2026 · rediseño: bloque = tarjeta con sus ejercicios adentro (negro, beige y blanco) */
+  .blk-card{background:#fff;border:1.5px solid #E3C3A5;border-radius:18px;padding:10px;margin-bottom:16px}
+  .blk-card>.block-banner{background:#F2ECE0;box-shadow:none;border-radius:12px;padding:12px 14px;margin-bottom:8px}
+  .blk-card .bb-top{display:flex;align-items:center;gap:8px}
+  .bb-tag{margin-left:auto;flex:none;background:#17120E;color:#E3C3A5;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:4px 9px;border-radius:999px}
+  .blk-body>.ex{margin-bottom:8px;box-shadow:none;border:1px solid #EFE6DA}
+  .blk-body>.ex:last-child{margin-bottom:0}
+  .blk-card.blk-fin{background:#17120E;border-color:#17120E}
+  .blk-card.blk-fin>.block-banner{background:#241E18;color:#F2ECE0}
+  .blk-card.blk-fin .bb-desc{color:#E3C3A5}
+  .blk-card.blk-fin .bb-tag{background:#E3C3A5;color:#17120E}
+  .blk-card.blk-fin .bb-btn{background:#E3C3A5;color:#17120E}
+  .ex.cardio-lo{background:#F2ECE0!important;border-color:#E3C3A5!important}
+  .ex.cardio-hi{background:#17120E!important;border-color:#17120E!important;color:#F2ECE0}
+  .ex.cardio-hi .ex-hdr,.ex.cardio-lo .ex-hdr{border-bottom-color:transparent}
+  .blk-fin .ex.cardio-hi{background:#2A231C!important;border-color:#4A3F34!important}
+  .ex.cardio-hi .num{background:#E3C3A5;color:#17120E}
+  .ex.cardio-hi .ex-hdr-meta{color:#E3C3A5!important}
+  .ex.cardio-hi .ex-hdr-name{color:#fff}.ex.cardio-hi .ex-hdr-meta,.ex.cardio-hi .ex-chev{color:#E3C3A5}
+  .ex.cardio-hi .ex-hdr-prog i{background:#3A322A}
+  .rep-mat{margin:10px 0 4px}.rep-mat-t{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;opacity:.85;margin-bottom:6px}
+  .rep-mat-chips{display:flex;flex-wrap:wrap;gap:6px}.rep-mat-chips span{background:#E3C3A5;color:#17120E;font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px}
   .block-banner{background:linear-gradient(135deg,#F1EDE9,#F2EEE9);color:#241F18;border-radius:14px;padding:16px 18px;box-shadow:0 4px 14px rgba(0,0,0,.35)}
   .block-banner .bb-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
   .block-banner .bb-ico{font-size:20px;flex:none}
@@ -1232,7 +1254,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-148'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-149'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -5486,6 +5508,15 @@ const CARDIO_PRESETS={
   'bicicleta fija':{maq:'Bicicleta',min:true,mide:['km','kcal'],pasos:['Ajustá el asiento a la altura de la cadera.','Pedaleá {min} minutos a ritmo moderado.','Anotá la distancia y las calorías.']}
 };
 const CARDIO_MIDE={km:'Distancia (km)',kcal:'Calorías',min:'Minutos'};
+/* ==== 20/11/2026 · ETAPA 1 del rediseño de rutina ====
+   Materiales del día: los carga la profe en el día (d.mat, "mancuernas · cajón") o se deducen de los ejercicios. */
+const MAT_RX=[[/mancuerna/i,'Mancuernas'],[/\bbarra\b(?!.*\bbarrita\b)|barra z|con barra/i,'Barra'],[/barrita/i,'Barra corta'],[/polea|cruce de poleas|face pull/i,'Polea'],[/m[aá]quina|prensa|sill[oó]n|camilla|dorsalera|\bhack\b|smith|multicadera|peck deck/i,'Máquinas'],[/caj[oó]n/i,'Cajón'],[/\bstep\b(?![\s-]*up)/i,'Step'],[/saltar la soga|\bsoga\b(?!.*polea)/i,'Soga'],[/pesa rusa|kettlebell|\bkb\b|swing/i,'Pesa rusa'],[/mini ?banda|\bbanda\b|el[aá]stic/i,'Banda'],[/bal[oó]n|pelota|wall ball/i,'Balón medicinal'],[/core ?bag/i,'Core bag'],[/\bdisco\b/i,'Disco'],[/fitball/i,'Fitball'],[/colchoneta/i,'Colchoneta'],[/tobillera/i,'Tobillera'],[/\btrx\b/i,'TRX'],[/\bcinta\b/i,'Cinta']];
+function dayMateriales(d){ if(!d) return []; if(d.mat) return String(d.mat).split(/·|,|\n/).map(function(x){ return x.trim(); }).filter(Boolean);
+  const seen=[]; (d.ex||[]).forEach(function(e){ if(isBlockRow(e)) return; const t=(e.n||'')+' '+(e.w||''); MAT_RX.forEach(function(m){ if(m[0].test(t)&&seen.indexOf(m[1])<0) seen.push(m[1]); }); }); return seen; }
+/* Cardio diferenciado: trote / soga / caminata → beige · sprint / cardio intenso → negro */
+function cardioKind(ex){ const n=String((ex&&ex.n)||'').toLowerCase(); if(/sprint|burpee|hiit|saltos? (al|en) caj|jumping|mountain climb|skipping|rodillas al pecho r[aá]pid|cardio intenso|a fondo/.test(n)) return 'hi'; if(/\btrote\b|trotar|saltar la soga|^soga\b|caminata|caminar|\bbici|el[ií]ptico|\bremo ergo|\bcorrer\b/.test(n)||cardioOf(ex)) return 'lo'; return ''; }
+/* Bloque finisher (AMRAP / EMOM / Finisher) → tarjeta negra propia */
+function isFinisherBlk(cfg){ return /amrap|emom|finisher/i.test((cfg.title||'')+' '+(cfg.format||'')); }
 function cardioOf(ex){ if(!ex||!ex.n) return null; return CARDIO_PRESETS[String(ex.n).trim().toLowerCase()]||null; }
 function cardioKey(ei,mi){ return 'cv|'+day+'|'+ei+'|m'+(mi||0); }
 function cardioVal(ei,mi){ const v=CACHE[cardioKey(ei,mi)]; return (v&&wOf(v)===+week)?v:{}; }
@@ -6049,6 +6080,7 @@ function renderApp(){
     hero.innerHTML=`<div class="rep-hero-eyebrow">📅 HOY</div>
       <div class="rep-hero-title">${esc(r[day].day)}${dayTypeTag(r[day])?' '+dayTypeTag(r[day]):''}</div>
       ${chips.length?`<div class="rep-hero-chips">${chips.map(c=>`<span class="rep-hero-chip">${c}</span>`).join('')}</div>`:''}
+      ${(function(){ const mt=dayMateriales(r[day]); return mt.length?`<div class="rep-mat"><div class="rep-mat-t">🧰 Materiales del día</div><div class="rep-mat-chips">${mt.map(x=>`<span>${esc(x)}</span>`).join('')}</div></div>`:''; })()}
       <div class="rep-hero-quote">${esc(frase)}</div>`;
     m.appendChild(hero);
   }
@@ -6090,13 +6122,20 @@ function renderApp(){
   /* 07/10/2026: selector de core del alumno, en lugar del bloque prearmado (ver CORE_CATALOG) */
   if(hasCoreDay(r[day])){ const cc=document.createElement('div'); cc.className='ex core-pick'; cc.id='coreCard'; cc.innerHTML=coreCardHTML(); m.appendChild(cc); }
 
+  let blkBody=null, blkTimed=false; /* tarjeta del bloque actual: sus ejercicios van ADENTRO.
+     Un bloque con temporizador (Tabata/AMRAP/EMOM) solo se queda con los ejercicios de 1 serie o "por tiempo"
+     que le siguen; si viene un ejercicio normal (p. ej. 4 series, como en las rutinas donde el Tabata es
+     "elegí vos"), el bloque se cierra ahí y el resto queda afuera, como antes. */
   r[day].ex.forEach((rawEx,ei)=>{
     if(coreHidden.has(ei)) return;
     const ex=exWithOverride(rawEx,ei);
     if(isBlockRow(ex)){
       const cfg=getBlockCfg(ex);
-      const bc=document.createElement('div'); bc.className='block-banner-wrap';
-      let bh=`<div class="block-banner"><div class="bb-top"><span class="bb-ico">🔁</span><span class="bb-title">${esc(cfg.title)}</span></div>`;
+      const fin=isFinisherBlk(cfg);
+      const bc=document.createElement('div'); bc.className='block-banner-wrap blk-card'+(fin?' blk-fin':'');
+      const nR=+(cfg.rounds||ex.s||0); const isRondas=cfg.work>0||/ronda|circuito|vuelta|amrap|emom|tabata/i.test(cfg.title||'');
+      const tag=/amrap/i.test(cfg.title+' '+cfg.format)?'AMRAP':/emom/i.test(cfg.title+' '+cfg.format)?'EMOM':(nR>1?nR+(isRondas?' rondas':' series'):'');
+      let bh=`<div class="block-banner"><div class="bb-top"><span class="bb-ico">${fin?'🔥':'🔁'}</span><span class="bb-title">${esc(cfg.title.replace(/\s*·\s*\d+\s*(rondas?|series|vueltas)\s*$/i,''))}</span>${tag?`<span class="bb-tag">${esc(tag)}</span>`:''}</div>`;
       if(cfg.desc) bh+=`<div class="bb-desc">${esc(cfg.desc)}</div>`;
       if(cfg.work>0){
         bh+=`<button type="button" class="bb-btn" data-act="openBlockTimer" data-title="${esc(cfg.title)}" data-work="${cfg.work}" data-rest="${cfg.rest||10}" data-rounds="${cfg.rounds}" data-format="${esc(cfg.format)}">⏱ Iniciar temporizador de circuito</button>`;
@@ -6104,10 +6143,11 @@ function renderApp(){
         bh+=`<button type="button" class="bb-btn" data-act="rest" data-sec="${cfg.rest}">⏱ Descanso ${cfg.rest} s</button>`;
       }
       bh+=`</div>`;
-      bc.innerHTML=bh; m.appendChild(bc);
+      bc.innerHTML=bh+'<div class="blk-body"></div>'; m.appendChild(bc); blkBody=bc.querySelector('.blk-body'); blkTimed=cfg.work>0;
       return;
     }
-    const c=document.createElement('div'); c.className='ex'+(openEx===ei?' open-ex':'');
+    if(blkBody&&blkTimed&&!(+ex.s<=1||/seg|″|"|vuelta/i.test(String(ex.r||'')))){ blkBody=null; }
+    const c=document.createElement('div'); const ck=cardioKind(ex); c.className='ex'+(openEx===ei?' open-ex':'')+(ck?' cardio-'+ck:'');
     const isOpen=openEx===ei;
     /* mini progress for header (solo del integrante seleccionado) */
     const selMi=isDuo()?member:0;
@@ -6155,7 +6195,7 @@ function renderApp(){
     else { html+=setsTable(ex,ei,selMi,obj);
     html+=`<details class="rm" id="rm-${ei}-${selMi}">${rmHTML(ei,selMi)}</details>`; }
     html+=`</div>`;
-    c.innerHTML=html; m.appendChild(c);
+    c.innerHTML=html; (blkBody||m).appendChild(c);
   });
 
   healthPost(m);
