@@ -163,6 +163,14 @@
   /* ---- Bloque / circuito: cartel de sección, no un ejercicio con peso y series ---- */
   .block-banner-wrap{margin-bottom:12px}
   /* 20/11/2026 · rediseño: bloque = tarjeta con sus ejercicios adentro (negro, beige y blanco) */
+  .sug-today{display:inline-block;margin:2px 0 0;font-size:12px;font-weight:800;color:#17120E;background:#E3C3A5;border-radius:999px;padding:2px 8px}
+  .sug-today.down{background:#F2ECE0}
+  .stp-cell{display:flex;align-items:center;gap:3px}.stp-cell .cell{min-width:0;flex:1;text-align:center}
+  .stp{flex:none;width:26px;height:30px;border-radius:8px;border:1px solid #E3C3A5;background:#F2ECE0;color:#17120E;font-weight:900;font-size:15px;line-height:1;padding:0;cursor:pointer}
+  .fb-bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 0 2px;font-size:12.5px}.fb-bar>span{font-weight:700;color:var(--mute);margin-right:2px}
+  .fb-bar button{font-family:inherit;font-size:12.5px;font-weight:700;border:1.5px solid #E3C3A5;background:#fff;color:#17120E;border-radius:999px;padding:6px 10px;cursor:pointer}
+  .fb-bar button.on{background:#17120E;border-color:#17120E;color:#F2ECE0}
+  .fb-hint{font-size:11.5px;color:var(--mute);min-height:14px}
   .blk-card{background:#fff;border:1.5px solid #E3C3A5;border-radius:18px;padding:10px;margin-bottom:16px}
   .blk-card>.block-banner{background:#F2ECE0;box-shadow:none;border-radius:12px;padding:12px 14px;margin-bottom:8px}
   .blk-card .bb-top{display:flex;align-items:center;gap:8px}
@@ -5480,13 +5488,16 @@ function setsTable(ex,ei,mi,objetivo){
         <td><input class="cell" inputmode="numeric" placeholder="${esc(repPh(ex.r,si))}" value="${esc(v.r||'')}" data-chg="set" data-i="${ei}" data-j="${si}" data-m="${mi}" data-f="r"></td>
         <td><button class="chk ${v.done?'on':''}" data-act="toggle" data-i="${ei}" data-j="${si}" data-m="${mi}">✓</button></td></tr>`;
     } else {
+      const tEx=isTimeEx(ex), sg=sugToday(ex,mi);
+      const wPh=(!tEx&&sg)?numTxt(sg.v):numPH(objetivo), rPh=(tEx&&sg)?numTxt(sg.v):repPh(ex.r,si);
+      const stp=function(d,lbl){ return `<button type="button" class="stp" data-act="stepCell" data-d="${d}">${lbl}</button>`; };
       sets+=`<tr><td class="s">S${si+1}</td>
-        <td><input class="cell" inputmode="decimal" placeholder="${esc(numPH(objetivo))}" value="${esc(v.w||'')}" data-chg="set" data-i="${ei}" data-j="${si}" data-m="${mi}" data-f="w"></td>
-        <td><input class="cell" inputmode="numeric" placeholder="${esc(repPh(ex.r,si))}" value="${esc(v.r||'')}" data-chg="set" data-i="${ei}" data-j="${si}" data-m="${mi}" data-f="r"></td>
+        <td><div class="stp-cell${tEx?' noop':''}">${tEx?'':stp(-2.5,'−')}<input class="cell" inputmode="decimal" placeholder="${esc(wPh)}" value="${esc(v.w||'')}" data-chg="set" data-i="${ei}" data-j="${si}" data-m="${mi}" data-f="w">${tEx?'':stp(2.5,'+')}</div></td>
+        <td><div class="stp-cell${tEx?'':' noop'}">${tEx?stp(-5,'−'):''}<input class="cell" inputmode="numeric" placeholder="${esc(rPh)}" value="${esc(v.r||'')}" data-chg="set" data-i="${ei}" data-j="${si}" data-m="${mi}" data-f="r">${tEx?stp(5,'+'):''}</div></td>
         <td><button class="chk ${v.done?'on':''}" data-act="toggle" data-i="${ei}" data-j="${si}" data-m="${mi}">✓</button></td></tr>`;
     }
   }
-  return `<table class="sets"><tr><th class="s">Serie</th><th>${isDrop?'Pesos Drop':'Peso (kg)'}</th><th>Reps</th><th>✓</th></tr>${sets}</table>`;
+  return `<table class="sets"><tr><th class="s">Serie</th><th>${isDrop?'Pesos Drop':'Peso (kg)'}</th><th>${isTimeEx(ex)?'Tiempo (″)':'Reps'}</th><th>✓</th></tr>${sets}</table>`+(isDrop?'':`<div class="fb-wrap" data-i="${ei}" data-m="${mi}">${fbBarHTML(ei,mi)}</div>`);
 }
 /* ==== Cardio guiado (09/10/2026) ====
    Los ejercicios de cardio de la biblioteca traen el paso a paso de la máquina del gimnasio
@@ -6158,7 +6169,7 @@ function renderApp(){
     const maxBadge=maxW?` · <span class="max-w">🏆 ${fmt(maxW)}</span>`:'';
     if(cardioOf(ex)){ const cp_=cardioOf(ex), cv_=cardioVal(ei,selMi); setsTotal=1; setsDone=cv_.done?1:0; progDots=`<i${cv_.done?' class="done"':''}></i>`; }
     const hdrMeta=cardioOf(ex)?(`🫀 ${esc(cardioOf(ex).maq)} · `+(cardioOf(ex).work?`${cardioRounds(ex)} × ${cardioOf(ex).work}″/${cardioOf(ex).rest}″`:`${cardioMins(ex)} min`)+(setsDone?' · ✓':'')):`${esc(srTxt(ex.s,ex.r))}${(obj&&obj!=='A definir')?' · '+esc(obj):''}${maxBadge}${setsTotal?(' · '+setsDone+'/'+setsTotal+' ✓'):''}`;
-    const wCmp=weightCmpHTML(ex.n,member);
+    const wCmp=weightCmpHTML(ex.n,member)+sugHTML(ex,selMi);
     const hdrPA=(ex.pa&&ex.pa.n)?' · <span class="pa-tag">⚡ + pausa activa</span>':'';
     /* 07/10/2026: Tami pidió sacar las miniaturas (tanto el frame real de YouTube como el
        ícono genérico de grupo muscular) de la lista de ejercicios — no las quiere por ahora. */
@@ -6419,6 +6430,23 @@ function getLastWeight(exName,mi){
   }
   return null;
 }
+/* ==== 21/11/2026 · ETAPA 2: registro de peso/tiempo ====
+   "Sugerido hoy" sale del último peso (o tiempo) y de cómo le quedó: Liviano → +2,5 kg (+5″) · Justo → igual · Pesado → −2,5 kg (−5″). */
+function isTimeEx(ex){ return /″|"|\bseg\b|\bs\b$|segundos|\bmin\b|′/i.test(String((ex&&ex.r)||'')); }
+function fbKey(ei,mi){ return 'fb_'+day+'_'+ei+'_'+(mi||0); }
+function fbOf(ei,mi){ const v=CACHE[fbKey(ei,mi)]; return (v&&wOf(v)===+week)?v.v:''; }
+function numTxt(x){ return String(Math.round(x*10)/10).replace('.',','); }
+function sugToday(ex,mi){ if(!ex||cardioOf(ex)) return null; const mm=membersOf(); const L=lastFor(ex.n,mm[mi||0]); if(!L) return null;
+  const t=isTimeEx(ex); let best=null; L.sets.forEach(function(st){ const v=firstNum(t?st.r:st.w); if(v!=null&&v>0&&(best==null||v>best)) best=v; }); if(best==null) return null;
+  const step=t?5:2.5, d=L.fb==='L'?step:L.fb==='P'?-step:0; const v=Math.max(t?5:0,best+d);
+  return {v:v, txt:numTxt(v)+(t?'″':' kg'), dir:d>0?'up':d<0?'down':'eq', last:numTxt(best)+(t?'″':' kg'), fb:L.fb}; }
+function sugHTML(ex,mi){ const sg=sugToday(ex,mi); if(!sg) return ''; return `<span class="sug-today ${sg.dir}">Sugerido hoy: ${sg.txt}${sg.dir==='up'?' ↑':sg.dir==='down'?' ↓':''}</span>`; }
+function fbBarHTML(ei,mi){ const v=fbOf(ei,mi); const _ex=(routine()[day]||{ex:[]}).ex[ei]; const st=isTimeEx(_ex)?'5″':'2,5 kg'; const b=function(k,t){ return `<button type="button" class="${v===k?'on':''}" data-act="exFb" data-i="${ei}" data-m="${mi}" data-v="${k}">${t}</button>`; };
+  return `<div class="fb-bar"><span>¿Cómo te quedó?</span>${b('L','🪶 Liviano')}${b('J','👌 Justo')}${b('P','🧱 Pesado')}</div><div class="fb-hint">${v==='L'?'La próxima te sugiero subir '+st+'.':v==='P'?'La próxima te sugiero bajar '+st+'.':v==='J'?'La próxima mantenemos.':''}</div>`; }
+function exFb(ei,mi,v){ const k=fbKey(ei,mi); const cur=fbOf(ei,mi); if(cur===v) delete CACHE[k]; else CACHE[k]={v:v,_w:+week,_t:Date.now()}; queueSave(); const c=document.querySelector(`.fb-wrap[data-i="${ei}"][data-m="${mi}"]`); if(c) c.innerHTML=fbBarHTML(ei,mi); }
+/* − / + : 2,5 kg en el peso; 5″ en los ejercicios por tiempo (en la columna de reps) */
+function stepCell(btn){ const inp=btn.parentNode.querySelector('input'); if(!inp) return; const d=parseFloat(btn.dataset.d); let cur=firstNum(inp.value); if(cur==null) cur=firstNum(inp.placeholder); if(cur==null) cur=0;
+  const nv=Math.max(0,cur+d); inp.value=numTxt(nv); inp.dispatchEvent(new Event('change',{bubbles:true})); }
 function weightCmpHTML(exName,mi){
   var prev=getLastWeight(exName,mi);
   if(!prev) return '';
@@ -6596,12 +6624,12 @@ function pickMember(i){ member=i; openEx=-1; savePos(); renderApp(); }
 /* Peso más alto registrado por ejercicio */
 function lastFor(exName,forName){
   const mm=membersOf(), mname=forName||mm[isDuo()&&member>=0?member:0];
-  for(let i=LOGS.length-1;i>=0;i--){ const log=LOGS[i]; if(!log.ex) continue;
+  for(let i=0;i<LOGS.length;i++){ const log=LOGS[i]; if(!log.ex) continue; /* 21/11/2026: LOGS va de más nuevo a más viejo — antes tomaba la MÁS VIEJA */
     const x=log.ex.find(e2=>e2.n===exName); if(!x) continue;
     let sets=null;
     if(x.members){ const me=x.members.find(m2=>m2.name===mname); if(me) sets=me.sets; }
     else sets=x.sets;
-    if(sets&&sets.length) return {date:log.date, sets};
+    if(sets&&sets.length) return {date:log.date, sets, fb:(x.members?((x.members.find(m2=>m2.name===mname)||{}).fb):x.fb)||''};
   }
   return null;
 }
@@ -7813,8 +7841,8 @@ async function closeSession(){
       members.forEach((mn,mi)=>{ const v=cardioVal(ei,mi); if(v.km||v.kcal||v.min||v.done) mem.push({name:mn,sets:[{s:1,w:'',r:'',rir:'',done:!!v.done}],cardio:{km:v.km||'',kcal:v.kcal||'',min:v.min||''}}); });
       if(mem.length){ if(members.length>1) exs.push({n:ex.n,members:mem}); else exs.push({n:ex.n,sets:mem[0].sets,cardio:mem[0].cardio}); }
       return; }
-    members.forEach((mn,mi)=>{ const sets=[]; for(let si=0;si<ex.s;si++){ const v=CACHE[K(ei,si,mi)]||{}; if(v.w||v.r||v.rir||v.done) sets.push({s:si+1,w:v.w||'',r:v.r||'',rir:v.rir||'',done:!!v.done}); } if(sets.length) mem.push({name:mn,sets}); });
-    if(mem.length){ if(members.length>1) exs.push({n:ex.n,members:mem}); else exs.push({n:ex.n,sets:mem[0].sets}); }
+    members.forEach((mn,mi)=>{ const sets=[]; for(let si=0;si<ex.s;si++){ const v=CACHE[K(ei,si,mi)]||{}; if(v.w||v.r||v.rir||v.done) sets.push({s:si+1,w:v.w||'',r:v.r||'',rir:v.rir||'',done:!!v.done}); } const fb=fbOf(ei,mi); if(sets.length) mem.push(fb?{name:mn,sets,fb}:{name:mn,sets}); });
+    if(mem.length){ if(members.length>1) exs.push({n:ex.n,members:mem}); else exs.push(mem[0].fb?{n:ex.n,sets:mem[0].sets,fb:mem[0].fb}:{n:ex.n,sets:mem[0].sets}); }
   });
   const obs=(CACHE[OBSK()]||'').trim();
   const h=health(); let hh=null;
@@ -9308,6 +9336,8 @@ document.addEventListener('click',e=>{
     case 'sesSumShare': sesSumShare(); break;
     case 'sesFeel': sesFeel(el.dataset.f,el.dataset.v); break;
     case 'relojSet': relojSet(el.dataset.v==='1'); break;
+    case 'exFb': exFb(+el.dataset.i,+(el.dataset.m||0),el.dataset.v); break;
+    case 'stepCell': stepCell(el); break;
     case 'sesStory': sesStory(); break;
     case 'storyClose': { const o=$('storyPrev'); if(o){ o.style.display='none'; o.innerHTML=''; } } break;
     case 'sesPause': sesPause(); break;
