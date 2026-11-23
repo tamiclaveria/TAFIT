@@ -213,6 +213,7 @@
   .dep-add button{flex:1 1 100%;border:none;border-radius:8px;padding:9px;font-weight:700;background:#17120E;color:#fff;cursor:pointer}
   .dep-empty,.dep-hint{font-size:11.5px;color:var(--mute);margin:6px 0 0}
   .dep-tbl{overflow-x:auto} .dep-tbl table{width:100%;border-collapse:collapse;font-size:12px} .dep-tbl th,.dep-tbl td{padding:5px 4px;border-bottom:1px solid var(--line);text-align:center} .dep-tbl th small{display:block;font-weight:500;color:var(--mute)}
+  .bb-opt{display:inline-block;margin:6px 0 2px;font-size:11.5px;font-weight:800;letter-spacing:.02em;color:#17120E;background:#E3C3A5;border-radius:6px;padding:3px 8px}
   .bb-pl{display:inline-block;margin:8px 0 0 6px;border:1px solid #17120E;background:transparent;color:#17120E;border-radius:10px;padding:7px 11px;font-size:12px;font-weight:700;cursor:pointer}
   .blk-fin .bb-pl{border-color:#E3C3A5;color:#E3C3A5}
   .pl-box{background:#fff;padding:8px 12px 12px;max-height:42vh;overflow:auto}
@@ -1357,7 +1358,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-151'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-152'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -6195,7 +6196,7 @@ function renderApp(){
   const seg=document.createElement('div'); seg.className='seg'; seg.innerHTML=r.map((d,i)=>`<button data-act="pickDay" data-i="${i}" class="${i===day?'sel':''}">${esc(d.day.split('·')[0].trim())}${d.type?`<i class="daytag daytag-${esc(d.type)}">${({gym:'🏋️',funcional:'🎒',run:'🏃',swim:'🏊',mob:'🧘'})[d.type]||''}</i>`:''}</button>`).join(''); m.appendChild(seg);
   /* Barra de progreso de ejercicios */
   const coreHidden=abPresetIdx(r[day]);
-  const realExCount=r[day].ex.filter((e,ix)=>!isBlockRow(e)&&!coreHidden.has(ix)).length;
+  const realExCount=r[day].ex.filter((e,ix)=>!isBlockRow(e)&&!coreHidden.has(ix)&&!exWithOverride(e,ix)._skip&&!exOptional(ix)).length;
   const pb2=document.createElement('div'); pb2.className='prog-bar2'; pb2.id='progbar2'; pb2.textContent='Vas 0 de '+realExCount+' ejercicios · 0% completado'; m.appendChild(pb2);
   /* Entrada en calor */
   if(isSesDay(r[day])){ pb2.style.display='none'; }
@@ -6248,6 +6249,7 @@ function renderApp(){
       const nR=+(cfg.rounds||ex.s||0); const isRondas=cfg.work>0||/^(ron|fb|hx)$/.test(ex.bk||'')||/ronda|circuito|vuelta|amrap|emom|tabata/i.test(cfg.title||'');
       const tag=/amrap/i.test(cfg.title+' '+cfg.format)?'AMRAP':/emom/i.test(cfg.title+' '+cfg.format)?'EMOM':(nR>1?nR+(isRondas?' rondas':' series'):'');
       let bh=`<div class="block-banner"><div class="bb-top"><span class="bb-ico">${fin?'🔥':ex.bk==='wu'?'🧘':'🔁'}</span><span class="bb-title">${esc(cfg.title.replace(/\s*·\s*\d+\s*(rondas?|series|vueltas)\s*$/i,''))}</span>${tag?`<span class="bb-tag">${esc(tag)}</span>`:''}</div>`;
+      if(fin&&!/opcional/i.test(cfg.title)) bh+=`<div class="bb-opt">Opcional · si te quedan ganas, cerrá con esto</div>`;
       if(cfg.desc) bh+=`<div class="bb-desc">${esc(cfg.desc)}</div>`;
       if(cfg.work>0){
         bh+=`<button type="button" class="bb-btn" data-act="openBlockTimer" data-ei="${ei}" data-title="${esc(cfg.title)}" data-work="${cfg.work}" data-rest="${cfg.rest||10}" data-rounds="${cfg.rounds}" data-format="${esc(cfg.format)}">⏱ ${cfg.format==='amrap'?'AMRAP · contar vueltas':cfg.format==='emom'?'EMOM · aviso cada minuto':'Tabata '+cfg.work+'″/'+(cfg.rest||10)+'″'}</button>`;
@@ -7981,7 +7983,9 @@ function toggleSet(ei,si,mi,el){ const k=K(ei,si,mi); CACHE[k]=CACHE[k]||{}; CAC
      siguientes — cada serie se tilda SOLO cuando la toca el alumno, así se ve clarito cuál
      hizo y cuál le falta. (El peso y las reps sí se siguen copiando a las series vacías.) */
   progress(); queueSave(); }
-function progress(){ const r=routine(); if(isSesDay(r[day])) return; let total=0,done=0; const mi=isDuo()?member:0; let exDone=0,realExCount=0; const _hid=abPresetIdx(r[day]); r[day].ex.forEach((ex,ei)=>{ if(isBlockRow(ex)||_hid.has(ei)) return; realExCount++; if(cardioOf(ex)){ total++; if(cardioVal(ei,mi).done){ done++; exDone++; } return; } let allDone=true; for(let si=0;si<ex.s;si++){ total++; const _rp=(CACHE[K(ei,si,mi)]||{}); if(wOf(_rp)===+week&&_rp.done) done++; else allDone=false; } if(allDone&&ex.s>0) exDone++; }); const pct=total?Math.round(done/total*100):0; if($('prog')) $('prog').style.width=pct+'%'; if($('proglbl')) $('proglbl').textContent=`${done}/${total} series · ${exDone}/${realExCount} ejercicios · ${pct}%`; if($('progbar2')) $('progbar2').textContent=`Vas ${exDone} de ${realExCount} ejercicios · ${pct}% completado`; const b=$('closebtn'); if(b){ b.classList.toggle('ready',pct===100); b.textContent=pct===100?'✓ Sesión completa · guardar en transcripta':'Cerrar sesión y guardar en transcripta'; } }
+/* 23/11/2026: los finisher (AMRAP/EMOM del final) y los bloques "opcional" no cuentan para el % del día */
+function exOptional(ei){ const b=lvBlockOf(ei); if(!b) return false; const cfg=getBlockCfg(b); return isFinisherBlk(cfg)||/opcional/i.test(cfg.title||''); }
+function progress(){ const r=routine(); if(isSesDay(r[day])) return; let total=0,done=0; const mi=isDuo()?member:0; let exDone=0,realExCount=0; const _hid=abPresetIdx(r[day]); r[day].ex.forEach((rawEx,ei)=>{ if(isBlockRow(rawEx)||_hid.has(ei)) return; const ex=exWithOverride(rawEx,ei); if(ex._skip||exOptional(ei)) return; realExCount++; if(cardioOf(ex)){ total++; if(cardioVal(ei,mi).done){ done++; exDone++; } return; } let allDone=true; for(let si=0;si<ex.s;si++){ total++; const _rp=(CACHE[K(ei,si,mi)]||{}); if(wOf(_rp)===+week&&_rp.done) done++; else allDone=false; } if(allDone&&ex.s>0) exDone++; }); const pct=total?Math.round(done/total*100):0; if($('prog')) $('prog').style.width=pct+'%'; if($('proglbl')) $('proglbl').textContent=`${done}/${total} series · ${exDone}/${realExCount} ejercicios · ${pct}%`; if($('progbar2')) $('progbar2').textContent=`Vas ${exDone} de ${realExCount} ejercicios · ${pct}% completado`; const b=$('closebtn'); if(b){ b.classList.toggle('ready',pct===100); b.textContent=pct===100?'✓ Sesión completa · guardar en transcripta':'Cerrar sesión y guardar en transcripta'; } }
 
 function restSec(s){ if(!s) return 0; const str=String(s); if(str.includes(':')){ const p=str.split(':'); return (parseInt(p[0])||0)*60+(parseInt(p[1])||0); } const n=firstNum(str); return n?Math.round(n):0; }
 /* Vibración + beep (el contexto de audio se crea en el tap para que iPhone lo permita) */
@@ -8447,7 +8451,7 @@ const BI_SRC=`@hy2|HYROX · 2 días|hy|HYROX||2|Abdominales + HYROX, ideal para 
 -Press de hombros con pesa rusa a una mano|10-8-6 por brazo|oI3kX7cclb4|py
 -Hollow rock|15-20-25|Pu1OJjgtpco|py
 -Squat jump|30-40-50″|-kbKBjUU-1A|py
-=Finisher · AMRAP 8′|8|amrap|Tantas vueltas como puedas. Anotá las vueltas en Observaciones.
+=Finisher · AMRAP 8′|8|amrap|Tantas vueltas como puedas: contalas con el botón de abajo y queda tu récord.
 -Swing con pesa rusa|10|7GfH0HFg9AQ
 -Burpee|10|Uy2nUNX38xE
 -Saltar la soga|30″|AnQwqHgZdoQ
@@ -8493,7 +8497,7 @@ const BI_SRC=`@hy2|HYROX · 2 días|hy|HYROX||2|Abdominales + HYROX, ideal para 
 -Thruster con mancuernas|12-10-8|iuKRLXTiqdw|py
 -Hollow rock|15-20-25|Pu1OJjgtpco|py
 -Squat jump|30-40-50″|-kbKBjUU-1A|py
-=Finisher · AMRAP 8′|8|amrap|Tantas vueltas como puedas. Anotá las vueltas en Observaciones.
+=Finisher · AMRAP 8′|8|amrap|Tantas vueltas como puedas: contalas con el botón de abajo y queda tu récord.
 -Swing con pesa rusa|10|7GfH0HFg9AQ
 -Burpee|10|Uy2nUNX38xE
 -Saltar la soga|30″|AnQwqHgZdoQ
@@ -8538,7 +8542,7 @@ const BI_SRC=`@hy2|HYROX · 2 días|hy|HYROX||2|Abdominales + HYROX, ideal para 
 -Press francés con barra|12-10-8|Zd6LaSowRdc|py
 -Curl martillo con mancuernas|12-10-8|RHdacbwKbTo|py
 -Lunges jump (estocada con salto)|30-40-50″|Gb5tRcrGw7M|py
-=Finisher · AMRAP 8′|8|amrap|Tantas vueltas como puedas. Anotá las vueltas en Observaciones.
+=Finisher · AMRAP 8′|8|amrap|Tantas vueltas como puedas: contalas con el botón de abajo y queda tu récord.
 -Saltar la soga|20″|AnQwqHgZdoQ
 -Burpee|8|Uy2nUNX38xE
 -Mountain climber (escaladores)|12|0MQF6Id1tp0
@@ -8562,7 +8566,7 @@ const BI_SRC=`@hy2|HYROX · 2 días|hy|HYROX||2|Abdominales + HYROX, ideal para 
 -Sentadilla goblet con pausa abajo|12-10-8|5HHITKuLxUs|py
 -Crunch abdominal|15-20-25|hl9Yu7UZqHU|py
 -Burpee|30-40-50″|Uy2nUNX38xE|py
-=Finisher · AMRAP 8′|8|amrap|Tantas vueltas como puedas. Anotá las vueltas en Observaciones.
+=Finisher · AMRAP 8′|8|amrap|Tantas vueltas como puedas: contalas con el botón de abajo y queda tu récord.
 -Thruster con mancuernas|10|iuKRLXTiqdw
 -Salto al cajón|10|c-Yonc6lzUs
 -Saltar la soga|30″|AnQwqHgZdoQ
@@ -8607,7 +8611,7 @@ const BI_SRC=`@hy2|HYROX · 2 días|hy|HYROX||2|Abdominales + HYROX, ideal para 
 -Caminata lateral con banda|15-20-20 pasos por lado|3NIc8Xt3qR8|py
 -Bird dog|10-12-15 por lado|L0UMTpI1xWI|py
 -Jumping squat|30-40-50″|-kbKBjUU-1A|py
-=Finisher · AMRAP 8′|8|amrap|Tantas vueltas como puedas. Anotá las vueltas en Observaciones.
+=Finisher · AMRAP 8′|8|amrap|Tantas vueltas como puedas: contalas con el botón de abajo y queda tu récord.
 -Swing con pesa rusa|12|7GfH0HFg9AQ
 -Hip thrust con peso del cuerpo|10|jWRNRAgaBxQ
 -Saltar la soga|30″|AnQwqHgZdoQ
@@ -8630,7 +8634,7 @@ const BI_SRC=`@hy2|HYROX · 2 días|hy|HYROX||2|Abdominales + HYROX, ideal para 
 -Curl martillo con mancuernas|12-10-8|RHdacbwKbTo|py
 -Abdominales bicicleta|15-20-25|dYxamPVcKvk|py
 -Mountain climber cruzado|30-40-50″|vy2Cki-5r4k|py
-=Finisher · AMRAP 8′|8|amrap|Tantas vueltas como puedas. Anotá las vueltas en Observaciones.
+=Finisher · AMRAP 8′|8|amrap|Tantas vueltas como puedas: contalas con el botón de abajo y queda tu récord.
 -Saltar la soga|20″|AnQwqHgZdoQ
 -Burpee|8|Uy2nUNX38xE
 -Mountain climber (escaladores)|12|0MQF6Id1tp0
@@ -8654,7 +8658,7 @@ const BI_SRC=`@hy2|HYROX · 2 días|hy|HYROX||2|Abdominales + HYROX, ideal para 
 -Vuelos laterales con mancuernas|12-10-8|aVa9ce3SlSA|py
 -Hollow rock|15-20-25|Pu1OJjgtpco|py
 -Squat jump|30-40-50″|-kbKBjUU-1A|py
-=Finisher · AMRAP 8′|8|amrap|Tantas vueltas como puedas. Anotá las vueltas en Observaciones.
+=Finisher · AMRAP 8′|8|amrap|Tantas vueltas como puedas: contalas con el botón de abajo y queda tu récord.
 -Swing con pesa rusa|10|7GfH0HFg9AQ
 -Burpee|10|Uy2nUNX38xE
 -Saltar la soga|30″|AnQwqHgZdoQ
@@ -8699,7 +8703,7 @@ const BI_SRC=`@hy2|HYROX · 2 días|hy|HYROX||2|Abdominales + HYROX, ideal para 
 -Mountain climber cruzado|30-40-50″|vy2Cki-5r4k|py
 -Elevación de piernas acostado|15-20-25|eEbq5_AIgpo|py
 -Jumping jacks|30-40-50″|4HF-X5OzyFM|py
-=Finisher · AMRAP 10′|10|amrap|Tantas vueltas como puedas. Anotá las vueltas en Observaciones.
+=Finisher · AMRAP 10′|10|amrap|Tantas vueltas como puedas: contalas con el botón de abajo y queda tu récord.
 -Trote|200 m|cnLwXHn7aU4
 -Wall ball con balón medicinal|10|PDraAEVsgXs
 -Slam con balón medicinal|10|EsAhU1jHpiQ
@@ -8722,7 +8726,7 @@ const BI_SRC=`@hy2|HYROX · 2 días|hy|HYROX||2|Abdominales + HYROX, ideal para 
 -Caminata lateral con banda|15-20-20 pasos por lado|3NIc8Xt3qR8|py
 -Crunch abdominal|15-20-25|hl9Yu7UZqHU|py
 -Jumping squat|30-40-50″|-kbKBjUU-1A|py
-=Finisher · AMRAP 8′|8|amrap|Tantas vueltas como puedas. Anotá las vueltas en Observaciones.
+=Finisher · AMRAP 8′|8|amrap|Tantas vueltas como puedas: contalas con el botón de abajo y queda tu récord.
 -Sentadilla goblet|10|5HHITKuLxUs
 -Swing con pesa rusa|10|7GfH0HFg9AQ
 -Saltar la soga|30″|AnQwqHgZdoQ
