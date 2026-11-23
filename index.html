@@ -1367,7 +1367,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-154'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-155'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -6705,7 +6705,12 @@ function showInstallBanner(container){
   try{ if(localStorage.getItem('tafit:install:dismissed')) return; }catch(e){}
   var div=document.createElement('div'); div.className='install-banner';
   if(isIOS()){
-    div.innerHTML='<button class="ib-close" data-act="dismissInstall">✕</button><div class="ib-icon">📲</div><div class="ib-title">¡Instalá TaFit en tu celu!</div><div class="ios-steps"><div class="ios-step"><div class="step-icon">⬆️</div><div>Tocá<br><b>Compartir</b></div></div><div class="ios-step"><div class="step-icon">➕</div><div>Elegí<br><b>Agregar a inicio</b></div></div><div class="ios-step"><div class="step-icon">✅</div><div>Tocá<br><b>Agregar</b></div></div></div><button class="ib-btn" data-act="dismissInstall">¡Entendido!</button>';
+    /* 23/11/2026: en iPhone también se instala desde Chrome (iOS 16.4+): ahí "Compartir" está arriba,
+       al lado de la dirección; en Safari está abajo. Dentro de WhatsApp/Instagram hay que abrir el
+       link en el navegador primero. */
+    const ua=navigator.userAgent, chr=/CriOS|FxiOS|EdgiOS/.test(ua), inApp=/Instagram|FBAN|FBAV|WhatsApp|Line\//.test(ua);
+    const where=chr?'arriba, al lado de la dirección':'abajo, en la barra de Safari';
+    div.innerHTML='<button class="ib-close" data-act="dismissInstall">✕</button><div class="ib-icon">📲</div><div class="ib-title">¡Instalá TaFit en tu celu!</div>'+(inApp?'<div class="ib-text">Primero abrí este link en Safari o Chrome (menú ⋯ → Abrir en el navegador).</div>':'')+'<div class="ios-steps"><div class="ios-step"><div class="step-icon">⬆️</div><div>Tocá <b>Compartir</b><br><small>'+where+'</small></div></div><div class="ios-step"><div class="step-icon">➕</div><div>Elegí<br><b>Agregar a pantalla de inicio</b></div></div><div class="ios-step"><div class="step-icon">✅</div><div>Tocá<br><b>Agregar</b></div></div></div><button class="ib-btn" data-act="dismissInstall">¡Entendido!</button>';
   } else {
     div.innerHTML='<button class="ib-close" data-act="dismissInstall">✕</button><div class="ib-icon">📲</div><div class="ib-title">¡Instalá TaFit en tu celu!</div><div class="ib-text">Agregá la app a tu pantalla de inicio para acceder más rápido, sin abrir el navegador.</div><button class="ib-btn" data-act="installPWA">Instalar TaFit</button>';
   }
