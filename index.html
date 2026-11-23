@@ -213,6 +213,11 @@
   .dep-add button{flex:1 1 100%;border:none;border-radius:8px;padding:9px;font-weight:700;background:#17120E;color:#fff;cursor:pointer}
   .dep-empty,.dep-hint{font-size:11.5px;color:var(--mute);margin:6px 0 0}
   .dep-tbl{overflow-x:auto} .dep-tbl table{width:100%;border-collapse:collapse;font-size:12px} .dep-tbl th,.dep-tbl td{padding:5px 4px;border-bottom:1px solid var(--line);text-align:center} .dep-tbl th small{display:block;font-weight:500;color:var(--mute)}
+  .cp-fold{display:flex;align-items:center;gap:8px;width:100%;border:none;background:transparent;padding:0;cursor:pointer;text-align:left;color:inherit;font:inherit}
+  .cp-fold .eyebrow{margin:0;white-space:nowrap}
+  .cp-fold .cp-sum{flex:1;min-width:0;font-size:12.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cp-fold i{font-style:normal;color:var(--mute)}
+  .cp-body{margin-top:10px}
   .bb-opt{display:inline-block;margin:6px 0 2px;font-size:11.5px;font-weight:800;letter-spacing:.02em;color:#17120E;background:#E3C3A5;border-radius:6px;padding:3px 8px}
   .bb-pl{display:inline-block;margin:8px 0 0 6px;border:1px solid #17120E;background:transparent;color:#17120E;border-radius:10px;padding:7px 11px;font-size:12px;font-weight:700;cursor:pointer}
   .blk-fin .bb-pl{border-color:#E3C3A5;color:#E3C3A5}
@@ -1628,12 +1633,20 @@ function corePlan(fmt,n){
   if(fmt==='emom'){ const r=n*3; return {title:`EMOM ${r}′ de core`, desc:`Cada minuto, en el minuto, durante ${r} minutos: un ejercicio por minuto rotando en este orden (3 ciclos). Lo que sobre del minuto es descanso.`, work:60, rest:0, rounds:r, format:'emom', dose:null}; }
   const r=Math.max(8,n*2); return {title:`Tabata ${Math.round(r/2)}′ de core`, desc:`20″ de trabajo / 10″ de descanso, ${r} vueltas (${Math.round(r/2)} minutos), rotando los ejercicios en este orden.`, work:20, rest:10, rounds:r, format:'tabata', dose:'20 seg'};
 }
+/* 23/11/2026: la activación de core va en acordeón (cerrada) — arriba solo una línea con lo elegido */
 function coreCardHTML(){
+  const st=DB.students[active]; const saved=st.abChoice;
+  if(coreDraft&&coreDraftFor!==active) coreDraft=null;
+  const open=!!window._coreOpen||coreDraft!==null;
+  let sum='Elegí tus abdominales';
+  if(coreChoiceValid(saved)&&coreDraft===null){ const n=saved.ex.length, d=coreDoneList().length; const pl=corePlan(saved.fmt,n); sum=pl.title+(d?' · '+d+'/'+n+' ✓':''); }
+  return `<button type="button" class="cp-fold" data-act="coreFold"><span class="eyebrow">🔥 Activación de core</span><span class="cp-sum">${esc(sum)}</span><i>${open?'▴':'▾'}</i></button>`+(open?'<div class="cp-body">'+coreCardBody()+'</div>':'');
+}
+function coreCardBody(){
   const st=DB.students[active];
   const saved=st.abChoice;
-  if(coreDraft&&coreDraftFor!==active) coreDraft=null;
   const editing=coreDraft!==null||!coreChoiceValid(saved);
-  let h='<div class="eyebrow">🔥 Activación de core · antes de empezar</div>';
+  let h='';
   if(editing){
     const c=coreDraft||{fmt:(saved&&saved.fmt)||'',ex:(saved&&Array.isArray(saved.ex))?saved.ex.slice():[]};
     if(!coreDraft){ coreDraft=c; coreDraftFor=active; }
@@ -10765,6 +10778,7 @@ document.addEventListener('click',e=>{
     case 'tabataPause': pauseTabata(); break;
     case 'tabAdd': tabAdd(1); break;
     case 'tabSub': tabAdd(-1); break;
+    case 'coreFold': { window._coreOpen=!window._coreOpen; if(!window._coreOpen) coreDraft=null; renderCoreCard(); break; }
     case 'tabRoundDone': tabRoundDone(); break;
     case 'depAdd': depAdd(el.dataset.k); break;
     case 'depDel': depDel(el.dataset.k,+el.dataset.i); break;
