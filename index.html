@@ -1070,29 +1070,40 @@
   #app.dark.theme-f .ex.open-ex{border-left-color:#E3C3A5}
   #app.dark.theme-f header{background:#140D0F}
   /* Tabata */
-  .tabata-overlay{position:fixed;inset:0;background:rgba(13,27,42,.9);display:none;align-items:center;justify-content:center;z-index:75;padding:20px}
+  /* 23/11/2026 · Etapa 5: temporizador con colores de marca */
+  .tabata-overlay{position:fixed;inset:0;background:#17120E;display:none;align-items:center;justify-content:center;z-index:75;padding:20px 16px;overflow:auto}
   .tabata-overlay.show{display:flex}
-  .tabata-box{text-align:center;width:100%;max-width:340px}
-  .tabata-title{font-size:14px;letter-spacing:3px;color:#92bee8;font-weight:800;margin-bottom:8px}
-  .tabata-modes{display:flex;gap:6px;justify-content:center;margin-bottom:10px}
-  .tabata-modes button{padding:7px 14px;border:1.5px solid #2a3a4a;border-radius:20px;background:transparent;color:#a2bcd7;font-size:12px;font-weight:700;cursor:pointer}
-  .tabata-modes button.sel{background:#E3C3A5;border-color:#E3C3A5;color:#17120E}
-  .tabata-modehelp{font-size:11px;color:#a2bdd7;margin-top:10px;line-height:1.5;max-width:280px;margin-left:auto;margin-right:auto}
-  .tabata-time{font-size:80px;font-weight:900;color:#fff;font-family:'system-ui';line-height:1}
-  .tabata-phase{font-size:22px;font-weight:700;color:#fff;margin:12px 0;padding:8px 20px;border-radius:12px;display:inline-block}
-  .tabata-phase.work{background:#e74c3c;color:#fff}
-  .tabata-phase.rest-phase{background:#2ecc71;color:#fff}
-  .tabata-phase.done{background:#f39c12;color:#fff}
-  .tabata-round{font-size:14px;color:#a2bcd7;margin:8px 0 16px}
+  .tabata-box{text-align:center;width:100%;max-width:360px}
+  .tabata-title{font-size:13px;letter-spacing:2px;color:#E3C3A5;font-weight:800;margin-bottom:10px}
+  .tabata-modes{display:flex;gap:4px;justify-content:center;margin-bottom:14px;background:#2a221b;border-radius:12px;padding:4px}
+  .tabata-modes button{flex:1;padding:8px 2px;border:none;border-radius:9px;background:transparent;color:#d8cbbd;font-size:12px;font-weight:700;cursor:pointer}
+  .tabata-modes button.sel{background:#E3C3A5;color:#17120E}
+  .tabata-time{font-size:86px;font-weight:900;color:#fff;line-height:1;font-variant-numeric:tabular-nums}
+  .tabata-phase{font-size:19px;font-weight:800;color:#F2ECE0;margin:12px 0 8px;padding:7px 18px;border-radius:12px;display:inline-block;border:1.5px solid #4a3d31}
+  .tabata-phase.pre{border-color:#E3C3A5;color:#E3C3A5}
+  .tabata-phase.work{background:#E3C3A5;border-color:#E3C3A5;color:#17120E}
+  .tabata-phase.rest-phase{background:#fff;border-color:#fff;color:#17120E}
+  .tabata-phase.done{background:#F2ECE0;border-color:#F2ECE0;color:#17120E}
+  .tabata-barw{height:6px;background:#2a221b;border-radius:6px;overflow:hidden;margin:4px auto 8px;max-width:300px}
+  .tabata-barw i{display:block;height:100%;width:0;background:#E3C3A5;transition:width .25s linear}
+  .tabata-round{font-size:14px;color:#d8cbbd;margin:6px 0 12px;min-height:18px}
+  .tabata-round b{color:#fff;font-size:18px}
+  .tabata-act{display:flex;gap:8px;justify-content:center;margin:0 0 14px}
+  .tabata-act button{flex:1;max-width:240px;padding:18px 10px;border:none;border-radius:16px;background:#E3C3A5;color:#17120E;font-size:20px;font-weight:900;cursor:pointer}
+  .tabata-act button.tab-minus{flex:none;width:64px;background:#2a221b;color:#E3C3A5;font-size:16px}
+  .tabata-rec{font-size:13px;color:#E3C3A5;margin:-4px 0 12px}
   .tabata-controls{display:flex;gap:8px;justify-content:center;margin-bottom:16px}
-  .tabata-controls button{padding:10px 18px;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;color:#fff}
-  .tabata-controls button:first-child{background:#2ecc71}
-  .tabata-controls button:nth-child(2){background:#e74c3c}
-  .tabata-controls button:last-child{background:#34495e}
+  .tabata-controls button{padding:11px 16px;border:none;border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;background:#2a221b;color:#F2ECE0}
+  .tabata-controls button:first-child{background:#fff;color:#17120E}
   .tabata-config{display:flex;gap:8px;justify-content:center}
   .tabata-config .fld{text-align:center}
-  .tabata-config label{font-size:10px;color:#a2bdd7;display:block;margin-bottom:4px}
-  .tabata-config input{width:60px;text-align:center;padding:8px;border:1.5px solid #2a3a4a;border-radius:8px;background:#0d1b2a;color:#fff;font-size:16px;font-weight:700}
+  .tabata-config label{font-size:10px;color:#d8cbbd;display:block;margin-bottom:4px}
+  .tabata-config input{width:74px;text-align:center;padding:8px;border:1.5px solid #4a3d31;border-radius:10px;background:#2a221b;color:#fff;font-size:16px;font-weight:700}
+  .tabata-modehelp{font-size:11.5px;color:#d8cbbd;margin-top:10px;line-height:1.5;max-width:300px;margin-left:auto;margin-right:auto}
+  .tabata-voz{margin-top:10px;background:none;border:none;color:#E3C3A5;font-size:12px;font-weight:700;cursor:pointer}
+  .tabata-voz small{color:#d8cbbd;font-weight:500}
+  .blk-rec{font-size:12px;font-weight:700;margin-top:6px}
+  .cnt-btn{border:1px solid #17120E;background:#17120E;color:#fff;border-radius:999px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer}
   .tabata-btn{background:var(--accent);color:#17120E;border:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;margin-top:8px}
   @media print{ header,nav,.seg,.weeks,.session-close,.edit-actions,.iconbtn,.lockbtn,.rest,.no-print{display:none!important} body,#app,main{background:#fff!important} #resumenCard{box-shadow:none!important;border-radius:0!important;max-width:100%!important} .icard{break-inside:avoid} }
 
@@ -1269,26 +1280,28 @@
 <div id="lb"></div>
 <div id="tabata" class="tabata-overlay">
   <div class="tabata-box">
-    <div class="tabata-title" id="tabataTitle">TABATA</div>
+    <div class="tabata-title" id="tabataTitle">TEMPORIZADOR</div>
     <div class="tabata-modes">
-      <button data-act="tabataMode" data-mode="tabata" class="sel">Tabata</button>
-      <button data-act="tabataMode" data-mode="amrap">AMRAP</button>
-      <button data-act="tabataMode" data-mode="emom">EMOM</button>
+      <button data-act="tabataMode" data-mode="tabata" class="sel">Tabata</button><button data-act="tabataMode" data-mode="amrap">AMRAP</button><button data-act="tabataMode" data-mode="emom">EMOM</button><button data-act="tabataMode" data-mode="rondas">Rondas</button><button data-act="tabataMode" data-mode="cuenta">Cuenta</button>
     </div>
     <div class="tabata-time" id="tabataTime">00:00</div>
     <div class="tabata-phase" id="tabataPhase">Listo para empezar</div>
+    <div class="tabata-barw"><i id="tabataBar"></i></div>
     <div class="tabata-round" id="tabataRound"></div>
+    <div class="tabata-act" id="tabataAct" style="display:none"></div>
+    <div class="tabata-rec" id="tabataRec" style="display:none"></div>
     <div class="tabata-controls">
       <button data-act="tabataStart" id="tabataStartBtn">▶ Iniciar</button>
-      <button data-act="tabataStop">■ Parar</button>
+      <button data-act="tabataPause" id="tabataPauseBtn" style="display:none">⏸ Pausa</button>
       <button data-act="tabataClose">✕ Cerrar</button>
     </div>
     <div class="tabata-config">
-      <div class="fld" id="fldWork"><label id="lblWork">Trabajo (seg)</label><input id="tabWork" type="number" value="20"></div>
-      <div class="fld" id="fldRest"><label id="lblRest">Descanso (seg)</label><input id="tabRest" type="number" value="10"></div>
-      <div class="fld" id="fldRounds"><label id="lblRounds">Rondas</label><input id="tabRounds" type="number" value="8"></div>
+      <div class="fld" id="fldWork"><label id="lblWork">Trabajo (seg)</label><input id="tabWork" type="number" inputmode="numeric" value="20"></div>
+      <div class="fld" id="fldRest"><label id="lblRest">Descanso (seg)</label><input id="tabRest" type="number" inputmode="numeric" value="10"></div>
+      <div class="fld" id="fldRounds"><label id="lblRounds">Rondas</label><input id="tabRounds" type="number" inputmode="numeric" value="8"></div>
     </div>
     <div class="tabata-modehelp" id="tabataModeHelp"></div>
+    <button type="button" class="tabata-voz" data-act="tabVoz" id="tabVoz"></button>
   </div>
 </div>
 <div id="modal"><div class="mbox"><div class="mtitle" id="mtitle"></div><input id="minput" class="minput"><div class="mbtns"><button id="mcancel">Cancelar</button><button id="mok">Aceptar</button></div></div></div>
@@ -1311,7 +1324,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-149'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-150'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -6201,7 +6214,10 @@ function renderApp(){
       let bh=`<div class="block-banner"><div class="bb-top"><span class="bb-ico">${fin?'🔥':ex.bk==='wu'?'🧘':'🔁'}</span><span class="bb-title">${esc(cfg.title.replace(/\s*·\s*\d+\s*(rondas?|series|vueltas)\s*$/i,''))}</span>${tag?`<span class="bb-tag">${esc(tag)}</span>`:''}</div>`;
       if(cfg.desc) bh+=`<div class="bb-desc">${esc(cfg.desc)}</div>`;
       if(cfg.work>0){
-        bh+=`<button type="button" class="bb-btn" data-act="openBlockTimer" data-title="${esc(cfg.title)}" data-work="${cfg.work}" data-rest="${cfg.rest||10}" data-rounds="${cfg.rounds}" data-format="${esc(cfg.format)}">⏱ Iniciar temporizador de circuito</button>`;
+        bh+=`<button type="button" class="bb-btn" data-act="openBlockTimer" data-ei="${ei}" data-title="${esc(cfg.title)}" data-work="${cfg.work}" data-rest="${cfg.rest||10}" data-rounds="${cfg.rounds}" data-format="${esc(cfg.format)}">⏱ ${cfg.format==='amrap'?'AMRAP · contar vueltas':cfg.format==='emom'?'EMOM · aviso cada minuto':'Tabata '+cfg.work+'″/'+(cfg.rest||10)+'″'}</button>`;
+        if(cfg.format==='amrap'){ const _b=amrapBest(cfg.title), _c=CACHE['amrap_'+day+'_'+ei]; const _h=(_c&&wOf(_c)===+week)?_c.v:null; if(_b||_h!=null) bh+=`<div class="blk-rec">${_b?'🏆 Récord: '+_b+' vueltas':''}${_h!=null?(_b?' · ':'')+'hoy: '+_h:''}</div>`; }
+      } else if(nR>1&&isRondas&&ex.bk!=='wu'){ const _r=restOfBlock(ex,cfg);
+        bh+=`<button type="button" class="bb-btn" data-act="openBlockTimer" data-ei="${ei}" data-title="${esc(cfg.title.replace(/\s*·\s*\d+\s*(rondas?|series|vueltas)\s*$/i,''))}" data-work="0" data-rest="${_r}" data-rounds="${nR}" data-format="rondas">⏱ Contar rondas · descanso ${tabFmt(_r)}${_r<60?'″':''}</button>`;
       } else if(cfg.rest>0){
         bh+=`<button type="button" class="bb-btn" data-act="rest" data-sec="${cfg.rest}">⏱ Descanso ${cfg.rest} s</button>`;
       }
@@ -6242,7 +6258,8 @@ function renderApp(){
     if(ex.pa&&ex.pa.n) html+=`<div class="pa-line"><b>⚡ Pausa activa entre series:</b> <span class="alt-tap" data-act="playVideo" data-url="${esc(ex.pa.vid||YT(ex.pa.n))}" data-name="${esc(ex.pa.n)}">🎬 ${esc(ex.pa.n)}${ex.pa.r?' · '+esc(ex.pa.r):''}</span></div>`;
     html+=tipAccordionHTML(tipFor(ex),!(ex.tip&&ex.tip.trim()));
     const restChip = `<span class="rest" data-act="rest" data-sec="${restSec(ex.rest)||60}">⏱ Descanso ${ex.rest?esc(ex.rest):'60 s'}</span>`;
-    html+=`<div class="chips">${cardioOf(ex)?'':restChip}<button type="button" class="vid" data-act="playVideo" data-url="${esc(ex.vid||YT(ex.n))}" data-name="${esc(ex.n)}">▶ Ver técnica</button>${waExLink(ex.n)}</div>`;
+    const cntBtn=(function(){ if(cardioOf(ex)||!isTimeEx(ex)) return ''; let si=0; for(;si<ex.s;si++){ const v=CACHE[K(ei,si,selMi)]||{}; if(!(wOf(v)===+week&&v.done)) break; } if(si>=ex.s) si=ex.s-1; const sec=secOf(repPh(ex.r,si)||ex.r); if(sec<10) return ''; return `<button type="button" class="cnt-btn" data-act="tabCuenta" data-i="${ei}" data-si="${si}" data-m="${selMi}" data-sec="${sec}" data-name="${esc(ex.n)}">⏱ Cuenta ${tabFmt(sec)}${sec<60?'″':''}</button>`; })();
+    html+=`<div class="chips">${cntBtn}${cardioOf(ex)?'':restChip}<button type="button" class="vid" data-act="playVideo" data-url="${esc(ex.vid||YT(ex.n))}" data-name="${esc(ex.n)}">▶ Ver técnica</button>${waExLink(ex.n)}</div>`;
     const last=cardioOf(ex)?null:lastFor(ex.n);
     const lastHasWeight=!!(last&&last.sets&&last.sets.some(s=>s.w));
     if(last){
@@ -6312,100 +6329,125 @@ function toggleAlarm(a){ const k='halarm|'+day; const arr=(CACHE[k]||[]).slice()
 
 function numPH(w){ const n=firstNum(w); return n!=null?String(n).replace('.',','):'kg'; }
 function rirOpts(v){ let o='<option value="">RIR</option>'; for(let i=0;i<=5;i++) o+=`<option value="${i}" ${String(v)===String(i)?'selected':''}>${i}</option>`; return o; }
-/* Tabata Timer */
-let tabataInt=null, tabataState=null, tabataMode='tabata';
-function openTabata(title,work,rest,rounds,format){
-  $('tabataTitle').textContent=title?String(title).toUpperCase():'TABATA';
-  /* El temporizador abre en el formato que se eligió al armar el bloque (Tabata/AMRAP/EMOM)
-     — antes siempre abría en Tabata sin importar cuál se había elegido. Igual se puede
-     cambiar de formato a mano acá mismo, tocando los botones de arriba, para una sesión
-     puntual sin tener que ir a Editar. */
-  const fmt=(format==='amrap'||format==='emom')?format:'tabata';
+/* ==== 23/11/2026 · Etapa 5: temporizadores ====
+   Un solo reloj con 5 modos: Tabata (20″/10″), AMRAP (con botón "+1 vuelta" que se guarda y
+   queda como récord a superar), EMOM (aviso en cada minuto y a los 10″), Rondas (marcás
+   "terminé la ronda" y arranca solo el descanso) y Cuenta regresiva (trote, sprint, plancha…).
+   Avisa con voz, pitidos o nada según lo que eligió la alumna (mismo ajuste que el running).
+   Cuenta con la hora real (no se atrasa si se apaga la pantalla) y mantiene la pantalla
+   prendida mientras corre. */
+let tabataInt=null, tabataState=null, tabataMode='tabata', tabCtx={}, tabWake=null;
+const TAB_MODES=[['tabata','Tabata'],['amrap','AMRAP'],['emom','EMOM'],['rondas','Rondas'],['cuenta','Cuenta']];
+function secOf(str){ const t=String(str||''); let m=/(\d+)\s*[′']\s*(\d+)?/.exec(t); if(m) return (+m[1])*60+(+m[2]||0); if((m=/(\d+)\s*min/i.exec(t))) return (+m[1])*60; if((m=/(\d+)\s*(″|"|seg|s\b)/i.exec(t))) return +m[1]; return 0; }
+function restOfBlock(ex,cfg){ if(ex&&ex.lv&&ex.bk==='fb') return ({P:90,I:75,A:60})[curNivel()]||75; if(cfg&&cfg.rest>0) return cfg.rest; const t=String((cfg&&cfg.desc)||(ex&&ex.tip)||''); const m=/(\d+\s*[′']\s*(?:\d+\s*″)?|\d+\s*″)\s*(de descanso|entre)/i.exec(t); return m?secOf(m[1]):60; }
+function tabSay(t){ try{ sesSay(t); }catch(e){} }
+function tabPip(n){ if(avisoMode()==='off') return; try{ sesBeep(n||1); }catch(e){} }
+function tabFmt(s){ s=Math.max(0,Math.ceil(s)); const mm=Math.floor(s/60), ss=s%60; return (mm?mm+':':'')+String(ss).padStart(mm?2:1,'0'); }
+async function tabWakeOn(){ try{ if(navigator.wakeLock&&(!tabWake||tabWake.released)) tabWake=await navigator.wakeLock.request('screen'); }catch(e){} }
+function tabWakeOff(){ try{ if(tabWake){ tabWake.release(); tabWake=null; } }catch(e){} }
+function amrapKey(){ return 'amrap_'+day+'_'+(tabCtx.ei==null?'x':tabCtx.ei); }
+function amrapBest(title){ let best=0; (LOGS||[]).forEach(function(l){ (l.amrap||[]).forEach(function(a){ if(a.t===title&&+a.v>best) best=+a.v; }); }); return best; }
+function openTabata(title,work,rest,rounds,format,ei,extra){
+  tabCtx=Object.assign({title:title||'',ei:(ei==null||ei==='')?null:+ei},extra||{});
+  $('tabataTitle').textContent=title?String(title).toUpperCase():'TEMPORIZADOR';
+  const fmt=TAB_MODES.some(function(m){ return m[0]===format; })?format:'tabata';
   setTabataMode(fmt);
-  if(fmt==='emom'){
-    /* El intervalo de EMOM se guarda en "work" (mismo campo que usan Tabata/AMRAP para no
-       duplicar el dato), pero el temporizador en modo EMOM lo lee de "Cada (seg)" (tabRest). */
-    if(work) $('tabRest').value=work;
-    if(rounds) $('tabRounds').value=rounds;
-  } else {
-    if(work) $('tabWork').value=work;
-    if(rest) $('tabRest').value=rest;
-    if(rounds) $('tabRounds').value=rounds;
-  }
+  if(fmt==='emom'){ $('tabRest').value=work||60; $('tabRounds').value=rounds||10; }
+  else if(fmt==='amrap'){ $('tabWork').value=work||480; }
+  else if(fmt==='rondas'){ $('tabRest').value=rest||60; $('tabRounds').value=rounds||3; }
+  else if(fmt==='cuenta'){ $('tabWork').value=work||60; }
+  else { $('tabWork').value=work||20; $('tabRest').value=rest||10; $('tabRounds').value=rounds||8; }
+  paintIdle(); $('tabVoz').innerHTML=sesVozLbl();
   $('tabata').classList.add('show');
 }
-function closeTabata(){ stopTabata(); $('tabata').classList.remove('show'); }
-function stopTabata(){ if(tabataInt){ clearInterval(tabataInt); tabataInt=null; } tabataState=null; $('tabataPhase').textContent='Listo para empezar'; $('tabataPhase').className='tabata-phase'; $('tabataTime').textContent='00:00'; $('tabataRound').textContent=''; $('tabataStartBtn').textContent='▶ Iniciar'; }
+function closeTabata(){ if(tabataState&&tabataState.mode==='amrap'&&tabataState.count) amrapSave(); stopTabata(); $('tabata').classList.remove('show'); if(tabCtx.dirty&&tab==='app') renderApp(); }
+function stopTabata(){ if(tabataInt){ clearInterval(tabataInt); tabataInt=null; } tabataState=null; tabWakeOff(); paintIdle(); }
+function paintIdle(){ const m=tabataMode; $('tabataTime').textContent=m==='amrap'?tabFmt(+$('tabWork').value||480):m==='cuenta'?tabFmt(+$('tabWork').value||60):m==='emom'?tabFmt(+$('tabRest').value||60):m==='rondas'?'1/'+(+$('tabRounds').value||3):tabFmt(+$('tabWork').value||20);
+  $('tabataPhase').textContent='Listo para empezar'; $('tabataPhase').className='tabata-phase'; $('tabataRound').textContent=''; $('tabataBar').style.width='0%'; $('tabataStartBtn').textContent='▶ Iniciar'; $('tabataPauseBtn').style.display='none';
+  const rec=$('tabataRec'); if(m==='amrap'){ const b=amrapBest(tabCtx.title); const cur=CACHE[amrapKey()]; rec.innerHTML=(b?'🏆 Tu récord: <b>'+b+' vueltas</b>':'Primera vez: ¡marcá tu récord!')+(cur&&wOf(cur)===+week?' · hoy: '+cur.v:''); rec.style.display=''; } else rec.style.display='none';
+  $('tabataAct').style.display='none'; }
 function setTabataMode(mode){
-  tabataMode=mode; stopTabata();
-  document.querySelectorAll('.tabata-modes button').forEach(b=>b.classList.toggle('sel',b.dataset.mode===mode));
-  const fw=$('fldWork'), fr=$('fldRest'), frd=$('fldRounds'), help=$('tabataModeHelp');
-  if(mode==='tabata'){
-    fw.style.display=''; fr.style.display=''; frd.style.display='';
-    $('lblWork').textContent='Trabajo (seg)'; $('lblRest').textContent='Descanso (seg)'; $('lblRounds').textContent='Rondas';
-    help.textContent='Alterna trabajo y descanso durante la cantidad de rondas que pongas.';
-  } else if(mode==='amrap'){
-    fw.style.display=''; fr.style.display='none'; frd.style.display='none';
-    $('lblWork').textContent='Duración total (seg)';
-    help.textContent='AMRAP: hacé la mayor cantidad de vueltas posibles hasta que se acabe el tiempo. Vos contás las rondas.';
-  } else if(mode==='emom'){
-    fw.style.display='none'; fr.style.display=''; frd.style.display='';
-    $('lblRest').textContent='Cada (seg)'; $('lblRounds').textContent='Rondas (0 = sin límite)';
-    help.textContent='EMOM: arranca una ronda nueva cada tantos segundos. Descansás lo que te sobre de esa ronda.';
-  }
+  if(tabataInt){ clearInterval(tabataInt); tabataInt=null; tabataState=null; }
+  tabataMode=mode;
+  document.querySelectorAll('.tabata-modes button').forEach(function(b){ b.classList.toggle('sel',b.dataset.mode===mode); });
+  const show=function(id,on){ $(id).style.display=on?'':'none'; };
+  const H={tabata:'Trabajo y descanso alternados. Clásico: 20″ / 10″ × 8.',amrap:'Tantas vueltas como puedas. Tocá "+1 vuelta" cada vez que completás una: queda guardado para superarlo la próxima.',emom:'Arranca una ronda cada minuto. Te aviso al empezar cada minuto y cuando faltan 10″.',rondas:'Hacé la ronda a tu ritmo y tocá "Terminé la ronda": el descanso arranca solo y te aviso cuando volver.',cuenta:'Cuenta regresiva con aviso de voz: para trote, sprint, plancha…'};
+  show('fldWork',mode==='tabata'||mode==='amrap'||mode==='cuenta'); show('fldRest',mode==='tabata'||mode==='emom'||mode==='rondas'); show('fldRounds',mode!=='amrap'&&mode!=='cuenta');
+  $('lblWork').textContent=mode==='tabata'?'Trabajo (seg)':'Duración (seg)'; $('lblRest').textContent=mode==='emom'?'Cada (seg)':'Descanso (seg)'; $('lblRounds').textContent='Rondas';
+  $('tabataModeHelp').textContent=H[mode]||'';
+  paintIdle();
 }
+function tabStartPhase(s,phase,dur){ s.phase=phase; s.dur=dur; s.end=Date.now()+dur*1000; s.said={}; }
 function startTabata(){
-  stopTabata();
-  audioWarm();
-  if(tabataMode==='amrap'){
-    var total=parseInt($('tabWork').value)||600;
-    tabataState={mode:'amrap',time:total,total:total};
-    paintTabata();
-    tabataInt=setInterval(function(){
-      tabataState.time--;
-      if(tabataState.time<=0){ stopTabata(); buzz(true); $('tabataPhase').textContent='¡TERMINADO!'; $('tabataPhase').className='tabata-phase done'; $('tabataTime').textContent='💪'; return; }
-      paintTabata();
-    },1000);
-  } else if(tabataMode==='emom'){
-    var every=parseInt($('tabRest').value)||60, totalR=parseInt($('tabRounds').value)||0;
-    tabataState={mode:'emom',every:every,rounds:totalR,round:1,time:every};
-    paintTabata();
-    tabataInt=setInterval(function(){
-      tabataState.time--;
-      if(tabataState.time<=0){
-        if(tabataState.rounds>0&&tabataState.round>=tabataState.rounds){ stopTabata(); buzz(true); $('tabataPhase').textContent='¡TERMINADO!'; $('tabataPhase').className='tabata-phase done'; $('tabataTime').textContent='💪'; return; }
-        tabataState.round++; tabataState.time=tabataState.every; buzz(false);
-      }
-      paintTabata();
-    },1000);
-  } else {
-    var work=parseInt($('tabWork').value)||20, rest=parseInt($('tabRest').value)||10, rounds=parseInt($('tabRounds').value)||8;
-    tabataState={mode:'tabata',work:work,rest:rest,rounds:rounds,round:1,phase:'work',time:work};
-    paintTabata();
-    tabataInt=setInterval(function(){
-      tabataState.time--;
-      if(tabataState.time<=0){
-        if(tabataState.phase==='work'){
-          if(tabataState.round>=tabataState.rounds){ stopTabata(); buzz(true); $('tabataPhase').textContent='¡TERMINADO!'; $('tabataPhase').className='tabata-phase done'; $('tabataTime').textContent='💪'; return; }
-          tabataState.phase='rest'; tabataState.time=tabataState.rest; buzz(false);
-        } else { tabataState.phase='work'; tabataState.round++; tabataState.time=tabataState.work; buzz(false); }
-      }
-      paintTabata();
-    },1000);
-  }
-  $('tabataStartBtn').textContent='⏸ Reiniciar';
+  if(tabataInt){ clearInterval(tabataInt); tabataInt=null; }
+  audioWarm(); tabWakeOn();
+  const m=tabataMode, W=+$('tabWork').value||0, R=+$('tabRest').value||0, N=+$('tabRounds').value||0;
+  const s={mode:m,round:1,rounds:N,count:0,paused:false,t0:Date.now()};
+  if(m==='tabata'){ s.work=W||20; s.rest=R||10; s.rounds=N||8; }
+  else if(m==='amrap'){ s.total=W||480; s.count=0; }
+  else if(m==='emom'){ s.every=R||60; s.rounds=N||10; }
+  else if(m==='rondas'){ s.rest=R||60; s.rounds=N||3; }
+  else if(m==='cuenta'){ s.total=W||60; }
+  tabataState=s; tabStartPhase(s,'pre',3); tabSay('Tres'); s.said[3]=1;
+  $('tabataStartBtn').textContent='↺ Reiniciar'; $('tabataPauseBtn').style.display=''; $('tabataPauseBtn').textContent='⏸ Pausa';
+  tabataInt=setInterval(tabTick,200); tabTick();
 }
-function paintTabata(){
-  var s=tabataState; if(!s) return;
-  var mm=Math.floor(s.time/60),ss=s.time%60; $('tabataTime').textContent=(mm?mm+':':'')+String(ss).padStart(2,'0');
-  if(s.mode==='amrap'){
-    $('tabataPhase').textContent='¡DALE!'; $('tabataPhase').className='tabata-phase work'; $('tabataRound').textContent='Contá vos las vueltas que completás';
+function pauseTabata(){ const s=tabataState; if(!s) return; if(!s.paused){ s.paused=true; s.left=(s.end-Date.now())/1000; s.upAt=Date.now(); $('tabataPauseBtn').textContent='▶ Seguir'; $('tabataPhase').textContent='EN PAUSA'; }
+  else { s.paused=false; s.end=Date.now()+s.left*1000; if(s.phase==='go') s.t0+=Date.now()-s.upAt; $('tabataPauseBtn').textContent='⏸ Pausa'; } }
+function tabEnd(msg){ const s=tabataState; if(s&&s.mode==='amrap') amrapSave(); clearInterval(tabataInt); tabataInt=null; tabWakeOff(); tabPip(3); buzz(true);
+  $('tabataPhase').textContent='¡TERMINADO!'; $('tabataPhase').className='tabata-phase done'; $('tabataTime').textContent='💪'; $('tabataBar').style.width='100%'; $('tabataPauseBtn').style.display='none'; $('tabataStartBtn').textContent='↺ Otra vez';
+  $('tabataAct').style.display='none'; if(msg) $('tabataRound').innerHTML=msg; tabSay(s&&s.mode==='amrap'?('¡Tiempo! Hiciste '+s.count+' vueltas'):'¡Terminaste!');
+  if(s&&s.mode==='cuenta'&&tabCtx.ei!=null&&tabCtx.si!=null){ const k=K(tabCtx.ei,tabCtx.si,tabCtx.mi||0); const v=Object.assign({},CACHE[k]||{}); if(!(wOf(v)===+week)){ Object.keys(v).forEach(function(x){ delete v[x]; }); } v.done=true; if(!v.r) v.r=String(s.total); v._w=week; CACHE[k]=v; queueSave(); tabCtx.dirty=true; $('tabataRound').innerHTML='✓ Serie marcada como hecha'; }
+  tabataState=null; }
+function tabTick(){
+  const s=tabataState; if(!s||s.paused) return;
+  const now=Date.now(); let left=(s.end-now)/1000; const sec=Math.ceil(left);
+  /* aviso 3-2-1 al final de cada tramo con tiempo */
+  if(s.phase!=='go'&&left>0&&sec<=3&&!s.said[sec]){ s.said[sec]=1; if(s.phase==='pre') tabSay(['','Uno','Dos','Tres'][sec]); else tabPip(1); }
+  if(s.phase==='pre'){ $('tabataTime').textContent=String(Math.max(1,sec)); $('tabataPhase').textContent='PREPARATE'; $('tabataPhase').className='tabata-phase pre';
+    if(left<=0) tabFirst(s); return; }
+  if(s.mode==='tabata'){
+    if(left<=0){ if(s.phase==='work'){ if(s.round>=s.rounds) return tabEnd(s.rounds+' rondas completas'); tabStartPhase(s,'rest',s.rest); tabSay('Descanso'); buzz(false); }
+      else { s.round++; tabStartPhase(s,'work',s.work); tabSay(s.round===s.rounds?'¡Última!':'¡Trabajo!'); buzz(false); } left=s.dur; }
+    tabPaint(left,s.phase==='work'?'¡TRABAJO!':'DESCANSO',s.phase==='work'?'work':'rest-phase','Ronda '+s.round+' de '+s.rounds,1-left/s.dur);
+  } else if(s.mode==='amrap'){
+    if(left<=0) return tabEnd('<b>'+s.count+' vueltas</b>'+(s.count>amrapBest(tabCtx.title)?' · 🏆 ¡nuevo récord!':''));
+    if(s.total>=150&&sec===60&&!s.said.m1){ s.said.m1=1; tabSay('Queda un minuto'); }
+    if(s.total>=60&&sec===30&&!s.said.s30){ s.said.s30=1; tabSay('Treinta segundos'); }
+    if(sec<=3&&!s.said['p'+sec]){ s.said['p'+sec]=1; tabPip(1); }
+    tabPaint(left,'¡DALE!','work','Vueltas: <b>'+s.count+'</b>',1-left/s.total);
   } else if(s.mode==='emom'){
-    $('tabataPhase').textContent='RONDA EN CURSO'; $('tabataPhase').className='tabata-phase work'; $('tabataRound').textContent='Ronda '+s.round+(s.rounds>0?' de '+s.rounds:'');
-  } else {
-    $('tabataPhase').textContent=s.phase==='work'?'¡TRABAJO!':'DESCANSO'; $('tabataPhase').className='tabata-phase '+(s.phase==='work'?'work':'rest-phase'); $('tabataRound').textContent='Ronda '+s.round+' de '+s.rounds;
+    if(left<=0){ if(s.round>=s.rounds) return tabEnd(s.rounds+' minutos completos'); s.round++; tabStartPhase(s,'work',s.every); tabSay(s.round===s.rounds?'Último minuto':'Minuto '+s.round); buzz(false); left=s.dur; }
+    if(sec===10&&s.every>=30&&!s.said.d10){ s.said.d10=1; tabSay('Diez segundos'); }
+    tabPip0(s,sec);
+    tabPaint(left,'MINUTO '+s.round,'work','Ronda '+s.round+' de '+s.rounds,1-left/s.every);
+  } else if(s.mode==='rondas'){
+    if(s.phase==='go'){ const el=(now-s.t0)/1000; $('tabataTime').textContent=tabFmt(el); $('tabataPhase').textContent='RONDA '+s.round+' DE '+s.rounds; $('tabataPhase').className='tabata-phase work'; $('tabataRound').textContent='Cuando termines la ronda, tocá el botón'; $('tabataBar').style.width=Math.round((s.round-1)/s.rounds*100)+'%'; return; }
+    if(left<=0){ s.round++; s.phase='go'; s.t0=Date.now(); tabSay('¡Vamos! Ronda '+s.round); buzz(false); $('tabataAct').style.display=''; return; }
+    if(sec===10&&s.rest>=30&&!s.said.d10){ s.said.d10=1; tabSay('Diez segundos'); }
+    tabPaint(left,'DESCANSO','rest-phase','Después viene la ronda '+(s.round+1)+' de '+s.rounds,1-left/s.rest);
+  } else if(s.mode==='cuenta'){
+    if(left<=0) return tabEnd(tabCtx.exName?esc(tabCtx.exName)+' · '+tabFmt(s.total)+' ✓':'');
+    if(s.total>=60&&Math.abs(left-s.total/2)<0.3&&!s.said.half){ s.said.half=1; tabSay('Mitad'); }
+    if(s.total>=90&&sec===30&&!s.said.s30){ s.said.s30=1; tabSay('Treinta segundos'); }
+    if(s.total>=30&&sec===10&&!s.said.d10){ s.said.d10=1; tabSay('Diez segundos'); }
+    tabPip0(s,sec);
+    tabPaint(left,tabCtx.exName?String(tabCtx.exName).toUpperCase():'¡DALE!','work','',1-left/s.total);
   }
 }
+function tabPip0(s,sec){ if(sec<=3&&sec>0&&!s.said['p'+sec]){ s.said['p'+sec]=1; tabPip(1); } }
+function tabFirst(s){
+  if(s.mode==='tabata'){ tabStartPhase(s,'work',s.work); tabSay('¡Trabajo!'); }
+  else if(s.mode==='amrap'){ tabStartPhase(s,'work',s.total); tabSay('¡Arrancamos!'); $('tabataAct').innerHTML='<button type="button" data-act="tabAdd">+1 vuelta</button><button type="button" class="tab-minus" data-act="tabSub">−1</button>'; $('tabataAct').style.display=''; }
+  else if(s.mode==='emom'){ tabStartPhase(s,'work',s.every); tabSay('Minuto 1'); }
+  else if(s.mode==='rondas'){ s.phase='go'; s.t0=Date.now(); tabSay('¡Arrancamos! Ronda 1'); $('tabataAct').innerHTML='<button type="button" data-act="tabRoundDone">✓ Terminé la ronda</button>'; $('tabataAct').style.display=''; }
+  else if(s.mode==='cuenta'){ tabStartPhase(s,'work',s.total); tabSay('¡Arrancá!'); }
+  buzz(false);
+}
+function tabPaint(left,phase,cls,round,frac){ $('tabataTime').textContent=tabFmt(left); $('tabataPhase').textContent=phase; $('tabataPhase').className='tabata-phase '+cls; $('tabataRound').innerHTML=round||''; $('tabataBar').style.width=Math.max(0,Math.min(100,Math.round(frac*100)))+'%'; }
+function tabAdd(d){ const s=tabataState; if(!s||s.mode!=='amrap'||s.phase==='pre') return; s.count=Math.max(0,s.count+d); if(d>0){ tabPip(1); try{ if(navigator.vibrate) navigator.vibrate(60); }catch(e){} } const b=amrapBest(tabCtx.title); if(d>0&&b&&s.count===b+1) tabSay('¡Nuevo récord!'); tabTick(); }
+function amrapSave(){ const s=tabataState; if(!s||s.mode!=='amrap') return; const k=amrapKey(); const prev=CACHE[k]; if(prev&&wOf(prev)===+week&&+prev.v>=s.count) return; CACHE[k]={v:s.count,t:tabCtx.title,_w:week}; queueSave(); tabCtx.dirty=true; }
+function tabRoundDone(){ const s=tabataState; if(!s||s.mode!=='rondas'||s.phase!=='go') return; if(s.round>=s.rounds) return tabEnd(s.rounds+' rondas completas'); $('tabataAct').style.display='none'; tabStartPhase(s,'rest',s.rest); tabSay('Descanso'); buzz(false); tabTick(); }
 
 /* Banner de instalación PWA */
 /* Racha de entrenamiento */
@@ -7921,6 +7963,7 @@ function bestSet(ei,mi){ const ex=exWithOverride(routine()[day].ex[ei],ei); let 
 function rmHTML(ei,mi){ const b=bestSet(ei,mi); if(!b) return `<summary>RM estimados (8RM→1RM) <span class="best">cargá peso y reps</span></summary><div class="rmempty">Cuando cargues peso y reps de al menos una serie, calculo los RM con la fórmula de Epley.</div>`; let grid=''; for(let n=8;n>=1;n--){ grid+=`<div><b>${fmt(b.e/(1+n/30))}</b><span>${n}RM</span></div>`; } return `<summary>RM estimados (8RM→1RM) <span class="best">con tu mejor serie (S${b.si+1}): ${fmt(b.w)}×${b.r}</span></summary><div class="rmgrid">${grid}</div>`; }
 function fmt(x){ return (Math.round(x*2)/2).toString().replace('.',',')+' kg'; }
 
+function _amPre(){ return Object.keys(CACHE).some(function(k){ return k.indexOf('amrap_'+day+'_')===0&&CACHE[k]&&wOf(CACHE[k])===+week; }); }
 async function closeSession(){
   const r=routine(), members=membersOf(), exs=[];
   r[day].ex.forEach((rawEx,ei)=>{
@@ -7943,15 +7986,16 @@ async function closeSession(){
   if(hasCoreDay(r[day])){ const ch=DB.students[active].abChoice, dn=coreDoneList(); if(coreChoiceValid(ch)&&dn.length){ core={fmt:ch.fmt, ex:ch.ex.map(id=>{ const it=coreItem(id); return it?it.n:id; }), done:dn.map(id=>{ const it=coreItem(id); return it?it.n:id; })}; } }
   let ses=null;
   if(isSesDay(r[day])){ const t=sesDayTpl(r[day]); const v=sesVal(); if(t&&(v.km||v.min||v.m||v.fc||t.tipo==='mob')){ ses={tipo:t.tipo, n:(v.plan&&(v.test||v.plan==='Correr libre'))?v.plan:t.n, km:v.km||'', min:v.min||'', fc:v.fc||'', m:v.m||''}; if(v.route) ses.route=v.route; ['sec','splits','rest','zn','plan','rpe','feel','at','test','fcMax','inc'].forEach(function(f){ if(v[f]) ses[f]=v[f]; }); if(t.prog&&!v.test) ses.prog=t.id; if(t.tipo==='swim'&&!ses.m){ const done=(t.ser||[]).reduce(function(a,x,i){ return a+(v['s'+i]?x.rep*x.m:0); },0); if(done) ses.m=String(done); } } }
-  if(!exs.length && !obs && !hh && !core && !ses){ toast("No hay nada cargado en esta sesión todavía",'warn'); return; }
+  if(!exs.length && !obs && !hh && !core && !ses && !_amPre()){ toast("No hay nada cargado en esta sesión todavía",'warn'); return; }
   /* 07/10/2026: aviso de sesión repetida — había días cerrados dos veces seguidas (mismo
      día de rutina, misma semana, minutos de diferencia), que duplicaban la Transcripta. */
   { const dup=LOGS.find(function(l){ return l.dayName===r[day].day&&+l.week===+week&&(Date.now()-Date.parse(l.date))<6*3600*1000; });
     if(dup){ const mins=Math.max(1,Math.round((Date.now()-Date.parse(dup.date))/60000)); const t=mins<60?(mins+' minuto'+(mins===1?'':'s')):(Math.round(mins/60)+' hora'+(Math.round(mins/60)===1?'':'s'));
       if(!await uiConfirm('Ya cerraste '+r[day].day+' de esta semana hace '+t+'.\n\n¿Guardar otra sesión igual en la Transcripta?')) return; } }
   const _bv=bienVal(); const bien=(_bv&&bienAvg(_bv)!=null)?{s:_bv.s,e:_bv.e,d:_bv.d,x:_bv.x,z:_bv.z||''}:null;
+  const _am=[]; Object.keys(CACHE).forEach(function(k){ if(k.indexOf('amrap_'+day+'_')===0){ const v=CACHE[k]; if(v&&wOf(v)===+week&&+v.v>0) _am.push({t:v.t||'AMRAP',v:+v.v}); } });
   const _baja=bienFactor()<1; const _niv=(dayHasLv(r[day])||curImp()==='sin'||_baja)?Object.assign({n:dayHasLv(r[day])?curNivel():'',imp:curImp()},_baja?{baja:true}:{}):null;
-  LOGS.unshift(Object.assign({ date:new Date().toISOString(), dayName:r[day].day, dayIdx:day, week, weekName:weeks()[week].t+' '+weeks()[week].n, ex:exs, obs, health:hh, core, ses }, bien?{bien}:{}, _niv?{niv:_niv}:{}));
+  LOGS.unshift(Object.assign({ date:new Date().toISOString(), dayName:r[day].day, dayIdx:day, week, weekName:weeks()[week].t+' '+weeks()[week].n, ex:exs, obs, health:hh, core, ses }, bien?{bien}:{}, _niv?{niv:_niv}:{}, _am.length?{amrap:_am}:{}));
   await saveLogs();
   await autoBackup('sesion');
   /* Avisá al profe (aviso interno, no push): si quien cierra es el alumno, no la profe */
@@ -7970,6 +8014,7 @@ async function closeSession(){
   Object.keys(CACHE).forEach(function(k){ if(k.indexOf('ses|'+day+'|')===0) delete CACHE[k]; });
   delete CACHE[OBSK()];
   delete CACHE[coreSessionKey()];
+  Object.keys(CACHE).forEach(function(k){ if(k.indexOf('amrap_'+day+'_')===0) delete CACHE[k]; });
   await saveData();
   toast("✓ Sesión guardada en la transcripta",'ok');
   renderApp();
@@ -7985,6 +8030,7 @@ function logEntryHTML(e,i){
     return `<div class="log-ex"><div class="len">${esc(x.n)}</div><div class="lsets">${x.cardio?esc(cvL(x.cardio)):setsLine(x.sets)}</div></div>`;
   }).join('');
   const obs=(function(){ const p=[]; if(e.bien) p.push('Llegó: 😴'+e.bien.s+' ⚡'+e.bien.e+' 💪'+e.bien.d+' 🧠'+e.bien.x+((+e.bien.d<=2)?' · dolor'+(e.bien.z?' en '+String(e.bien.z).toLowerCase():''):''));
+    if(e.amrap&&e.amrap.length) p.push(e.amrap.map(function(a){ return String(a.t||'AMRAP').replace(/^Finisher\s*·\s*/i,'')+': '+a.v+' vueltas'; }).join(' · '));
     if(e.niv){ const q=[]; if(e.niv.n) q.push(NIV_LBL[e.niv.n]||e.niv.n); if(e.niv.imp==='sin') q.push('sin impacto'); if(e.niv.baja) q.push('carga −20%'); if(q.length) p.push('Lo hizo: '+q.join(' · ')); }
     return p.length?`<div class="log-obs">🧘 ${esc(p.join(' — '))}</div>`:''; })()+(e.obs?`<div class="log-obs">📝 ${esc(e.obs)}</div>`:'');
   const coreFmtL=e.core?((CORE_FMTS.find(f=>f.v===e.core.fmt)||{}).l||e.core.fmt):'';
@@ -10529,7 +10575,13 @@ document.addEventListener('click',e=>{
     case 'saveWa': var wf=$('wafld'),mpf=$('mpfld'); if(wf) DB.settings.whatsapp=wf.value.trim(); if(mpf) DB.settings.mercadopago=mpf.value.trim(); saveDB(); toast('Datos guardados ✓','ok'); break;
     case 'copyReport': var rptCards=[]; DB.order.forEach(function(id){ var s=DB.students[id]; var logs=safeParse(localStorage.getItem('tafit:logs:'+id)||'[]',[]); var last=logs.length?logs[0]:null; var adh=0; if(last){var plan=0,h=0;last.ex.forEach(function(x){if(x.members){x.members.forEach(function(mm){mm.sets.forEach(function(st){plan++;if(st.done)h++})})}else if(x.sets){x.sets.forEach(function(st){plan++;if(st.done)h++})}});adh=plan?Math.round(h/plan*100):0;} rptCards.push({name:s.name,sessions:logs.length,last:last,adh:adh}); }); var txt=generateReportText(rptCards); navigator.clipboard.writeText(txt).then(function(){toast('Informe copiado ✓','ok')}).catch(function(){toast('No se pudo copiar','warn')}); break;
     case 'openTabata': openTabata(); break;
-    case 'openBlockTimer': openTabata(el.dataset.title,+el.dataset.work,+el.dataset.rest,+el.dataset.rounds,el.dataset.format); break;
+    case 'openBlockTimer': openTabata(el.dataset.title,+el.dataset.work,+el.dataset.rest,+el.dataset.rounds,el.dataset.format,el.dataset.ei); break;
+    case 'tabCuenta': openTabata(el.dataset.name,+el.dataset.sec,0,1,'cuenta',el.dataset.i,{si:+el.dataset.si,mi:+(el.dataset.m||0),exName:el.dataset.name}); break;
+    case 'tabataPause': pauseTabata(); break;
+    case 'tabAdd': tabAdd(1); break;
+    case 'tabSub': tabAdd(-1); break;
+    case 'tabRoundDone': tabRoundDone(); break;
+    case 'tabVoz': { const order=['on','beep','off']; const cur=avisoMode(); const nx=order[(order.indexOf(cur)+1)%3]; try{ localStorage.setItem('tafit:voz',nx); }catch(e){} $('tabVoz').innerHTML=sesVozLbl(); break; }
     case 'tabataMode': setTabataMode(el.dataset.mode); break;
     case 'openNotifs': renderNotifList(); $('notifOv').classList.add('show'); markNotifsSeen(); break;
     case 'closeNotifs': $('notifOv').classList.remove('show'); break;
