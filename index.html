@@ -172,6 +172,28 @@
   .bien-opts button.on,.bien-zonas button.on{background:#17120E;border-color:#17120E;color:#F2ECE0}
   .bien-msg{margin-top:10px;background:#F2ECE0;border-radius:10px;padding:9px 11px;font-size:12.5px;line-height:1.45}
   .bien-card.done .bien-msg{background:#fff}
+  /* 23/11/2026 · Etapa 4: nivel e impacto */
+  .niv-bar{background:#fff;border:1px solid #E3C3A5;border-radius:14px;padding:10px 12px;margin:0 0 12px}
+  .nb-row{display:flex;align-items:center;gap:8px;margin:3px 0}
+  .nb-l{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#17120E;min-width:62px}
+  .nb-seg{display:flex;flex:1;background:#F2ECE0;border-radius:10px;padding:3px;gap:3px}
+  .nb-seg button{flex:1;border:none;background:transparent;border-radius:8px;padding:7px 4px;font-size:12px;font-weight:700;color:#17120E;cursor:pointer}
+  .nb-seg button.sel{background:#17120E;color:#fff}
+  .nb-seg.nb-lock button:not(.sel){opacity:.35}
+  .nb-note{font-size:11.5px;color:#6b5d50;margin-top:6px}
+  .nb-undo{border:none;background:none;padding:0;font:inherit;font-weight:700;text-decoration:underline;color:#17120E;cursor:pointer}
+  .bien-go{display:inline-block;margin:6px 0 0;border:none;background:#17120E;color:#fff;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer}
+  .ni-tag{display:inline-block;margin:2px 0 1px;font-size:11px;font-weight:700;color:#17120E;background:#F2ECE0;border-radius:6px;padding:2px 7px}
+  #app.dark .ni-tag{background:#E3C3A5}
+  .bi-filt{margin:8px 0 4px}
+  .bi-frow{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin:5px 0}
+  .bi-frow span{font-size:11px;font-weight:700;color:var(--mute);margin-right:2px}
+  .bi-frow button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer}
+  .bi-frow button.sel{background:#17120E;color:#fff;border-color:#17120E}
+  .bi-apply{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;align-items:center}
+  .bi-apply select{flex:1 1 30%;min-width:0;padding:7px;border-radius:8px;border:1px solid var(--line);font-size:12px;background:var(--card);color:var(--ink)}
+  .bi-lock{font-size:11.5px;display:flex;align-items:center;gap:4px;flex:1 1 60%}
+  .bi-apply button{flex:none;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;background:var(--accent);color:#17120E}
   .notif-dolor b{color:#B5523B}.bien-legend{font-size:11.5px;color:#C9B49C;margin-bottom:4px}
   .sug-today{display:inline-block;margin:2px 0 0;font-size:12px;font-weight:800;color:#17120E;background:#E3C3A5;border-radius:999px;padding:2px 8px}
   .sug-today.down{background:#F2ECE0}
@@ -1647,8 +1669,8 @@ function blockTitleClean(ex){ return (ex.n||'').replace(/^──\s*/,'').replace
 /* 11/11/2026: si las reps ya traen el esquema (p. ej. "1×12 + 3×10"), no anteponer las series (salía "4×1×12 + 3×10") */
 function srHas(r){ return /\d\s*[×x]\s*\d/i.test(String(r||'')); }
 /* reps de la serie si (0-based) en un esquema "1×12 + 3×10" → 12, 10, 10, 10 */
-function repPh(r,si){ const t=String(r||''); if(!srHas(t)) return t; const out=[]; t.split('+').forEach(function(p){ const m=/(\d+)\s*[×x]\s*([\w\-]+)/i.exec(p.trim()); if(m) for(let i=0;i<+m[1];i++) out.push(m[2]); }); return out[si]||out[out.length-1]||t; }
-function srTxt(s,r){ return srHas(r)?String(r):s+'×'+r; }
+function repPh(r,si){ const t=String(r||''); if(isPyrR(t)){ const pp=t.split(/\s·\s/); const v=pp[Math.min(si,pp.length-1)]||''; return (/^\d+[″′]?/.exec(v)||[v])[0]; } if(!srHas(t)) return t; const out=[]; t.split('+').forEach(function(p){ const m=/(\d+)\s*[×x]\s*([\w\-]+)/i.exec(p.trim()); if(m) for(let i=0;i<+m[1];i++) out.push(m[2]); }); return out[si]||out[out.length-1]||t; }
+function srTxt(s,r){ return srHas(r)?String(r):isPyrR(r)?s+' rondas: '+r:(+s===1&&/[″′]/.test(String(r||'')))?String(r):s+'×'+r; }
 function getBlockCfg(ex){
   if(ex.blk){ return { title:blockTitleClean(ex), desc:ex.tip||'', work:+ex.blkWork||0, rest:+ex.blkRest||0, rounds:Math.max(1,+ex.blkRounds||+ex.s||3), format:ex.blkFormat||'tabata' }; }
   /* legado: intenta sacar "(45s/15s)" del nombre; si no hay patrón, queda sin temporizador de trabajo/descanso (solo el chip de descanso) */
@@ -2988,7 +3010,7 @@ function migrateCache(){
    Viaja con la rutina (no con los ajustes sueltos de la semana), así no se pierde. */
 function exWithWeek(ex){ const v=ex&&Array.isArray(ex.wk)?ex.wk[week]:null; if(!v) return ex; const o=Object.assign({},ex); ['n','r','s','vid','tip'].forEach(function(f){ if(v[f]) o[f]=v[f]; }); return o; }
 function exWithOverride(ex,ei){
-  ex=exWithWeek(ex);
+  ex=exLevel(exWithWeek(ex),ei); /* 23/11/2026: nivel (programas TaFiT) y versión sin impacto */
   const ovKey='wo_w'+week+'_'+day+'_'+ei;
   const ov=CACHE[ovKey];
   if(!ov||ov._del) return ex;
@@ -6145,6 +6167,7 @@ function renderApp(){
   if(hasCoreDay(r[day])){ const cc=document.createElement('div'); cc.className='ex core-pick'; cc.id='coreCard'; cc.innerHTML=coreCardHTML(); m.appendChild(cc); }
 
   { const bw=document.createElement('div'); bw.id='bienWrap'; bw.innerHTML=bienHTML(); m.appendChild(bw); }
+  { const nb=nivBarHTML(); if(nb){ const nw=document.createElement('div'); nw.id='nivWrap'; nw.innerHTML=nb; m.appendChild(nw); } }
   let blkBody=null, blkTimed=false; /* tarjeta del bloque actual: sus ejercicios van ADENTRO.
      Un bloque con temporizador (Tabata/AMRAP/EMOM) solo se queda con los ejercicios de 1 serie o "por tiempo"
      que le siguen; si viene un ejercicio normal (p. ej. 4 series, como en las rutinas donde el Tabata es
@@ -6156,9 +6179,9 @@ function renderApp(){
       const cfg=getBlockCfg(ex);
       const fin=isFinisherBlk(cfg);
       const bc=document.createElement('div'); bc.className='block-banner-wrap blk-card'+(fin?' blk-fin':'');
-      const nR=+(cfg.rounds||ex.s||0); const isRondas=cfg.work>0||/ronda|circuito|vuelta|amrap|emom|tabata/i.test(cfg.title||'');
+      const nR=+(cfg.rounds||ex.s||0); const isRondas=cfg.work>0||/^(ron|fb|hx)$/.test(ex.bk||'')||/ronda|circuito|vuelta|amrap|emom|tabata/i.test(cfg.title||'');
       const tag=/amrap/i.test(cfg.title+' '+cfg.format)?'AMRAP':/emom/i.test(cfg.title+' '+cfg.format)?'EMOM':(nR>1?nR+(isRondas?' rondas':' series'):'');
-      let bh=`<div class="block-banner"><div class="bb-top"><span class="bb-ico">${fin?'🔥':'🔁'}</span><span class="bb-title">${esc(cfg.title.replace(/\s*·\s*\d+\s*(rondas?|series|vueltas)\s*$/i,''))}</span>${tag?`<span class="bb-tag">${esc(tag)}</span>`:''}</div>`;
+      let bh=`<div class="block-banner"><div class="bb-top"><span class="bb-ico">${fin?'🔥':ex.bk==='wu'?'🧘':'🔁'}</span><span class="bb-title">${esc(cfg.title.replace(/\s*·\s*\d+\s*(rondas?|series|vueltas)\s*$/i,''))}</span>${tag?`<span class="bb-tag">${esc(tag)}</span>`:''}</div>`;
       if(cfg.desc) bh+=`<div class="bb-desc">${esc(cfg.desc)}</div>`;
       if(cfg.work>0){
         bh+=`<button type="button" class="bb-btn" data-act="openBlockTimer" data-title="${esc(cfg.title)}" data-work="${cfg.work}" data-rest="${cfg.rest||10}" data-rounds="${cfg.rounds}" data-format="${esc(cfg.format)}">⏱ Iniciar temporizador de circuito</button>`;
@@ -6190,12 +6213,12 @@ function renderApp(){
     const exNum=r[day].ex.slice(0,ei+1).filter(function(e2,i2){ return !isBlockRow(e2)&&!coreHidden.has(i2); }).length;
     const thId=cardioOf(ex)?null:(extractYouTubeId(ex.vid)||vidForName(ex.n));
     const thumbHtml=thId?`<span class="ex-prev" data-act="playVideo" data-url="${esc(ex.vid||YT(ex.n))}" data-name="${esc(ex.n)}"><img src="https://i.ytimg.com/vi/${thId}/mq2.jpg" alt="" loading="lazy" onerror="if(!this.dataset.f){ this.dataset.f=1; this.src='https://i.ytimg.com/vi/${thId}/mqdefault.jpg'; } else this.parentNode.classList.add('noimg')"><i class="ex-prev-n">${exNum}</i><i class="ex-prev-p">▶</i></span>`:`<span class="num">${exNum}</span>`;
-    let html=`<div class="ex-hdr" data-act="accordion" data-i="${ei}">${thumbHtml}<div class="ex-hdr-info"><div class="ex-hdr-name">${esc(ex.n)}</div><div class="ex-hdr-meta">${hdrMeta}${hdrPA}</div>${wCmp}<div class="ex-hdr-prog">${progDots}</div></div><span class="ex-chev${isOpen?' open':''}">▾</span></div>`;
+    let html=`<div class="ex-hdr" data-act="accordion" data-i="${ei}">${thumbHtml}<div class="ex-hdr-info"><div class="ex-hdr-name">${esc(ex.n)}</div>${ex.niFrom?`<div class="ni-tag">🌿 Sin impacto · en vez de ${esc(ex.niFrom)}</div>`:''}<div class="ex-hdr-meta">${hdrMeta}${hdrPA}</div>${wCmp}<div class="ex-hdr-prog">${progDots}</div></div><span class="ex-chev${isOpen?' open':''}">▾</span></div>`;
     html+=`<div class="ex-body${isOpen?' open':''}">`;
     if(trainer){
       html+=`<div class="quick-edit"><div class="qe-title">✏ Edición rápida</div><div class="form-grid"><div class="form-field full"><div class="form-lbl">Ejercicio</div><input class="form-inp" value="${esc(ex.n)}" data-chg="qedit" data-ei="${ei}" data-f="n"></div><div class="form-field"><div class="form-lbl">Series</div><input class="form-inp" value="${esc(ex.s)}" data-chg="qedit" data-ei="${ei}" data-f="s"></div><div class="form-field"><div class="form-lbl">Reps</div><input class="form-inp" value="${esc(ex.r)}" data-chg="qedit" data-ei="${ei}" data-f="r"></div><div class="form-field"><div class="form-lbl">Peso obj.</div><input class="form-inp" value="${esc(ex.w)}" data-chg="qedit" data-ei="${ei}" data-f="w"></div><div class="form-field"><div class="form-lbl">Descanso</div><input class="form-inp" value="${esc(ex.rest)}" data-chg="qedit" data-ei="${ei}" data-f="rest"></div><div class="form-field full"><div class="form-lbl">Observación / Técnica</div><textarea class="form-inp" data-chg="qedit" data-ei="${ei}" data-f="tip" placeholder="Ej: rodillas semi rígidas, no bloquear codos...">${esc(ex.tip||'')}</textarea></div></div></div>`;
     }
-    if(!cardioOf(ex)) html+=`<div class="meta">${srHas(ex.r)?'objetivo '+esc(ex.r):ex.s+' series · objetivo '+esc(ex.r)+' reps'}${(obj&&obj!=='A definir')?' · '+esc(obj):''}</div>`;
+    if(!cardioOf(ex)) html+=`<div class="meta">${srHas(ex.r)?'objetivo '+esc(ex.r):isPyrR(ex.r)?ex.s+' rondas · objetivo '+esc(ex.r):ex.s+' series · objetivo '+esc(ex.r)+' reps'}${(obj&&obj!=='A definir')?' · '+esc(obj):''}</div>`;
     if(!cardioOf(ex)){ const sw=suggestedStartW(rawEx); if(sw) html+=`<div class="sugw">💡 ${sw.w?`Para arrancar: <b>~${kgTxt(sw.w)} kg</b>${implOf(ex.n)==='m'?' por mano':''} `:'Ejercicio nuevo: '}<span>(venías haciendo ${kgTxt(sw.prev.w)} kg en ${esc(sw.from)}${sw.w?'':'; arrancá más liviano y ajustá'}). En S1 priorizá la técnica.</span></div>`; }
     if(ex.alt) html+=`<div class="alt"><b>Alternativo:</b> <span class="alt-tap" data-act="playVideo" data-url="${esc(ex.altVid||YT(ex.alt))}" data-name="${esc(ex.alt)}">🎬 ${esc(ex.alt)}</span></div>`;
     /* 11/11/2026: pausa activa adentro del mismo ejercicio (no como fila aparte, para no scrollear tanto) */
@@ -6460,9 +6483,11 @@ function bienHTML(){ const v=bienVal()||{}; const av=bienAvg(v); const done=av!=
   if(av!=null) h+=bienMsgHTML(v,av);
   return h+`</div>`; }
 function bienMsgHTML(v,av){ let m=[];
-  if(bienDolor(v)) m.push(`🩹 Con dolor${v.z?' en '+v.z.toLowerCase():''}: hoy usá la <b>versión sin impacto</b> o el <b>alternativo</b> de cada ejercicio y bajá un <b>20% la carga</b> (ya te lo ajusté en el sugerido). Tu profe ya está avisada.`);
-  if(av<=2.5) m.push('🌱 Hoy venís bajo/a: te sugiero hacerlo en <b>nivel principiante</b> (menos rondas y menos peso). Moverte igual suma.');
-  else if(av>=4.5) m.push('🔥 ¡Venís a full! Si querés, hoy podés ir en <b>nivel avanzado</b>.');
+  const _d=routine()[day], _L=nivLock(), _h=CACHE[nivHoyKey()]||{};
+  const _bt=function(k,v,l){ return ` <button type="button" class="bien-go" data-act="nivSet" data-k="${k}" data-v="${v}">${l}</button>`; };
+  if(bienDolor(v)) m.push(`🩹 Con dolor${v.z?' en '+v.z.toLowerCase():''}: hoy usá la <b>versión sin impacto</b> o el <b>alternativo</b> de cada ejercicio y bajá un <b>20% la carga</b> (ya te lo ajusté en el sugerido). Tu profe ya está avisada.`+((dayHasImpact(_d)&&!_L.imp&&curImp()!=='sin')?_bt('himp','sin','🌿 Pasar a sin impacto hoy'):''));
+  if(av<=2.5) m.push('🌱 Hoy venís bajo/a: te sugiero hacerlo en <b>nivel principiante</b> (menos rondas y menos peso). Moverte igual suma.'+((dayHasLv(_d)&&!_L.niv&&curNivel()!=='P')?_bt('hniv','P','Hacerlo en Principiante hoy'):''));
+  else if(av>=4.5) m.push('🔥 ¡Venís a full! Si querés, hoy podés ir en <b>nivel avanzado</b>.'+((dayHasLv(_d)&&!_L.niv&&curNivel()!=='A')?_bt('hniv','A','Ir en Avanzado hoy'):''));
   return m.length?`<div class="bien-msg">${m.join('<br>')}</div>`:''; }
 async function bienSet(f,val){ const k=bienKey(); const cur=Object.assign({},bienVal()||{}); cur[f]=f==='z'?val:+val; if(f==='d'&&+val>2) delete cur.z; cur._w=+week; cur._t=Date.now(); cur.at=cur.at||new Date().toISOString(); CACHE[k]=cur; queueSave(); window._bienOpen=true;
   const av=bienAvg(cur); if(av!=null&&(!bienDolor(cur)||cur.z)) window._bienOpen=false;
@@ -7865,14 +7890,15 @@ function paintRest(){ const mm=Math.floor(restLeft/60), ss=restLeft%60; $('restn
 function stopRest(){ if(restInt){ clearInterval(restInt); restInt=null; } $('rest').classList.remove('show'); }
 
 function firstNum(s){ if(s==null) return null; const m=String(s).replace(',','.').match(/-?\d+(\.\d+)?/); return m?parseFloat(m[0]):null; }
-function bestSet(ei,mi){ const ex=routine()[day].ex[ei]; let best=null; for(let si=0;si<ex.s;si++){ const raw=CACHE[K(ei,si,mi)]||{}; const v=(wOf(raw)===+week)?raw:{}; const w=firstNum(v.w); let r=firstNum(v.r); if(r==null&&w!=null) r=firstNum(repPh(ex.r,si)); /* 23/11/2026: si cargó el peso pero dejó las reps del objetivo sin escribir, se usan esas reps (antes esa serie no contaba y el RM quedaba con el peso de la serie anterior) */ if(w==null||r==null||w<=0||r<=0) continue; const e=w*(1+r/30); if(!best||e>best.e) best={w,r,e}; } return best; }
+function bestSet(ei,mi){ const ex=exWithOverride(routine()[day].ex[ei],ei); let best=null; for(let si=0;si<ex.s;si++){ const raw=CACHE[K(ei,si,mi)]||{}; const v=(wOf(raw)===+week)?raw:{}; const w=firstNum(v.w); let r=firstNum(v.r); if(r==null&&w!=null) r=firstNum(repPh(ex.r,si)); /* 23/11/2026: si cargó el peso pero dejó las reps del objetivo sin escribir, se usan esas reps (antes esa serie no contaba y el RM quedaba con el peso de la serie anterior) */ if(w==null||r==null||w<=0||r<=0) continue; const e=w*(1+r/30); if(!best||e>best.e) best={w,r,e}; } return best; }
 function rmHTML(ei,mi){ const b=bestSet(ei,mi); if(!b) return `<summary>RM estimados (8RM→1RM) <span class="best">cargá peso y reps</span></summary><div class="rmempty">Cuando cargues peso y reps de al menos una serie, calculo los RM con la fórmula de Epley.</div>`; let grid=''; for(let n=8;n>=1;n--){ grid+=`<div><b>${fmt(b.e/(1+n/30))}</b><span>${n}RM</span></div>`; } return `<summary>RM estimados (8RM→1RM) <span class="best">mejor: ${fmt(b.w)}×${b.r}</span></summary><div class="rmgrid">${grid}</div>`; }
 function fmt(x){ return (Math.round(x*2)/2).toString().replace('.',',')+' kg'; }
 
 async function closeSession(){
   const r=routine(), members=membersOf(), exs=[];
-  r[day].ex.forEach((ex,ei)=>{
-    if(isBlockRow(ex)) return;
+  r[day].ex.forEach((rawEx,ei)=>{
+    if(isBlockRow(rawEx)) return;
+    const ex=exWithOverride(rawEx,ei); /* 23/11/2026: con el nivel/sin impacto se guarda lo que realmente hizo */
     const mem=[];
     if(cardioOf(ex)){ /* cardio guiado: lo que marcó la máquina */
       members.forEach((mn,mi)=>{ const v=cardioVal(ei,mi); if(v.km||v.kcal||v.min||v.done) mem.push({name:mn,sets:[{s:1,w:'',r:'',rir:'',done:!!v.done}],cardio:{km:v.km||'',kcal:v.kcal||'',min:v.min||''}}); });
@@ -7897,7 +7923,8 @@ async function closeSession(){
     if(dup){ const mins=Math.max(1,Math.round((Date.now()-Date.parse(dup.date))/60000)); const t=mins<60?(mins+' minuto'+(mins===1?'':'s')):(Math.round(mins/60)+' hora'+(Math.round(mins/60)===1?'':'s'));
       if(!await uiConfirm('Ya cerraste '+r[day].day+' de esta semana hace '+t+'.\n\n¿Guardar otra sesión igual en la Transcripta?')) return; } }
   const _bv=bienVal(); const bien=(_bv&&bienAvg(_bv)!=null)?{s:_bv.s,e:_bv.e,d:_bv.d,x:_bv.x,z:_bv.z||''}:null;
-  LOGS.unshift(Object.assign({ date:new Date().toISOString(), dayName:r[day].day, dayIdx:day, week, weekName:weeks()[week].t+' '+weeks()[week].n, ex:exs, obs, health:hh, core, ses }, bien?{bien}:{}));
+  const _niv=(dayHasLv(r[day])||curImp()==='sin')?{n:dayHasLv(r[day])?curNivel():'',imp:curImp()}:null;
+  LOGS.unshift(Object.assign({ date:new Date().toISOString(), dayName:r[day].day, dayIdx:day, week, weekName:weeks()[week].t+' '+weeks()[week].n, ex:exs, obs, health:hh, core, ses }, bien?{bien}:{}, _niv?{niv:_niv}:{}));
   await saveLogs();
   await autoBackup('sesion');
   /* Avisá al profe (aviso interno, no push): si quien cierra es el alumno, no la profe */
@@ -7907,7 +7934,7 @@ async function closeSession(){
   /* Limpiar tildes Y pesos del día cerrado para que no aparezcan en semanas/días siguientes */
   r[day].ex.forEach(function(ex,ei){
     for(var mi2=0;mi2<members.length;mi2++){
-      for(var si=0;si<ex.s;si++){
+      for(var si=0;si<Math.max(+ex.s||0,8);si++){
         delete CACHE[K(ei,si,mi2)];
       }
     }
@@ -8076,6 +8103,909 @@ async function startNewCycle(){
   toast('✓ Nuevo ciclo iniciado para '+name,'ok');
   renderEdit();
 }
+/* ==== 23/11/2026 · Etapa 4: programas TaFiT listos + niveles + versión sin impacto ====
+   Los programas (HYROX 2-5 días, Funcional 2-5 días, Pádel / Hockey / Fútbol recreativo y
+   competitivo) viven en el código, no en la base: así no ocupan lugar en la nube y se ven en
+   todos los celulares. Se escriben en un formato corto (una línea por día / bloque /
+   ejercicio) y se arman al usarlos. Todos los videos son IDs de YouTube reales buscados uno
+   por uno (o los de la biblioteca), ninguno inventado.
+   Nivel: la rutina es la misma; cambian rondas, tiempos y reps de la pirámide:
+   Principiante 2 rondas (30″, 12-12) · Intermedio 3 rondas (30-40-50″, 12-10-8) ·
+   Avanzado 4 rondas (12-10-8-6). Sin impacto: cada ejercicio con salto cambia solo por su
+   par sin impacto (también en rutinas armadas a mano), con su video. */
+const BI_SRC=`@hy2|HYROX · 2 días|hy|HYROX||2|Abdominales + HYROX, ideal para empezar
+#Día 1 · Abdominales + HYROX|mancuernas de 7,5 kg · cajón · pesa rusa de 8 kg · soga
+=Circuito de abdominales|3|ron|1′ de descanso entre series
+-Plancha con toque de hombros|40″|7o-EHYhFcl8
+-Crunch con pesa rusa al pecho|20|INSIA2A7BL8
+-Rotaciones rusas con pesa rusa|20 (10 por lado)|hdSyLWfRJHc
+=Circuito HYROX|3|hx|Alternás cardio y ejercicio · 2′ entre vueltas
+-Trote|3′|cnLwXHn7aU4
+-Thruster con mancuernas|15|iuKRLXTiqdw
+-Sprint|1′|N-t_NYgEGYw
+-Step-up al cajón con mancuernas|10 + 10|DbEqoeGwFfE
+-Trote|3′|cnLwXHn7aU4
+-Swing con pesa rusa|20|7GfH0HFg9AQ
+-Sprint|1′|N-t_NYgEGYw
+-Saltar la soga|50 saltos|AnQwqHgZdoQ
+#Día 2 · Abdominales + HYROX|pesa rusa de 8 kg · balón medicinal · step · banda · core bag
+=Circuito de abdominales|3|ron|1′ de descanso entre series
+-Plancha lateral con elevación de cadera|30″ por lado|pNeOCS_KjeE
+-Dead bug con balón medicinal|20|jdiE9CQDebo
+-Abdominales bicicleta|20|dYxamPVcKvk
+=Circuito HYROX|3|hx|Alternás cardio y ejercicio · 2′ entre vueltas
+-Trote|3′|cnLwXHn7aU4
+-Arrastre de core bag (sled push simulado)|10 m + 10 m|_mnAJVM6Zd0
+-Sprint|1′|N-t_NYgEGYw
+-Wall ball con balón medicinal|15|PDraAEVsgXs
+-Trote|3′|cnLwXHn7aU4
+-Remo con banda elástica de pie|20|cRmuo81YQes
+-Sprint|1′|N-t_NYgEGYw
+-Burpee saltando el step de costado|12|Uy2nUNX38xE
+@hy3|HYROX · 3 días|hy|HYROX||3|Abdominales + HYROX, sin repetir ejercicios entre días
+#Día 1 · Abdominales + HYROX|mancuernas de 7,5 kg · cajón · pesa rusa de 8 kg
+=Circuito de abdominales|3|ron|1′ de descanso entre series
+-Plancha con extensión de codo (de antebrazos a manos)|40″|0L6KKXw6_rQ
+-Elevación de piernas acostada|15|eEbq5_AIgpo
+-Leñador con pesa rusa de rodillas|12 por lado|K1DQYyod_jw
+=Circuito HYROX|3|hx|Alternás cardio y ejercicio · 2′ entre vueltas
+-Trote|3′|cnLwXHn7aU4
+-Estocadas caminando con mancuernas|10 + 10|EPARQLIYrZU
+-Sprint|1′|N-t_NYgEGYw
+-Salto al cajón, bajando caminando|12|c-Yonc6lzUs
+-Trote|3′|cnLwXHn7aU4
+-Farmer walk con mancuernas (paseo del granjero)|20 m ida y vuelta|69hTPgHwA08
+-Sprint|1′|N-t_NYgEGYw
+-Burpee con flexión|12|5FgajzJYr04
+#Día 2 · Abdominales + HYROX|balón medicinal · banda · step · core bag
+=Circuito de abdominales|3|ron|1′ de descanso entre series
+-Hollow hold (cuerpo en banana)|30″|Pu1OJjgtpco
+-Crunch con balón medicinal arriba|20|hl9Yu7UZqHU
+-Toque de talones (oblicuos)|20|PmD8OjgsdrY
+=Circuito HYROX|3|hx|Alternás cardio y ejercicio · 2′ entre vueltas
+-Trote|3′|cnLwXHn7aU4
+-Wall ball con balón medicinal|20|PDraAEVsgXs
+-Sprint|1′|N-t_NYgEGYw
+-Sentadilla sumo con core bag al pecho|15|Jpj51FykjjA
+-Trote|3′|cnLwXHn7aU4
+-Face pull con banda elástica|20|BwFDZGcM0Hc
+-Sprint|1′|N-t_NYgEGYw
+-Saltos laterales sobre el step|20|C0-nxRFvtbA
+#Día 3 · Abdominales + HYROX|pesa rusa de 8 kg · mancuernas de 7,5 kg · soga · cajón
+=Circuito de abdominales|3|ron|1′ de descanso entre series
+-Plancha lateral con rotación|10 por lado|AJusvmH3Xlk
+-V-ups con pesa rusa|15|n78J6ajuCbI
+-Mountain climber|30″|0MQF6Id1tp0
+=Circuito HYROX|3|hx|Alternás cardio y ejercicio · 2′ entre vueltas
+-Trote|3′|cnLwXHn7aU4
+-Swing con pesa rusa|20|7GfH0HFg9AQ
+-Sprint|1′|N-t_NYgEGYw
+-Devil press con mancuernas|10|Tj-BDDuqslI
+-Trote|3′|cnLwXHn7aU4
+-Step-up al cajón con pesa rusa en el pecho|10 + 10|DbEqoeGwFfE
+-Sprint|1′|N-t_NYgEGYw
+-Saltar la soga|60 saltos|AnQwqHgZdoQ
+@hy4|HYROX · 4 días|hy|HYROX||4|Abdominales + HYROX, sin repetir ejercicios entre días
+#Día 1 · Abdominales + HYROX|mancuernas de 7,5 kg · cajón · pesa rusa de 8 kg
+=Circuito de abdominales|3|ron|1′ de descanso entre series
+-Plancha con extensión de codo|40″|0L6KKXw6_rQ
+-V-ups con pesa rusa|20|n78J6ajuCbI
+-Oblicuos en banco declinado con pesa rusa|20|cJB3v85U1bM
+=Circuito HYROX|3|hx|Alternás cardio y ejercicio · 2′ entre vueltas
+-Trote|3′|cnLwXHn7aU4
+-Estocadas con mancuerna arriba de la cabeza|10 + 10|J3DxelcaaMU
+-Sprint|1′|N-t_NYgEGYw
+-Burpee con cajón (subo, burpee de un lado, subo, burpee del otro)|16|Uy2nUNX38xE
+-Trote|3′|cnLwXHn7aU4
+-Thruster con mancuernas|15|iuKRLXTiqdw
+-Sprint|1′|N-t_NYgEGYw
+-Remo renegado con mancuernas en plancha|10 por lado|51Idfavk54E
+#Día 2 · Abdominales + HYROX|balón medicinal · banda · step · soga
+=Circuito de abdominales|3|ron|1′ de descanso entre series
+-Plancha lateral|30″ por lado|kyOeSuh7LLo
+-Russian twist con balón medicinal|20|NSCbldIsXeI
+-Crunch inverso|15|wg59Dej-4sk
+=Circuito HYROX|3|hx|Alternás cardio y ejercicio · 2′ entre vueltas
+-Trote|3′|cnLwXHn7aU4
+-Wall ball con balón medicinal|20|PDraAEVsgXs
+-Sprint|1′|N-t_NYgEGYw
+-Angelitos con banda (abrir y cerrar brazos arriba)|20|1gmvlqBCaTw
+-Trote|3′|cnLwXHn7aU4
+-Sentadilla con salto|15|-kbKBjUU-1A
+-Sprint|1′|N-t_NYgEGYw
+-Saltar la soga|60 saltos|AnQwqHgZdoQ
+#Día 3 · Abdominales + HYROX|pesa rusa de 8 kg · core bag · cajón · banda
+=Circuito de abdominales|3|ron|1′ de descanso entre series
+-Hollow rock|20|Pu1OJjgtpco
+-Dead bug con pesa rusa|20|jdiE9CQDebo
+-Mountain climber cruzado|30″|vy2Cki-5r4k
+=Circuito HYROX|3|hx|Alternás cardio y ejercicio · 2′ entre vueltas
+-Trote|3′|cnLwXHn7aU4
+-Arrastre de core bag (sled push simulado)|10 m + 10 m|_mnAJVM6Zd0
+-Sprint|1′|N-t_NYgEGYw
+-Swing con pesa rusa|20|7GfH0HFg9AQ
+-Trote|3′|cnLwXHn7aU4
+-Step-up al cajón con core bag al hombro|10 + 10|DbEqoeGwFfE
+-Sprint|1′|N-t_NYgEGYw
+-Remo con banda elástica de pie|20|cRmuo81YQes
+#Día 4 · Abdominales + HYROX|mancuernas de 7,5 kg · step · balón medicinal · pesa rusa de 8 kg
+=Circuito de abdominales|3|ron|1′ de descanso entre series
+-Plancha con toque de hombros|40″|7o-EHYhFcl8
+-Crunch con balón medicinal arriba|20|hl9Yu7UZqHU
+-Toque de talones (oblicuos)|20|PmD8OjgsdrY
+=Circuito HYROX|3|hx|Alternás cardio y ejercicio · 2′ entre vueltas
+-Trote|3′|cnLwXHn7aU4
+-Farmer walk con mancuernas|20 m ida y vuelta|69hTPgHwA08
+-Sprint|1′|N-t_NYgEGYw
+-Saltos laterales con step, bajando bien la cola|20|C0-nxRFvtbA
+-Trote|3′|cnLwXHn7aU4
+-Devil press con mancuernas|10|Tj-BDDuqslI
+-Sprint|1′|N-t_NYgEGYw
+-Slam con balón medicinal|15|EsAhU1jHpiQ
+@hy5|HYROX · 5 días|hy|HYROX||5|Abdominales + HYROX, sin repetir ejercicios entre días
+#Día 1 · Abdominales + HYROX|mancuernas de 7,5 kg · cajón · soga
+=Circuito de abdominales|3|ron|1′ de descanso entre series
+-Plancha con toque de hombros|40″|7o-EHYhFcl8
+-Crunch con mancuerna al pecho|20|INSIA2A7BL8
+-Abdominales bicicleta|20|dYxamPVcKvk
+=Circuito HYROX|3|hx|Alternás cardio y ejercicio · 2′ entre vueltas
+-Trote|3′|cnLwXHn7aU4
+-Thruster con mancuernas|15|iuKRLXTiqdw
+-Sprint|1′|N-t_NYgEGYw
+-Salto al cajón, bajando caminando|12|c-Yonc6lzUs
+-Trote|3′|cnLwXHn7aU4
+-Estocadas hacia atrás con mancuernas|10 + 10|IpSouV9cPxQ
+-Sprint|1′|N-t_NYgEGYw
+-Saltar la soga|60 saltos|AnQwqHgZdoQ
+#Día 2 · Abdominales + HYROX|pesa rusa de 8 kg · banda · step
+=Circuito de abdominales|3|ron|1′ de descanso entre series
+-Plancha lateral con elevación de cadera|30″ por lado|pNeOCS_KjeE
+-V-ups con pesa rusa|15|n78J6ajuCbI
+-Rotaciones rusas con pesa rusa|20|hdSyLWfRJHc
+=Circuito HYROX|3|hx|Alternás cardio y ejercicio · 2′ entre vueltas
+-Trote|3′|cnLwXHn7aU4
+-Swing con pesa rusa|20|7GfH0HFg9AQ
+-Sprint|1′|N-t_NYgEGYw
+-Angelitos con banda y pesa rusa|20|1gmvlqBCaTw
+-Trote|3′|cnLwXHn7aU4
+-Sentadilla goblet con pesa rusa|15|5HHITKuLxUs
+-Sprint|1′|N-t_NYgEGYw
+-Saltos laterales con step|20|C0-nxRFvtbA
+#Día 3 · Abdominales + HYROX|balón medicinal · core bag · cajón
+=Circuito de abdominales|3|ron|1′ de descanso entre series
+-Hollow hold|30″|Pu1OJjgtpco
+-Dead bug con balón medicinal|20|jdiE9CQDebo
+-Toque de talones|20|PmD8OjgsdrY
+=Circuito HYROX|3|hx|Alternás cardio y ejercicio · 2′ entre vueltas
+-Trote|3′|cnLwXHn7aU4
+-Wall ball con balón medicinal|20|PDraAEVsgXs
+-Sprint|1′|N-t_NYgEGYw
+-Arrastre de core bag (sled push simulado)|10 m + 10 m|_mnAJVM6Zd0
+-Trote|3′|cnLwXHn7aU4
+-Burpee con cajón (subo, burpee de un lado, subo, burpee del otro)|16|Uy2nUNX38xE
+-Sprint|1′|N-t_NYgEGYw
+-Slam con balón medicinal|15|EsAhU1jHpiQ
+#Día 4 · Abdominales + HYROX|mancuernas de 7,5 kg · pesa rusa de 8 kg · banda
+=Circuito de abdominales|3|ron|1′ de descanso entre series
+-Plancha con extensión de codo|40″|0L6KKXw6_rQ
+-Elevación de piernas acostada|15|eEbq5_AIgpo
+-Leñador con pesa rusa de rodillas|12 por lado|K1DQYyod_jw
+=Circuito HYROX|3|hx|Alternás cardio y ejercicio · 2′ entre vueltas
+-Trote|3′|cnLwXHn7aU4
+-Farmer walk con mancuernas|20 m ida y vuelta|69hTPgHwA08
+-Sprint|1′|N-t_NYgEGYw
+-Remo renegado con mancuernas en plancha|10 por lado|51Idfavk54E
+-Trote|3′|cnLwXHn7aU4
+-Remo con banda elástica de pie|20|cRmuo81YQes
+-Sprint|1′|N-t_NYgEGYw
+-Burpee con flexión|12|5FgajzJYr04
+#Día 5 · Abdominales + HYROX|mancuernas de 7,5 kg · core bag · step · soga
+=Circuito de abdominales|3|ron|1′ de descanso entre series
+-Mountain climber cruzado|30″|vy2Cki-5r4k
+-Crunch inverso|15|wg59Dej-4sk
+-Hollow rock|20|Pu1OJjgtpco
+=Circuito HYROX|3|hx|Alternás cardio y ejercicio · 2′ entre vueltas
+-Trote|3′|cnLwXHn7aU4
+-Devil press con mancuernas|10|Tj-BDDuqslI
+-Sprint|1′|N-t_NYgEGYw
+-Step-up al step con core bag al hombro|10 + 10|DbEqoeGwFfE
+-Trote|3′|cnLwXHn7aU4
+-Sentadilla con salto|15|-kbKBjUU-1A
+-Sprint|1′|N-t_NYgEGYw
+-Saltar la soga|60 saltos|AnQwqHgZdoQ
+@fu2|Funcional · 2 días|fu|Funcional||2|Full body: 3 bloques + finisher
+#Día 1 · Full body empuje|barra · mancuernas · cajón · soga · pesa rusa
+=Entrada en calor (10′)|1|wu|Soga + movilidad de cadera, hombros y tobillos.
+=Bloque 1|3|fb|De un ejercicio al otro sin pausa
+-Sentadilla frontal con barra|12-10-8|VabOUIgSGk0|py
+-Push press con barra|12-10-8|f4cvDdmxldE|py
+-Salto al cajón|5-6-8|c-Yonc6lzUs|py
+-Mountain climber|30-40-50″|0MQF6Id1tp0|py
+=Cardio entre bloques|1|cb|Antes del bloque 2
+-Saltar la soga|3′|AnQwqHgZdoQ
+=Bloque 2|3|fb|De un ejercicio al otro sin pausa
+-Estocadas caminando con mancuernas|10-8-6 por pierna|EPARQLIYrZU|py
+-Flexiones de brazos|12-10-8|b2UagYWNErY|py
+-Plancha|30-40-45″|LKd2gK40YCY|py
+-Burpee|30-40-50″|Uy2nUNX38xE|py
+=Bloque 3|3|fb|De un ejercicio al otro sin pausa
+-Thruster con mancuernas|12-10-8|iuKRLXTiqdw|py
+-Press de hombros con pesa rusa a una mano|10-8-6 por brazo|oI3kX7cclb4|py
+-Hollow rock|15-20-25|Pu1OJjgtpco|py
+-Squat jump|30-40-50″|-kbKBjUU-1A|py
+=Finisher · AMRAP 8′|8|amrap|Tantas vueltas como puedas. Anotá las vueltas en Observaciones.
+-Swing con pesa rusa|10|7GfH0HFg9AQ
+-Burpee|10|Uy2nUNX38xE
+-Saltar la soga|30″|AnQwqHgZdoQ
+#Día 2 · Full body tracción y cadera|barra · mancuernas · pesa rusa · banda · step
+=Entrada en calor (10′)|1|wu|Soga + movilidad de cadera, hombros y tobillos.
+=Bloque 1|3|fb|De un ejercicio al otro sin pausa
+-Peso muerto rumano con barra|12-10-8|rjvlSfZ-PQw|py
+-Remo con barra|12-10-8|qGxSGldH1l8|py
+-Swing con pesa rusa|15-20-20|7GfH0HFg9AQ|py
+-High knee (rodillas arriba)|30-40-50″|iBpgkuFuENY|py
+=Cardio entre bloques|1|cb|Antes del bloque 2
+-Saltar la soga|3′|AnQwqHgZdoQ
+=Bloque 2|3|fb|De un ejercicio al otro sin pausa
+-Hip thrust con barra|12-10-8|jWRNRAgaBxQ|py
+-Dominadas (con banda si hace falta)|8-6-5|nO8pU3aujio|py
+-Plancha lateral|30-40-45″ por lado|kyOeSuh7LLo|py
+-Saltos laterales con step|30-40-50″|C0-nxRFvtbA|py
+=Bloque 3|3|fb|De un ejercicio al otro sin pausa
+-Remo gorila con pesa rusa|10-8-6 por brazo|MXiGlFCXxBc|py
+-Curl martillo con mancuernas|12-10-8|RHdacbwKbTo|py
+-Superman sostenido|30-40-45″|I2w92FymIj8|py
+-Lunges jump (estocada con salto)|30-40-50″|Gb5tRcrGw7M|py
+=Finisher · EMOM 10′|10|emom|Minutos impares: 12 swings · minutos pares: 10 flexiones.
+-Swing con pesa rusa (minutos impares)|12|7GfH0HFg9AQ
+-Flexiones de brazos (minutos pares)|10|b2UagYWNErY
+@fu3|Funcional · 3 días|fu|Funcional||3|Piernas/empuje · cadera/pecho · cadena posterior
+#Día 1 · Piernas y empuje|barra · mancuernas · cajón · soga · pesa rusa
+=Entrada en calor (10′)|1|wu|Soga + movilidad de cadera, hombros y tobillos.
+=Bloque 1|3|fb|De un ejercicio al otro sin pausa
+-Sentadilla frontal con barra|12-10-8|VabOUIgSGk0|py
+-Push press con barra|12-10-8|f4cvDdmxldE|py
+-Salto al cajón|5-6-8|c-Yonc6lzUs|py
+-Mountain climber|30-40-50″|0MQF6Id1tp0|py
+=Cardio entre bloques|1|cb|Antes del bloque 2
+-Saltar la soga|3′|AnQwqHgZdoQ
+=Bloque 2|3|fb|De un ejercicio al otro sin pausa
+-Estocadas caminando con mancuernas|10-8-6 por pierna|EPARQLIYrZU|py
+-Flexiones con palmada|8-6-5|q4kAdOV0cQU|py
+-Plancha|30-40-45″|LKd2gK40YCY|py
+-Burpee|30-40-50″|Uy2nUNX38xE|py
+=Bloque 3|3|fb|De un ejercicio al otro sin pausa
+-Dominadas|8-6-5|nO8pU3aujio|py
+-Thruster con mancuernas|12-10-8|iuKRLXTiqdw|py
+-Hollow rock|15-20-25|Pu1OJjgtpco|py
+-Squat jump|30-40-50″|-kbKBjUU-1A|py
+=Finisher · AMRAP 8′|8|amrap|Tantas vueltas como puedas. Anotá las vueltas en Observaciones.
+-Swing con pesa rusa|10|7GfH0HFg9AQ
+-Burpee|10|Uy2nUNX38xE
+-Saltar la soga|30″|AnQwqHgZdoQ
+#Día 2 · Cadera, pecho y hombros|barra · mancuernas · pesa rusa · cajón · step
+=Entrada en calor (10′)|1|wu|Soga + movilidad de cadera, hombros y tobillos.
+=Bloque 1|3|fb|De un ejercicio al otro sin pausa
+-Hip thrust con barra|12-10-8|jWRNRAgaBxQ|py
+-Press de pecho con mancuernas en banco|12-10-8|W-qU8CF-WeU|py
+-Swing con pesa rusa|15-20-20|7GfH0HFg9AQ|py
+-High knee (rodillas arriba)|30-40-50″|iBpgkuFuENY|py
+=Cardio entre bloques|1|cb|Antes del bloque 2
+-Saltar la soga|3′|AnQwqHgZdoQ
+=Bloque 2|3|fb|De un ejercicio al otro sin pausa
+-Peso muerto sumo con barra|12-10-8|aMbhhzzP24A|py
+-Remo renegado con flexión|10-8-6|51Idfavk54E|py
+-Plancha lateral|30-40-45″ por lado|kyOeSuh7LLo|py
+-Paso lateral por encima del cajón|30-40-50″|6wfYqJ5z9Rw|py
+=Bloque 3|3|fb|De un ejercicio al otro sin pausa
+-Estocada búlgara con salto|5-6-8 por pierna|LW_J38ETubU|py
+-Vuelos laterales con mancuernas|12-10-8|aVa9ce3SlSA|py
+-Toque de hombros en plancha|15-20-25|7o-EHYhFcl8|py
+-Burpee con salto al cajón|30-40-50″|HWkusQYVQAo|py
+=Finisher · EMOM 10′|10|emom|Minutos impares: 12 swings · minutos pares: 10 flexiones.
+-Swing con pesa rusa (minutos impares)|12|7GfH0HFg9AQ
+-Flexiones de brazos (minutos pares)|10|b2UagYWNErY
+#Día 3 · Cadena posterior, espalda y brazos|barra · mancuernas · fitball · cajón · soga
+=Entrada en calor (10′)|1|wu|Soga + movilidad de cadera, hombros y tobillos.
+=Bloque 1|3|fb|De un ejercicio al otro sin pausa
+-Peso muerto rumano con barra|12-10-8|rjvlSfZ-PQw|py
+-Remo con barra|12-10-8|qGxSGldH1l8|py
+-Estocada con salto|5-6-8 por pierna|Gb5tRcrGw7M|py
+-Jumping squat|30-40-50″|-kbKBjUU-1A|py
+=Cardio entre bloques|1|cb|Antes del bloque 2
+-Saltar la soga|3′|AnQwqHgZdoQ
+=Bloque 2|3|fb|De un ejercicio al otro sin pausa
+-Hip thrust a una pierna|12-10-8 por pierna|RwIzC9Jbutw|py
+-Curl femoral en fitball|12-10-8|PUPZIYwosbI|py
+-Elevación de rodillas en banco|15-20-25|ayrf5mLIUMc|py
+-Salto al cajón con descenso|30-40-50″|c-Yonc6lzUs|py
+=Bloque 3|3|fb|De un ejercicio al otro sin pausa
+-Remo gorila con mancuernas|12-10-8|MXiGlFCXxBc|py
+-Press francés con barra|12-10-8|Zd6LaSowRdc|py
+-Curl martillo con mancuernas|12-10-8|RHdacbwKbTo|py
+-Lunges jump (estocada con salto)|30-40-50″|Gb5tRcrGw7M|py
+=Finisher · AMRAP 8′|8|amrap|Tantas vueltas como puedas. Anotá las vueltas en Observaciones.
+-Saltar la soga|20″|AnQwqHgZdoQ
+-Burpee|8|Uy2nUNX38xE
+-Mountain climber (escaladores)|12|0MQF6Id1tp0
+@fu4|Funcional · 4 días|fu|Funcional||4|Cuádriceps · empuje · glúteos · tracción
+#Día 1 · Piernas (cuádriceps)|barra · mancuernas · cajón · soga
+=Entrada en calor (10′)|1|wu|Soga + movilidad de cadera, hombros y tobillos.
+=Bloque 1|3|fb|De un ejercicio al otro sin pausa
+-Sentadilla frontal con barra|12-10-8|VabOUIgSGk0|py
+-Salto al cajón|5-6-8|c-Yonc6lzUs|py
+-Plancha|30-40-45″|LKd2gK40YCY|py
+-Mountain climber|30-40-50″|0MQF6Id1tp0|py
+=Cardio entre bloques|1|cb|Antes del bloque 2
+-Saltar la soga|3′|AnQwqHgZdoQ
+=Bloque 2|3|fb|De un ejercicio al otro sin pausa
+-Estocadas caminando con mancuernas|10-8-6 por pierna|EPARQLIYrZU|py
+-Step-up al cajón con mancuernas|10-8-6 por pierna|DbEqoeGwFfE|py
+-Hollow rock|15-20-25|Pu1OJjgtpco|py
+-Squat jump|30-40-50″|-kbKBjUU-1A|py
+=Bloque 3|3|fb|De un ejercicio al otro sin pausa
+-Thruster con mancuernas|12-10-8|iuKRLXTiqdw|py
+-Sentadilla goblet con pausa abajo|12-10-8|5HHITKuLxUs|py
+-Crunch abdominal|15-20-25|hl9Yu7UZqHU|py
+-Burpee|30-40-50″|Uy2nUNX38xE|py
+=Finisher · AMRAP 8′|8|amrap|Tantas vueltas como puedas. Anotá las vueltas en Observaciones.
+-Thruster con mancuernas|10|iuKRLXTiqdw
+-Salto al cajón|10|c-Yonc6lzUs
+-Saltar la soga|30″|AnQwqHgZdoQ
+#Día 2 · Tren superior empuje|barra · mancuernas · pesa rusa · banda
+=Entrada en calor (10′)|1|wu|Soga + movilidad de cadera, hombros y tobillos.
+=Bloque 1|3|fb|De un ejercicio al otro sin pausa
+-Push press con barra|12-10-8|f4cvDdmxldE|py
+-Press de pecho con mancuernas en banco|12-10-8|W-qU8CF-WeU|py
+-Plancha lateral|30-40-45″ por lado|kyOeSuh7LLo|py
+-High knee (rodillas arriba)|30-40-50″|iBpgkuFuENY|py
+=Cardio entre bloques|1|cb|Antes del bloque 2
+-Saltar la soga|3′|AnQwqHgZdoQ
+=Bloque 2|3|fb|De un ejercicio al otro sin pausa
+-Flexiones con palmada|8-6-5|q4kAdOV0cQU|py
+-Press de hombros con pesa rusa a una mano|10-8-6 por brazo|oI3kX7cclb4|py
+-Toque de hombros en plancha|15-20-25|7o-EHYhFcl8|py
+-Jumping jacks|30-40-50″|4HF-X5OzyFM|py
+=Bloque 3|3|fb|De un ejercicio al otro sin pausa
+-Vuelos laterales con mancuernas|12-10-8|aVa9ce3SlSA|py
+-Fondos en banco|12-10-8|V1K9BFx9OeM|py
+-Rueda abdominal|8-10-12|pQTSUqQ-IS0|py
+-Burpee con flexión|30-40-50″|5FgajzJYr04|py
+=Finisher · EMOM 10′|10|emom|Minutos impares: 10 flexiones · minutos pares: 12 swings.
+-Flexiones de brazos (minutos impares)|10|b2UagYWNErY
+-Swing con pesa rusa (minutos pares)|12|7GfH0HFg9AQ
+#Día 3 · Cadena posterior y glúteos|barra · pesa rusa · fitball · banda · step
+=Entrada en calor (10′)|1|wu|Soga + movilidad de cadera, hombros y tobillos.
+=Bloque 1|3|fb|De un ejercicio al otro sin pausa
+-Peso muerto rumano con barra|12-10-8|rjvlSfZ-PQw|py
+-Swing con pesa rusa|15-20-20|7GfH0HFg9AQ|py
+-Superman sostenido|30-40-45″|I2w92FymIj8|py
+-Saltos laterales con step|30-40-50″|C0-nxRFvtbA|py
+=Cardio entre bloques|1|cb|Antes del bloque 2
+-Saltar la soga|3′|AnQwqHgZdoQ
+=Bloque 2|3|fb|De un ejercicio al otro sin pausa
+-Hip thrust con barra|12-10-8|jWRNRAgaBxQ|py
+-Curl femoral en fitball|12-10-8|PUPZIYwosbI|py
+-Elevación de piernas acostado|15-20-25|eEbq5_AIgpo|py
+-Estocada con salto|30-40-50″|Gb5tRcrGw7M|py
+=Bloque 3|3|fb|De un ejercicio al otro sin pausa
+-Peso muerto sumo con barra|12-10-8|aMbhhzzP24A|py
+-Caminata lateral con banda|15-20-20 pasos por lado|3NIc8Xt3qR8|py
+-Bird dog|10-12-15 por lado|L0UMTpI1xWI|py
+-Jumping squat|30-40-50″|-kbKBjUU-1A|py
+=Finisher · AMRAP 8′|8|amrap|Tantas vueltas como puedas. Anotá las vueltas en Observaciones.
+-Swing con pesa rusa|12|7GfH0HFg9AQ
+-Hip thrust con peso del cuerpo|10|jWRNRAgaBxQ
+-Saltar la soga|30″|AnQwqHgZdoQ
+#Día 4 · Tren superior tracción|barra · mancuernas · pesa rusa · banda · soga
+=Entrada en calor (10′)|1|wu|Soga + movilidad de cadera, hombros y tobillos.
+=Bloque 1|3|fb|De un ejercicio al otro sin pausa
+-Dominadas|8-6-5|nO8pU3aujio|py
+-Remo con barra|12-10-8|qGxSGldH1l8|py
+-Rotación rusa con pesa rusa|15-20-25|hdSyLWfRJHc|py
+-Lunges jump (estocada con salto)|30-40-50″|Gb5tRcrGw7M|py
+=Cardio entre bloques|1|cb|Antes del bloque 2
+-Saltar la soga|3′|AnQwqHgZdoQ
+=Bloque 2|3|fb|De un ejercicio al otro sin pausa
+-Remo renegado con flexión|10-8-6|51Idfavk54E|py
+-Remo gorila con pesa rusa|10-8-6 por brazo|MXiGlFCXxBc|py
+-Dead bug|15-20-25|jdiE9CQDebo|py
+-Burpee con salto al cajón|30-40-50″|HWkusQYVQAo|py
+=Bloque 3|3|fb|De un ejercicio al otro sin pausa
+-Face pull con banda|15-15-15|BwFDZGcM0Hc|py
+-Curl martillo con mancuernas|12-10-8|RHdacbwKbTo|py
+-Abdominales bicicleta|15-20-25|dYxamPVcKvk|py
+-Mountain climber cruzado|30-40-50″|vy2Cki-5r4k|py
+=Finisher · AMRAP 8′|8|amrap|Tantas vueltas como puedas. Anotá las vueltas en Observaciones.
+-Saltar la soga|20″|AnQwqHgZdoQ
+-Burpee|8|Uy2nUNX38xE
+-Mountain climber (escaladores)|12|0MQF6Id1tp0
+@fu5|Funcional · 5 días|fu|Funcional||5|Incluye un día metabólico (cardio + core)
+#Día 1 · Piernas y empuje|barra · mancuernas · cajón · soga
+=Entrada en calor (10′)|1|wu|Soga + movilidad de cadera, hombros y tobillos.
+=Bloque 1|3|fb|De un ejercicio al otro sin pausa
+-Sentadilla frontal con barra|12-10-8|VabOUIgSGk0|py
+-Push press con barra|12-10-8|f4cvDdmxldE|py
+-Salto al cajón|5-6-8|c-Yonc6lzUs|py
+-Mountain climber|30-40-50″|0MQF6Id1tp0|py
+=Cardio entre bloques|1|cb|Antes del bloque 2
+-Saltar la soga|3′|AnQwqHgZdoQ
+=Bloque 2|3|fb|De un ejercicio al otro sin pausa
+-Estocadas caminando con mancuernas|10-8-6 por pierna|EPARQLIYrZU|py
+-Flexiones de brazos|12-10-8|b2UagYWNErY|py
+-Plancha|30-40-45″|LKd2gK40YCY|py
+-Burpee|30-40-50″|Uy2nUNX38xE|py
+=Bloque 3|3|fb|De un ejercicio al otro sin pausa
+-Thruster con mancuernas|12-10-8|iuKRLXTiqdw|py
+-Vuelos laterales con mancuernas|12-10-8|aVa9ce3SlSA|py
+-Hollow rock|15-20-25|Pu1OJjgtpco|py
+-Squat jump|30-40-50″|-kbKBjUU-1A|py
+=Finisher · AMRAP 8′|8|amrap|Tantas vueltas como puedas. Anotá las vueltas en Observaciones.
+-Swing con pesa rusa|10|7GfH0HFg9AQ
+-Burpee|10|Uy2nUNX38xE
+-Saltar la soga|30″|AnQwqHgZdoQ
+#Día 2 · Cadena posterior y tracción|barra · pesa rusa · banda · step
+=Entrada en calor (10′)|1|wu|Soga + movilidad de cadera, hombros y tobillos.
+=Bloque 1|3|fb|De un ejercicio al otro sin pausa
+-Peso muerto rumano con barra|12-10-8|rjvlSfZ-PQw|py
+-Dominadas|8-6-5|nO8pU3aujio|py
+-Swing con pesa rusa|15-20-20|7GfH0HFg9AQ|py
+-High knee (rodillas arriba)|30-40-50″|iBpgkuFuENY|py
+=Cardio entre bloques|1|cb|Antes del bloque 2
+-Saltar la soga|3′|AnQwqHgZdoQ
+=Bloque 2|3|fb|De un ejercicio al otro sin pausa
+-Hip thrust con barra|12-10-8|jWRNRAgaBxQ|py
+-Remo con barra|12-10-8|qGxSGldH1l8|py
+-Superman sostenido|30-40-45″|I2w92FymIj8|py
+-Saltos laterales con step|30-40-50″|C0-nxRFvtbA|py
+=Bloque 3|3|fb|De un ejercicio al otro sin pausa
+-Remo gorila con pesa rusa|10-8-6 por brazo|MXiGlFCXxBc|py
+-Face pull con banda|15-15-15|BwFDZGcM0Hc|py
+-Dead bug|15-20-25|jdiE9CQDebo|py
+-Lunges jump (estocada con salto)|30-40-50″|Gb5tRcrGw7M|py
+=Finisher · EMOM 10′|10|emom|Minutos impares: 12 swings · minutos pares: 8 burpees.
+-Swing con pesa rusa (minutos impares)|12|7GfH0HFg9AQ
+-Burpee (minutos pares)|8|Uy2nUNX38xE
+#Día 3 · Metabólico (cardio + core)|soga · cajón · balón medicinal · core bag
+=Entrada en calor (10′)|1|wu|Soga + movilidad de cadera, hombros y tobillos.
+=Bloque 1|3|fb|De un ejercicio al otro sin pausa
+-Wall ball con balón medicinal|15-20-20|PDraAEVsgXs|py
+-Arrastre de core bag|10 m + 10 m|_mnAJVM6Zd0
+-Plancha con toque de hombros|30-40-45″|7o-EHYhFcl8|py
+-Saltar la soga|50-60-80 saltos|AnQwqHgZdoQ|py
+=Cardio entre bloques|1|cb|Antes del bloque 2
+-Trote|3′|cnLwXHn7aU4
+=Bloque 2|3|fb|De un ejercicio al otro sin pausa
+-Burpee con salto al cajón|8-10-12|HWkusQYVQAo|py
+-Slam con balón medicinal|12-15-15|EsAhU1jHpiQ|py
+-Rotación rusa con balón medicinal|15-20-25|NSCbldIsXeI|py
+-Sprint|30-40-50″|N-t_NYgEGYw|py
+=Bloque 3|3|fb|De un ejercicio al otro sin pausa
+-Step-up rápido al cajón|10-12-15 por pierna|DbEqoeGwFfE|py
+-Mountain climber cruzado|30-40-50″|vy2Cki-5r4k|py
+-Elevación de piernas acostado|15-20-25|eEbq5_AIgpo|py
+-Jumping jacks|30-40-50″|4HF-X5OzyFM|py
+=Finisher · AMRAP 10′|10|amrap|Tantas vueltas como puedas. Anotá las vueltas en Observaciones.
+-Trote|200 m|cnLwXHn7aU4
+-Wall ball con balón medicinal|10|PDraAEVsgXs
+-Slam con balón medicinal|10|EsAhU1jHpiQ
+#Día 4 · Glúteos y piernas unilateral|mancuernas · pesa rusa · fitball · banda · cajón
+=Entrada en calor (10′)|1|wu|Soga + movilidad de cadera, hombros y tobillos.
+=Bloque 1|3|fb|De un ejercicio al otro sin pausa
+-Estocada búlgara con mancuernas|10-8-6 por pierna|l5c49YVRYjM|py
+-Hip thrust a una pierna|12-10-8 por pierna|RwIzC9Jbutw|py
+-Plancha lateral|30-40-45″ por lado|kyOeSuh7LLo|py
+-Estocada con salto|30-40-50″|Gb5tRcrGw7M|py
+=Cardio entre bloques|1|cb|Antes del bloque 2
+-Saltar la soga|3′|AnQwqHgZdoQ
+=Bloque 2|3|fb|De un ejercicio al otro sin pausa
+-Peso muerto sumo con pesa rusa|12-10-8|Awq1gUp4skU|py
+-Curl femoral en fitball|12-10-8|PUPZIYwosbI|py
+-Bird dog|10-12-15 por lado|L0UMTpI1xWI|py
+-Paso lateral por encima del cajón|30-40-50″|6wfYqJ5z9Rw|py
+=Bloque 3|3|fb|De un ejercicio al otro sin pausa
+-Step-up al cajón con mancuernas|10-8-6 por pierna|DbEqoeGwFfE|py
+-Caminata lateral con banda|15-20-20 pasos por lado|3NIc8Xt3qR8|py
+-Crunch abdominal|15-20-25|hl9Yu7UZqHU|py
+-Jumping squat|30-40-50″|-kbKBjUU-1A|py
+=Finisher · AMRAP 8′|8|amrap|Tantas vueltas como puedas. Anotá las vueltas en Observaciones.
+-Sentadilla goblet|10|5HHITKuLxUs
+-Swing con pesa rusa|10|7GfH0HFg9AQ
+-Saltar la soga|30″|AnQwqHgZdoQ
+#Día 5 · Tren superior completo|barra · mancuernas · pesa rusa · banda
+=Entrada en calor (10′)|1|wu|Soga + movilidad de cadera, hombros y tobillos.
+=Bloque 1|3|fb|De un ejercicio al otro sin pausa
+-Press de pecho con mancuernas en banco|12-10-8|W-qU8CF-WeU|py
+-Remo renegado con flexión|10-8-6|51Idfavk54E|py
+-Rueda abdominal|8-10-12|pQTSUqQ-IS0|py
+-Burpee con flexión|30-40-50″|5FgajzJYr04|py
+=Cardio entre bloques|1|cb|Antes del bloque 2
+-Saltar la soga|3′|AnQwqHgZdoQ
+=Bloque 2|3|fb|De un ejercicio al otro sin pausa
+-Press de hombros con pesa rusa a una mano|10-8-6 por brazo|oI3kX7cclb4|py
+-Remo con mancuerna a una mano|12-10-8 por brazo|ryhxLQUn-cQ|py
+-Toque de hombros en plancha|15-20-25|7o-EHYhFcl8|py
+-High knee (rodillas arriba)|30-40-50″|iBpgkuFuENY|py
+=Bloque 3|3|fb|De un ejercicio al otro sin pausa
+-Curl martillo con mancuernas|12-10-8|RHdacbwKbTo|py
+-Fondos en banco|12-10-8|V1K9BFx9OeM|py
+-Abdominales bicicleta|15-20-25|dYxamPVcKvk|py
+-Mountain climber|30-40-50″|0MQF6Id1tp0|py
+=Finisher · EMOM 10′|10|emom|Minutos impares: 10 flexiones · minutos pares: 10 remos con banda.
+-Flexiones de brazos (minutos impares)|10|b2UagYWNErY
+-Remo con banda (minutos pares)|10|cRmuo81YQes
+@pa-r|Pádel recreativo · 2 días|dp|Pádel|Recreativo|2|Juega para divertirse, 1-2 partidos por semana
+#Día 1 · Piernas, empuje y desplazamiento|mancuernas · polea · banda · cajón · conos
+=Entrada en calor (10′)|1|wu|5′ de bici o cinta + movilidad de cadera, tobillo y hombro + 2×15 rotación externa con banda.
+=Core y prevención|3|ron|45″ de descanso
+-Pallof press en polea|10 por lado|LWrUioYVcZ0
+-Plancha lateral|30″ por lado|kyOeSuh7LLo
+-Extensión de muñeca excéntrica con mancuerna (codo)|15|r1yrlQyXZuc
+=Fuerza|3|ser|1′30″ de descanso entre series
+-Sentadilla goblet|S1 3x12 → S5 3x8|5HHITKuLxUs|fz
+-Press con mancuernas en banco plano|S1 3x12 → S5 3x8|W-qU8CF-WeU|fz
+-Estocada lateral con mancuerna|3x10 por lado|6mDKhdmTjao
+-Remo bajo en polea|S1 3x12 → S5 3x8|rV2EKsX4P-A|fz
+=Pádel|3|ron|1′ entre rondas
+-Desplazamiento lateral con banda en las rodillas|4 tramos de 5 m|3NIc8Xt3qR8
+-Step-up rápido al cajón|10 por pierna|DbEqoeGwFfE
+-Rotación de torso en polea de bajo a alto (derecha)|10 por lado|K1DQYyod_jw
+#Día 2 · Cadera, tracción y rotación|mancuernas · polea · balón medicinal · fitball · banda
+=Entrada en calor (10′)|1|wu|5′ de bici o cinta + movilidad + 2×15 face pull con banda.
+=Core y prevención|3|ron|45″ de descanso
+-Dead bug|10 por lado|jdiE9CQDebo
+-Bird dog|10 por lado|L0UMTpI1xWI
+-Pronación y supinación con mancuerna (codo)|15|RjHOuDn5i-4
+=Fuerza|3|ser|1′30″ de descanso entre series
+-Hip thrust en máquina|S1 3x12 → S5 3x8|gdUC0EFGWfQ|fz
+-Jalón al pecho, agarre neutro|S1 3x12 → S5 3x8|b8P4oVaz6gg|fz
+-Peso muerto rumano con mancuernas|S1 3x12 → S5 3x8|9j_L1KgpK8Y|fz
+-Press militar sentado con mancuernas|S1 3x12 → S5 3x8|oI3kX7cclb4|fz
+=Pádel|3|ron|1′ entre rondas
+-Lanzamiento lateral de balón medicinal contra la pared|8 por lado|o9BC7lgN1bo
+-Curl femoral en fitball|12|PUPZIYwosbI
+-Elevación de talones a una pierna|15 por pierna|1BL4681pIz4
+@pa-c|Pádel competitivo · 3 días|dp|Pádel|Competitivo|3|Juega torneos o entrena pádel 2+ veces por semana
+#Día 1 · Fuerza de piernas y potencia|barra · mancuernas · cajón · banda · conos
+=Entrada en calor (10′)|1|wu|5′ de bici + movilidad + 2×10 sentadilla con salto suave + 2×15 rotación externa con banda.
+=Core y prevención|3|ron|45″ de descanso
+-Pallof press con caminata|8 por lado|LWrUioYVcZ0
+-Plancha lateral con elevación de pierna|20″ por lado|UM_7sZQwG84
+-Extensión de muñeca excéntrica con mancuerna|15|r1yrlQyXZuc
+=Potencia · contraste|4|ser|Pesado e inmediatamente explosivo · 2′ después de cada par
+-Sentadilla con barra|4x6|TPoVS6ag6l4|w5=5x4
+-Salto al cajón (apenas terminás la sentadilla)|4x5|c-Yonc6lzUs
+-Estocada búlgara con mancuernas|4x6 por pierna|l5c49YVRYjM
+-Salto lateral (skater) (apenas terminás la búlgara)|4x5 por lado|8fAogMVW-to
+=Fuerza complementaria|3|ser|1′30″ de descanso entre series
+-Peso muerto rumano con barra|S1 3x12 → S5 3x8|rjvlSfZ-PQw|fz
+-Aductores en máquina|3x12|pNCnlDA-Kdk
+-Elevación de talones a una pierna|3x15|1BL4681pIz4
+=Agilidad|4|pw|40″ entre rondas
+-Desplazamiento lateral entre conos (5 m), tocando el cono abajo|20″|mziPKITnPeQ
+-Split step + sprint de 3 m adelante y vuelta atrás|6|ZFD3kdPe7Js
+#Día 2 · Tren superior y rotación|mancuernas · polea · balón medicinal · banda · landmine
+=Entrada en calor (10′)|1|wu|5′ de remo o elíptico + movilidad de hombro y columna + 2×15 face pull.
+=Core y prevención|3|ron|45″ de descanso
+-Rotación en landmine (arcoíris)|8 por lado|STy6D5_dBws
+-Rotación externa de hombro en polea|15 por brazo|R9uAG-xMkuU
+-Pronación y supinación con mancuerna|15|RjHOuDn5i-4
+=Potencia|4|pw|1′30″ entre series
+-Lanzamiento rotacional de balón medicinal (derecha y revés)|6 por lado|o9BC7lgN1bo
+-Landmine press unilateral explosivo|6 por brazo|Cidr2pbu7Dw
+-Slam con balón medicinal|8|EsAhU1jHpiQ
+=Fuerza|3|ser|1′30″ de descanso entre series
+-Press inclinado con mancuernas, agarre neutro|S1 3x12 → S5 3x8|OhnoqtPEpzM|fz
+-Remo unilateral con mancuerna apoyado en banco|S1 3x12 → S5 3x8|ryhxLQUn-cQ|fz
+-Jalón al pecho, agarre neutro|S1 3x12 → S5 3x8|b8P4oVaz6gg|fz
+-Vuelos laterales en máquina|3x12|NkRQI9rrRN8
+=Finisher de hombro|2|ron|Liviano y sin dolor
+-Elevación en Y en polea baja|12|GhhBwqmsx3s
+-Face pull con pausa arriba|15|BwFDZGcM0Hc
+#Día 3 · Cadena posterior, glúteo y resistencia|barra · pesa rusa · fitball · banda · soga · cinta
+=Entrada en calor (10′)|1|wu|3′ de soga + movilidad + caminata lateral con banda 2×15.
+=Core y prevención|3|ron|45″ de descanso
+-Dead bug con banda|10 por lado|jdiE9CQDebo
+-Copenhagen en banco, rodilla apoyada (aductores)|15″ por lado|DpXug2f7K08
+-Superman con pausa|12|I2w92FymIj8
+=Fuerza|3|ser|1′30″ de descanso entre series
+-Hip thrust con barra|S1 3x12 → S5 3x8|jWRNRAgaBxQ|fz
+-Peso muerto sumo con pesa rusa|S1 3x12 → S5 3x8|Awq1gUp4skU|fz
+-Curl femoral en fitball|3x12|PUPZIYwosbI
+-Abductores en polea|3x15 por pierna|Z2WcfUyPalE
+=Resistencia de partido|8|tab:20/10|8 rondas de 20″ de trabajo y 10″ de pausa, alternando. 2′ de descanso y repetir (S1-S2: 1 vez · S3-S5: 2 veces · S6: 1 vez).
+-Desplazamiento lateral rápido|20″|mziPKITnPeQ
+-Swing con pesa rusa|20″|7GfH0HFg9AQ
+=Vuelta a la calma|1|wu|5′ de cinta suave + elongación de cadera y hombro.
+@ho-r|Hockey recreativo · 2 días|dp|Hockey|Recreativo|2|Juega por diversión o en mami/papi hockey
+#Día 1 · Piernas, empuje y sprint|mancuernas · polea · banda · conos · cinta
+=Entrada en calor (10′)|1|wu|5′ de cinta o bici + movilidad de cadera y tobillo + caminata lateral con banda 2×15.
+=Core y prevención|3|ron|45″ de descanso
+-Plancha|30″|LKd2gK40YCY
+-Pallof press en polea|10 por lado|LWrUioYVcZ0
+-Copenhagen con rodilla apoyada (aductores)|15″ por lado|DpXug2f7K08
+=Fuerza|3|ser|1′30″ de descanso entre series
+-Sentadilla goblet|S1 3x12 → S5 3x8|5HHITKuLxUs|fz
+-Press con mancuernas en banco plano|S1 3x12 → S5 3x8|W-qU8CF-WeU|fz
+-Estocada atrás con mancuernas|3x10 por pierna|IpSouV9cPxQ
+-Remo bajo en polea|S1 3x12 → S5 3x8|rV2EKsX4P-A|fz
+=Hockey|4|ron|45″ entre rondas
+-Sprint de 10 m desde posición baja|1|N-t_NYgEGYw
+-Desplazamiento lateral entre conos en posición baja|20″|mziPKITnPeQ
+#Día 2 · Cadena posterior, tracción y espalda baja|mancuernas · pesa rusa · fitball · polea · banda
+=Entrada en calor (10′)|1|wu|5′ de bici + movilidad + puente de glúteos 2×15.
+=Core y prevención|3|ron|45″ de descanso
+-Bird dog|10 por lado|L0UMTpI1xWI
+-Plancha lateral|30″ por lado|kyOeSuh7LLo
+-Superman con pausa|12|I2w92FymIj8
+=Fuerza|3|ser|1′30″ de descanso entre series
+-Peso muerto rumano con mancuernas|S1 3x12 → S5 3x8|9j_L1KgpK8Y|fz
+-Jalón al pecho|S1 3x12 → S5 3x8|wHnu02mAIkk|fz
+-Hip thrust en máquina|S1 3x12 → S5 3x8|gdUC0EFGWfQ|fz
+-Press militar sentado con mancuernas|S1 3x12 → S5 3x8|oI3kX7cclb4|fz
+=Hockey|3|ron|1′ entre rondas
+-Curl femoral en fitball (isquios)|12|PUPZIYwosbI
+-Swing con pesa rusa|15|7GfH0HFg9AQ
+-Rotación de torso en polea de bajo a alto (golpe)|10 por lado|K1DQYyod_jw
+@ho-c|Hockey competitivo · 3 días|dp|Hockey|Competitivo|3|Juega en club, entrena 2-3 veces por semana
+#Día 1 · Potencia vertical · piernas y empuje|barra · mancuernas · cajón · conos
+=Entrada en calor (10′)|1|wu|5′ de bici + movilidad + 2×5 saltos suaves al cajón.
+=Core y prevención|3|ron|45″ de descanso
+-Giro ruso|10 por lado|hdSyLWfRJHc
+-Copenhagen en banco|20″ por lado|DpXug2f7K08
+-Superman sostenido|30″|I2w92FymIj8
+=Potencia|4|pw|1′30″ entre series
+-Salto al cajón|4|c-Yonc6lzUs
+-Burpee con salto al cajón|5|HWkusQYVQAo
+-Lunges jump (estocada con salto)|5 por pierna|Gb5tRcrGw7M
+=Contrastes|4|ser|Pesado e inmediatamente explosivo · 2′ después de cada par
+-Sentadilla con barra|4x6|TPoVS6ag6l4|w5=5x3
+-Jumping squat (apenas terminás la sentadilla)|4x5|-kbKBjUU-1A
+-Press de pecho con mancuernas|4x6|W-qU8CF-WeU
+-Flexiones con palmada (apenas terminás el press)|4x5|q4kAdOV0cQU
+=Sprints repetidos|6|ron|Volvé caminando (pausa ≈ 40″)
+-Sprint de 20 m desde posición baja|1|N-t_NYgEGYw
+#Día 2 · Potencia lateral y rotacional · cadera y hombros|barra · pesa rusa · landmine · cajón · balón medicinal
+=Entrada en calor (10′)|1|wu|5′ de remo o elíptico + movilidad de cadera y columna + caminata lateral con banda.
+=Core y prevención|3|ron|45″ de descanso
+-Rotación de torso en polea (leñador de arriba a abajo)|10 por lado|K1DQYyod_jw
+-Curl femoral en fitball, bajada lenta en 3″|8|PUPZIYwosbI
+-Bird dog|10 por lado|L0UMTpI1xWI
+=Potencia|4|pw|1′30″ entre series
+-Salto lateral por encima del cajón (skater)|5 por lado|8fAogMVW-to
+-Rotación de cintura en landmine explosiva|5 por lado|ZSkBWzDfB5U
+-Lanzamiento rotacional de balón medicinal contra la pared (golpe)|6 por lado|o9BC7lgN1bo
+=Contrastes|4|ser|Pesado e inmediatamente explosivo · 2′ después de cada par
+-Peso muerto sumo con barra|4x6|aMbhhzzP24A
+-Swing con pesa rusa (apenas terminás el peso muerto)|4x10|7GfH0HFg9AQ
+-Press de hombros de pie con barra|4x6|Xaa6rn3Hrh4
+-Push press (apenas terminás el press)|4x5|f4cvDdmxldE
+=Accesorios|3|ser|1′ de descanso
+-Remo con barra|3x8|qGxSGldH1l8
+-Hip thrust con barra|3x8|jWRNRAgaBxQ
+#Día 3 · Potencia horizontal · unilateral y agarre|barra · mancuernas · cajón · banda · soga
+=Entrada en calor (10′)|1|wu|3′ de soga + movilidad + 2×10 estocadas con giro.
+=Core y prevención|3|ron|45″ de descanso
+-Plancha lateral con elevación de pierna|20″ por lado|UM_7sZQwG84
+-Rueda abdominal|10|pQTSUqQ-IS0
+-Pallof press isométrico|20″ por lado|LWrUioYVcZ0
+=Potencia|4|pw|1′30″ entre series
+-Estocada con salto alternada|6|Gb5tRcrGw7M
+-Salto largo con caída controlada|4|3Da8VPKoKaU
+=Contrastes|4|ser|Pesado e inmediatamente explosivo · 2′ después de cada par
+-Peso muerto rumano con barra|4x6|rjvlSfZ-PQw
+-Salto al cajón con descenso (apenas terminás)|4x4|c-Yonc6lzUs
+-Step-up al cajón con mancuernas|4x6 por pierna|DbEqoeGwFfE
+-Step-up con salto (apenas terminás)|4x5 por pierna|yexqQSo9XFA
+=Resistencia de partido|6|ron|15″ de sprint + 15″ de desplazamiento lateral bajo + 30″ de pausa
+-Sprint|15″|N-t_NYgEGYw
+-Desplazamiento lateral bajo|15″|mziPKITnPeQ
+=Agarre|3|ser|Agarre del palo
+-Caminata de granjero con mancuernas pesadas|3x30 m|69hTPgHwA08
+@fo-r|Fútbol recreativo · 2 días|dp|Fútbol|Recreativo|2|Fútbol 5 con amigos, 1-2 partidos por semana
+#Día 1 · Piernas, empuje y velocidad|mancuernas · polea · banda · cajón · conos
+=Entrada en calor (10′)|1|wu|5′ de cinta + movilidad de cadera y tobillo + caminata lateral con banda 2×15.
+=Core y prevención|3|ron|45″ de descanso
+-Copenhagen con rodilla apoyada|15″ por lado|DpXug2f7K08
+-Plancha|30″|LKd2gK40YCY
+-Equilibrio monopodal|30″ por pierna|RMdL-XZ8qo8
+=Fuerza|3|ser|1′30″ de descanso entre series
+-Sentadilla goblet|S1 3x12 → S5 3x8|5HHITKuLxUs|fz
+-Press con mancuernas en banco plano|S1 3x12 → S5 3x8|W-qU8CF-WeU|fz
+-Step-up al cajón con mancuernas|3x10 por pierna|DbEqoeGwFfE
+-Remo bajo en polea|S1 3x12 → S5 3x8|rV2EKsX4P-A|fz
+=Fútbol|4|ron|45″ entre rondas
+-Sprint de 15 m|1|N-t_NYgEGYw
+-Zigzag entre 5 conos|1 pasada|8gJaCN1meJc
+#Día 2 · Cadena posterior, tracción y core|mancuernas · fitball · polea · banda · máquinas
+=Entrada en calor (10′)|1|wu|5′ de bici + movilidad + puente de glúteos 2×15.
+=Core y prevención|3|ron|45″ de descanso
+-Curl femoral en fitball (isquios)|10|PUPZIYwosbI
+-Plancha lateral|30″ por lado|kyOeSuh7LLo
+-Bird dog|10 por lado|L0UMTpI1xWI
+=Fuerza|3|ser|1′30″ de descanso entre series
+-Peso muerto rumano con mancuernas|S1 3x12 → S5 3x8|9j_L1KgpK8Y|fz
+-Jalón al pecho|S1 3x12 → S5 3x8|wHnu02mAIkk|fz
+-Hip thrust en máquina|S1 3x12 → S5 3x8|gdUC0EFGWfQ|fz
+-Máquina aductora|3x12|pNCnlDA-Kdk
+=Resistencia de partido|6|tab:30/30|6 rondas de 30″ fuerte + 30″ suave (cinta o bici). 2′ de descanso y otra vuelta igual.
+-Cinta o bici fuerte|30″|Q3mGikLadak
+@fo-c|Fútbol competitivo · 3 días|dp|Fútbol|Competitivo|3|Juega en liga o club, entrena 2-3 veces por semana
+#Día 1 · Fuerza y potencia de piernas|barra · mancuernas · cajón · conos
+=Entrada en calor (10′)|1|wu|5′ de bici + movilidad + 2×5 saltos suaves al cajón.
+=Core y prevención|3|ron|45″ de descanso
+-Copenhagen en banco|20″ por lado|DpXug2f7K08
+-Pallof press|10 por lado|LWrUioYVcZ0
+-Equilibrio monopodal con alcance|6 por pierna|RMdL-XZ8qo8
+=Contrastes|4|ser|Pesado e inmediatamente explosivo · 2′ después de cada par
+-Sentadilla con barra|4x6|TPoVS6ag6l4|w5=5x3
+-Salto al cajón (apenas terminás la sentadilla)|4x4|c-Yonc6lzUs
+-Estocada búlgara con mancuernas|4x6 por pierna|l5c49YVRYjM
+-Estocada con salto (apenas terminás la búlgara)|4x4 por pierna|Gb5tRcrGw7M
+=Fuerza complementaria|3|ser|1′30″ de descanso entre series
+-Press con mancuernas en banco plano|S1 3x12 → S5 3x8|W-qU8CF-WeU|fz
+-Remo con barra|S1 3x12 → S5 3x8|qGxSGldH1l8|fz
+-Elevación de talones a una pierna|3x15|1BL4681pIz4
+=Velocidad|6|ron|Salida desde parado, volvé caminando
+-Sprint de 20 m|1|N-t_NYgEGYw
+#Día 2 · Cambios de dirección, cadera y tren superior|pesa rusa · banda · conos · balón medicinal · polea
+=Entrada en calor (10′)|1|wu|5′ de cinta + movilidad + caminata lateral con banda.
+=Core y prevención|3|ron|45″ de descanso
+-Rotación de torso en polea|10 por lado|K1DQYyod_jw
+-Plancha lateral con elevación de pierna|20″ por lado|UM_7sZQwG84
+-Bird dog|10 por lado|L0UMTpI1xWI
+=Agilidad|4|pw|1′30″ entre series
+-Frenada y cambio de dirección a 90° entre conos (5 m + 5 m)|4 por lado|MvJHsWoVn7c
+-Salto lateral (skater) con frenada de 2″|5 por lado|8fAogMVW-to
+-Lanzamiento de balón medicinal por encima de la cabeza (saque lateral)|8|FAOD0j4ZEYE
+=Fuerza|3|ser|1′30″ de descanso entre series
+-Peso muerto sumo con pesa rusa|S1 3x12 → S5 3x8|Awq1gUp4skU|fz
+-Jalón al pecho|S1 3x12 → S5 3x8|wHnu02mAIkk|fz
+-Press militar sentado con mancuernas|S1 3x12 → S5 3x8|oI3kX7cclb4|fz
+-Abductores en polea|3x15 por pierna|Z2WcfUyPalE
+#Día 3 · Cadena posterior y resistencia|barra · fitball · pesa rusa · cinta · soga
+=Entrada en calor (10′)|1|wu|3′ de soga + movilidad + puente de glúteos 2×15.
+=Core y prevención|3|ron|45″ de descanso
+-Curl femoral en fitball, bajada lenta en 3″|8|PUPZIYwosbI
+-Dead bug|10 por lado|jdiE9CQDebo
+-Superman con pausa|12|I2w92FymIj8
+=Fuerza|3|ser|1′30″ de descanso entre series
+-Peso muerto rumano con barra|S1 3x12 → S5 3x8|rjvlSfZ-PQw|fz
+-Hip thrust con barra|S1 3x12 → S5 3x8|jWRNRAgaBxQ|fz
+-Máquina aductora|3x12|pNCnlDA-Kdk
+-Swing con pesa rusa|3x15|7GfH0HFg9AQ
+=Resistencia de partido|10|ron|15″ de sprint + 45″ de trote suave (S1-S2: 8 rondas · S3-S5: 10-12 · S6: 6)
+-Sprint|15″|N-t_NYgEGYw
+-Trote suave|45″|cnLwXHn7aU4`;
+const BI_WEEKS={
+  hy:[{t:'S1',n:'Base',d:'Como está escrito. Trote cómodo, sprint lo más rápido que puedas con buena técnica.'},{t:'S2',n:'Base',d:'Como está escrito, buscando hacerlo más fluido.'},{t:'S3',n:'Sumás',d:'+2 reps o +5″ por ejercicio (ya te lo sumé).'},{t:'S4',n:'Sumás',d:'+2 reps o +5″ por ejercicio (ya te lo sumé).'},{t:'S5',n:'4ª vuelta',d:'Una vuelta más al circuito HYROX.'},{t:'S6',n:'4ª vuelta',d:'Una vuelta más al circuito HYROX.'}],
+  fu:[{t:'S1',n:'Base',d:'Como está escrito para tu nivel.'},{t:'S2',n:'Base',d:'Igual que la S1, buscando subir un poco la carga.'},{t:'S3',n:'Más carga',d:'Más carga y +10″ de cardio (ya te lo sumé).'},{t:'S4',n:'Más carga',d:'Más carga y +10″ de cardio (ya te lo sumé).'},{t:'S5',n:'Ronda extra',d:'Una ronda más en el bloque 1.'},{t:'S6',n:'Descarga',d:'Una ronda menos y carga liviana.'}],
+  dp:[{t:'S1',n:'Base',d:'Fuerza 3×12 · potencia y agilidad 3 series.'},{t:'S2',n:'Volumen',d:'Fuerza 1×12 + 2×10.'},{t:'S3',n:'Carga',d:'Fuerza 3×10 · potencia y agilidad 4 series.'},{t:'S4',n:'Carga',d:'Fuerza 1×10 + 2×8.'},{t:'S5',n:'Pico',d:'Fuerza 3×8, la semana más pesada.'},{t:'S6',n:'Descarga',d:'Fuerza 3×10 liviano · potencia 2 series.'}]
+};
+const NIV_LBL={P:'Principiante',I:'Intermedio',A:'Avanzado'};
+const NIV_REST={P:'1′30″',I:'1′15″',A:'1′'};
+const NIV_CARGA={P:'carga liviana',I:'subí la carga en cada ronda',A:'carga alta al final'};
+function biCap(s){ s=String(s||'').trim(); return s?s.charAt(0).toUpperCase()+s.slice(1):''; }
+function biVid(id){ return id&&id!=='?'?'https://www.youtube.com/watch?v='+id:''; }
+let _BI=null;
+function builtinTpls(){
+  if(_BI) return _BI;
+  const T=[]; let t=null,d=null,bk=null;
+  BI_SRC.split('\n').forEach(function(ln){
+    if(!ln.trim()) return;
+    const c=ln[0], p=ln.slice(1).split('|');
+    if(c==='@'){ t={id:'bi-'+p[0],name:p[1],fam:p[2],cat:p[3],modo:p[4]||'',dias:+p[5],para:p[6]||'',builtin:true,routine:[]}; T.push(t); return; }
+    if(c==='#'){ d={day:p[0],mov:'none',mat:(p[1]||'').split('·').map(biCap).join(' · '),tf:t.fam,ex:[]}; t.routine.push(d); bk=null; return; }
+    if(c==='='){ const R=+p[1]||1, kk=p[2]||'ron', k=kk.split(':')[0];
+      const row={n:'── '+p[0]+' ──',blk:true,tip:p[3]||'',s:R,r:'',w:'',alt:'',rest:'',vid:'',lv:t.fam,bk:k,blkRounds:R,blkWork:0,blkRest:0,blkFormat:'tabata'};
+      bk={k:k,R:R};
+      if(k==='amrap'){ row.blkFormat='amrap'; row.blkWork=R*60; row.blkRounds=1; row.s=1; bk.R=1; }
+      else if(k==='emom'){ row.blkFormat='emom'; row.blkWork=60; row.blkRounds=R; bk.R=1; }
+      else if(k==='tab'){ const wr=(kk.split(':')[1]||'20/10').split('/'); row.blkWork=+wr[0]||20; row.blkRest=+wr[1]||10; bk.R=1; }
+      else if(k==='wu'||k==='cb'){ bk.R=1; }
+      d.ex.push(row); return; }
+    if(c==='-'){ const fl=(p[3]||'').split(' ').filter(Boolean); let s=bk?bk.R:3, r=p[1]||''; const ex={n:p[0],s:s,r:r,w:'',alt:'',tip:'',rest:'',vid:biVid(p[2]),lv:t.fam,bk:bk?bk.k:''};
+      if(bk&&bk.k==='ser'){ let m=/^S1\s*(\d+)\s*x\s*(\d+)/i.exec(r); if(m){ ex.s=+m[1]; ex.r=m[2]; }
+        else if((m=/^(\d+)\s*x\s*(.+)$/i.exec(r))){ ex.s=+m[1]; ex.r=m[2].trim(); } }
+      fl.forEach(function(f){ if(f==='py') ex.py=1; else if(f==='fz') ex.fz=1; else if(/^w5=/.test(f)){ const m=/^w5=(\d+)x(\d+)/.exec(f); if(m){ ex.wk=[{},{},{},{},{s:+m[1],r:m[2]},{}]; } } });
+      d.ex.push(ex); }
+  });
+  _BI=T; return T;
+}
+/* ---- nivel / impacto efectivos del alumno abierto ---- */
+function nivLock(){ const st=DB.students[active]||{}; return st.nivLock||{}; }
+function nivHoyKey(){ return 'nivHoy_'+week+'_'+day; }
+function curNivel(){ const L=nivLock(); if(L.niv) return L.niv; const h=CACHE[nivHoyKey()]; if(h&&h.niv) return h.niv; const st=DB.students[active]||{}; return CACHE.nivel||st.nivel||'I'; }
+function curImp(){ const L=nivLock(); if(L.imp) return L.imp; const h=CACHE[nivHoyKey()]; if(h&&h.imp) return h.imp; const st=DB.students[active]||{}; return CACHE.imp||st.imp||'con'; }
+/* ---- versión sin impacto (orden importa: lo más específico primero) ---- */
+const NOIMP=[
+  [/burpee con salto al caj[oó]n|burpee box/i,'Burpee sin salto + step-up al cajón','zzN6L1cnAAs'],
+  [/devil press/i,'Devil press sin salto (paso atrás y adelante)','Tj-BDDuqslI'],
+  [/burpee/i,'Burpee sin salto (paso atrás y paso adelante)','zzN6L1cnAAs'],
+  [/saltar la soga|^soga\b/i,'Skipping sin salto (o elíptico)','H6U5EKbiY7A'],
+  [/step-?up con salto/i,'Step-up rápido al cajón','yexqQSo9XFA'],
+  [/salto al caj[oó]n/i,'Step-up rápido al cajón','yexqQSo9XFA'],
+  [/b[uú]lgara con salto/i,'Estocada búlgara sin salto','l5c49YVRYjM'],
+  [/squat jump|jumping squat|sentadilla con salto/i,'Sentadilla con elevación de talones','HCsE3FFqzts'],
+  [/estocada con salto|lunges? jump|estocadas? .*con salto/i,'Estocada alternada rápida','A53s7p26g64'],
+  [/saltos? laterales? (con|sobre) (el )?step/i,'Step lateral (subir y bajar de costado)','IiYSs4PeKu4'],
+  [/salto lateral|skater/i,'Estocada lateral rápida (sin salto)','6mDKhdmTjao'],
+  [/salto largo/i,'Sentadilla con elevación de talones','HCsE3FFqzts'],
+  [/flexiones con palmada/i,'Flexiones explosivas sin despegar las manos','b2UagYWNErY'],
+  [/mountain climber|escaladores/i,'Mountain climber lento, sin saltar los pies','0MQF6Id1tp0'],
+  [/jumping jacks?/i,'Jumping jacks sin salto (paso al costado)','vip0vCDpl5I'],
+  [/high knee/i,'Skipping sin salto','H6U5EKbiY7A'],
+  [/^sprint\b|^trote\b|cinta o bici fuerte/i,'Bici o elíptico a la misma intensidad','qRkoq39DqAo']
+];
+function noImpFor(n){ for(let i=0;i<NOIMP.length;i++){ if(NOIMP[i][0].test(n||'')) return NOIMP[i]; } return null; }
+function dayHasImpact(d){ return !!(d&&(d.ex||[]).some(function(e){ return !isBlockRow(e)&&noImpFor(e.n); })); }
+function dayHasLv(d){ return !!(d&&(d.ex||[]).some(function(e){ return e&&e.lv; })); }
+/* ---- rondas del bloque según nivel y semana ---- */
+function lvBlockOf(ei){ const ex=(routine()[day]||{}).ex||[]; for(let i=ei-1;i>=0;i--){ if(isBlockRow(ex[i])) return ex[i]; } return null; }
+function lvRounds(b){
+  let R=+b.blkRounds||+b.s||1; const L=curNivel(), k=b.bk, f=b.lv, w=+week||0;
+  if(k==='wu'||k==='cb'||k==='ser'||k==='tab') return R;
+  if(k==='amrap') return 1;
+  if(k==='emom') return Math.max(4,R+(L==='P'?-2:L==='A'?2:0));
+  if(k==='pw'){ R=[3,3,4,4,4,2][w]||R; return Math.max(2,R+(L==='P'?-1:0)); }
+  R=Math.max(1,R+(L==='P'?-1:L==='A'?1:0));
+  if(f==='fu'){ if(w===4&&/bloque 1\b/i.test(b.n)) R++; if(w===5) R=Math.max(1,R-1); }
+  if(f==='hy'&&k==='hx'&&w>=4) R++;
+  return R;
+}
+function pyrParse(r){ const m=/^\s*(\d+(?:-\d+)+)\s*(″|"|′)?\s*(.*)$/.exec(String(r||'')); if(!m) return null; return {L:m[1].split('-').map(Number),u:m[2]==='"'?'″':(m[2]||''),suf:m[3]||''}; }
+function pyrTxt(P,n,addT){ let L=curNivel()==='P'?[P.L[0]]:P.L.slice(); while(L.length<n){ const a=L[L.length-1], b=L.length>1?L[L.length-2]:a; L.push(Math.max(1,a+(a-b))); } L=L.slice(0,n); if(addT&&P.u==='″') L=L.map(function(x){ return x+addT; }); return L.map(function(x){ return x+P.u; }).join(' · ')+(P.suf?' '+P.suf:''); }
+function isPyrR(r){ return /^\s*\d+[″′]?(\s·\s\d+[″′]?)+/.test(String(r||'')); }
+function exLevel(ex,ei){
+  if(!ex) return ex;
+  const o=Object.assign({},ex); const w=+week||0;
+  if(ex.lv){
+    const L=curNivel();
+    if(isBlockRow(ex)){
+      const R=lvRounds(ex); o.blkRounds=R; o.s=R;
+      if(ex.bk==='amrap'){ const M=Math.max(4,Math.round((+ex.blkWork||480)/60)+(L==='P'?-2:L==='A'?2:0)); o.blkWork=M*60; o.n=String(ex.n).replace(/AMRAP\s*\d+\s*′/i,'AMRAP '+M+'′'); }
+      if(ex.bk==='emom'){ o.n=String(ex.n).replace(/EMOM\s*\d+\s*′/i,'EMOM '+R+'′'); }
+      if(ex.bk==='fb') o.tip=(ex.tip?ex.tip+' · ':'')+NIV_REST[L]+' de descanso entre rondas · '+NIV_CARGA[L];
+      if(ex.bk==='hx'&&w>=4) o.tip=(ex.tip?ex.tip+' · ':'')+'S'+(w+1)+': sumás una vuelta';
+    } else {
+      const b=lvBlockOf(ei), k=b&&b.bk;
+      if(b&&(k==='ron'||k==='fb'||k==='hx'||k==='pw')) o.s=lvRounds(b);
+      if(ex.py){ const P=pyrParse(ex.r); if(P) o.r=pyrTxt(P,o.s,(ex.lv==='fu'&&(w===2||w===3))?10:0); }
+      else if(ex.fz){ o.s=3; o.r=['12','1×12 + 2×10','10','1×10 + 2×8','8','10'][w]||ex.r; if(w===5) o.w='Liviano (descarga)'; }
+      else if(k==='ron'||k==='hx'||k==='fb'){
+        let m=/^(\d+)\s*(″|")(.*)$/.exec(String(ex.r||''));
+        if(m&&+m[1]<=60){ let v=+m[1]+(L==='P'?-10:L==='A'?10:0); if(ex.lv==='hy'&&(w===2||w===3)) v+=5; o.r=Math.max(10,v)+'″'+m[3]; }
+        else if(ex.lv==='hy'&&(w===2||w===3)&&(m=/^(\d+)(\s.*)?$/.exec(String(ex.r||'')))&&!/[′']/.test(ex.r)) o.r=(+m[1]+2)+(m[2]||'');
+      }
+    }
+  }
+  if(!isBlockRow(ex)&&curImp()==='sin'){ const ni=noImpFor(ex.n); if(ni){ o.niFrom=ex.n; o.n=ni[1]; o.vid=biVid(ni[2]); if(ex.alt&&noImpFor(ex.alt)) o.alt=''; } }
+  return o;
+}
+function nivBarHTML(){
+  const d=routine()[day]; const hasLv=dayHasLv(d), hasImp=dayHasImpact(d);
+  if(!hasLv&&!hasImp) return '';
+  const L=nivLock(), nv=curNivel(), im=curImp(), hoy=CACHE[nivHoyKey()]||null;
+  const seg=function(k,opts,cur,locked){ return `<div class="nb-seg${locked?' nb-lock':''}">${opts.map(function(o){ return `<button type="button" data-act="nivSet" data-k="${k}" data-v="${o[0]}" class="${cur===o[0]?'sel':''}"${locked?' disabled':''}>${o[1]}</button>`; }).join('')}</div>`; };
+  let h='<div class="niv-bar">';
+  if(hasLv) h+=`<div class="nb-row"><span class="nb-l">Nivel</span>${seg('niv',[['P','Principiante'],['I','Intermedio'],['A','Avanzado']],nv,!!L.niv)}</div>`;
+  if(hasImp) h+=`<div class="nb-row"><span class="nb-l">Impacto</span>${seg('imp',[['con','Con saltos'],['sin','🌿 Sin impacto']],im,!!L.imp)}</div>`;
+  const notes=[];
+  if(L.niv||L.imp) notes.push('🔒 Tu profe fijó '+[L.niv?'el nivel':'',L.imp?'el impacto':''].filter(Boolean).join(' y ')+' para vos.');
+  if(hoy&&(hoy.niv||hoy.imp)) notes.push('Solo por hoy · <button type="button" class="nb-undo" data-act="nivSet" data-k="hoy" data-v="">volver a lo de siempre</button>');
+  if(hasLv&&!notes.length) notes.push(nv==='P'?'Menos rondas y carga liviana.':nv==='A'?'Una ronda más y carga alta al final.':'Rondas y tiempos como están escritos.');
+  h+=`<div class="nb-note">${notes.join(' ')}</div></div>`;
+  return h;
+}
+async function nivSet(k,v){
+  const L=nivLock();
+  if(k==='hoy'){ delete CACHE[nivHoyKey()]; }
+  else if(k==='hniv'||k==='himp'){ const cur=Object.assign({},CACHE[nivHoyKey()]||{}); cur[k==='hniv'?'niv':'imp']=v; cur._w=+week; CACHE[nivHoyKey()]=cur; }
+  else if(k==='niv'){ if(L.niv) return; CACHE.nivel=v; delete CACHE[nivHoyKey()]; }
+  else if(k==='imp'){ if(L.imp) return; CACHE.imp=v; const h=CACHE[nivHoyKey()]; if(h){ delete h.imp; } }
+  queueSave(); renderApp();
+}
+
 /* ==== Plantillas de rutina reutilizables (06/10/2026) ==== */
 async function saveAsTemplate(){
   const st=DB.students[active];
@@ -8088,8 +9018,8 @@ async function saveAsTemplate(){
   toast('Plantilla guardada ✓','ok');
   renderEdit();
 }
-async function applyTemplate(tplId,targetId){
-  const tpl=(DB.templates||[]).find(function(t){ return t.id===tplId; }); if(!tpl) return;
+async function applyTemplate(tplId,targetId,tplObj,after){
+  const tpl=tplObj||(DB.templates||[]).find(function(t){ return t.id===tplId; }); if(!tpl) return;
   /* 07/10/2026: Tami pidió poder elegir A QUIÉN mandarle la plantilla directamente desde
      la lista, sin tener que primero cambiar de alumno arriba y después venir acá — ahora
      cada plantilla tiene su propio selector de alumno (ver templates UI) y se puede aplicar
@@ -8118,10 +9048,21 @@ async function applyTemplate(tplId,targetId){
   st.routine=cp(tpl.routine);
   /* 29/10/2026: una plantilla puede traer sus propias semanas (p. ej. "Omar · Hipertrofia 6 semanas") */
   if(Array.isArray(tpl.weeks)&&tpl.weeks.length){ st.weeks=cp(tpl.weeks); st.unlockWeek=0; week=0; day=0; try{ localStorage.removeItem('tafit:pos:'+target); }catch(e){} }
+  if(after) await after(st);
   await saveDB();
   toast('Plantilla aplicada a '+name+' ✓','ok');
   renderEdit();
 }
+/* 23/11/2026: aplicar un programa TaFiT con nivel/impacto (y opcionalmente fijarlos) */
+async function applyBuiltin(id){
+  const t=builtinTpls().find(function(x){ return x.id===id; }); if(!t) return;
+  const box=document.querySelector('.bi-apply[data-bi="'+id+'"]'); const g=function(f){ const e=box&&box.querySelector('[data-f="'+f+'"]'); return e?(e.type==='checkbox'?e.checked:e.value):''; };
+  const niv=g('niv')||'I', imp=g('imp')||'con', lock=!!g('lock');
+  const obj={ id:t.id, name:t.name+' · '+NIV_LBL[niv]+(imp==='sin'?' · sin impacto':''), routine:cp(t.routine), weeks:cp(BI_WEEKS[t.fam]||WEEKS6) };
+  openSecs.add('biprog');
+  await applyTemplate(t.id,g('to')||active,obj,async function(st){ st.nivel=niv; st.imp=imp; if(lock) st.nivLock={niv:niv,imp:imp}; else delete st.nivLock; delete CACHE.nivel; delete CACHE.imp; await saveData(); });
+}
+async function setNivLock(f,v){ const st=DB.students[active]; if(!st) return; const L=Object.assign({},st.nivLock||{}); if(v) L[f]=v; else delete L[f]; if(L.niv||L.imp) st.nivLock=L; else delete st.nivLock; openSecs.add('nivel'); await saveDB(); toast(v?'Fijado ✓':'Ahora lo elige '+st.name,'ok'); renderEdit(); }
 async function deleteTemplate(tplId){
   const tpl=(DB.templates||[]).find(function(t){ return t.id===tplId; }); if(!tpl) return;
   if(!await uiConfirm('¿Borrar la plantilla "'+tpl.name+'"? Esto no afecta a ninguna alumna que ya la haya usado — solo deja de estar disponible para usarla de nuevo.')) return;
@@ -8510,6 +9451,38 @@ function renderEdit(){
   }
 
   {
+    /* 23/11/2026 · Etapa 4: programas TaFiT listos, con filtros y nivel/impacto al aplicarlos */
+    const F=window._biF||(window._biF={cat:'',dias:0,modo:''});
+    const all=builtinTpls();
+    const cats=[['','Todos'],['HYROX','HYROX'],['Funcional','Funcional'],['Pádel','Pádel'],['Hockey','Hockey'],['Fútbol','Fútbol']];
+    const chip=function(k,v,l,cur){ return `<button type="button" data-act="biFilter" data-k="${k}" data-v="${esc(String(v))}" class="${String(cur)===String(v)?'sel':''}">${esc(l)}</button>`; };
+    const isDep=/^(Pádel|Hockey|Fútbol)$/.test(F.cat);
+    let filt=`<div class="bi-filt"><div class="bi-frow">${cats.map(function(c){ return chip('cat',c[0],c[1],F.cat); }).join('')}</div>`;
+    if(!isDep) filt+=`<div class="bi-frow"><span>Días</span>${[[0,'Todos'],[2,'2'],[3,'3'],[4,'4'],[5,'5']].map(function(c){ return chip('dias',c[0],c[1],F.dias); }).join('')}</div>`;
+    if(!F.cat||isDep) filt+=`<div class="bi-frow"><span>Deportes</span>${[['','Todos'],['Recreativo','Recreativo'],['Competitivo','Competitivo']].map(function(c){ return chip('modo',c[0],c[1],F.modo); }).join('')}</div>`;
+    filt+='</div>';
+    const list=all.filter(function(t){ return (!F.cat||t.cat===F.cat)&&(!F.dias||isDep||t.dias===+F.dias)&&(!F.modo||!t.modo||t.modo===F.modo); });
+    const st3=DB.students[active]||{};
+    const prevH=function(t){ return `<details class="tpl-prev"><summary>👁 Ver contenido</summary><div class="tpl-prev-body">${t.routine.map(function(d){ const names=d.ex.filter(function(e){ return !isBlockRow(e); }).map(function(e){ return e.n; }); return `<div class="tpl-prev-day"><b>${esc(d.day)}</b><small>${esc(names.slice(0,6).join(', ')+(names.length>6?'…':''))}</small></div>`; }).join('')}</div></details>`; };
+    const opts=DB.order.filter(function(sid){ return !DB.students[sid].archived||sid===active; }).map(function(sid){ return `<option value="${esc(sid)}"${sid===active?' selected':''}>${esc(DB.students[sid].name)}</option>`; }).join('');
+    const rows=list.length?list.map(function(t){
+      const nEx=t.routine.reduce(function(a,d){ return a+d.ex.filter(function(e){ return !isBlockRow(e); }).length; },0);
+      return `<div class="tpl-row bi-row"><div class="tpl-info"><b>${esc(t.name)}</b><small>${esc(t.para)} · ${t.routine.length} días · ${nEx} ejercicios con video · 6 semanas</small>${prevH(t)}
+        <div class="bi-apply" data-bi="${esc(t.id)}"><select class="bi-sel" data-f="to">${opts}</select>
+        <select class="bi-sel" data-f="niv">${['P','I','A'].map(function(l){ return `<option value="${l}"${(st3.nivel||'I')===l?' selected':''}>${NIV_LBL[l]}</option>`; }).join('')}</select>
+        <select class="bi-sel" data-f="imp"><option value="con"${st3.imp!=='sin'?' selected':''}>Con saltos</option><option value="sin"${st3.imp==='sin'?' selected':''}>Sin impacto</option></select>
+        <label class="bi-lock"><input type="checkbox" class="bi-sel" data-f="lock"> Fijar (que no lo cambie)</label>
+        <button data-act="applyBuiltin" data-id="${esc(t.id)}">▶ Usar</button></div></div></div>`;
+    }).join(''):`<p style="font-size:11.5px;color:var(--mute)">No hay programas con ese filtro.</p>`;
+    SEC('biprog','⭐ Programas TaFiT listos',`<p style="font-size:11.5px;color:var(--mute)">HYROX y Funcional de 2 a 5 días, y Pádel, Hockey y Fútbol recreativo o competitivo. Todos con video en cada ejercicio y 6 semanas de progresión. El nivel cambia rondas, tiempos y reps; "sin impacto" cambia solo los saltos por su versión sin impacto. Si no fijás nada, la alumna puede cambiarlo desde su app.</p>${filt}<div class="tpl-list">${rows}</div>`);
+  }
+  {
+    const st4=DB.students[active]||{}; const L4=st4.nivLock||{};
+    SEC('nivel','🎚 Nivel e impacto',`<p style="font-size:11.5px;color:var(--mute)">Sirve para los programas TaFiT (rondas, tiempos y reps según nivel) y para cualquier rutina (los ejercicios con salto cambian por su versión sin impacto). Si lo dejás en "Que elija", ${esc(st4.name)} lo cambia desde su app.</p>
+      <div class="fld mt8"><label>Nivel</label><select data-chg="nivLock" data-f="niv"><option value=""${!L4.niv?' selected':''}>Que elija (arranca en ${NIV_LBL[st4.nivel||'I']})</option>${['P','I','A'].map(function(l){ return `<option value="${l}"${L4.niv===l?' selected':''}>🔒 Fijar ${NIV_LBL[l]}</option>`; }).join('')}</select></div>
+      <div class="fld mt8"><label>Impacto</label><select data-chg="nivLock" data-f="imp"><option value=""${!L4.imp?' selected':''}>Que elija (arranca ${st4.imp==='sin'?'sin':'con'} impacto)</option><option value="con"${L4.imp==='con'?' selected':''}>🔒 Fijar con impacto</option><option value="sin"${L4.imp==='sin'?' selected':''}>🔒 Fijar sin impacto</option></select></div>`);
+  }
+  {
     /* Plantillas de rutina reutilizables (06/10/2026): guardar la rutina de un alumno
        como plantilla y aplicarla después a otro, para no volver a tipear todo de cero
        cada vez que arranca alguien con un programa parecido. Las plantillas son
@@ -8634,7 +9607,9 @@ function collectForm(){ const out=[]; document.querySelectorAll('.edit-day').for
         const bRest=Math.max(0,parseInt(g('blkRest'))||0);
         const bRounds=Math.max(1,parseInt(g('blkRounds'))||3);
         const bFormat=(g('blkFormat')==='amrap'||g('blkFormat')==='emom')?g('blkFormat'):'tabata';
-        exes.push({ n:bTitle, s:bRounds, r:'', w:'', alt:'', tip:bDesc, rest:bRest?(bRest+' s'):'', vid:'', blk:true, blkWork:bWork, blkRest:bRest, blkRounds:bRounds, blkFormat:bFormat });
+        const _bo={ n:bTitle, s:bRounds, r:'', w:'', alt:'', tip:bDesc, rest:bRest?(bRest+' s'):'', vid:'', blk:true, blkWork:bWork, blkRest:bRest, blkRounds:bRounds, blkFormat:bFormat };
+        { const _op=_orig[_pos]; if(_op&&_op.lv&&_op.blk){ _bo.lv=_op.lv; _bo.bk=_op.bk; } }
+        exes.push(_bo);
         return;
       }
       const n=(g('n')||'').trim(); const rawS=(g('s')||'').trim();
@@ -8643,7 +9618,7 @@ function collectForm(){ const out=[]; document.querySelectorAll('.edit-day').for
       const sParts=rawS.match(/(\d+)\s*[xX×]\s*(\d+)/g);
       if(sParts&&sParts.length>1){ let totalS=0; const repP=[]; sParts.forEach(function(p){ const m=p.match(/(\d+)\s*[xX×]\s*(\d+)/); if(m){ totalS+=parseInt(m[1]); repP.push(m[1]+'×'+m[2]); } }); finalS=totalS; finalR=repP.join(' + '); }
       const vidManual=(g('vid')||'').trim();
-      const obj={ n, s:finalS, r:finalR, w:(g('w')||'').trim()||'A definir', alt:(g('alt')||'').trim(), tip:(g('tip')||'').trim(), rest:(g('rest')||'').trim(), vid:vidManual||YT(n||'ejercicio'), altVid:(g('altVid')||'').trim() }; { const wkIns=[...exEl.querySelectorAll('[data-wk]')]; if(wkIns.length){ const wk=[]; wkIns.forEach(function(i){ const wi=+i.dataset.wk; const v=(i.value||'').trim(); wk[wi]=wk[wi]||{}; if(v) wk[wi][i.dataset.wf]=v; }); for(let q=0;q<wk.length;q++){ wk[q]=wk[q]||{}; if(wk[q].n&&!wk[q].vid){ const li=exLibList().find(function(x){ return inf2Norm(x.n)===inf2Norm(wk[q].n); }); if(li&&li.vid) wk[q].vid=li.vid; } } if(wk.some(function(o){ return Object.keys(o).length; })) obj.wk=wk; } else { const _o=_orig.find(function(x){ return x&&x.n===n&&Array.isArray(x.wk); }); if(_o) obj.wk=JSON.parse(JSON.stringify(_o.wk)); } } { const _o2=_orig.find(function(x){ return x&&x.n===n&&x.from; }); if(_o2) obj.from=_o2.from; } { const _o3=_orig.find(function(x){ return x&&x.n===n&&x.pa; }); if(_o3) obj.pa=JSON.parse(JSON.stringify(_o3.pa)); } const w2el=exEl.querySelector('[data-field="w2"]'); if(w2el) obj.w2=(w2el.value||'').trim()||'A definir'; exes.push(obj); }); out[di]={ day:dayName, ex:exes }; if(dayWd) out[di].wd=dayWd; if(dayType) out[di].type=dayType; { const cb=dayEl.querySelector('.corebox'); if(cb&&cb.checked) out[di].core=true; } { const se=dayEl.querySelector('.dayses'); if(se&&dayType&&['run','swim','mob'].indexOf(dayType)>=0) out[di].ses=se.value; { const _od=(DB.students[active].routine||[])[di]; if(_od&&Array.isArray(_od.sesWk)&&out[di].ses===_od.ses) out[di].sesWk=_od.sesWk.slice(); } const mv=dayEl.querySelector('.daymov'); if(mv&&mv.value!=='mob-c') out[di].mov=mv.value; } }); return out; }
+      const obj={ n, s:finalS, r:finalR, w:(g('w')||'').trim()||'A definir', alt:(g('alt')||'').trim(), tip:(g('tip')||'').trim(), rest:(g('rest')||'').trim(), vid:vidManual||YT(n||'ejercicio'), altVid:(g('altVid')||'').trim() }; { const wkIns=[...exEl.querySelectorAll('[data-wk]')]; if(wkIns.length){ const wk=[]; wkIns.forEach(function(i){ const wi=+i.dataset.wk; const v=(i.value||'').trim(); wk[wi]=wk[wi]||{}; if(v) wk[wi][i.dataset.wf]=v; }); for(let q=0;q<wk.length;q++){ wk[q]=wk[q]||{}; if(wk[q].n&&!wk[q].vid){ const li=exLibList().find(function(x){ return inf2Norm(x.n)===inf2Norm(wk[q].n); }); if(li&&li.vid) wk[q].vid=li.vid; } } if(wk.some(function(o){ return Object.keys(o).length; })) obj.wk=wk; } else { const _o=_orig.find(function(x){ return x&&x.n===n&&Array.isArray(x.wk); }); if(_o) obj.wk=JSON.parse(JSON.stringify(_o.wk)); } } { const _o2=_orig.find(function(x){ return x&&x.n===n&&x.from; }); if(_o2) obj.from=_o2.from; } { const _o3=_orig.find(function(x){ return x&&x.n===n&&x.pa; }); if(_o3) obj.pa=JSON.parse(JSON.stringify(_o3.pa)); } const w2el=exEl.querySelector('[data-field="w2"]'); if(w2el) obj.w2=(w2el.value||'').trim()||'A definir'; { const _op=_orig[_pos]; if(_op&&_op.lv&&_op.n===n) ['lv','bk','py','fz'].forEach(function(k){ if(_op[k]!=null) obj[k]=_op[k]; }); } exes.push(obj); }); out[di]={ day:dayName, ex:exes }; if(dayWd) out[di].wd=dayWd; if(dayType) out[di].type=dayType; { const cb=dayEl.querySelector('.corebox'); if(cb&&cb.checked) out[di].core=true; } { const se=dayEl.querySelector('.dayses'); if(se&&dayType&&['run','swim','mob'].indexOf(dayType)>=0) out[di].ses=se.value; { const _od=(DB.students[active].routine||[])[di]; if(_od&&Array.isArray(_od.sesWk)&&out[di].ses===_od.ses) out[di].sesWk=_od.sesWk.slice(); } const mv=dayEl.querySelector('.daymov'); if(mv&&mv.value!=='mob-c') out[di].mov=mv.value; } { const _od2=(DB.students[active].routine||[])[di]; if(_od2){ if(_od2.mat) out[di].mat=_od2.mat; if(_od2.tf) out[di].tf=_od2.tf; } } }); return out; }
 function collectWeeks(){ const out=[]; document.querySelectorAll('.week-row').forEach(wr=>{ const g=f=>{ const el=wr.querySelector('[data-wf="'+f+'"]'); return el?el.value.trim():''; }; out.push({ t:g('t')||'S', n:g('n')||'', d:g('d')||'' }); }); return out.length?out:cp(DEFAULT_WEEKS); }
 function collectHealth(){ const sec=$('healthsec'); if(!sec) return DB.students[active].health; const g=sel=>{ const el=sec.querySelector(sel); return el?el.value:''; }; const enabled=g('[data-hf="enabled"]')==='on'; const leg=g('[data-hf="leg"]')==='on'; const tag=g('[data-hf="tag"]').trim(); const alarms=g('[data-hf="alarms"]').split(',').map(s=>s.trim()).filter(Boolean); const warning=g('[data-hf="warning"]').trim(); const rules=[]; sec.querySelectorAll('.hrule').forEach(rr=>{ const t=(rr.querySelector('[data-hf="rt"]').value||'').trim(); const d=(rr.querySelector('[data-hf="rd"]').value||'').trim(); if(t||d) rules.push({t,d}); }); return { enabled, tag, leg, alarms, warning, rules }; }
 function collectMembers(){ const el=$('membersfld'); if(!el) return DB.students[active].members; const arr=el.value.split(',').map(s=>s.trim()).filter(Boolean); return arr; }
@@ -9382,6 +10357,9 @@ document.addEventListener('click',e=>{
     case 'sesFeel': sesFeel(el.dataset.f,el.dataset.v); break;
     case 'relojSet': relojSet(el.dataset.v==='1'); break;
     case 'bienSet': bienSet(el.dataset.f,el.dataset.v); break;
+    case 'nivSet': nivSet(el.dataset.k,el.dataset.v); break;
+    case 'biFilter': { const F=window._biF||(window._biF={}); F[el.dataset.k]=el.dataset.k==='dias'?+el.dataset.v:el.dataset.v; if(el.dataset.k==='cat'&&/^(Pádel|Hockey|Fútbol)$/.test(el.dataset.v)) F.dias=0; if(el.dataset.k==='cat'&&/^(HYROX|Funcional)$/.test(el.dataset.v)) F.modo=''; openSecs.add('biprog'); renderEdit(); break; }
+    case 'applyBuiltin': applyBuiltin(id); break;
     case 'bienOpen': window._bienOpen=true; { const w=$('bienWrap'); if(w) w.innerHTML=bienHTML(); } break;
     case 'exFb': exFb(+el.dataset.i,+(el.dataset.m||0),el.dataset.v); break;
     case 'stepCell': stepCell(el); break;
@@ -9569,6 +10547,7 @@ document.addEventListener('change',e=>{
     case 'gpsPref': setGpsPref(el.checked); break;
     case 'cintaVel': setCintaVel(el.dataset.f,el.value); break;
     case 'dayType': syncFromForms(); renderEdit(); break;
+    case 'nivLock': setNivLock(el.dataset.f,el.value); break;
     case 'resumenCycle': resumenCycleIdx=+el.value; renderResumen(); break;
     case 'informeCycle': saveInformeCycle(+el.value); break;
     case 'resumenMember': resumenMemberIdx=+el.value; renderResumen(); break;
