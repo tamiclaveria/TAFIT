@@ -174,6 +174,10 @@
   .bien-card.done .bien-msg{background:#fff}
   /* 23/11/2026 · Etapa 4: nivel e impacto */
   .niv-bar{background:#fff;border:1px solid #E3C3A5;border-radius:14px;padding:10px 12px;margin:0 0 12px}
+  .niv-bar>summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer;font-size:13px}
+  .niv-bar>summary::-webkit-details-marker{display:none}
+  .nb-ch{font-size:11.5px;font-weight:700;color:#6b5d50;white-space:nowrap}
+  .niv-bar[open]>summary{margin-bottom:6px}
   .nb-row{display:flex;align-items:center;gap:8px;margin:3px 0}
   .nb-l{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#17120E;min-width:62px}
   .nb-seg{display:flex;flex:1;background:#F2ECE0;border-radius:10px;padding:3px;gap:3px}
@@ -6795,8 +6799,10 @@ function computeProgramSummary(cycleOverride,memberName){
   const prog=[];
   names.forEach(function(n){
     let first=null,last=null;
-    for(let i=0;i<logsAsc.length;i++){ const w=exWeightInLog(logsAsc[i],n,memberName); if(w!=null){ first=w; break; } }
-    for(let i=logsAsc.length-1;i>=0;i--){ const w=exWeightInLog(logsAsc[i],n,memberName); if(w!=null){ last=w; break; } }
+    /* 23/11/2026: las sesiones con la carga bajada a propósito (−20% por dolor) no cuentan para el progreso de peso */
+    const logsW=logsAsc.filter(function(l){ return !(l.niv&&l.niv.baja); });
+    for(let i=0;i<logsW.length;i++){ const w=exWeightInLog(logsW[i],n,memberName); if(w!=null){ first=w; break; } }
+    for(let i=logsW.length-1;i>=0;i--){ const w=exWeightInLog(logsW[i],n,memberName); if(w!=null){ last=w; break; } }
     if(first!=null&&last!=null&&first>0&&last>first){ prog.push({ n, first, last, pct:Math.round((last-first)/first*100), metric:'kg' }); return; }
     /* Sin progreso de peso (o ejercicio sin carga: banda, peso corporal) — probamos con
        repeticiones, así no queda vacío para alumnos que no levantan pesas pesadas. */
@@ -9010,17 +9016,19 @@ function nivBarHTML(){
   if(!hasLv&&!hasImp) return '';
   const L=nivLock(), nv=curNivel(), im=curImp(), hoy=CACHE[nivHoyKey()]||null;
   const seg=function(k,opts,cur,locked){ return `<div class="nb-seg${locked?' nb-lock':''}">${opts.map(function(o){ return `<button type="button" data-act="nivSet" data-k="${k}" data-v="${o[0]}" class="${cur===o[0]?'sel':''}"${locked?' disabled':''}>${o[1]}</button>`; }).join('')}</div>`; };
-  let h='<div class="niv-bar">';
+  const sumTxt=[hasLv?NIV_LBL[nv]:'',hasImp?(im==='sin'?'🌿 sin impacto':'con saltos'):'',(hoy&&hoy.baja)?'carga −20%':''].filter(Boolean).join(' · ');
+  let h=`<details class="niv-bar"${window._nivOpen?' open':''}><summary><span class="nb-sum">🎚️ ${hoy&&(hoy.niv||hoy.imp||hoy.baja)?'Hoy':'Tu rutina'}: <b>${esc(sumTxt)}</b></span><span class="nb-ch">${(L.niv&&(!hasImp||L.imp))?'🔒':'cambiar'} ▾</span></summary>`;
   if(hasLv) h+=`<div class="nb-row"><span class="nb-l">Nivel</span>${seg('niv',[['P','Principiante'],['I','Intermedio'],['A','Avanzado']],nv,!!L.niv)}</div>`;
   if(hasImp) h+=`<div class="nb-row"><span class="nb-l">Impacto</span>${seg('imp',[['con','Con saltos'],['sin','🌿 Sin impacto']],im,!!L.imp)}</div>`;
   const notes=[];
   if(L.niv||L.imp) notes.push('🔒 Tu profe fijó '+[L.niv?'el nivel':'',L.imp?'el impacto':''].filter(Boolean).join(' y ')+' para vos.');
   if(hoy&&(hoy.niv||hoy.imp||hoy.baja)) notes.push('Solo por hoy'+(hoy.baja?' (carga −20%)':'')+' · <button type="button" class="nb-undo" data-act="nivSet" data-k="hoy" data-v="">volver a lo de siempre</button>');
   if(hasLv&&!notes.length) notes.push(nv==='P'?'Menos rondas y carga liviana.':nv==='A'?'Una ronda más y carga alta al final.':'Rondas y tiempos como están escritos.');
-  h+=`<div class="nb-note">${notes.join(' ')}</div></div>`;
+  h+=`<div class="nb-note">${notes.join(' ')}</div></details>`;
   return h;
 }
 async function nivSet(k,v){
+  window._nivOpen=(k==='niv'||k==='imp');
   const L=nivLock();
   if(k==='hoy'){ delete CACHE[nivHoyKey()]; }
   else if(k==='hniv'||k==='himp'||k==='hbaja'){ const cur=Object.assign({},CACHE[nivHoyKey()]||{}); const f=k==='hniv'?'niv':k==='himp'?'imp':'baja'; if(v) cur[f]=(f==='baja')?true:v; else delete cur[f]; cur._w=+week; if(cur.niv||cur.imp||cur.baja) CACHE[nivHoyKey()]=cur; else delete CACHE[nivHoyKey()]; }
