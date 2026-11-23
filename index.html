@@ -186,10 +186,43 @@
   .nb-seg.nb-lock button:not(.sel){opacity:.35}
   .nb-note{font-size:11.5px;color:#6b5d50;margin-top:6px}
   .nb-undo{border:none;background:none;padding:0;font:inherit;font-weight:700;text-decoration:underline;color:#17120E;cursor:pointer}
-  .bien-opts .bien-go,.bien-go{display:inline-block;margin:4px 0 0;border:none;background:#17120E;color:#fff;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer}
+  .bien-go{display:inline-block;margin:4px 0 0;border:none;background:#17120E;color:#fff;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer}
   .ni-tag{display:inline-block;margin:2px 0 1px;font-size:11px;font-weight:700;color:#17120E;background:#F2ECE0;border-radius:6px;padding:2px 7px}
   #app.dark .ni-tag{background:#E3C3A5}
   .bi-filt{margin:8px 0 4px}
+  /* 23/11/2026 · Etapa 6: deportistas */
+  .match-card{background:#17120E;color:#F2ECE0;border-radius:14px;padding:11px 13px;margin:0 0 12px;font-size:13px;line-height:1.5}
+  .match-card b{color:#fff}
+  .match-card .mc-t{display:inline-block;margin-top:4px;color:#E3C3A5;font-size:12.5px}
+  .match-card .nb-undo{color:#E3C3A5}
+  .match-card .bien-go{background:#E3C3A5;color:#17120E}
+  .les-banner{background:#F2ECE0;border:1px solid #E3C3A5;border-radius:12px;padding:9px 11px;margin:0 0 10px;font-size:12.5px;line-height:1.5;color:#17120E}
+  .les-banner small{color:#6b5d50}
+  .dep-acc{border:1px solid var(--line);border-radius:12px;margin:6px 0;background:var(--card)}
+  .dep-acc>summary{list-style:none;display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer}
+  .dep-acc>summary::-webkit-details-marker{display:none}
+  .dep-acc>summary small{margin-left:auto;font-size:11.5px;color:var(--mute)}
+  .dep-acc[open]>summary .bi-chev{transform:rotate(180deg)}
+  .dep-body{padding:0 12px 12px}
+  .dep-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+  .dep-row small{color:var(--mute)} .dep-row.off{opacity:.55}
+  .dep-del,.dep-tg{border:none;background:none;cursor:pointer;font-size:12px;font-weight:700;color:var(--ink)}
+  .dep-add{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .dep-add input,.dep-add select{flex:1 1 40%;min-width:0;padding:7px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;background:var(--card);color:var(--ink)}
+  .dep-add.ev label{flex:1 1 45%;font-size:11px;color:var(--mute);display:flex;flex-direction:column;gap:3px}
+  .dep-add button{flex:1 1 100%;border:none;border-radius:8px;padding:9px;font-weight:700;background:#17120E;color:#fff;cursor:pointer}
+  .dep-empty,.dep-hint{font-size:11.5px;color:var(--mute);margin:6px 0 0}
+  .dep-tbl{overflow-x:auto} .dep-tbl table{width:100%;border-collapse:collapse;font-size:12px} .dep-tbl th,.dep-tbl td{padding:5px 4px;border-bottom:1px solid var(--line);text-align:center} .dep-tbl th small{display:block;font-weight:500;color:var(--mute)}
+  .bb-pl{display:inline-block;margin:8px 0 0 6px;border:1px solid #17120E;background:transparent;color:#17120E;border-radius:10px;padding:7px 11px;font-size:12px;font-weight:700;cursor:pointer}
+  .blk-fin .bb-pl{border-color:#E3C3A5;color:#E3C3A5}
+  .pl-box{background:#fff;padding:8px 12px 12px;max-height:42vh;overflow:auto}
+  .pl-nav{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:2px 0 8px;color:#17120E;font-size:12.5px;font-weight:700}
+  .pl-nav button{border:none;background:#17120E;color:#fff;border-radius:8px;padding:7px 11px;font-weight:700;cursor:pointer} .pl-nav button[disabled]{opacity:.3}
+  .pl-list{display:flex;flex-direction:column;gap:4px}
+  .pl-list button{display:flex;gap:8px;align-items:center;text-align:left;border:1px solid var(--line,#E8DFD0);background:#fff;border-radius:8px;padding:7px 9px;font-size:12.5px;cursor:pointer;color:#17120E}
+  .pl-list button.on{background:#E3C3A5;border-color:#E3C3A5;font-weight:700}
+  .pl-list i{font-style:normal;font-weight:800;min-width:16px}
+  .pl-hint{font-size:11px;color:#6b5d50;margin:6px 0 0}
   .bi-list{display:flex;flex-direction:column;gap:6px;margin-top:6px}
   .bi-row{border:1px solid var(--line);border-radius:12px;background:var(--card)}
   .bi-row>summary{list-style:none;display:flex!important;align-items:center;justify-content:space-between;gap:8px;padding:11px 12px;cursor:pointer}
@@ -199,7 +232,7 @@
   .bi-row[open]>summary .bi-chev{transform:rotate(180deg)}
   .bi-body{padding:0 12px 12px}
   .bi-meta{display:block;font-size:11.5px;color:var(--mute);margin-bottom:4px}
-  .bien-opts{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:2px}
+  .bien-choice{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:2px}
   .bien-or{font-size:11.5px;color:#6b5d50}
   .bien-go.on{background:#E3C3A5;color:#17120E}
   .bien-wa{display:inline-block;margin-top:8px;font-weight:700;color:#17120E;text-decoration:underline}
@@ -1324,7 +1357,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-150'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-151'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -1657,6 +1690,7 @@ function coreToggleDone(id){
 }
 function renderCoreCard(){ const el=$('coreCard'); if(el) el.innerHTML=coreCardHTML(); }
 function openVideoModal(id,name){
+  { const _pb=$('plBox'); if(_pb&&!window._plOpening) _pb.remove(); }
   let ov=$('vidModalOv');
   if(!ov){
     ov=document.createElement('div'); ov.id='vidModalOv'; ov.className='vid-modal-ov';
@@ -2999,7 +3033,7 @@ let asisMode='dia', asisDayISO=dstr(_asisNow.getFullYear(),_asisNow.getMonth(),_
    en Editar para la agenda. */
 let transCalMode=false, transCalY=_asisNow.getFullYear(), transCalM=_asisNow.getMonth();
 const WD_NAMES=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-document.addEventListener('toggle',e=>{ const d=e.target; if(d&&d.matches&&d.matches('details[data-sec]')){ if(d.open) openSecs.add(d.dataset.sec); else openSecs.delete(d.dataset.sec); } },true);
+document.addEventListener('toggle',e=>{ const d=e.target; if(d&&d.matches&&d.matches('details[data-dsec]')){ if(d.open) openSecs.add(d.dataset.dsec); else openSecs.delete(d.dataset.dsec); } if(d&&d.matches&&d.matches('details[data-sec]')){ if(d.open) openSecs.add(d.dataset.sec); else openSecs.delete(d.dataset.sec); } },true);
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -6196,6 +6230,7 @@ function renderApp(){
   /* 07/10/2026: selector de core del alumno, en lugar del bloque prearmado (ver CORE_CATALOG) */
   if(hasCoreDay(r[day])){ const cc=document.createElement('div'); cc.className='ex core-pick'; cc.id='coreCard'; cc.innerHTML=coreCardHTML(); m.appendChild(cc); }
 
+  { const mc=matchCardHTML(); if(mc){ const mw=document.createElement('div'); mw.id='matchWrap'; mw.innerHTML=mc; m.appendChild(mw); } }
   { const bw=document.createElement('div'); bw.id='bienWrap'; bw.innerHTML=bienHTML(); m.appendChild(bw); }
   { const nb=nivBarHTML(); if(nb){ const nw=document.createElement('div'); nw.id='nivWrap'; nw.innerHTML=nb; m.appendChild(nw); } }
   let blkBody=null, blkTimed=false; /* tarjeta del bloque actual: sus ejercicios van ADENTRO.
@@ -6205,6 +6240,7 @@ function renderApp(){
   r[day].ex.forEach((rawEx,ei)=>{
     if(coreHidden.has(ei)) return;
     const ex=exWithOverride(rawEx,ei);
+    if(ex._skip){ if(isBlockRow(ex)) blkBody=null; return; } /* 23/11/2026: versión temporada (semana de partido) */
     if(isBlockRow(ex)){
       const cfg=getBlockCfg(ex);
       const fin=isFinisherBlk(cfg);
@@ -6221,6 +6257,7 @@ function renderApp(){
       } else if(cfg.rest>0){
         bh+=`<button type="button" class="bb-btn" data-act="rest" data-sec="${cfg.rest}">⏱ Descanso ${cfg.rest} s</button>`;
       }
+      { let nv=0; const _all=r[day].ex; for(let q=ei+1;q<_all.length&&!isBlockRow(_all[q]);q++){ const _o=exWithOverride(_all[q],q); if(!_o._skip&&(extractYouTubeId(_o.vid)||vidForName(_o.n))) nv++; } if(nv>1) bh+=`<button type="button" class="bb-pl" data-act="openPlaylist" data-ei="${ei}">▶ Ver los ${nv} videos seguidos</button>`; }
       bh+=`</div>`;
       bc.innerHTML=bh+'<div class="blk-body"></div>'; m.appendChild(bc); blkBody=bc.querySelector('.blk-body'); blkTimed=cfg.work>0;
       return;
@@ -6551,7 +6588,7 @@ function bienMsgHTML(v,av){ let m=[];
   if(av<=2.5){ m.push('🌱 Hoy venís más bajo/a. ¿Querés hacerla en nivel principiante?'); if(dayHasLv(_d)&&!_L.niv) opts.push(_bt('hniv',_h.niv==='P'?'':'P','Principiante hoy',_h.niv==='P')); }
   else if(av>=4.5){ m.push('🔥 ¡Venís a full! Si querés, hoy podés ir en avanzado.'); if(dayHasLv(_d)&&!_L.niv) opts.push(_bt('hniv',_h.niv==='A'?'':'A','Avanzado hoy',_h.niv==='A')); }
   if(!m.length) return '';
-  if(opts.length) m.push(`<div class="bien-opts">${opts.join('')}${(_h.niv||_h.imp||_h.baja)?'':' <span class="bien-or">o hacé tu rutina normal</span>'}</div>`);
+  if(opts.length) m.push(`<div class="bien-choice">${opts.join('')}${(_h.niv||_h.imp||_h.baja)?'':' <span class="bien-or">o hacé tu rutina normal</span>'}</div>`);
   if(bienDolor(v)){ const num=(DB.settings.whatsapp||'5492616985895').replace(/[^0-9]/g,''); const txt=encodeURIComponent('Hola profe, soy '+((DB.students[active]||{}).name||'')+'. Hoy llego con dolor'+(v.z?' en '+v.z.toLowerCase():'')+' ('+v.d+'/5).'); m.push(`<a class="bien-wa" href="https://wa.me/${num}?text=${txt}" target="_blank" rel="noopener">💬 Contale a tu profe</a>`); }
   return m.length?`<div class="bien-msg">${m.join('<br>')}</div>`:''; }
 async function bienSet(f,val){ const k=bienKey(); const cur=Object.assign({},bienVal()||{}); cur[f]=f==='z'?val:+val; if(f==='d'&&+val>2) delete cur.z; cur._w=+week; cur._t=Date.now(); cur.at=cur.at||new Date().toISOString(); CACHE[k]=cur; queueSave(); window._bienOpen=true;
@@ -7540,6 +7577,7 @@ function informe2HTML(d,opts){
     </div>
     ${coreH?`<div class="sec avoid">${coreH}</div>`:''}
     ${(function(){ const ks=Object.keys(d.cardio||{}); if(!ks.length) return ''; return `<div class="sec avoid"><h2>Cardio <small>distancia de cada sesión</small></h2><div class="smalls">${ks.map(function(n){ const v=d.cardio[n], a=v[0].w, b=v[v.length-1].w; const fk=function(x){ return x.toFixed(2).replace('.',','); }; return `<div class="sm"><div class="sm-n">${esc(n)}</div><div class="sm-v">${fk(a)} → <b class="br">${fk(b)} km</b>${v.length>1&&a>0?' · '+(b>=a?'+':'')+Math.round((b-a)/a*100)+'%':''}</div>${v.length>1?inf2Spark(v):''}<div class="sm-d">${v.length} ${v.length===1?'sesión':'sesiones'}</div></div>`; }).join('')}</div></div>`; })()}
+    ${evalInformeHTML()}
     ${cmpH}
     ${goals?`<div class="sec avoid"><h2>Próximo ciclo</h2><div class="card"><p>Objetivos sugeridos según cómo terminó el ciclo (un pasito más en sus ejercicios más fuertes):</p><ul class="goals">${goals}</ul></div></div>`:''}
     ${opts.pdf?'':foot}
@@ -7657,6 +7695,7 @@ function renderResumen(){
   }
 
   if(!sum.sessions){
+    { const ev=evalInformeHTML(); if(ev){ const w=document.createElement('div'); w.className='inf2'; w.innerHTML=ev; m.appendChild(w); } }
     const empty=document.createElement('div'); empty.className='note'; empty.textContent=`${displayName} todavía no cerró ninguna sesión — el informe se arma solo con datos reales de entrenamiento.`; m.appendChild(empty);
     return;
   }
@@ -8970,7 +9009,7 @@ function builtinTpls(){
     if(!ln.trim()) return;
     const c=ln[0], p=ln.slice(1).split('|');
     if(c==='@'){ t={id:'bi-'+p[0],name:p[1],fam:p[2],cat:p[3],modo:p[4]||'',dias:+p[5],para:p[6]||'',builtin:true,routine:[]}; T.push(t); return; }
-    if(c==='#'){ d={day:p[0],mov:'none',mat:(p[1]||'').split('·').map(biCap).join(' · '),tf:t.fam,ex:[]}; t.routine.push(d); bk=null; return; }
+    if(c==='#'){ d={day:p[0],mov:'none',mat:(p[1]||'').split('·').map(biCap).join(' · '),tf:t.fam,tid:t.id,ex:[]}; t.routine.push(d); bk=null; return; }
     if(c==='='){ const R=+p[1]||1, kk=p[2]||'ron', k=kk.split(':')[0];
       const row={n:'── '+p[0]+' ──',blk:true,tip:p[3]||'',s:R,r:'',w:'',alt:'',rest:'',vid:'',lv:t.fam,bk:k,blkRounds:R,blkWork:0,blkRest:0,blkFormat:'tabata'};
       bk={k:k,R:R};
@@ -9055,7 +9094,7 @@ function exLevel(ex,ei){
     }
   }
   if(!isBlockRow(ex)&&curImp()==='sin'){ const ni=noImpFor(ex.n); if(ni){ o.niFrom=ex.n; o.n=ni[1]; o.vid=biVid(ni[2]); if(ex.alt&&noImpFor(ex.alt)) o.alt=''; } }
-  return o;
+  return tempApply(o,ex,ei);
 }
 function nivBarHTML(){
   const d=routine()[day]; const hasLv=dayHasLv(d), hasImp=dayHasImpact(d);
@@ -9081,6 +9120,112 @@ async function nivSet(k,v){
   else if(k==='niv'){ if(L.niv) return; CACHE.nivel=v; delete CACHE[nivHoyKey()]; }
   else if(k==='imp'){ if(L.imp) return; CACHE.imp=v; const h=CACHE[nivHoyKey()]; if(h){ delete h.imp; } }
   queueSave(); renderApp();
+}
+
+/* ==== 23/11/2026 · Etapa 6: para deportistas ====
+   Partidos/torneos, lesiones y evaluaciones viven en la ficha del alumno (DB.students[id]),
+   los carga la profe en Editar. En la app: aviso de semana de partido, "sin piernas pesado"
+   48 h antes, versión temporada de los programas competitivos (Pádel / Hockey / Fútbol) y
+   modo playlist con todos los videos de un bloque. */
+const LES_ZONAS=['Rodilla','Tobillo','Isquios','Aductores','Gemelo','Cadera','Espalda baja','Hombro','Codo','Muñeca','Cuello','Otra'];
+const EVAL_T=[{k:'salto',l:'Salto',u:'cm',up:true,h:'Salto vertical o horizontal (siempre el mismo)'},{k:'sprint',l:'Sprint 20 m',u:'s',up:false,h:'Segundos, menos es mejor'},{k:'flex',l:'Flexiones',u:'reps',up:true,h:'Máximas, con buena técnica'},{k:'plancha',l:'Plancha',u:'s',up:true,h:'Segundos sostenidos'}];
+const LEG_RX=/sentadilla|peso muerto|b[uú]lgara|estocada|zancada|prensa|hip thrust|step-?up|salto|swing|thruster|lunge|squat|cu[aá]driceps|femoral|isquio|gemelo|talones|aductor|abductor|wall ball|sprint|skater/i;
+/* versión temporada (semana de partido) de los programas competitivos, según cada documento */
+const TEMPORADA={
+  'bi-pa-c':[{s3:/potencia/i,skip:/agilidad/i,note:'Día A: sin agilidad y potencia en 3 series.'},{note:'Día B: día completo.'},{only:/core/i,note:'Solo core y aductores: hacelo junto con el Día 2.'}],
+  'bi-ho-c':[{s3:/potencia/i,note:'Día A (3-4 días antes del partido): completo, potencia en 3 series.'},{skip:/contrastes/i,light:/accesorios/i,note:'Día B (2 días antes como máximo): sin contrastes pesados, accesorios livianos.'},{off:true}],
+  'bi-fo-c':[{s3:/contrastes/i,note:'Día A (3-4 días antes del partido): completo, contrastes en 3 series.'},{light:/fuerza/i,note:'Día B (2 días antes como máximo): fuerza liviana.'},{off:true}]
+};
+function dISO(d){ const x=new Date(d); x.setHours(0,0,0,0); return x; }
+function daysTo(iso){ return Math.round((dISO(iso+'T00:00:00')-dISO(Date.now()))/86400000); }
+function fmtDM(iso){ try{ const d=new Date(iso+'T12:00:00'); return d.toLocaleDateString('es-AR',{weekday:'short',day:'2-digit',month:'2-digit'}); }catch(e){ return iso; } }
+function stPartidos(){ const st=DB.students[active]||{}; return (st.partidos||[]).slice().sort(function(a,b){ return a.d<b.d?-1:1; }); }
+function nextMatch(){ return stPartidos().find(function(p){ return daysTo(p.d)>=0; })||null; }
+function lastMatchYesterday(){ return stPartidos().find(function(p){ return daysTo(p.d)===-1; })||null; }
+function temporadaRule(){ const d=routine()[day]; if(!d||!d.tid||!TEMPORADA[d.tid]) return null; const m=nextMatch(); if(!m||daysTo(m.d)>6) return null; if(CACHE['tempOff_'+week]) return null; return TEMPORADA[d.tid][day]||null; }
+function tempApply(o,ex,ei){
+  const R=temporadaRule(); if(!R) return o;
+  if(R.off){ o._skip=true; return o; }
+  const b=isBlockRow(ex)?ex:lvBlockOf(ei); const t=b?String(b.n||''):'';
+  if(R.only&&!(b&&R.only.test(t))){ o._skip=true; return o; }
+  if(R.skip&&b&&R.skip.test(t)){ o._skip=true; return o; }
+  if(R.s3&&b&&R.s3.test(t)){ if(isBlockRow(ex)){ o.blkRounds=3; o.s=3; } else if(+o.s>3) o.s=3; }
+  if(R.light&&b&&R.light.test(t)){ if(isBlockRow(ex)) o.tip=(o.tip?o.tip+' · ':'')+'Semana de partido: carga liviana'; else o.w='Liviano'; }
+  return o;
+}
+function dayHasLegs(d){ return !!(d&&(d.ex||[]).some(function(e){ return !isBlockRow(e)&&LEG_RX.test(e.n||''); })); }
+function matchCardHTML(){
+  const st=DB.students[active]||{}; if(!(st.partidos||[]).length) return '';
+  const d=routine()[day], m=nextMatch(), y=lastMatchYesterday(); const out=[];
+  const ico=function(p){ return p&&p.tipo==='torneo'?'🏆':'⚽'; };
+  if(m){ const n=daysTo(m.d), lbl=(m.t?esc(m.t)+' · ':'')+fmtDM(m.d);
+    if(n===0) out.push(`<b>${ico(m)} Hoy: ${lbl}</b><br>¡Éxitos! Si entrenás hoy, que sea solo movilidad y activación.`);
+    else if(n<=2){ out.push(`<b>${ico(m)} ${m.tipo==='torneo'?'Torneo':'Partido'} en ${n===1?'1 día':n+' días'}</b> · ${lbl}<br>${dayHasLegs(d)?'Faltan menos de 48 h: hoy evitá piernas pesado. Priorizá tren superior y core, o bajá la carga.':'Faltan menos de 48 h: nada de piernas pesado hasta el partido.'}`);
+      if(dayHasLegs(d)){ const h=CACHE[nivHoyKey()]||{}; out.push(`<button type="button" class="bien-go${h.baja?' on':''}" data-act="nivSet" data-k="hbaja" data-v="${h.baja?'':'1'}">${h.baja?'✓ ':''}Bajar 20% la carga hoy</button>`); } }
+    else if(n<=6) out.push(`<b>${ico(m)} Semana de ${m.tipo==='torneo'?'torneo':'partido'}</b> · ${lbl}`);
+  }
+  if(!out.length&&y) out.push(`<b>⚽ Ayer jugaste</b><br>Hoy: movilidad, core y cardio suave. Escuchá el cuerpo.`);
+  if(d&&d.tid&&TEMPORADA[d.tid]&&m&&daysTo(m.d)<=6){
+    const R=TEMPORADA[d.tid][day]||{};
+    if(CACHE['tempOff_'+week]) out.push(`<span class="mc-t">Estás viendo la rutina completa · <button type="button" class="nb-undo" data-act="tempToggle">volver a la versión temporada</button></span>`);
+    else out.push(`<span class="mc-t">🗓️ Versión temporada: ${R.off?'en semana de partido este día no va. Descansá o hacé movilidad.':esc(R.note||'')} <button type="button" class="nb-undo" data-act="tempToggle">ver rutina completa</button></span>`);
+  }
+  return out.length?`<div class="match-card">${out.join('<br>')}</div>`:'';
+}
+function lesActivas(st){ return ((st||DB.students[active]||{}).lesiones||[]).filter(function(l){ return l.activa!==false; }); }
+function lesBannerHTML(st){ const L=lesActivas(st); if(!L.length) return ''; return `<div class="les-banner">🩹 <b>Lesiones a tener en cuenta:</b> ${L.map(function(l){ return '<span>'+esc(l.z)+(l.t?' — '+esc(l.t):'')+(l.desde?' <small>(desde '+esc(fmtDM(l.desde))+')</small>':'')+'</span>'; }).join(' · ')}</div>`; }
+function depSecHTML(){
+  const st=DB.students[active]||{}; const P=stPartidos(), L=st.lesiones||[], E=(st.evals||[]).slice().sort(function(a,b){ return a.d<b.d?-1:1; });
+  const del=function(k,i){ return `<button type="button" class="dep-del" data-act="depDel" data-k="${k}" data-i="${i}" title="Borrar">🗑</button>`; };
+  const pAll=st.partidos||[];
+  const pRows=P.filter(function(p){ return daysTo(p.d)>=-14; }).map(function(p){ const i=pAll.indexOf(p); const n=daysTo(p.d); return `<div class="dep-row"><span>${p.tipo==='torneo'?'🏆':'⚽'} <b>${esc(fmtDM(p.d))}</b> ${esc(p.t||'')}<small>${n===0?' · hoy':n>0?' · en '+n+' día'+(n===1?'':'s'):' · jugado'}</small></span>${del('partidos',i)}</div>`; }).join('')||'<p class="dep-empty">Sin partidos cargados.</p>';
+  const today=todayISO();
+  const pAdd=`<div class="dep-add"><input type="date" id="depPd" value="${today}"><select id="depPt"><option value="partido">Partido</option><option value="torneo">Torneo</option></select><input id="depPx" placeholder="Rival / torneo (opcional)"><button type="button" data-act="depAdd" data-k="partidos">+ Agregar</button></div>`;
+  const lRows=L.map(function(l,i){ return `<div class="dep-row${l.activa===false?' off':''}"><span>🩹 <b>${esc(l.z)}</b> ${esc(l.t||'')}<small>${l.desde?' · desde '+esc(fmtDM(l.desde)):''}${l.activa===false?' · recuperada':''}</small></span><span><button type="button" class="dep-tg" data-act="lesToggle" data-i="${i}">${l.activa===false?'Reactivar':'Recuperada ✓'}</button>${del('lesiones',i)}</span></div>`; }).join('')||'<p class="dep-empty">Sin lesiones cargadas.</p>';
+  const lAdd=`<div class="dep-add"><select id="depLz">${LES_ZONAS.map(function(z){ return `<option>${z}</option>`; }).join('')}</select><input id="depLt" placeholder="Qué tiene (ej: tendinitis rotuliana)"><input type="date" id="depLd" value="${today}"><button type="button" data-act="depAdd" data-k="lesiones">+ Agregar</button></div>`;
+  const eHead=`<tr><th>Fecha</th>${EVAL_T.map(function(t){ return `<th>${t.l}<small>${t.u}</small></th>`; }).join('')}<th></th></tr>`;
+  const eRows=E.map(function(e){ const i=(st.evals||[]).indexOf(e); return `<tr><td>${esc(fmtDM(e.d))}</td>${EVAL_T.map(function(t){ return `<td>${e[t.k]!=null&&e[t.k]!==''?esc(String(e[t.k]).replace('.',',')):'—'}</td>`; }).join('')}<td>${del('evals',i)}</td></tr>`; }).join('');
+  const eAdd=`<div class="dep-add ev"><input type="date" id="depEd" value="${today}">${EVAL_T.map(function(t){ return `<label>${t.l} <small>(${t.u})</small><input id="depE_${t.k}" inputmode="decimal" placeholder="—" title="${esc(t.h)}"></label>`; }).join('')}<button type="button" data-act="depAdd" data-k="evals">+ Guardar evaluación</button></div>`;
+  const acc=function(id,t,n,body){ return `<details class="dep-acc"${openSecs.has(id)?' open':''} data-dsec="${id}"><summary><b>${t}</b><small>${n}</small><span class="bi-chev">▾</span></summary><div class="dep-body">${body}</div></details>`; };
+  const nextM=nextMatch();
+  return acc('dep-p','⚽ Partidos y torneos',nextM?'próximo: '+fmtDM(nextM.d):(P.length?P.length+' cargados':'—'),pRows+pAdd+`<p class="dep-hint">En la semana de partido le aparece el aviso; 48 h antes, "nada de piernas pesado". En Pádel, Hockey y Fútbol competitivo se arma sola la versión temporada.</p>`)
+    +acc('dep-l','🩹 Lesiones',lesActivas(st).length?lesActivas(st).length+' activa'+(lesActivas(st).length===1?'':'s'):'—',lRows+lAdd+`<p class="dep-hint">Las activas se ven arriba de la rutina cuando la armás o editás.</p>`)
+    +acc('dep-e','📏 Evaluaciones',E.length?E.length+' cargada'+(E.length===1?'':'s'):'—',(E.length?`<div class="dep-tbl"><table>${eHead}${eRows}</table></div>`:'')+eAdd+`<p class="dep-hint">Su evolución sale en el Informe de progreso.</p>`);
+}
+async function depAdd(k){
+  const st=DB.students[active]; if(!st) return; const g=function(id){ const e=$(id); return e?String(e.value||'').trim():''; };
+  if(k==='partidos'){ const d=g('depPd'); if(!d){ toast('Elegí la fecha','warn'); return; } (st.partidos=st.partidos||[]).push({d:d,tipo:g('depPt')||'partido',t:g('depPx')}); openSecs.add('dep-p'); }
+  else if(k==='lesiones'){ (st.lesiones=st.lesiones||[]).push({z:g('depLz')||'Otra',t:g('depLt'),desde:g('depLd'),activa:true}); openSecs.add('dep-l'); }
+  else if(k==='evals'){ const e={d:g('depEd')||todayISO()}; let any=false; EVAL_T.forEach(function(t){ const v=g('depE_'+t.k).replace(',','.'); if(v!==''&&!isNaN(+v)){ e[t.k]=+v; any=true; } }); if(!any){ toast('Cargá al menos un resultado','warn'); return; } (st.evals=st.evals||[]).push(e); openSecs.add('dep-e'); }
+  openSecs.add('depor'); await saveDB(); toast('Guardado ✓','ok'); renderEdit();
+}
+async function depDel(k,i){ const st=DB.students[active]; if(!st||!st[k]||!st[k][i]) return; if(!await uiConfirm('¿Borrar este registro?')) return; st[k].splice(i,1); openSecs.add('depor'); openSecs.add(k==='partidos'?'dep-p':k==='lesiones'?'dep-l':'dep-e'); await saveDB(); renderEdit(); }
+async function lesToggle(i){ const st=DB.students[active]; const l=st&&st.lesiones&&st.lesiones[i]; if(!l) return; l.activa=(l.activa===false); if(!l.activa) l.hasta=todayISO(); else delete l.hasta; openSecs.add('depor'); openSecs.add('dep-l'); await saveDB(); renderEdit(); }
+/* evolución de evaluaciones para el Informe */
+function evalInformeHTML(){
+  const st=DB.students[active]||{}; const E=(st.evals||[]).slice().sort(function(a,b){ return a.d<b.d?-1:1; }); if(!E.length) return '';
+  const cards=EVAL_T.map(function(t){ const serie=E.filter(function(e){ return e[t.k]!=null&&e[t.k]!==''; }).map(function(e){ return {w:+e[t.k],d:e.d}; }); if(!serie.length) return '';
+    const a=serie[0].w, b=serie[serie.length-1].w; const better=serie.length>1&&(t.up?b>a:b<a); const nf=function(v){ return String(Math.round(v*100)/100).replace('.',',')+' '+t.u; };
+    return `<div class="sm"><div class="sm-n">${t.l}</div><div class="sm-v">${serie.length>1?`<b>${nf(a)}</b> → <b class="br">${nf(b)}</b>${better?' ▲':''}`:`<b>${nf(a)}</b>`}</div>${serie.length>1?inf2Spark(t.up?serie:serie.map(function(x){ return {w:-x.w,d:x.d}; })):''}<div class="sm-d">${serie.length} evaluaci${serie.length===1?'ón':'ones'}${t.up?'':' · menos es mejor'}</div></div>`; }).join('');
+  return cards?`<div class="sec avoid"><h2>Evaluaciones <small>salto, sprint, flexiones y plancha</small></h2><div class="smalls">${cards}</div></div>`:'';
+}
+/* modo playlist: todos los videos de un bloque seguidos */
+function openPlaylist(ei){
+  const ex=(routine()[day]||{}).ex||[]; const items=[];
+  for(let i=ei+1;i<ex.length&&!isBlockRow(ex[i]);i++){ const o=exWithOverride(ex[i],i); if(o._skip) continue; const id=extractYouTubeId(o.vid)||vidForName(o.n); if(id) items.push({id:id,n:o.n}); }
+  if(!items.length){ toast('Este bloque no tiene videos','warn'); return; }
+  window._pl={items:items,i:0,title:blockTitleClean(ex[ei])}; plShow(0);
+}
+function plShow(i){
+  const P=window._pl; if(!P) return; P.i=Math.max(0,Math.min(P.items.length-1,i)); const it=P.items[P.i];
+  window._plOpening=true; openVideoModal(it.id,it.n); window._plOpening=false;
+  const rest=P.items.slice(P.i+1).map(function(x){ return x.id; });
+  const b=$('vidModalBody'); if(!b) return;
+  b.innerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${it.id}?rel=0&playsinline=1&autoplay=1${rest.length?'&playlist='+rest.join(','):''}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+  let pb=$('plBox'); if(!pb){ pb=document.createElement('div'); pb.id='plBox'; pb.className='pl-box'; b.parentNode.appendChild(pb); }
+  pb.innerHTML=`<div class="pl-nav"><button type="button" data-act="plGo" data-i="${P.i-1}"${P.i?'':' disabled'}>◀ Anterior</button><span>${P.i+1} de ${P.items.length}</span><button type="button" data-act="plGo" data-i="${P.i+1}"${P.i<P.items.length-1?'':' disabled'}>Siguiente ▶</button></div>`
+    +`<div class="pl-list">${P.items.map(function(x,k){ return `<button type="button" data-act="plGo" data-i="${k}" class="${k===P.i?'on':''}"><i>${k+1}</i>${esc(x.n)}</button>`; }).join('')}</div><p class="pl-hint">Se pasan solos uno detrás del otro.</p>`;
+  const t=$('vidModalTitle'); if(t) t.textContent='▶ '+P.title+' · '+it.n;
 }
 
 /* ==== Plantillas de rutina reutilizables (06/10/2026) ==== */
@@ -9551,13 +9696,14 @@ function renderEdit(){
         <label class="bi-lock"><input type="checkbox" class="bi-sel" data-f="lock"> Fijar (que no lo cambie)</label>
         <button data-act="applyBuiltin" data-id="${esc(t.id)}">▶ Usar</button></div></div></details>`;
     }).join(''):`<p style="font-size:11.5px;color:var(--mute)">No hay programas con ese filtro.</p>`;
-    SEC('biprog','⭐ Programas TaFiT listos',`<p style="font-size:11.5px;color:var(--mute)">Todos con video y 6 semanas de progresión. Tocá uno para verlo y aplicarlo.</p>${filt}<div class="bi-list">${rows}</div>`);
+    SEC('biprog','⭐ Programas TaFiT listos',`${lesBannerHTML()}<p style="font-size:11.5px;color:var(--mute)">Todos con video y 6 semanas de progresión. Tocá uno para verlo y aplicarlo.</p>${filt}<div class="bi-list">${rows}</div>`);
   }
   {
     const st4=DB.students[active]||{}; const L4=st4.nivLock||{};
     SEC('nivel','🎚 Nivel e impacto',`<p style="font-size:11.5px;color:var(--mute)">Sirve para los programas TaFiT (rondas, tiempos y reps según nivel) y para cualquier rutina (los ejercicios con salto cambian por su versión sin impacto). Si lo dejás en "Que elija", ${esc(st4.name)} lo cambia desde su app.</p>
       <div class="fld mt8"><label>Nivel</label><select data-chg="nivLock" data-f="niv"><option value=""${!L4.niv?' selected':''}>Que elija (arranca en ${NIV_LBL[st4.nivel||'I']})</option>${['P','I','A'].map(function(l){ return `<option value="${l}"${L4.niv===l?' selected':''}>🔒 Fijar ${NIV_LBL[l]}</option>`; }).join('')}</select></div>
       <div class="fld mt8"><label>Impacto</label><select data-chg="nivLock" data-f="imp"><option value=""${!L4.imp?' selected':''}>Que elija (arranca ${st4.imp==='sin'?'sin':'con'} impacto)</option><option value="con"${L4.imp==='con'?' selected':''}>🔒 Fijar con impacto</option><option value="sin"${L4.imp==='sin'?' selected':''}>🔒 Fijar sin impacto</option></select></div>`);
+    SEC('depor','🏅 Deportista: partidos, lesiones y evaluaciones',depSecHTML());
   }
   {
     /* Plantillas de rutina reutilizables (06/10/2026): guardar la rutina de un alumno
@@ -9605,6 +9751,7 @@ function renderEdit(){
 
   const duo=isDuo(), mm=membersOf();
   const head=document.createElement('div'); head.className='focus'; head.style.margin='4px 0 12px'; head.innerHTML=`Rutina de <b>${esc(DB.students[active].name)}</b>`; m.appendChild(head);
+  { const lb=lesBannerHTML(); if(lb){ const ld=document.createElement('div'); ld.innerHTML=lb; m.appendChild(ld.firstChild); } }
   routine().forEach((d,di)=>{
     const dayEl=document.createElement('details'); dayEl.className='edit-day tacc'; dayEl.dataset.day=di; dayEl.dataset.sec='day'+di; if(openSecs.has('day'+di)) dayEl.open=true;
     let html=`<summary><h2>${esc(d.day)||('Día '+(di+1))} · ${d.ex.length-abPresetIdx(d).size} ej.${dayTypeTag(d)?' '+dayTypeTag(d):''}</h2><span class="tchev">▾</span></summary><div class="tacc-body">`;
@@ -9695,7 +9842,7 @@ function collectForm(){ const out=[]; document.querySelectorAll('.edit-day').for
       const sParts=rawS.match(/(\d+)\s*[xX×]\s*(\d+)/g);
       if(sParts&&sParts.length>1){ let totalS=0; const repP=[]; sParts.forEach(function(p){ const m=p.match(/(\d+)\s*[xX×]\s*(\d+)/); if(m){ totalS+=parseInt(m[1]); repP.push(m[1]+'×'+m[2]); } }); finalS=totalS; finalR=repP.join(' + '); }
       const vidManual=(g('vid')||'').trim();
-      const obj={ n, s:finalS, r:finalR, w:(g('w')||'').trim()||'A definir', alt:(g('alt')||'').trim(), tip:(g('tip')||'').trim(), rest:(g('rest')||'').trim(), vid:vidManual||YT(n||'ejercicio'), altVid:(g('altVid')||'').trim() }; { const wkIns=[...exEl.querySelectorAll('[data-wk]')]; if(wkIns.length){ const wk=[]; wkIns.forEach(function(i){ const wi=+i.dataset.wk; const v=(i.value||'').trim(); wk[wi]=wk[wi]||{}; if(v) wk[wi][i.dataset.wf]=v; }); for(let q=0;q<wk.length;q++){ wk[q]=wk[q]||{}; if(wk[q].n&&!wk[q].vid){ const li=exLibList().find(function(x){ return inf2Norm(x.n)===inf2Norm(wk[q].n); }); if(li&&li.vid) wk[q].vid=li.vid; } } if(wk.some(function(o){ return Object.keys(o).length; })) obj.wk=wk; } else { const _o=_orig.find(function(x){ return x&&x.n===n&&Array.isArray(x.wk); }); if(_o) obj.wk=JSON.parse(JSON.stringify(_o.wk)); } } { const _o2=_orig.find(function(x){ return x&&x.n===n&&x.from; }); if(_o2) obj.from=_o2.from; } { const _o3=_orig.find(function(x){ return x&&x.n===n&&x.pa; }); if(_o3) obj.pa=JSON.parse(JSON.stringify(_o3.pa)); } const w2el=exEl.querySelector('[data-field="w2"]'); if(w2el) obj.w2=(w2el.value||'').trim()||'A definir'; { const _op=_orig[_pos]; if(_op&&_op.lv&&_op.n===n) ['lv','bk','py','fz'].forEach(function(k){ if(_op[k]!=null) obj[k]=_op[k]; }); } exes.push(obj); }); out[di]={ day:dayName, ex:exes }; if(dayWd) out[di].wd=dayWd; if(dayType) out[di].type=dayType; { const cb=dayEl.querySelector('.corebox'); if(cb&&cb.checked) out[di].core=true; } { const se=dayEl.querySelector('.dayses'); if(se&&dayType&&['run','swim','mob'].indexOf(dayType)>=0) out[di].ses=se.value; { const _od=(DB.students[active].routine||[])[di]; if(_od&&Array.isArray(_od.sesWk)&&out[di].ses===_od.ses) out[di].sesWk=_od.sesWk.slice(); } const mv=dayEl.querySelector('.daymov'); if(mv&&mv.value!=='mob-c') out[di].mov=mv.value; } { const _od2=(DB.students[active].routine||[])[di]; if(_od2){ if(_od2.mat) out[di].mat=_od2.mat; if(_od2.tf) out[di].tf=_od2.tf; } } }); return out; }
+      const obj={ n, s:finalS, r:finalR, w:(g('w')||'').trim()||'A definir', alt:(g('alt')||'').trim(), tip:(g('tip')||'').trim(), rest:(g('rest')||'').trim(), vid:vidManual||YT(n||'ejercicio'), altVid:(g('altVid')||'').trim() }; { const wkIns=[...exEl.querySelectorAll('[data-wk]')]; if(wkIns.length){ const wk=[]; wkIns.forEach(function(i){ const wi=+i.dataset.wk; const v=(i.value||'').trim(); wk[wi]=wk[wi]||{}; if(v) wk[wi][i.dataset.wf]=v; }); for(let q=0;q<wk.length;q++){ wk[q]=wk[q]||{}; if(wk[q].n&&!wk[q].vid){ const li=exLibList().find(function(x){ return inf2Norm(x.n)===inf2Norm(wk[q].n); }); if(li&&li.vid) wk[q].vid=li.vid; } } if(wk.some(function(o){ return Object.keys(o).length; })) obj.wk=wk; } else { const _o=_orig.find(function(x){ return x&&x.n===n&&Array.isArray(x.wk); }); if(_o) obj.wk=JSON.parse(JSON.stringify(_o.wk)); } } { const _o2=_orig.find(function(x){ return x&&x.n===n&&x.from; }); if(_o2) obj.from=_o2.from; } { const _o3=_orig.find(function(x){ return x&&x.n===n&&x.pa; }); if(_o3) obj.pa=JSON.parse(JSON.stringify(_o3.pa)); } const w2el=exEl.querySelector('[data-field="w2"]'); if(w2el) obj.w2=(w2el.value||'').trim()||'A definir'; { const _op=_orig[_pos]; if(_op&&_op.lv&&_op.n===n) ['lv','bk','py','fz'].forEach(function(k){ if(_op[k]!=null) obj[k]=_op[k]; }); } exes.push(obj); }); out[di]={ day:dayName, ex:exes }; if(dayWd) out[di].wd=dayWd; if(dayType) out[di].type=dayType; { const cb=dayEl.querySelector('.corebox'); if(cb&&cb.checked) out[di].core=true; } { const se=dayEl.querySelector('.dayses'); if(se&&dayType&&['run','swim','mob'].indexOf(dayType)>=0) out[di].ses=se.value; { const _od=(DB.students[active].routine||[])[di]; if(_od&&Array.isArray(_od.sesWk)&&out[di].ses===_od.ses) out[di].sesWk=_od.sesWk.slice(); } const mv=dayEl.querySelector('.daymov'); if(mv&&mv.value!=='mob-c') out[di].mov=mv.value; } { const _od2=(DB.students[active].routine||[])[di]; if(_od2){ if(_od2.mat) out[di].mat=_od2.mat; if(_od2.tf) out[di].tf=_od2.tf; if(_od2.tid) out[di].tid=_od2.tid; } } }); return out; }
 function collectWeeks(){ const out=[]; document.querySelectorAll('.week-row').forEach(wr=>{ const g=f=>{ const el=wr.querySelector('[data-wf="'+f+'"]'); return el?el.value.trim():''; }; out.push({ t:g('t')||'S', n:g('n')||'', d:g('d')||'' }); }); return out.length?out:cp(DEFAULT_WEEKS); }
 function collectHealth(){ const sec=$('healthsec'); if(!sec) return DB.students[active].health; const g=sel=>{ const el=sec.querySelector(sel); return el?el.value:''; }; const enabled=g('[data-hf="enabled"]')==='on'; const leg=g('[data-hf="leg"]')==='on'; const tag=g('[data-hf="tag"]').trim(); const alarms=g('[data-hf="alarms"]').split(',').map(s=>s.trim()).filter(Boolean); const warning=g('[data-hf="warning"]').trim(); const rules=[]; sec.querySelectorAll('.hrule').forEach(rr=>{ const t=(rr.querySelector('[data-hf="rt"]').value||'').trim(); const d=(rr.querySelector('[data-hf="rd"]').value||'').trim(); if(t||d) rules.push({t,d}); }); return { enabled, tag, leg, alarms, warning, rules }; }
 function collectMembers(){ const el=$('membersfld'); if(!el) return DB.students[active].members; const arr=el.value.split(',').map(s=>s.trim()).filter(Boolean); return arr; }
@@ -10581,6 +10728,12 @@ document.addEventListener('click',e=>{
     case 'tabAdd': tabAdd(1); break;
     case 'tabSub': tabAdd(-1); break;
     case 'tabRoundDone': tabRoundDone(); break;
+    case 'depAdd': depAdd(el.dataset.k); break;
+    case 'depDel': depDel(el.dataset.k,+el.dataset.i); break;
+    case 'lesToggle': lesToggle(+el.dataset.i); break;
+    case 'tempToggle': { const k='tempOff_'+week; if(CACHE[k]) delete CACHE[k]; else CACHE[k]={v:1,_w:week}; queueSave(); renderApp(); break; }
+    case 'openPlaylist': openPlaylist(+el.dataset.ei); break;
+    case 'plGo': plShow(+el.dataset.i); break;
     case 'tabVoz': { const order=['on','beep','off']; const cur=avisoMode(); const nx=order[(order.indexOf(cur)+1)%3]; try{ localStorage.setItem('tafit:voz',nx); }catch(e){} $('tabVoz').innerHTML=sesVozLbl(); break; }
     case 'tabataMode': setTabataMode(el.dataset.mode); break;
     case 'openNotifs': renderNotifList(); $('notifOv').classList.add('show'); markNotifsSeen(); break;
