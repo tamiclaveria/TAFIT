@@ -6705,7 +6705,9 @@ function pickMember(i){ member=i; openEx=-1; savePos(); renderApp(); }
 /* Peso más alto registrado por ejercicio */
 function lastFor(exName,forName){
   const mm=membersOf(), mname=forName||mm[isDuo()&&member>=0?member:0];
-  for(let i=0;i<LOGS.length;i++){ const log=LOGS[i]; if(!log.ex) continue; /* 21/11/2026: LOGS va de más nuevo a más viejo — antes tomaba la MÁS VIEJA */
+  /* 23/11/2026: una sesión hecha con la carga bajada (−20% por dolor) no cuenta como referencia si hay otra normal antes */
+  const _ord=LOGS.filter(function(l){ return !(l.niv&&l.niv.baja); }).concat(LOGS.filter(function(l){ return l.niv&&l.niv.baja; }));
+  for(let i=0;i<_ord.length;i++){ const log=_ord[i]; if(!log.ex) continue; /* 21/11/2026: LOGS va de más nuevo a más viejo — antes tomaba la MÁS VIEJA */
     const x=log.ex.find(e2=>e2.n===exName); if(!x) continue;
     let sets=null;
     if(x.members){ const me=x.members.find(m2=>m2.name===mname); if(me) sets=me.sets; }
@@ -7942,7 +7944,7 @@ async function closeSession(){
     if(dup){ const mins=Math.max(1,Math.round((Date.now()-Date.parse(dup.date))/60000)); const t=mins<60?(mins+' minuto'+(mins===1?'':'s')):(Math.round(mins/60)+' hora'+(Math.round(mins/60)===1?'':'s'));
       if(!await uiConfirm('Ya cerraste '+r[day].day+' de esta semana hace '+t+'.\n\n¿Guardar otra sesión igual en la Transcripta?')) return; } }
   const _bv=bienVal(); const bien=(_bv&&bienAvg(_bv)!=null)?{s:_bv.s,e:_bv.e,d:_bv.d,x:_bv.x,z:_bv.z||''}:null;
-  const _niv=(dayHasLv(r[day])||curImp()==='sin')?{n:dayHasLv(r[day])?curNivel():'',imp:curImp()}:null;
+  const _baja=bienFactor()<1; const _niv=(dayHasLv(r[day])||curImp()==='sin'||_baja)?Object.assign({n:dayHasLv(r[day])?curNivel():'',imp:curImp()},_baja?{baja:true}:{}):null;
   LOGS.unshift(Object.assign({ date:new Date().toISOString(), dayName:r[day].day, dayIdx:day, week, weekName:weeks()[week].t+' '+weeks()[week].n, ex:exs, obs, health:hh, core, ses }, bien?{bien}:{}, _niv?{niv:_niv}:{}));
   await saveLogs();
   await autoBackup('sesion');
@@ -7976,7 +7978,9 @@ function logEntryHTML(e,i){
     if(x.members){ const blocks=x.members.map(mm=>`<div class="lsets"><b>${esc(mm.name)}:</b> ${mm.cardio?esc(cvL(mm.cardio)):setsLine(mm.sets)}</div>`).join(''); return `<div class="log-ex"><div class="len">${esc(x.n)}</div>${blocks}</div>`; }
     return `<div class="log-ex"><div class="len">${esc(x.n)}</div><div class="lsets">${x.cardio?esc(cvL(x.cardio)):setsLine(x.sets)}</div></div>`;
   }).join('');
-  const obs=e.obs?`<div class="log-obs">📝 ${esc(e.obs)}</div>`:'';
+  const obs=(function(){ const p=[]; if(e.bien) p.push('Llegó: 😴'+e.bien.s+' ⚡'+e.bien.e+' 💪'+e.bien.d+' 🧠'+e.bien.x+((+e.bien.d<=2)?' · dolor'+(e.bien.z?' en '+String(e.bien.z).toLowerCase():''):''));
+    if(e.niv){ const q=[]; if(e.niv.n) q.push(NIV_LBL[e.niv.n]||e.niv.n); if(e.niv.imp==='sin') q.push('sin impacto'); if(e.niv.baja) q.push('carga −20%'); if(q.length) p.push('Lo hizo: '+q.join(' · ')); }
+    return p.length?`<div class="log-obs">🧘 ${esc(p.join(' — '))}</div>`:''; })()+(e.obs?`<div class="log-obs">📝 ${esc(e.obs)}</div>`:'');
   const coreFmtL=e.core?((CORE_FMTS.find(f=>f.v===e.core.fmt)||{}).l||e.core.fmt):'';
   const sesH=e.ses?(function(x){ const p=[]; if(x.km) p.push(String(x.km).replace('.',',')+' km'); if(x.m) p.push(x.m+' m'); if(x.min) p.push(x.min+' min'); if(x.inc) p.push('pendiente '+String(x.inc).replace('.',',')+'%'); if(x.fc) p.push('♥ '+x.fc); const rt=ritmoTxt(x); if(rt) p.push(rt.replace('Ritmo: ','')); if(x.rpe) p.push('esfuerzo '+x.rpe+'/10'); if(x.feel){ const fe=FEELS.find(function(f){ return f[0]===x.feel; }); if(fe) p.push(fe[1]); } if(x.test) p.push('test 12′: '+(x.test/1000).toFixed(2).replace('.',',')+' km'); return `<div class="log-ex"><div class="len">${x.tipo==='swim'?'🏊':x.tipo==='mob'?'🧘':'🏃'} ${esc(x.n)}</div><div class="lsets">${esc(p.join(' · ')||'hecho')}</div>${x.route?`<div class="gps-mini">${routeSVG(x.route)}</div>`:''}${(x.splits||x.zn||x.route)?`<button type="button" class="sum-open" data-act="sesSumLog" data-i="${(window._sumReg=window._sumReg||[]).push(Object.assign({_d:e.date},x))-1}">📊 Ver resumen</button>`:''}</div>`; })(e.ses):'';
   const coreH=e.core?`<div class="log-ex"><div class="len">🔥 Core · ${esc(coreFmtL)}</div><div class="lsets">${(e.core.ex||[]).map(n=>((e.core.done||[]).indexOf(n)>=0?'✓ ':'— ')+esc(n)).join(' &nbsp;|&nbsp; ')}</div></div>`:'';
