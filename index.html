@@ -163,6 +163,16 @@
   /* ---- Bloque / circuito: cartel de sección, no un ejercicio con peso y series ---- */
   .block-banner-wrap{margin-bottom:12px}
   /* 20/11/2026 · rediseño: bloque = tarjeta con sus ejercicios adentro (negro, beige y blanco) */
+  .bien-card{background:#fff;border:1.5px solid #E3C3A5;border-radius:16px;padding:14px;margin-bottom:14px;color:#17120E}
+  .bien-card.done{background:#F2ECE0;font-size:13.5px;cursor:pointer}.bien-ed{color:var(--mute);font-size:12px;margin-left:6px;text-decoration:underline}
+  .bien-t{font-weight:800;font-size:15px}.bien-sub{font-size:12px;color:var(--mute);margin:2px 0 8px}
+  .bien-q{margin:8px 0}.bien-ql{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:13px;margin-bottom:5px}.bien-ql small{color:var(--mute);font-size:11px}
+  .bien-opts{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.bien-opts button,.bien-zonas button{font-family:inherit;font-weight:800;font-size:14px;border:1.5px solid #E3C3A5;background:#fff;color:#17120E;border-radius:10px;padding:8px 0;cursor:pointer}
+  .bien-zonas{display:flex;flex-wrap:wrap;gap:6px}.bien-zonas button{padding:7px 12px;font-size:13px}
+  .bien-opts button.on,.bien-zonas button.on{background:#17120E;border-color:#17120E;color:#F2ECE0}
+  .bien-msg{margin-top:10px;background:#F2ECE0;border-radius:10px;padding:9px 11px;font-size:12.5px;line-height:1.45}
+  .bien-card.done .bien-msg{background:#fff}
+  .notif-dolor b{color:#B5523B}.bien-legend{font-size:11.5px;color:#C9B49C;margin-bottom:4px}
   .sug-today{display:inline-block;margin:2px 0 0;font-size:12px;font-weight:800;color:#17120E;background:#E3C3A5;border-radius:999px;padding:2px 8px}
   .sug-today.down{background:#F2ECE0}
   .stp-cell{display:flex;align-items:center;gap:3px}.stp-cell .cell{min-width:0;flex:1;text-align:center}
@@ -2898,6 +2908,7 @@ function renderNotifList(){
   const el=$('notifList');
   if(!NOTIFS.length){ el.innerHTML='<div class="empty">Todavía no hay avisos. Acá vas a ver cuándo un alumno cierra una sesión o te escribe por el chat.</div>'; return; }
   el.innerHTML=NOTIFS.slice(0,30).map(function(n){
+    if(n.dolor){ const ck2=!!DB.students[n.id]; return `<div class="notif-row notif-dolor${ck2?' notif-click':''}"${ck2?` data-act="openNotifTrans" data-id="${esc(n.id)}"`:''}><b>🩹 ${esc(n.name)}</b><span>${esc(n.text||'')} · ${fmtShort(n.date)}</span></div>`; }
     if(n.chat){
       const preview=esc((n.text||'').slice(0,60))+((n.text||'').length>60?'…':'');
       const clickable=!!DB.students[n.id];
@@ -6133,6 +6144,7 @@ function renderApp(){
   /* 07/10/2026: selector de core del alumno, en lugar del bloque prearmado (ver CORE_CATALOG) */
   if(hasCoreDay(r[day])){ const cc=document.createElement('div'); cc.className='ex core-pick'; cc.id='coreCard'; cc.innerHTML=coreCardHTML(); m.appendChild(cc); }
 
+  { const bw=document.createElement('div'); bw.id='bienWrap'; bw.innerHTML=bienHTML(); m.appendChild(bw); }
   let blkBody=null, blkTimed=false; /* tarjeta del bloque actual: sus ejercicios van ADENTRO.
      Un bloque con temporizador (Tabata/AMRAP/EMOM) solo se queda con los ejercicios de 1 serie o "por tiempo"
      que le siguen; si viene un ejercicio normal (p. ej. 4 series, como en las rutinas donde el Tabata es
@@ -6432,14 +6444,39 @@ function getLastWeight(exName,mi){
 }
 /* ==== 21/11/2026 · ETAPA 2: registro de peso/tiempo ====
    "Sugerido hoy" sale del último peso (o tiempo) y de cómo le quedó: Liviano → +2,5 kg (+5″) · Justo → igual · Pesado → −2,5 kg (−5″). */
+/* ==== 23/11/2026 · ETAPA 3: chequeo de bienestar antes de entrenar ====
+   Escala 1 a 5 donde 5 = mejor (dormí genial, mucha energía, nada de dolor, nada de estrés). */
+const BIEN_Q=[['s','😴 Sueño','dormí mal','dormí genial'],['e','⚡ Energía','sin energía','a full'],['d','💪 Dolor muscular','mucho dolor','nada'],['x','🧠 Estrés','mucho','nada']];
+const BIEN_ZONAS=['Rodilla','Espalda','Hombro','Codo','Otro'];
+function bienKey(){ return 'bien_'+day; }
+function bienVal(){ const v=CACHE[bienKey()]; return (v&&wOf(v)===+week)?v:null; }
+function bienAvg(v){ if(!v) return null; const ks=['s','e','d','x'].filter(function(k){ return +v[k]>0; }); if(ks.length<4) return null; return ks.reduce(function(a,k){ return a+(+v[k]); },0)/4; }
+function bienDolor(v){ return !!(v&&+v.d>0&&+v.d<=2); }
+function bienHTML(){ const v=bienVal()||{}; const av=bienAvg(v); const done=av!=null&&(!bienDolor(v)||v.z);
+  if(done&&!window._bienOpen){ return `<div class="bien-card done" data-act="bienOpen"><b>🧘 Hoy llegás:</b> 😴${v.s} ⚡${v.e} 💪${v.d} 🧠${v.x} <span class="bien-ed">editar</span>${bienMsgHTML(v,av)}</div>`; }
+  let h=`<div class="bien-card"><div class="bien-t">🧘 ¿Cómo llegás hoy?</div><div class="bien-sub">Del 1 al 5 (5 = de diez). Me ayuda a ajustarte el entrenamiento.</div>`;
+  BIEN_Q.forEach(function(q){ h+=`<div class="bien-q"><div class="bien-ql"><b>${q[1]}</b><small>1 ${q[2]} · 5 ${q[3]}</small></div><div class="bien-opts">${[1,2,3,4,5].map(function(n){ return `<button type="button" class="${+v[q[0]]===n?'on':''}" data-act="bienSet" data-f="${q[0]}" data-v="${n}">${n}</button>`; }).join('')}</div></div>`; });
+  if(bienDolor(v)) h+=`<div class="bien-q"><div class="bien-ql"><b>🩹 ¿Dónde te duele?</b></div><div class="bien-zonas">${BIEN_ZONAS.map(function(z){ return `<button type="button" class="${v.z===z?'on':''}" data-act="bienSet" data-f="z" data-v="${z}">${z}</button>`; }).join('')}</div></div>`;
+  if(av!=null) h+=bienMsgHTML(v,av);
+  return h+`</div>`; }
+function bienMsgHTML(v,av){ let m=[];
+  if(bienDolor(v)) m.push(`🩹 Con dolor${v.z?' en '+v.z.toLowerCase():''}: hoy usá la <b>versión sin impacto</b> o el <b>alternativo</b> de cada ejercicio y bajá un <b>20% la carga</b> (ya te lo ajusté en el sugerido). Tu profe ya está avisada.`);
+  if(av<=2.5) m.push('🌱 Hoy venís bajo/a: te sugiero hacerlo en <b>nivel principiante</b> (menos rondas y menos peso). Moverte igual suma.');
+  else if(av>=4.5) m.push('🔥 ¡Venís a full! Si querés, hoy podés ir en <b>nivel avanzado</b>.');
+  return m.length?`<div class="bien-msg">${m.join('<br>')}</div>`:''; }
+async function bienSet(f,val){ const k=bienKey(); const cur=Object.assign({},bienVal()||{}); cur[f]=f==='z'?val:+val; if(f==='d'&&+val>2) delete cur.z; cur._w=+week; cur._t=Date.now(); cur.at=cur.at||new Date().toISOString(); CACHE[k]=cur; queueSave(); window._bienOpen=true;
+  const av=bienAvg(cur); if(av!=null&&(!bienDolor(cur)||cur.z)) window._bienOpen=false;
+  if(!trainer&&bienDolor(cur)&&cur.z&&!cur.avisado){ cur.avisado=true; CACHE[k]=cur; queueSave(); try{ await pushNotif({ id:active, name:DB.students[active].name, date:new Date().toISOString(), dolor:true, text:'Llega con dolor en '+cur.z.toLowerCase()+' ('+cur.d+'/5) · '+(routine()[day]||{}).day }); }catch(e){} }
+  const el=$('bienWrap'); if(el) el.innerHTML=bienHTML(); else render(); }
+function bienFactor(){ const v=bienVal(); return bienDolor(v)?0.8:1; }
 function isTimeEx(ex){ return /″|"|\bseg\b|\bs\b$|segundos|\bmin\b|′/i.test(String((ex&&ex.r)||'')); }
 function fbKey(ei,mi){ return 'fb_'+day+'_'+ei+'_'+(mi||0); }
 function fbOf(ei,mi){ const v=CACHE[fbKey(ei,mi)]; return (v&&wOf(v)===+week)?v.v:''; }
 function numTxt(x){ return String(Math.round(x*10)/10).replace('.',','); }
 function sugToday(ex,mi){ if(!ex||cardioOf(ex)) return null; const mm=membersOf(); const L=lastFor(ex.n,mm[mi||0]); if(!L) return null;
   const t=isTimeEx(ex); let best=null; L.sets.forEach(function(st){ const v=firstNum(t?st.r:st.w); if(v!=null&&v>0&&(best==null||v>best)) best=v; }); if(best==null) return null;
-  const step=t?5:2.5, d=L.fb==='L'?step:L.fb==='P'?-step:0; const v=Math.max(t?5:0,best+d);
-  return {v:v, txt:numTxt(v)+(t?'″':' kg'), dir:d>0?'up':d<0?'down':'eq', last:numTxt(best)+(t?'″':' kg'), fb:L.fb}; }
+  const step=t?5:2.5, d=L.fb==='L'?step:L.fb==='P'?-step:0; let v=Math.max(t?5:0,best+d); const bf=t?1:bienFactor(); if(bf<1) v=Math.round(v*bf/2.5)*2.5;
+  return {v:v, txt:numTxt(v)+(t?'″':' kg')+(bf<1?' (−20%)':''), dir:bf<1?'down':d>0?'up':d<0?'down':'eq', last:numTxt(best)+(t?'″':' kg'), fb:L.fb}; }
 function sugHTML(ex,mi){ const sg=sugToday(ex,mi); if(!sg) return ''; return `<span class="sug-today ${sg.dir}">Sugerido hoy: ${sg.txt}${sg.dir==='up'?' ↑':sg.dir==='down'?' ↓':''}</span>`; }
 function fbBarHTML(ei,mi){ const v=fbOf(ei,mi); const _ex=(routine()[day]||{ex:[]}).ex[ei]; const st=isTimeEx(_ex)?'5″':'2,5 kg'; const b=function(k,t){ return `<button type="button" class="${v===k?'on':''}" data-act="exFb" data-i="${ei}" data-m="${mi}" data-v="${k}">${t}</button>`; };
   return `<div class="fb-bar"><span>¿Cómo te quedó?</span>${b('L','🪶 Liviano')}${b('J','👌 Justo')}${b('P','🧱 Pesado')}</div><div class="fb-hint">${v==='L'?'La próxima te sugiero subir '+st+'.':v==='P'?'La próxima te sugiero bajar '+st+'.':v==='J'?'La próxima mantenemos.':''}</div>`; }
@@ -7859,7 +7896,8 @@ async function closeSession(){
   { const dup=LOGS.find(function(l){ return l.dayName===r[day].day&&+l.week===+week&&(Date.now()-Date.parse(l.date))<6*3600*1000; });
     if(dup){ const mins=Math.max(1,Math.round((Date.now()-Date.parse(dup.date))/60000)); const t=mins<60?(mins+' minuto'+(mins===1?'':'s')):(Math.round(mins/60)+' hora'+(Math.round(mins/60)===1?'':'s'));
       if(!await uiConfirm('Ya cerraste '+r[day].day+' de esta semana hace '+t+'.\n\n¿Guardar otra sesión igual en la Transcripta?')) return; } }
-  LOGS.unshift({ date:new Date().toISOString(), dayName:r[day].day, dayIdx:day, week, weekName:weeks()[week].t+' '+weeks()[week].n, ex:exs, obs, health:hh, core, ses });
+  const _bv=bienVal(); const bien=(_bv&&bienAvg(_bv)!=null)?{s:_bv.s,e:_bv.e,d:_bv.d,x:_bv.x,z:_bv.z||''}:null;
+  LOGS.unshift(Object.assign({ date:new Date().toISOString(), dayName:r[day].day, dayIdx:day, week, weekName:weeks()[week].t+' '+weeks()[week].n, ex:exs, obs, health:hh, core, ses }, bien?{bien}:{}));
   await saveLogs();
   await autoBackup('sesion');
   /* Avisá al profe (aviso interno, no push): si quien cierra es el alumno, no la profe */
@@ -9195,6 +9233,13 @@ async function renderReport(){
       if(inact.length) html+=`<div class="inact-h">😴 Virtuales sin entrenar hace 7 días o más</div>`+inact.map(function(c){ const st=DB.students[c.id]; const mm=(st.members&&st.members.length>1)?st.members:[st.name];
         return `<div class="inact-row"><div><b>${esc(c.name)}</b><span>${c.days===null?'Todavía no registró ninguna sesión':'Hace '+c.days+' días · '+esc(c.last.dayName||'')}</span></div><div class="inact-bs">${mm.map(function(nm,mi){ return `<button type="button" class="inact-b wa" data-act="inactWa" data-id="${esc(c.id)}" data-mi="${mi}">💬${mm.length>1?' '+esc(String(nm).split(' ')[0]):''}</button>`; }).join('')}</div></div>`; }).join('');
       html+=`</div>`; } }
+  /* 23/11/2026 · Etapa 3: cómo llegan los alumnos (chequeo de bienestar de los últimos 7 días) */
+  { const wk=Date.now()-7*864e5, rows=[];
+    for(const c of cards){ const logs=c.id===active?LOGS:safeParse(await Store.get('tafit:logs:'+c.id)||'[]',[]); const bs=logs.filter(function(l){ return l.bien&&Date.parse(l.date)>=wk; }); if(!bs.length) continue;
+      const av=function(k){ return (bs.reduce(function(a,l){ return a+(+l.bien[k]||0); },0)/bs.length); }; const tot=(av('s')+av('e')+av('d')+av('x'))/4; const dol=bs.filter(function(l){ return +l.bien.d<=2; }).map(function(l){ return l.bien.z||'?'; });
+      rows.push({c:c,n:bs.length,tot:tot,s:av('s'),e:av('e'),d:av('d'),x:av('x'),dol:dol}); }
+    if(rows.length){ rows.sort(function(a,b){ return a.tot-b.tot; }); const f=function(x){ return (Math.round(x*10)/10).toString().replace('.',','); };
+      html+=`<div class="panel-block"><div class="panel-title">🧘 Cómo llegan esta semana</div><div class="bien-legend">Promedio de sus chequeos (1 a 5, 5 = muy bien). Ordenado de peor a mejor.</div>`+rows.map(function(r){ return `<div class="inact-row"><div><b>${esc(r.c.name)} · ${f(r.tot)}</b><span>😴${f(r.s)} ⚡${f(r.e)} 💪${f(r.d)} 🧠${f(r.x)} · ${r.n} sesión${r.n===1?'':'es'}${r.dol.length?' · 🩹 dolor: '+esc(r.dol.join(', ').toLowerCase()):''}</span></div></div>`; }).join('')+`</div>`; } }
   /* Próximos cumpleaños (30 días): toma la fecha cargada directo por la profe en Editar → Integrantes;
      si no está, busca en el formulario de Anamnesis o, si no está, en el de Acuerdo (por si el alumno ya lo completó). */
   const bdays=cards.map(c=>{
@@ -9336,6 +9381,8 @@ document.addEventListener('click',e=>{
     case 'sesSumShare': sesSumShare(); break;
     case 'sesFeel': sesFeel(el.dataset.f,el.dataset.v); break;
     case 'relojSet': relojSet(el.dataset.v==='1'); break;
+    case 'bienSet': bienSet(el.dataset.f,el.dataset.v); break;
+    case 'bienOpen': window._bienOpen=true; { const w=$('bienWrap'); if(w) w.innerHTML=bienHTML(); } break;
     case 'exFb': exFb(+el.dataset.i,+(el.dataset.m||0),el.dataset.v); break;
     case 'stepCell': stepCell(el); break;
     case 'sesStory': sesStory(); break;
