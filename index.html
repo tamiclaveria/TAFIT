@@ -182,10 +182,23 @@
   .nb-seg.nb-lock button:not(.sel){opacity:.35}
   .nb-note{font-size:11.5px;color:#6b5d50;margin-top:6px}
   .nb-undo{border:none;background:none;padding:0;font:inherit;font-weight:700;text-decoration:underline;color:#17120E;cursor:pointer}
-  .bien-go{display:inline-block;margin:6px 0 0;border:none;background:#17120E;color:#fff;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer}
+  .bien-opts .bien-go,.bien-go{display:inline-block;margin:4px 0 0;border:none;background:#17120E;color:#fff;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer}
   .ni-tag{display:inline-block;margin:2px 0 1px;font-size:11px;font-weight:700;color:#17120E;background:#F2ECE0;border-radius:6px;padding:2px 7px}
   #app.dark .ni-tag{background:#E3C3A5}
   .bi-filt{margin:8px 0 4px}
+  .bi-list{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+  .bi-row{border:1px solid var(--line);border-radius:12px;background:var(--card)}
+  .bi-row>summary{list-style:none;display:flex!important;align-items:center;justify-content:space-between;gap:8px;padding:11px 12px;cursor:pointer}
+  .bi-row>summary::-webkit-details-marker{display:none}
+  .bi-row>summary b{font-size:13.5px;text-align:left}
+  .bi-chev{color:var(--mute);transition:transform .2s}
+  .bi-row[open]>summary .bi-chev{transform:rotate(180deg)}
+  .bi-body{padding:0 12px 12px}
+  .bi-meta{display:block;font-size:11.5px;color:var(--mute);margin-bottom:4px}
+  .bien-opts{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:2px}
+  .bien-or{font-size:11.5px;color:#6b5d50}
+  .bien-go.on{background:#E3C3A5;color:#17120E}
+  .bien-wa{display:inline-block;margin-top:8px;font-weight:700;color:#17120E;text-decoration:underline}
   .bi-frow{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin:5px 0}
   .bi-frow span{font-size:11px;font-weight:700;color:var(--mute);margin-right:2px}
   .bi-frow button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer}
@@ -6484,16 +6497,22 @@ function bienHTML(){ const v=bienVal()||{}; const av=bienAvg(v); const done=av!=
   return h+`</div>`; }
 function bienMsgHTML(v,av){ let m=[];
   const _d=routine()[day], _L=nivLock(), _h=CACHE[nivHoyKey()]||{};
-  const _bt=function(k,v,l){ return ` <button type="button" class="bien-go" data-act="nivSet" data-k="${k}" data-v="${v}">${l}</button>`; };
-  if(bienDolor(v)) m.push(`🩹 Con dolor${v.z?' en '+v.z.toLowerCase():''}: hoy usá la <b>versión sin impacto</b> o el <b>alternativo</b> de cada ejercicio y bajá un <b>20% la carga</b> (ya te lo ajusté en el sugerido). Tu profe ya está avisada.`+((dayHasImpact(_d)&&!_L.imp&&curImp()!=='sin')?_bt('himp','sin','🌿 Pasar a sin impacto hoy'):''));
-  if(av<=2.5) m.push('🌱 Hoy venís bajo/a: te sugiero hacerlo en <b>nivel principiante</b> (menos rondas y menos peso). Moverte igual suma.'+((dayHasLv(_d)&&!_L.niv&&curNivel()!=='P')?_bt('hniv','P','Hacerlo en Principiante hoy'):''));
-  else if(av>=4.5) m.push('🔥 ¡Venís a full! Si querés, hoy podés ir en <b>nivel avanzado</b>.'+((dayHasLv(_d)&&!_L.niv&&curNivel()!=='A')?_bt('hniv','A','Ir en Avanzado hoy'):''));
+  const _bt=function(k,v2,l,on){ return `<button type="button" class="bien-go${on?' on':''}" data-act="nivSet" data-k="${k}" data-v="${v2}">${on?'✓ ':''}${l}</button>`; };
+  const opts=[];
+  if(bienDolor(v)){ m.push(`🩹 Llegás con dolor${v.z?' en '+v.z.toLowerCase():''}. Si querés, hoy podés hacerla más suave:`);
+    if(dayHasImpact(_d)&&!_L.imp) opts.push(_bt('himp',_h.imp==='sin'?'':'sin','🌿 Sin impacto',_h.imp==='sin'));
+    opts.push(_bt('hbaja',_h.baja?'':'1','Bajar 20% la carga',!!_h.baja)); }
+  if(av<=2.5){ m.push('🌱 Hoy venís más bajo/a. ¿Querés hacerla en nivel principiante?'); if(dayHasLv(_d)&&!_L.niv) opts.push(_bt('hniv',_h.niv==='P'?'':'P','Principiante hoy',_h.niv==='P')); }
+  else if(av>=4.5){ m.push('🔥 ¡Venís a full! Si querés, hoy podés ir en avanzado.'); if(dayHasLv(_d)&&!_L.niv) opts.push(_bt('hniv',_h.niv==='A'?'':'A','Avanzado hoy',_h.niv==='A')); }
+  if(!m.length) return '';
+  if(opts.length) m.push(`<div class="bien-opts">${opts.join('')}${(_h.niv||_h.imp||_h.baja)?'':' <span class="bien-or">o hacé tu rutina normal</span>'}</div>`);
+  if(bienDolor(v)){ const num=(DB.settings.whatsapp||'5492616985895').replace(/[^0-9]/g,''); const txt=encodeURIComponent('Hola profe, soy '+((DB.students[active]||{}).name||'')+'. Hoy llego con dolor'+(v.z?' en '+v.z.toLowerCase():'')+' ('+v.d+'/5).'); m.push(`<a class="bien-wa" href="https://wa.me/${num}?text=${txt}" target="_blank" rel="noopener">💬 Contale a tu profe</a>`); }
   return m.length?`<div class="bien-msg">${m.join('<br>')}</div>`:''; }
 async function bienSet(f,val){ const k=bienKey(); const cur=Object.assign({},bienVal()||{}); cur[f]=f==='z'?val:+val; if(f==='d'&&+val>2) delete cur.z; cur._w=+week; cur._t=Date.now(); cur.at=cur.at||new Date().toISOString(); CACHE[k]=cur; queueSave(); window._bienOpen=true;
   const av=bienAvg(cur); if(av!=null&&(!bienDolor(cur)||cur.z)) window._bienOpen=false;
-  if(!trainer&&bienDolor(cur)&&cur.z&&!cur.avisado){ cur.avisado=true; CACHE[k]=cur; queueSave(); try{ await pushNotif({ id:active, name:DB.students[active].name, date:new Date().toISOString(), dolor:true, text:'Llega con dolor en '+cur.z.toLowerCase()+' ('+cur.d+'/5) · '+(routine()[day]||{}).day }); }catch(e){} }
+  /* 23/11/2026: ya no se avisa sola a la profe — la alumna decide si le cuenta (botón de WhatsApp en el mensaje) */
   const el=$('bienWrap'); if(el) el.innerHTML=bienHTML(); else render(); }
-function bienFactor(){ const v=bienVal(); return bienDolor(v)?0.8:1; }
+function bienFactor(){ const h=(typeof CACHE!=='undefined'&&CACHE[nivHoyKey()])||{}; return h.baja?0.8:1; } /* 23/11/2026: solo si la alumna elige bajar la carga hoy (antes era automático con dolor) */
 function isTimeEx(ex){ return /″|"|\bseg\b|\bs\b$|segundos|\bmin\b|′/i.test(String((ex&&ex.r)||'')); }
 function fbKey(ei,mi){ return 'fb_'+day+'_'+ei+'_'+(mi||0); }
 function fbOf(ei,mi){ const v=CACHE[fbKey(ei,mi)]; return (v&&wOf(v)===+week)?v.v:''; }
@@ -7890,8 +7909,8 @@ function paintRest(){ const mm=Math.floor(restLeft/60), ss=restLeft%60; $('restn
 function stopRest(){ if(restInt){ clearInterval(restInt); restInt=null; } $('rest').classList.remove('show'); }
 
 function firstNum(s){ if(s==null) return null; const m=String(s).replace(',','.').match(/-?\d+(\.\d+)?/); return m?parseFloat(m[0]):null; }
-function bestSet(ei,mi){ const ex=exWithOverride(routine()[day].ex[ei],ei); let best=null; for(let si=0;si<ex.s;si++){ const raw=CACHE[K(ei,si,mi)]||{}; const v=(wOf(raw)===+week)?raw:{}; const w=firstNum(v.w); let r=firstNum(v.r); if(r==null&&w!=null) r=firstNum(repPh(ex.r,si)); /* 23/11/2026: si cargó el peso pero dejó las reps del objetivo sin escribir, se usan esas reps (antes esa serie no contaba y el RM quedaba con el peso de la serie anterior) */ if(w==null||r==null||w<=0||r<=0) continue; const e=w*(1+r/30); if(!best||e>best.e) best={w,r,e}; } return best; }
-function rmHTML(ei,mi){ const b=bestSet(ei,mi); if(!b) return `<summary>RM estimados (8RM→1RM) <span class="best">cargá peso y reps</span></summary><div class="rmempty">Cuando cargues peso y reps de al menos una serie, calculo los RM con la fórmula de Epley.</div>`; let grid=''; for(let n=8;n>=1;n--){ grid+=`<div><b>${fmt(b.e/(1+n/30))}</b><span>${n}RM</span></div>`; } return `<summary>RM estimados (8RM→1RM) <span class="best">mejor: ${fmt(b.w)}×${b.r}</span></summary><div class="rmgrid">${grid}</div>`; }
+function bestSet(ei,mi){ const ex=exWithOverride(routine()[day].ex[ei],ei); let best=null; for(let si=0;si<ex.s;si++){ const raw=CACHE[K(ei,si,mi)]||{}; const v=(wOf(raw)===+week)?raw:{}; const w=firstNum(v.w); let r=firstNum(v.r); if(r==null&&w!=null) r=firstNum(repPh(ex.r,si)); /* 23/11/2026: si cargó el peso pero dejó las reps del objetivo sin escribir, se usan esas reps (antes esa serie no contaba y el RM quedaba con el peso de la serie anterior) */ if(w==null||r==null||w<=0||r<=0) continue; const e=w*(1+r/30); if(!best||e>best.e) best={w,r,e,si}; } return best; }
+function rmHTML(ei,mi){ const b=bestSet(ei,mi); if(!b) return `<summary>RM estimados (8RM→1RM) <span class="best">cargá peso y reps</span></summary><div class="rmempty">Cuando cargues peso y reps de al menos una serie, calculo los RM con la fórmula de Epley.</div>`; let grid=''; for(let n=8;n>=1;n--){ grid+=`<div><b>${fmt(b.e/(1+n/30))}</b><span>${n}RM</span></div>`; } return `<summary>RM estimados (8RM→1RM) <span class="best">con tu mejor serie (S${b.si+1}): ${fmt(b.w)}×${b.r}</span></summary><div class="rmgrid">${grid}</div>`; }
 function fmt(x){ return (Math.round(x*2)/2).toString().replace('.',',')+' kg'; }
 
 async function closeSession(){
@@ -8992,7 +9011,7 @@ function nivBarHTML(){
   if(hasImp) h+=`<div class="nb-row"><span class="nb-l">Impacto</span>${seg('imp',[['con','Con saltos'],['sin','🌿 Sin impacto']],im,!!L.imp)}</div>`;
   const notes=[];
   if(L.niv||L.imp) notes.push('🔒 Tu profe fijó '+[L.niv?'el nivel':'',L.imp?'el impacto':''].filter(Boolean).join(' y ')+' para vos.');
-  if(hoy&&(hoy.niv||hoy.imp)) notes.push('Solo por hoy · <button type="button" class="nb-undo" data-act="nivSet" data-k="hoy" data-v="">volver a lo de siempre</button>');
+  if(hoy&&(hoy.niv||hoy.imp||hoy.baja)) notes.push('Solo por hoy'+(hoy.baja?' (carga −20%)':'')+' · <button type="button" class="nb-undo" data-act="nivSet" data-k="hoy" data-v="">volver a lo de siempre</button>');
   if(hasLv&&!notes.length) notes.push(nv==='P'?'Menos rondas y carga liviana.':nv==='A'?'Una ronda más y carga alta al final.':'Rondas y tiempos como están escritos.');
   h+=`<div class="nb-note">${notes.join(' ')}</div></div>`;
   return h;
@@ -9000,7 +9019,7 @@ function nivBarHTML(){
 async function nivSet(k,v){
   const L=nivLock();
   if(k==='hoy'){ delete CACHE[nivHoyKey()]; }
-  else if(k==='hniv'||k==='himp'){ const cur=Object.assign({},CACHE[nivHoyKey()]||{}); cur[k==='hniv'?'niv':'imp']=v; cur._w=+week; CACHE[nivHoyKey()]=cur; }
+  else if(k==='hniv'||k==='himp'||k==='hbaja'){ const cur=Object.assign({},CACHE[nivHoyKey()]||{}); const f=k==='hniv'?'niv':k==='himp'?'imp':'baja'; if(v) cur[f]=(f==='baja')?true:v; else delete cur[f]; cur._w=+week; if(cur.niv||cur.imp||cur.baja) CACHE[nivHoyKey()]=cur; else delete CACHE[nivHoyKey()]; }
   else if(k==='niv'){ if(L.niv) return; CACHE.nivel=v; delete CACHE[nivHoyKey()]; }
   else if(k==='imp'){ if(L.imp) return; CACHE.imp=v; const h=CACHE[nivHoyKey()]; if(h){ delete h.imp; } }
   queueSave(); renderApp();
@@ -9452,7 +9471,7 @@ function renderEdit(){
 
   {
     /* 23/11/2026 · Etapa 4: programas TaFiT listos, con filtros y nivel/impacto al aplicarlos */
-    const F=window._biF||(window._biF={cat:'',dias:0,modo:''});
+    const F=window._biF||(window._biF={cat:'HYROX',dias:0,modo:''});
     const all=builtinTpls();
     const cats=[['','Todos'],['HYROX','HYROX'],['Funcional','Funcional'],['Pádel','Pádel'],['Hockey','Hockey'],['Fútbol','Fútbol']];
     const chip=function(k,v,l,cur){ return `<button type="button" data-act="biFilter" data-k="${k}" data-v="${esc(String(v))}" class="${String(cur)===String(v)?'sel':''}">${esc(l)}</button>`; };
@@ -9467,14 +9486,14 @@ function renderEdit(){
     const opts=DB.order.filter(function(sid){ return !DB.students[sid].archived||sid===active; }).map(function(sid){ return `<option value="${esc(sid)}"${sid===active?' selected':''}>${esc(DB.students[sid].name)}</option>`; }).join('');
     const rows=list.length?list.map(function(t){
       const nEx=t.routine.reduce(function(a,d){ return a+d.ex.filter(function(e){ return !isBlockRow(e); }).length; },0);
-      return `<div class="tpl-row bi-row"><div class="tpl-info"><b>${esc(t.name)}</b><small>${esc(t.para)} · ${t.routine.length} días · ${nEx} ejercicios con video · 6 semanas</small>${prevH(t)}
+      return `<details class="bi-row"><summary><b>${esc(t.name)}</b><span class="bi-chev">▾</span></summary><div class="bi-body"><small class="bi-meta">${esc(t.para)} · ${t.routine.length} días · ${nEx} ejercicios con video · 6 semanas</small>${prevH(t)}
         <div class="bi-apply" data-bi="${esc(t.id)}"><select class="bi-sel" data-f="to">${opts}</select>
         <select class="bi-sel" data-f="niv">${['P','I','A'].map(function(l){ return `<option value="${l}"${(st3.nivel||'I')===l?' selected':''}>${NIV_LBL[l]}</option>`; }).join('')}</select>
         <select class="bi-sel" data-f="imp"><option value="con"${st3.imp!=='sin'?' selected':''}>Con saltos</option><option value="sin"${st3.imp==='sin'?' selected':''}>Sin impacto</option></select>
         <label class="bi-lock"><input type="checkbox" class="bi-sel" data-f="lock"> Fijar (que no lo cambie)</label>
-        <button data-act="applyBuiltin" data-id="${esc(t.id)}">▶ Usar</button></div></div></div>`;
+        <button data-act="applyBuiltin" data-id="${esc(t.id)}">▶ Usar</button></div></div></details>`;
     }).join(''):`<p style="font-size:11.5px;color:var(--mute)">No hay programas con ese filtro.</p>`;
-    SEC('biprog','⭐ Programas TaFiT listos',`<p style="font-size:11.5px;color:var(--mute)">HYROX y Funcional de 2 a 5 días, y Pádel, Hockey y Fútbol recreativo o competitivo. Todos con video en cada ejercicio y 6 semanas de progresión. El nivel cambia rondas, tiempos y reps; "sin impacto" cambia solo los saltos por su versión sin impacto. Si no fijás nada, la alumna puede cambiarlo desde su app.</p>${filt}<div class="tpl-list">${rows}</div>`);
+    SEC('biprog','⭐ Programas TaFiT listos',`<p style="font-size:11.5px;color:var(--mute)">Todos con video y 6 semanas de progresión. Tocá uno para verlo y aplicarlo.</p>${filt}<div class="bi-list">${rows}</div>`);
   }
   {
     const st4=DB.students[active]||{}; const L4=st4.nivLock||{};
