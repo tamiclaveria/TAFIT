@@ -133,7 +133,8 @@
   .rest:hover{border-color:var(--accent)}
   .vid{font-size:12px;font-weight:700;text-decoration:none;color:var(--accentDk);background:none;border:none;padding:0;font-family:inherit;cursor:pointer}
   /* Modal de video: se abre adentro de la app en vez de salir a YouTube, cuando el ejercicio tiene un video puntual cargado */
-  .vid-modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:9999;padding:16px}
+  .vid-hint{display:block;font-size:10.5px;color:var(--mute);margin-top:4px;line-height:1.35}.vid-hint b{font-weight:600;color:var(--ink,inherit)}
+.vid-modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:9999;padding:16px}
   .vid-modal-ov.show{display:flex}
   .vid-modal{background:#000;border-radius:14px;overflow:hidden;width:100%;max-width:520px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
   .vid-modal-top{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#161616;color:#fff}
@@ -1367,7 +1368,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-156'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-157'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -1439,9 +1440,22 @@ function vNorm(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/
 function vidForName(name){ const k=vNorm(name); if(!k) return null;
   const lib=(typeof DB!=='undefined'&&DB.exLib)||[]; for(let i=0;i<lib.length;i++){ if(vNorm(lib[i].n)===k){ const id=extractYouTubeId(lib[i].vid); if(id) return id; } }
   const a=VID_ALIAS[k]; return a?(SHORT_VID[a]||a):null; }
+/* 24/11/2026 (Tami: "cada video que se sume, que no dure más de 1 minuto" y "si subo un video mío, ¿se
+   puede usar para hacer otros con el mismo?"): todo video se muestra como máximo 1 minuto. Si el link trae
+   un minuto de inicio (Compartir → "Empezar en", o escrito al lado: "https://youtu.be/ID 1:20" o "1:20-1:45"),
+   se muestra ese tramo: así un mismo video largo sirve para varios ejercicios, cada uno con su minuto. */
+const VID_MAX=60;
+function _tSec(x){ x=String(x||'').trim(); if(!x) return 0; let m=x.match(/^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s?)?$/); if(m&&(m[1]||m[2]||m[3])) return (+m[1]||0)*3600+(+m[2]||0)*60+(+m[3]||0);
+  m=x.match(/^(\d+):(\d{1,2})(?::(\d{1,2}))?$/); if(m) return m[3]!=null?(+m[1])*3600+(+m[2])*60+(+m[3]):(+m[1])*60+(+m[2]); return 0; }
+function ytClip(url){ const s=String(url||''); let st=0,en=0,m;
+  m=s.match(/[?&#](?:t|start)=([0-9hms]+)/); if(m) st=_tSec(m[1]);
+  m=s.match(/[?&#]end=([0-9hms]+)/); if(m) en=_tSec(m[1]);
+  m=s.match(/\s(\d+(?::\d{1,2}){0,2})(?:\s*-\s*(\d+(?::\d{1,2}){0,2}))?\s*$/); if(m){ st=_tSec(m[1]); if(m[2]) en=_tSec(m[2]); }
+  if(!(en>st)||en-st>VID_MAX) en=st+VID_MAX; return {st:st,en:en}; }
 function playVideo(url,name){
-  const id=extractYouTubeId(url)||vidForName(name);
-  if(id) openVideoModal(id,name);
+  const c=ytClip(url); const raw=_ytRawId(url);
+  const id=(c.st&&raw)?raw:(extractYouTubeId(url)||vidForName(name));
+  if(id) openVideoModal(id,name,c.st,c.en);
   else window.open(url,'_blank','noopener');
 }
 /* miniatura real del ejercicio (no del grupo muscular): el frame del propio video de
@@ -1721,7 +1735,7 @@ function coreToggleDone(id){
   cur._w=week; CACHE[k]=cur; queueSave(); renderCoreCard();
 }
 function renderCoreCard(){ const el=$('coreCard'); if(el) el.innerHTML=coreCardHTML(); }
-function openVideoModal(id,name){
+function openVideoModal(id,name,st,en){ st=+st||0; en=+en||0; if(!(en>st)||en-st>VID_MAX) en=st+VID_MAX;
   { const _pb=$('plBox'); if(_pb&&!window._plOpening) _pb.remove(); }
   let ov=$('vidModalOv');
   if(!ov){
@@ -1732,7 +1746,7 @@ function openVideoModal(id,name){
   }
   const t=$('vidModalTitle'); if(t) t.textContent=name||'Técnica';
   const tt=techText(name);
-  const b=$('vidModalBody'); if(b) b.innerHTML=(id?'<iframe src="https://www.youtube-nocookie.com/embed/'+id+'?rel=0&playsinline=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>':'')+(tt?'<details class="vm-tech"'+(id?'':' open')+'><summary>📖 Prefiero leer la técnica</summary><div>'+tt+'</div></details>':'');
+  const b=$('vidModalBody'); if(b) b.innerHTML=(id?'<iframe src="https://www.youtube-nocookie.com/embed/'+id+'?rel=0&playsinline=1&start='+st+'&end='+en+'" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>':'')+(tt?'<details class="vm-tech"'+(id?'':' open')+'><summary>📖 Prefiero leer la técnica</summary><div>'+tt+'</div></details>':'');
   ov.classList.add('show');
 }
 /* 15/10/2026: la técnica escrita, para quien no quiere (o no puede) ver el video */
@@ -9645,7 +9659,7 @@ function renderEdit(){
               <div class="fld mt8"><label>Grupo muscular (elegí uno o más)</label>${groupChecksHTML(groupsOf(it),'e')}</div>
               <div class="fld mt8"><label>Alternativo</label><input data-lf="alt" value="${esc(it.alt||'')}"></div>
               <div class="fld mt8"><label>Técnica / tip</label><textarea data-lf="tip">${esc(it.tip||'')}</textarea></div>
-              <div class="fld mt8"><label>Video (link de YouTube puntual, opcional)</label><input data-lf="vid" value="${esc(it.vid||'')}" placeholder="https://youtu.be/…"></div>
+              <div class="fld mt8"><label>Video (link de YouTube puntual, opcional)</label><input data-lf="vid" value="${esc(it.vid||'')}" placeholder="https://youtu.be/…"><small class="vid-hint">Se muestra 1 minuto como máximo. Si es un video largo (por ejemplo uno tuyo con varios ejercicios), poné al lado del link desde qué minuto: <b>https://youtu.be/… 1:20</b></small></div>
               <div class="edit-actions mt8"><button data-act="saveLibEx" data-id="${esc(it.id)}">Guardar</button><button data-act="editLibEx" data-id="${esc(it.id)}" style="background:var(--card);color:var(--steel)">Cancelar</button></div>
             </div>`;
           } else {
@@ -9663,7 +9677,7 @@ function renderEdit(){
       <div class="fld mt8" id="libNewGroups"><label>Grupo muscular (elegí uno o más)</label>${groupChecksHTML([],'n')}</div>
       <div class="fld mt8"><label>Alternativo</label><input id="libNewAlt" placeholder="Alternativo (opcional)"></div>
       <div class="fld mt8"><label>Técnica / tip</label><textarea id="libNewTip" placeholder="Punto clave a tener en cuenta"></textarea></div>
-      <div class="fld mt8"><label>Video (link de YouTube puntual, opcional)</label><input id="libNewVid" placeholder="https://youtu.be/…"></div>
+      <div class="fld mt8"><label>Video (link de YouTube puntual, opcional)</label><input id="libNewVid" placeholder="https://youtu.be/…"><small class="vid-hint">Se muestra 1 minuto como máximo. Si es un video largo (por ejemplo uno tuyo con varios ejercicios), poné al lado del link desde qué minuto: <b>https://youtu.be/… 1:20</b></small></div>
       <p class="mt8" style="font-size:11px;color:var(--mute);line-height:1.5">Si pegás acá un video puntual (no una búsqueda), se va a ver adentro de la app en cualquier rutina donde elijas este ejercicio de la biblioteca.</p>
       <div class="edit-actions mt8"><button data-act="addLibEx">+ Agregar a la biblioteca</button></div>`;
     SEC('exlib',`📚 Biblioteca de ejercicios (${exLibList().length})`,libHtml);
@@ -9886,7 +9900,7 @@ function renderEdit(){
         ${duo?`<div class="fld mt8"><label>Peso obj. (${esc(mm[1])})</label><input data-field="w2" value="${esc(ex.w2||'')}"></div>`:''}
         <div class="row2 mt8"><div class="fld"><label>Descanso</label><input data-field="rest" value="${esc(ex.rest)}" placeholder="90 s"></div><div class="fld"><label>Variante / Alternativo</label><input data-field="alt" value="${esc(ex.alt)}" placeholder="Alternativo"></div></div>
         <div class="fld mt8"><label>Tip / técnica</label><textarea data-field="tip" placeholder="Punto clave a tener en cuenta (una por línea)">${esc(ex.tip)}</textarea></div>
-        <div class="fld mt8"><label>Video del ejercicio (link de YouTube puntual, opcional)</label><input data-field="vid" value="${esc(ex.vid&&!/results\?search_query/.test(ex.vid)?ex.vid:'')}" placeholder="https://youtu.be/…"></div>
+        <div class="fld mt8"><label>Video del ejercicio (link de YouTube puntual, opcional)</label><input data-field="vid" value="${esc(ex.vid&&!/results\?search_query/.test(ex.vid)?ex.vid:'')}" placeholder="https://youtu.be/…"><small class="vid-hint">Se muestra 1 minuto como máximo. Si es un video largo (por ejemplo uno tuyo con varios ejercicios), poné al lado del link desde qué minuto: <b>https://youtu.be/… 1:20</b></small></div>
         <div class="fld mt8"><label>Video del alternativo (opcional)</label><input data-field="altVid" value="${esc(ex.altVid||'')}" placeholder="https://youtu.be/…"></div>
         <details class="wk-ed"${Array.isArray(ex.wk)&&ex.wk.some(function(v){ return v&&(v.n||v.r||v.vid); })?' open':''}><summary>📅 Cambia por semana (opcional)</summary><div class="wk-help">Dejá en blanco lo que no cambia. Ej: Dominadas → S2 "Dominadas con pausa arriba", S3 "Dominadas supinas"… o solo las reps de cada semana.</div>${weeks().map(function(w,wi){ const v=(Array.isArray(ex.wk)&&ex.wk[wi])||{}; return `<div class="wk-row"><b>${esc(w.t)}</b><input data-wk="${wi}" data-wf="n" value="${esc(v.n||'')}" placeholder="Nombre de la variante"><input data-wk="${wi}" data-wf="r" value="${esc(v.r||'')}" placeholder="Reps"><input data-wk="${wi}" data-wf="vid" value="${esc(v.vid||'')}" placeholder="Video (link)"></div>`; }).join('')}</details>
         <p class="mt8" style="font-size:11px;color:var(--mute);line-height:1.5">Si pegás un link puntual (no una búsqueda), "Ver técnica" lo muestra adentro de la app, sin salir a YouTube. Si lo dejás vacío, se abre una búsqueda en YouTube como hasta ahora.</p>
