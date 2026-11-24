@@ -247,6 +247,20 @@
   .bien-or{font-size:11.5px;color:#6b5d50}
   .bien-go.on{background:#E3C3A5;color:#17120E}
   .bien-wa{display:inline-block;margin-top:8px;font-weight:700;color:#17120E;text-decoration:underline}
+.vol-lbl{font-size:11.5px;font-weight:700;color:var(--ink);margin:10px 0 4px}
+  .vol-row{border-top:1px solid var(--line);padding:7px 0}
+  .vol-row>summary{list-style:none;cursor:pointer;display:block!important;padding:0!important}.vol-row>summary::-webkit-details-marker{display:none}
+  .vol-top{display:flex;align-items:center;gap:8px;font-size:13px}.vol-top b{flex:1;font-weight:700}
+  .vol-n{font-weight:700;font-size:13px}.vol-n small{font-weight:500;color:var(--mute);font-size:11px}
+  .vol-tag{font-size:10.5px;font-weight:700;border-radius:999px;padding:2px 8px;border:1px solid #17120E;color:#17120E;min-width:58px;text-align:center}
+  .vol-row.ok .vol-tag{background:#E3C3A5;border-color:#E3C3A5}
+  .vol-row.alto .vol-tag{background:#17120E;color:#F2ECE0}
+  .vol-row.bajo .vol-tag{background:transparent}
+  .vol-bar{position:relative;height:9px;border-radius:5px;background:#F2ECE0;margin-top:6px;overflow:hidden}
+  .vol-band{position:absolute;top:0;bottom:0;background:#E3C3A5;opacity:.75}
+  .vol-fill{position:absolute;left:0;top:3px;height:3px;border-radius:2px;background:#17120E}
+  .vol-det{font-size:11.5px;color:var(--mute);padding:6px 0 2px}.vol-det div{display:flex;justify-content:space-between;gap:10px;padding:2px 0}
+  .vol-off{margin-top:8px;border-top:1px solid var(--line);padding-top:6px}.vol-off summary span{font-size:11.5px;color:var(--mute)}
   .bi-frow{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin:5px 0}
   .bi-frow span{font-size:11px;font-weight:700;color:var(--mute);margin-right:2px}
   .bi-frow button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer}
@@ -1368,7 +1382,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-157'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-158'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -9159,7 +9173,9 @@ function noImpFor(n){ for(let i=0;i<NOIMP.length;i++){ if(NOIMP[i][0].test(n||''
 function dayHasImpact(d){ return !!(d&&(d.ex||[]).some(function(e){ return !isBlockRow(e)&&noImpFor(e.n); })); }
 function dayHasLv(d){ return !!(d&&(d.ex||[]).some(function(e){ return e&&e.lv; })); }
 /* ---- rondas del bloque según nivel y semana ---- */
-function lvBlockOf(ei){ const ex=(routine()[day]||{}).ex||[]; for(let i=ei-1;i>=0;i--){ if(isBlockRow(ex[i])) return ex[i]; } return null; }
+/* 24/11/2026: el bloque de core del principio que pasó a "a elección" (abPresetIdx) no es el bloque de los
+   ejercicios que siguen: con "Tabata de core (opcional)" todo el día de Joni contaba como opcional (0/0 series). */
+function lvBlockOf(ei){ const d=routine()[day]||{}; const ex=d.ex||[]; for(let i=ei-1;i>=0;i--){ if(isBlockRow(ex[i])) return abPresetIdx(d).has(i)?null:ex[i]; } return null; }
 function lvRounds(b){
   let R=+b.blkRounds||+b.s||1; const L=curNivel(), k=b.bk, f=b.lv, w=+week||0;
   if(k==='wu'||k==='cb'||k==='ser'||k==='tab') return R;
@@ -9612,6 +9628,109 @@ async function autoBackup(trigger){
 async function viewPhoto(pid){ const data=await Store.get(mediaKey('tafit:photo:')+':'+pid); if(!data) return; $('lb').innerHTML=`<img src="${data}" alt="">`; $('lb').classList.add('show'); }
 
 /* ===================== EDITAR ===================== */
+/* 24/11/2026 (Tami: "algo que muestre el volumen semanal por grupo muscular… solo yo, en el armado de la
+   rutina o en las rutinas ya realizadas"): series por grupo muscular, planificadas (lo que dice la rutina)
+   o realizadas (series tildadas en la Transcripta), contra el rango ideal según nivel y días por semana.
+   Directas cuentan 1, indirectas ½. Solo informa: no cambia nada de la rutina. Solo en el editor (profe). */
+const VOL_G=['Pecho','Espalda','Hombros','Bíceps','Tríceps','Cuádriceps','Glúteos','Isquios','Aductores','Gemelos','Core'];
+const VOL_BIG={'Pecho':1,'Espalda':1,'Cuádriceps':1,'Glúteos':1,'Isquios':1};
+const VOL_RANGE={ /* [grandes, chicos] × días 2 / 3 — series efectivas por semana */
+  P:{2:[[6,8],[4,6]],3:[[8,10],[6,8]]}, I:{2:[[8,12],[6,9]],3:[[10,15],[8,12]]}, A:{2:[[10,14],[8,12]],3:[[14,20],[10,16]]} };
+const VOL_RULES=[
+  [/gemelo|talon|pantorrilla/,{'Gemelos':1}],
+  [/aduc|aductor|copenhague/,{'Aductores':1}],
+  [/abduc|hip thrust|puente|patada de gluteo|patada gluteo|patada atras|almeja|caminata lateral|caminata en x|pull through|gluteo/,{'Glúteos':1}],
+  [/rumano|peso muerto a una pierna|peso muerto unilateral|buenos dias/,{'Isquios':1,'Glúteos':0.5}],
+  [/femoral|isquio|nordico/,{'Isquios':1}],
+  [/peso muerto|swing|cargada/,{'Glúteos':1,'Isquios':0.5,'Espalda':0.5}],
+  [/extension de cuadriceps|cuadriceps|sissy/,{'Cuádriceps':1}],
+  [/sumo/,{'Glúteos':1,'Cuádriceps':0.5,'Aductores':0.5}],
+  [/bulgar|estocada|zancada|step up|subida al cajon|subo bajo/,{'Cuádriceps':1,'Glúteos':1}],
+  [/sentadilla|pistol|prensa|hack|wall ball|thruster/,{'Cuádriceps':1,'Glúteos':0.5}],
+  [/abdomin|crunch|plancha|oblicu|giro ruso|dead bug|hollow|tijera|pataditas|toque de talon|mountain|rueda|navaja|barquito|elevacion de piernas|elevacion de rodillas|pallof|lenador|inferiores|sit up|v ups|bicicleta|espinales|superman|hiperextension|bird dog|nado en el piso|inclinacion lateral|core/,{'Core':1}],
+  [/press frances|press cerrado|tricep|patada de tricep|fondos|copa|trasnuca/,{'Tríceps':1}],
+  [/bicep|curl|martillo/,{'Bíceps':1}],
+  [/face pull|pajaro|vuelo posterior|vuelos posteriores|volada posterior/,{'Hombros':1,'Espalda':0.5}],
+  [/press militar|press de hombro|press hombro|press de hombros|arnold|elevacion lateral|volada|elevacion frontal|remo al menton/,{'Hombros':1}],
+  [/pecho|banca|press plano|press inclinado|inclinado|apertura|cruce de polea|flexion|pec deck|press en maquina/,{'Pecho':1,'Tríceps':0.5}],
+  [/remo|dorsal|jalon|dominada|pull ?over|encogimiento/,{'Espalda':1,'Bíceps':0.5}],
+];
+function volGroupsOf(name){ const n=vNorm(name); if(!n) return null; for(let i=0;i<VOL_RULES.length;i++){ if(VOL_RULES[i][0].test(n)){ const g=Object.assign({},VOL_RULES[i][1]); if(/^press|press/.test(n)&&g['Hombros']===1) g['Tríceps']=0.5; return g; } } return null; }
+function volDays(R){ const n=(R||[]).filter(function(d){ return !isSesDay(d); }).length; return n>=3?3:2; }
+/* series planificadas de una semana (wi) de una rutina */
+function volPlan(R,wi){
+  const tot={}, det={}, off=[];
+  (R||[]).forEach(function(d){ if(isSesDay(d)) return; const P=abPresetIdx(d); let blk=null, kids=[];
+    const rows=d.ex||[];
+    rows.forEach(function(e,ei){
+      if(isBlockRow(e)){ if(P.has(ei)){ blk=null; return; } blk=getBlockCfg(e); kids=[]; for(let j=ei+1;j<rows.length&&!isBlockRow(rows[j]);j++) kids.push(rows[j]); return; }
+      if(P.has(ei)||cardioOf(e)) return;
+      const v=Array.isArray(e.wk)?e.wk[wi]:null; const n=(v&&v.n)||e.n; let s=parseInt((v&&v.s)||e.s)||0;
+      if(blk&&(isFinisherBlk(blk)||/opcional/i.test(blk.title||''))) return;
+      if(blk&&s<=1){ const k1=kids.filter(function(x){ return (parseInt(x.s)||0)<=1; }).length||1; s=/tabata/i.test(blk.format||'')?Math.max(1,Math.round(blk.rounds/k1)):blk.rounds; }
+      if(!s) return;
+      const g=volGroupsOf(n); if(!g){ if(off.indexOf(n)<0) off.push(n); return; }
+      Object.keys(g).forEach(function(k){ tot[k]=(tot[k]||0)+s*g[k]; (det[k]=det[k]||[]).push({n:n,s:s,f:g[k],d:d.day}); });
+    });
+  });
+  return {tot:tot,det:det,off:off};
+}
+/* series realizadas (tildadas) en las sesiones de un ciclo, por semana */
+function volDone(cycle){
+  const byW={};
+  logsForCycle(cycle).forEach(function(o){ const l=o.e; const w=+l.week||0; const B=byW[w]||(byW[w]={tot:{},det:{},off:[],ses:0}); B.ses++;
+    (l.ex||[]).forEach(function(x){ let c=0;
+      if(x.members&&x.members.length){ x.members.forEach(function(m){ (m.sets||[]).forEach(function(s){ if(s.done) c++; }); }); c=c/x.members.length; }
+      else (x.sets||[]).forEach(function(s){ if(s.done) c++; });
+      if(!c) return; const g=volGroupsOf(x.n); if(!g){ if(B.off.indexOf(x.n)<0) B.off.push(x.n); return; }
+      Object.keys(g).forEach(function(k){ B.tot[k]=(B.tot[k]||0)+c*g[k]; (B.det[k]=B.det[k]||[]).push({n:x.n,s:c,f:g[k],d:l.dayName}); });
+    });
+  });
+  return byW;
+}
+function volSum(list){ const out={tot:{},det:{},off:[]}; list.forEach(function(b){ if(!b) return; Object.keys(b.tot).forEach(function(k){ out.tot[k]=(out.tot[k]||0)+b.tot[k]; out.det[k]=(out.det[k]||[]).concat(b.det[k]||[]); }); (b.off||[]).forEach(function(n){ if(out.off.indexOf(n)<0) out.off.push(n); }); }); return out; }
+function volSecHTML(){
+  const st=DB.students[active]||{}; const V=window._vol||(window._vol={mode:'plan',wk:null,niv:null,dias:null,cyc:null});
+  const cycles=studentCycles(); const ci=(V.cyc==null||V.cyc>=cycles.length)?cycles.length-1:V.cyc; const cyc=cycles[ci];
+  const R=cyc.routine||[]; const W=cyc.weeksArr||weeks();
+  const niv=V.niv||st.nivel||'I'; const dias=V.dias||volDays(R);
+  const chip=function(k,v,l,cur){ return `<button type="button" data-act="volSet" data-k="${k}" data-v="${esc(String(v))}" class="${String(cur)===String(v)?'sel':''}">${esc(l)}</button>`; };
+  let html=`<p style="font-size:11.5px;color:var(--mute)">Series efectivas por grupo muscular (directas = 1, indirectas = ½; por ejemplo el tríceps en un press de pecho). Solo lo ves vos: no cambia nada de la rutina. No cuenta la activación de core que elige el alumno ni los bloques opcionales o finisher.</p>`;
+  html+=`<div class="bi-filt"><div class="bi-frow">${chip('mode','plan','📝 Planificado',V.mode)}${chip('mode','done','✅ Realizado',V.mode)}</div>`;
+  if(cycles.length>1) html+=`<div class="bi-frow"><span>Rutina</span>${cycles.map(function(c,i){ return chip('cyc',i,i===cycles.length-1?'Actual':('Ciclo '+(i+1)+(c.start?' · '+new Date(c.start).toLocaleDateString('es-AR',{month:'short',year:'2-digit'}):'')),ci); }).join('')}</div>`;
+  let data, isMonth=false, label='', mN=0;
+  if(V.mode==='done'){
+    const byW=volDone(cyc); const ws=Object.keys(byW).map(Number).sort(function(a,b){ return a-b; });
+    if(!ws.length){ html+=`</div><p class="note" style="margin:8px 0 0">Todavía no hay sesiones registradas en esta rutina.</p>`; return html; }
+    const wk=(V.wk==null||(V.wk!=='mes'&&ws.indexOf(+V.wk)<0))?ws[ws.length-1]:V.wk;
+    html+=`<div class="bi-frow"><span>Semana</span>${ws.map(function(w){ return chip('wk',w,(W[w]&&W[w].t)||('S'+(w+1)),wk); }).join('')}${ws.length>1?chip('wk','mes','Mes',wk):''}</div>`;
+    if(wk==='mes'){ const last=ws.slice(-4); mN=last.length; data=volSum(last.map(function(w){ return byW[w]; })); isMonth=true; label='Realizado en '+last.length+' semana'+(last.length===1?'':'s')+' ('+last.map(function(w){ return (W[w]&&W[w].t)||('S'+(w+1)); }).join(', ')+')'; }
+    else { data=byW[wk]; label='Realizado en '+((W[wk]&&W[wk].t)||('S'+(+wk+1)))+' · '+data.ses+' sesi'+(data.ses===1?'ón':'ones'); }
+  } else {
+    const nW=Math.max(1,W.length); const wk=(V.wk==null||(V.wk!=='mes'&&+V.wk>=nW))?Math.min(+week||0,nW-1):V.wk;
+    html+=`<div class="bi-frow"><span>Semana</span>${W.map(function(w,i){ return chip('wk',i,w.t||('S'+(i+1)),wk); }).join('')}${nW>1?chip('wk','mes','Mes',wk):''}</div>`;
+    if(wk==='mes'){ const ix=[0,1,2,3].filter(function(i){ return i<nW; }); mN=ix.length; data=volSum(ix.map(function(i){ return volPlan(R,i); })); isMonth=true; label='Planificado en '+ix.length+' semanas ('+ix.map(function(i){ return W[i].t||('S'+(i+1)); }).join(', ')+')'; }
+    else { data=volPlan(R,+wk); label='Planificado para '+((W[wk]&&W[wk].t)||('S'+(+wk+1)))+' · '+R.filter(function(d){ return !isSesDay(d); }).length+' días'; }
+  }
+  html+=`<div class="bi-frow"><span>Nivel</span>${[['P','Principiante'],['I','Intermedio'],['A','Avanzado']].map(function(x){ return chip('niv',x[0],x[1],niv); }).join('')}</div>`;
+  html+=`<div class="bi-frow"><span>Rango para</span>${chip('dias',2,'2 días',dias)}${chip('dias',3,'3 días o más',dias)}</div></div>`;
+  const mult=isMonth?(mN>=4?3.5:mN):1;
+  html+=`<div class="vol-lbl">${esc(label)}${isMonth&&mN>=4?' · el rango del mes cuenta 1 semana de descarga':''}</div>`;
+  const fmtN=function(x){ return (Math.round(x*2)/2).toString().replace('.',','); };
+  html+=VOL_G.map(function(g){
+    const r=VOL_RANGE[niv][dias][VOL_BIG[g]?0:1]; const lo=Math.round(r[0]*mult), hi=Math.round(r[1]*mult);
+    const v=(data.tot[g]||0); const max=Math.max(hi*1.35,v,1);
+    const st_=v<lo?'bajo':v>hi?'alto':'ok'; const tag=st_==='bajo'?'Bajo':st_==='alto'?'Alto':'En rango';
+    const items=(data.det[g]||[]); const agg={}; items.forEach(function(it){ const k=it.n+'|'+it.f; agg[k]=agg[k]||{n:it.n,f:it.f,s:0}; agg[k].s+=it.s; });
+    const list=Object.keys(agg).map(function(k){ return agg[k]; }).sort(function(a,b){ return b.f-a.f||b.s*b.f-a.s*a.f; });
+    return `<details class="vol-row ${st_}"><summary><div class="vol-top"><b>${esc(g)}</b><span class="vol-n">${fmtN(v)} <small>/ ${lo}–${hi}</small></span><span class="vol-tag">${tag}</span></div>
+      <div class="vol-bar"><i class="vol-band" style="left:${lo/max*100}%;width:${Math.max(1,(hi-lo)/max*100)}%"></i><i class="vol-fill" style="width:${Math.min(100,v/max*100)}%"></i></div></summary>
+      <div class="vol-det">${list.length?list.map(function(it){ return `<div><span>${esc(it.n)}</span><span>${fmtN(it.s)} serie${it.s===1?'':'s'}${it.f<1?' × ½':''}</span></div>`; }).join(''):'<div><span>Ningún ejercicio de este grupo</span></div>'}</div></details>`;
+  }).join('');
+  if(data.off&&data.off.length) html+=`<details class="tacc vol-off"><summary><span>Sin grupo muscular (${data.off.length}): no suman</span><span class="tchev">▾</span></summary><div class="tacc-body" style="font-size:11.5px;color:var(--mute)">${data.off.map(esc).join(' · ')}</div></details>`;
+  return html;
+}
+function volRefresh(){ const b=document.querySelector('details[data-sec="volumen"] > .tacc-body'); if(b) b.innerHTML=volSecHTML(); }
 function renderEdit(){
   const m=$('main'); m.innerHTML='';
   const f=document.createElement('div'); f.className='focus'; f.textContent="Editá rutinas, integrantes, semanas, salud y tema"; m.appendChild(f);
@@ -9859,6 +9978,8 @@ function renderEdit(){
       : `<p style="font-size:11.5px;color:var(--mute)">Todavía no guardaste ninguna plantilla.</p>`;
     SEC('templates','📑 Plantillas de rutina',`<p style="font-size:11.5px;color:var(--mute)">Guardá una rutina ya armada como plantilla para no volver a cargarla de cero con cada alumna nueva que empiece algo parecido. Son compartidas: las guardás acá y las podés usar desde la ficha de cualquier otra alumna.</p>${saveTplBtn}<hr class="mt8" style="border:none;border-top:1px solid var(--line)"><h3 class="mt8" style="font-size:13px">Plantillas guardadas (${tpls.length})</h3>${tplListHtml}`);
   }
+
+  SEC('volumen','📊 Volumen por grupo muscular',volSecHTML());
 
   const duo=isDuo(), mm=membersOf();
   const head=document.createElement('div'); head.className='focus'; head.style.margin='4px 0 12px'; head.innerHTML=`Rutina de <b>${esc(DB.students[active].name)}</b>`; m.appendChild(head);
@@ -10693,6 +10814,7 @@ document.addEventListener('click',e=>{
     case 'relojSet': relojSet(el.dataset.v==='1'); break;
     case 'bienSet': bienSet(el.dataset.f,el.dataset.v); break;
     case 'nivSet': nivSet(el.dataset.k,el.dataset.v); break;
+    case 'volSet': { const V=window._vol||(window._vol={}); const k=el.dataset.k, v=el.dataset.v; V[k]=(k==='niv'||k==='mode'||v==='mes')?v:+v; if(k==='mode'||k==='cyc') V.wk=null; volRefresh(); break; }
     case 'biFilter': { const F=window._biF||(window._biF={}); F[el.dataset.k]=el.dataset.k==='dias'?+el.dataset.v:el.dataset.v; if(el.dataset.k==='cat'&&/^(Pádel|Hockey|Fútbol)$/.test(el.dataset.v)) F.dias=0; if(el.dataset.k==='cat'&&/^(HYROX|Funcional)$/.test(el.dataset.v)) F.modo=''; openSecs.add('biprog'); renderEdit(); break; }
     case 'applyBuiltin': applyBuiltin(id); break;
     case 'bienClose': window._bienOpen=false; { const w=$('bienWrap'); if(w) w.innerHTML=bienHTML(); } break;
