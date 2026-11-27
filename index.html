@@ -1389,7 +1389,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-162'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-163'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -5894,7 +5894,7 @@ const SES_TPL=[
   {id:'run-a5',tipo:'run',niv:'Avanzado',n:'Umbral 2 × 15′',bl:[B('Entrada en calor',12,2,'Trotá'),{rep:2,bl:[B('Umbral',15,4,'Corré fuerte y parejo'),B('Recuperación',4,2,'Trotá suave')]},B('Vuelta a la calma',6,1,'Caminá')]},
   {id:'run-a6',tipo:'run',niv:'Avanzado',n:'Progresivo largo 50′',bl:[B('Entrada en calor',5,1,'Trotá suave'),B('Base',15,2,'Corré'),B('Subí',15,3,'Corré un poco más rápido'),B('Fuerte',10,4,'Corré fuerte'),B('Vuelta a la calma',5,1,'Caminá')]},
   {id:'run-libre',tipo:'run',libre:true,niv:'Libre',n:'Libre: corre a su ritmo o elige una sesión',bl:[]},
-  {id:'run-test',tipo:'run',test:true,niv:'Todos',n:'Test de 12 minutos',bl:[B('Entrada en calor',10,2,'Trotá suave'),B('Test: lo más lejos que puedas',12,5,'Corré parejo y lo más fuerte que puedas sostener'),B('Vuelta a la calma',5,1,'Caminá')]},
+  {id:'run-test',tipo:'run',test:true,niv:'Todos',n:'Test de 12 minutos',bl:[/* 27/11/2026 (Tami): entrada en calor de verdad, no arrancar trotando de una · 29′ en total */B('Entrada en calor: caminata',3,1,'Caminá rápido para entrar en calor'),B('Entrada en calor: trote muy suave',6,2,'Trotá muy suave, que puedas charlar'),B('Movilidad en movimiento',2,1,'Hacé skipping suave, talones a la cola y rodillas arriba'),B('Preparate',1,1,'Caminá y respirá tranquila: en un minuto arranca el test'),B('Test: lo más lejos que puedas',12,5,'Corré parejo y lo más fuerte que puedas sostener'),B('Vuelta a la calma',5,1,'Caminá')]},
   {id:'prog-5k',tipo:'run',prog:true,niv:'Plan que avanza solo',n:'Plan: de caminar a correr 5 km (8 semanas)',bl:[B('Caminata',5,1,'Caminá'),{rep:8,bl:[B('Trote',1,2,'Trotá suave'),B('Caminata',1.5,1,'Caminá')]},B('Vuelta a la calma',5,1,'Caminá suave')]},
   {id:'prog-10k',tipo:'run',prog:true,niv:'Plan que avanza solo',n:'Plan: de 5 a 10 km (8 semanas)',bl:[B('Entrada en calor',8,2,'Trotá suave'),B('Fondo',23,2,'Corré parejo'),B('Vuelta a la calma',5,1,'Caminá')]},
   /* 23/10/2026 · sesiones pensadas para la CINTA del gimnasio. inc = inclinación (%), k = 'walk'/'run',
@@ -5914,7 +5914,7 @@ const SES_TPL=[
   /* 16/11/2026 (Tami): quema calórica caminando en pendiente, sin correr */
   {id:'cin-quema',tipo:'run',cinta:true,niv:'Intermedio',n:'Cinta: quema en pendiente 40′ (sin correr)',bl:[C('Caminata suave',5,1,'Caminá',{k:'walk',inc:2}),{rep:5,bl:[C('Subida fuerte',4,3,'Caminá rápido en subida, sin agarrarte de la cinta',{k:'walk',inc:10,dv:-0.5}),C('Recuperá',2,2,'Caminá con poca pendiente',{k:'walk',inc:4})]},C('Vuelta a la calma',5,1,'Caminá suave',{k:'walk',inc:0})]},
   /* 16/11/2026: test de 12′ también en la cinta (la distancia la marca la máquina) */
-  {id:'cin-test',tipo:'run',cinta:true,test:true,niv:'Todos',n:'Cinta: test de 12 minutos',bl:[C('Entrada en calor',10,2,'Trotá suave',{k:'run'}),C('Test: lo más lejos que puedas',12,5,'Subí la velocidad de a poco y sostené lo más fuerte que puedas',{k:'run',inc:1}),C('Vuelta a la calma',5,1,'Caminá',{k:'walk',inc:0})]},
+  {id:'cin-test',tipo:'run',cinta:true,test:true,niv:'Todos',n:'Cinta: test de 12 minutos',bl:[C('Entrada en calor: caminata',3,1,'Caminá rápido para entrar en calor',{k:'walk',inc:1}),C('Entrada en calor: trote muy suave',6,2,'Trotá muy suave, que puedas charlar',{k:'run',dv:-0.5}),C('Movilidad en movimiento',2,1,'Bajá a caminar y hacé rodillas arriba y talones a la cola suave',{k:'walk',inc:0}),C('Preparate',1,1,'Caminá: en un minuto arranca el test',{k:'walk',inc:0}),C('Test: lo más lejos que puedas',12,5,'Subí la velocidad de a poco y sostené lo más fuerte que puedas',{k:'run',inc:1}),C('Vuelta a la calma',5,1,'Caminá',{k:'walk',inc:0})]},
   {id:'swim-p1',tipo:'swim',niv:'Principiante',n:'Técnica y respiración 600 m',ser:[{rep:4,m:25,q:'Flotación y deslizamiento',p:30,ex:'Natación: flotación y deslizamiento (principiantes)'},{rep:4,m:25,q:'Patada de crol con tabla',p:30,ex:'Natación: patada de crol con tabla'},{rep:4,m:25,q:'Respiración en crol',p:30,ex:'Natación: respiración en crol'},{rep:4,m:50,q:'Crol suave',p:40,ex:'Natación: técnica de crol'},{rep:1,m:100,q:'Libre suave',p:0}]},
   {id:'swim-i1',tipo:'swim',niv:'Intermedio',n:'Resistencia 1200 m',ser:[{rep:1,m:200,q:'Entrada en calor libre suave',p:30},{rep:4,m:50,q:'Patada con tabla',p:20,ex:'Natación: patada de crol con tabla'},{rep:4,m:100,q:'Crol ritmo parejo',p:20,ex:'Natación: técnica de crol'},{rep:4,m:50,q:'Crol con pull buoy',p:20,ex:'Natación: crol con pull buoy'},{rep:1,m:200,q:'Espalda suave',p:0,ex:'Natación: técnica de espalda'}]},
   {id:'swim-a1',tipo:'swim',niv:'Avanzado',n:'Series 2000 m',ser:[{rep:1,m:300,q:'Entrada en calor libre',p:30},{rep:4,m:50,q:'Patada fuerte con tabla',p:15,ex:'Natación: patada de crol con tabla'},{rep:10,m:100,q:'Crol fuerte',p:15,ex:'Natación: técnica de crol'},{rep:4,m:100,q:'Crol con pull buoy',p:20,ex:'Natación: crol con pull buoy'},{rep:1,m:100,q:'Suave',p:0}]},
@@ -5950,13 +5950,42 @@ function minTxt(m){ const sec=Math.round(m*60), mm=Math.floor(sec/60), ss=sec%60
 /* ==== 23/10/2026 · v8-133: ritmos por zona (test de 12′) y planes que avanzan solos ==== */
 /* --- Test de 12 minutos → ritmo de cada zona, para los que no tienen reloj. Con GPS, la voz
    avisa si va muy rápido o muy lento para la zona del tramo. --- */
+/* 27/11/2026: duración real del test (entrada en calor + 12′ + vuelta a la calma) */
+/* 27/11/2026 (Tami): anotar un test de 12′ ya hecho, con opciones según lo que sepa el alumno:
+   km totales · velocidades de la cinta por tramos (ej. 6′ a 10 y 6′ a 11) · ritmo promedio (min/km). */
+function testPickBox(){ let o=$('tmPick'); if(o) return o; o=document.createElement('div'); o.id='tmPick'; o.style.cssText='position:fixed;inset:0;background:rgba(13,27,42,.55);display:none;align-items:center;justify-content:center;z-index:85;padding:22px'; document.body.appendChild(o); return o; }
+function testManualPick(){ const o=testPickBox();
+  o.innerHTML=`<div class="mbox" style="background:var(--card);border-radius:16px;padding:20px;width:100%;max-width:360px;box-shadow:0 18px 50px rgba(0,0,0,.3)"><div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:4px">📏 ¿Cómo te fue en el test de 12′?</div><div style="font-size:12px;color:var(--mute);margin-bottom:12px;line-height:1.4">Elegí lo que sepas. Con eso calculo tus ritmos por zona.</div>
+  <button type="button" class="ses-go ghost" data-tm="tramos" style="margin:0 0 8px">🏋️ Lo hice en la cinta: sé las velocidades<br><small style="font-weight:500">ej: los primeros 6′ a 10 km/h y los otros 6′ a 11</small></button>
+  <button type="button" class="ses-go ghost" data-tm="km" style="margin:0 0 8px">📍 Sé los km (o metros) que hice<br><small style="font-weight:500">ej: 2,1 km o 2100 m</small></button>
+  <button type="button" class="ses-go ghost" data-tm="ritmo" style="margin:0 0 12px">⏱️ Sé mi ritmo promedio<br><small style="font-weight:500">ej: 5:40 min/km</small></button>
+  <div class="mbtns" style="display:flex"><button type="button" data-tm="x" style="flex:1;padding:12px;border-radius:10px;font-size:14px;font-weight:700;background:var(--card);color:var(--mute);border:2px solid var(--line)">Cancelar</button></div></div>`;
+  o.style.display='flex';
+  o.onclick=function(e){ const b=e.target.closest('[data-tm]'); if(!b&&e.target!==o) return; o.style.display='none'; o.innerHTML=''; const k=b?b.dataset.tm:'x'; if(k!=='x') testManualAsk(k); }; }
+async function testManualAsk(k){ let m=0;
+  if(k==='km'){ const a=((await uiPrompt('¿Cuántos km hiciste en los 12 minutos del test?\n\nEj: 2,1 (km) o 2100 (metros)'))||'').trim(); if(!a) return; m=inf2Num(a); if(m>0&&m<30) m*=1000; }
+  else if(k==='tramos'){ const a=((await uiPrompt('Escribí cada tramo de los 12′ como minutos a velocidad, separados por coma.\n\nEj: 6 a 10, 6 a 11\n(o si fue todo igual: 12 a 10,5)'))||'').trim(); if(!a) return;
+    let km=0, mn=0; Array.from(a.matchAll(/(\d+(?:[.,]\d+)?)\s*(?:′|'|min)?\s*a\s*(\d+(?:[.,]\d+)?)/gi)).forEach(function(x){ const t=inf2Num(x[1]), v=inf2Num(x[2]); if(t>0&&v>0&&v<30){ km+=v*t/60; mn+=t; } });
+    if(!(km>0)){ toast('No entendí los tramos. Probá: 6 a 10, 6 a 11','warn'); return; }
+    if(Math.abs(mn-12)>0.6){ toast('Los tramos suman '+String(Math.round(mn*10)/10).replace('.',',')+' min: tienen que sumar 12′','warn'); return; }
+    m=km*1000; }
+  else if(k==='ritmo'){ const a=((await uiPrompt('¿A qué ritmo promedio corriste los 12′? (minutos por km)\n\nEj: 5:40 o 6'))||'').trim(); if(!a) return;
+    const x=a.match(/^(\d{1,2})(?:\s*[:.,′']\s*(\d{1,2}))?/); const sec=x?(+x[1])*60+(x[2]?+x[2]:0):0; if(!(sec>=150&&sec<=900)){ toast('Escribí el ritmo como minutos:segundos por km (ej: 5:40)','warn'); return; } m=720/sec*1000; }
+  if(!(m>=800&&m<=6000)){ toast('Revisá el número: tiene que dar entre 0,8 y 6 km','warn'); return; }
+  setRitmoData(m); const sk=sesKey(); const cur=CACHE[sk]; const v=(cur&&wOf(cur)===+week)?Object.assign({},cur):{}; v.test=Math.round(m);
+  /* queda registrado como sesión del día (Transcripta / mis salidas), con el tiempo total del test */
+  const tt=sesTpl(k==='tramos'?'cin-test':'run-test'); v.plan=tt?tt.n:'Test de 12 minutos'; if(!v.min) v.min=String(tt?sesMins(tt):29); if(!v.sec) v.sec=inf2Num(v.min)*60; if(!v.at) v.at=Date.now(); v._w=+week; CACHE[sk]=v; queueSave();
+  toast('✓ Test anotado: '+(m/1000).toFixed(2).replace('.',',')+' km en 12′. Ya tenés tus ritmos por zona','ok'); renderApp();
+  /* resumen para completar el resto de los datos de hoy: pulso promedio y máximo, cómo se sintió, esfuerzo */
+  setTimeout(function(){ sesSummary(sesVal(),'Tu test de 12′',{live:true}); },80); }
+function testMinsTxt(){ const t=sesTpl('run-test'); return t?sesMins(t)+' min en total: 12′ de entrada en calor, 12′ de test y 5′ caminando':'29 min en total'; }
 const RZ_F={1:[1.40,1.75],2:[1.25,1.40],3:[1.12,1.25],4:[1.03,1.12],5:[0.90,1.03]};
 function ritmoData(){ try{ const r=JSON.parse(localStorage.getItem('tafit:ritmo:'+active)||'null'); return r&&+r.d>=800?r:null; }catch(e){ return null; } }
 function setRitmoData(m){ try{ localStorage.setItem('tafit:ritmo:'+active,JSON.stringify({d:Math.round(m),at:Date.now()})); }catch(e){} }
 function ritmoZonas(){ const r=ritmoData(); if(!r) return null; const pt=720/(r.d/1000); const z={}; Object.keys(RZ_F).forEach(function(k){ z[k]=[Math.round(pt*RZ_F[k][0]),Math.round(pt*RZ_F[k][1])]; }); return {pt:pt,d:r.d,at:r.at,z:z}; }
 function pRange(a){ return paceTxt(a[0],1000)+'–'+paceTxt(a[1],1000); }
 function ritmoBoxHTML(){ const R=ritmoZonas();
-  if(!R) return `<div class="rz-box"><b>⏱️ ¿No tenés reloj?</b><span>Hacé una vez el <b>test de 12 minutos</b> y te digo a qué ritmo ir en cada zona. Con el GPS, la voz te avisa si vas muy rápido o muy lento.</span><button type="button" class="ses-go ghost" data-act="sesStart" data-tpl="run-test">▶ Hacer el test de 12′ (27 min en total)</button></div>`;
+  if(!R) return `<div class="rz-box"><b>⏱️ ¿No tenés reloj?</b><span>Hacé una vez el <b>test de 12 minutos</b> y te digo a qué ritmo ir en cada zona. Con el GPS, la voz te avisa si vas muy rápido o muy lento.</span><button type="button" class="ses-go ghost" data-act="sesStart" data-tpl="run-test">▶ Hacer el test de 12′ (${testMinsTxt()})</button></div>`;
   return `<div class="rz-box"><b>⏱️ Tus ritmos por zona <small>test: ${(R.d/1000).toFixed(2).replace('.',',')} km en 12′ · ${fmtShort(new Date(R.at).toISOString())}</small></b>${[1,2,3,4,5].map(function(k){ const Z=ZONAS[k-1]; return `<div class="rz-row"><span class="zt" style="background:${Z.c}">Z${k}</span><span>${esc(Z.t)}</span><b>${pRange(R.z[k])} /km</b></div>`; }).join('')}<button type="button" class="ses-link" data-act="sesStart" data-tpl="run-test">Rehacer el test (cada 6-8 semanas)</button></div>`; }
 /* ritmo de los últimos ~60 s */
 function gpsNowPace(){ if(!gps||!gps.trk||gps.trk.length<2) return 0; const last=gps.trk[gps.trk.length-1]; let j=gps.trk.length-2; while(j>0&&last[0]-gps.trk[j][0]<60) j--; const a=gps.trk[j]; const dd=last[1]-a[1], dt=last[0]-a[0]; return dd>=60&&dt>=20?dt/(dd/1000):0; }
@@ -6052,7 +6081,7 @@ function renderSesDay(m,d){
     h+=`<div class="ses-top"><span>${cin?'🏋️':'🏃'} ${esc(t.niv)}</span><b>${esc(t.libre?'Hoy elegís vos':t.pTitle||t.n)}</b><em>${t.libre?'a tu ritmo':sesMins(t)+' min'}</em></div>`+progBarHTML(t);
     h+=`<div class="ses-opts">${t.cinta?`<span class="opt-fixed">🏋️ Sesión de cinta${t.curva?' curva':''}</span>`:`<div class="gseg sm"><button type="button" data-act="lugarSet" data-v="afuera" class="${cin?'':'on'}">🌳 Afuera</button><button type="button" data-act="lugarSet" data-v="cinta" class="${cin?'on':''}">🏋️ Cinta</button></div>`}${cin?'':`<div class="gseg sm"><span>📍 GPS</span><button type="button" data-act="gpsSet" data-v="on" class="${gOn?'on':''}">Sí</button><button type="button" data-act="gpsSet" data-v="off" class="${gOn?'':'on'}">No</button></div>`}<div class="gseg sm"><span>❤️ Pulso</span><button type="button" data-act="relojSet" data-v="1" class="${relojOn()?'on':''}">Sí</button><button type="button" data-act="relojSet" data-v="0" class="${relojOn()?'':'on'}">No</button></div></div>`;
     const V=cintaVel(); if(cin&&!t.curva&&!V.set) h+=`<div class="cin-vel new"><div class="cv-lbl">👋 Antes de arrancar: tus velocidades (una sola vez)</div><div class="cv-grid"><label>Caminata rápida (km/h)<input inputmode="decimal" data-chg="cintaVel" data-f="walk" value="${velTxt(V.walk)}"></label><label>Trote cómodo (km/h)<input inputmode="decimal" data-chg="cintaVel" data-f="run" value="${velTxt(V.run)}"></label></div><div class="ses-mini" style="text-align:left">Trote cómodo = el que podés sostener charlando.</div></div>`;
-    if(t.tipo==='run'&&!t.test&&!t.libre){ const R=ritmoData(), wks=R?Math.floor((Date.now()-R.at)/(7*864e5)):0; if(!R||wks>=6) h+=`<div class="test-rem"><b>📏 ${R?'Hace '+wks+' semanas de tu último test de 12′':'Todavía no hiciste el test de 12′'}</b><span>${R?'Repetilo para ver cuánto mejoraste y ajustar tus ritmos.':'Con el test te digo a qué ritmo ir en cada zona y calibramos tu pulso máximo.'} Podés hacerlo hoy${cin?' en la cinta':''} en lugar de esta sesión (27 min).</span><button type="button" class="ses-go ghost" data-act="sesStart" data-tpl="${cin?'cin-test':'run-test'}">▶ Hacer el test hoy</button><button type="button" class="ses-link" data-act="testManual">¿Ya lo hiciste? Anotá los km de los 12′</button></div>`; }
+    if(t.tipo==='run'&&!t.test&&!t.libre){ const R=ritmoData(), wks=R?Math.floor((Date.now()-R.at)/(7*864e5)):0; if(!R||wks>=6) h+=`<div class="test-rem"><b>📏 ${R?'Hace '+wks+' semanas de tu último test de 12′':'Todavía no hiciste el test de 12′'}</b><span>${R?'Repetilo para ver cuánto mejoraste y ajustar tus ritmos.':'Con el test te digo a qué ritmo ir en cada zona y calibramos tu pulso máximo.'} Podés hacerlo hoy${cin?' en la cinta':''} en lugar de esta sesión (${testMinsTxt()}).</span><button type="button" class="ses-go ghost" data-act="sesStart" data-tpl="${cin?'cin-test':'run-test'}">▶ Hacer el test hoy</button><button type="button" class="ses-link" data-act="testManual">¿Ya lo hiciste? Anotá cómo te fue</button></div>`; }
     if(t.libre){ /* 05/11/2026: día libre — el alumno corre a su ritmo o elige una sesión guiada (p. ej. de viaje) */
       const opts=SES_TPL.filter(function(x){ return x.tipo==='run'&&!x.libre&&!x.prog&&!x.test&&(cin?x.cinta:!x.cinta); });
       h+=`<div class="ses-mini" style="text-align:left;margin:0 0 8px">Corré a tu ritmo, o si preferís, elegí una sesión guiada y te acompaño con la voz.</div><button type="button" class="ses-go" data-act="runFree">▶ Correr libre${gOn?' con GPS':''}</button><div class="ses-mini">Te aviso ${gOn?'cada kilómetro':'cada 5 minutos'}. Dejá la app abierta y la pantalla encendida.</div>`;
@@ -10961,11 +10990,7 @@ document.addEventListener('click',e=>{
     case 'gpsSet': setGpsPref(el.dataset.v==='on'); renderApp(); break;
     case 'lugarSet': try{ localStorage.setItem('tafit:lugar:'+active,el.dataset.v); }catch(e){} renderApp(); break;
     case 'sesSumOpen': sesSummary(sesVal(),'Tu salida',{live:true}); break;
-    case 'testManual': (async function(){ /* 27/11/2026 (Tami): test de 12′ ya hecho → anotarlo sin repetirlo */
-      const a=((await uiPrompt('¿Cuántos km hiciste en los 12 minutos del test?\n\nEj: 2 o 2,1 (si sabés la velocidad: 10 km/h durante 12′ = 2 km)'))||'').trim(); if(!a) return;
-      let m=inf2Num(a); if(m>0&&m<30) m*=1000; if(!(m>=800&&m<=6000)){ toast('Revisá el número: tiene que estar entre 0,8 y 6 km','warn'); return; }
-      setRitmoData(m); const k=sesKey(); const cur=CACHE[k]; const v=(cur&&wOf(cur)===+week)?Object.assign({},cur):{}; v.test=Math.round(m); v._w=+week; CACHE[k]=v; queueSave();
-      toast('✓ Test anotado: '+(m/1000).toFixed(2).replace('.',',')+' km. Ya tenés tus ritmos por zona','ok'); renderApp(); })(); break;
+    case 'testManual': testManualPick(); break; /* 27/11/2026 (Tami): test de 12′ ya hecho → elegir cómo anotarlo */
     case 'tramoAdd': tramoEdit(function(tr){ tr.push(['','']); }); break;
     case 'tramoDel': tramoEdit(function(tr){ tr.splice(+el.dataset.i,1); }); break;
     case 'kmCalc': (async function(){ const a=((await uiPrompt('Escribí cada tramo como minutos a velocidad, separados por coma.\n\nEj: 12 a 8, 12 a 10, 5 a 6,5'))||'').trim(); if(!a) return;
