@@ -714,7 +714,11 @@
   .zn-stack{display:flex;height:14px;border-radius:7px;overflow:hidden;margin-bottom:8px}.zn-stack i{display:block;height:100%}
   .zn-row{display:flex;align-items:center;gap:8px;font-size:12.5px;margin:5px 0;flex-wrap:wrap}.zn-row .zn-n{flex:1;color:#241F18}.zn-row em{flex:1 1 100%;font-style:normal;font-size:11px;color:var(--mute);padding-left:38px;margin-top:-3px}
   .sum-open{font-family:inherit;font-size:12px;font-weight:800;color:var(--accentDk);background:var(--tint2);border:none;border-radius:10px;padding:7px 12px;margin-top:6px;cursor:pointer}
-  .gps-err{font-size:12.5px;color:var(--mute);padding:12px}.gps-mini{background:#fff;border-radius:12px;margin-top:8px;padding:4px}.route-svg{width:100%;height:auto;max-height:190px;display:block}
+  .km-calc{display:block;margin-top:6px;font-size:12px}
+.tr-box{margin-top:10px;padding:10px;border-radius:12px;background:var(--bg2,rgba(227,195,165,.12))}.tr-box .cv-lbl small{font-weight:500;color:var(--mute);text-transform:none;letter-spacing:0}
+.tr-row{display:flex;align-items:flex-end;gap:8px;margin-top:6px}.tr-row label{flex:1;display:flex;flex-direction:column;font-size:11px;color:var(--mute)}.tr-row span{padding-bottom:10px;font-size:12px;color:var(--mute)}.tr-row input{font-family:inherit;font-size:16px;padding:9px;border:1px solid var(--line);border-radius:8px;width:100%;box-sizing:border-box;background:#fff;color:inherit;margin-top:3px}
+.tr-del{border:0;background:transparent;font-size:20px;line-height:1;padding:0 4px 8px;color:var(--mute);cursor:pointer}
+.gps-err{font-size:12.5px;color:var(--mute);padding:12px}.gps-mini{background:#fff;border-radius:12px;margin-top:8px;padding:4px}.route-svg{width:100%;height:auto;max-height:190px;display:block}
   .cobro-block{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:12px}
   .cobro-block.paid{background:var(--tint2);border-color:var(--accent)}
   .cobro-block.muted summary{list-style:none;cursor:pointer}
@@ -1382,7 +1386,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-159'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-160'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -3985,7 +3989,23 @@ function logsDelFor(id){ try{ return safeParse(localStorage.getItem('tafit:logsd
    Eran de S1: vuelven a S1 y así S1 queda completa y se abre S2. */
 const FIX_YO_S1={'2026-10-30T14:40:06.534Z':'Día 4','2026-10-30T21:51:33.649Z':'Día 5'};
 function fixKnownLog(l){ if(l&&FIX_YO_S1[l.date]&&l.dayName===FIX_YO_S1[l.date]&&+l.week===1&&l.weekName==='S2 Volumen'){ l=Object.assign({},l,{week:0,weekName:'S1 Base'}); }
-  if(l&&l.date==='2026-10-20T14:30:44.479Z'&&l.dayName==='Día 2'&&l.ses&&l.ses.tipo==='run'&&l.ses.km==='148'&&l.ses.min==='25'){ l=Object.assign({},l); l.ses=Object.assign({},l.ses,{km:'1,48'}); } return l; }
+  /* 27/11/2026 (Tami: "todas las transcriptas fueron calorías en vez de km"): en las salidas anotadas a
+     mano hasta el 26/11 el número de la cinta eran calorías. Pasa a Calorías y los km se calculan con el
+     tiempo por zona (sus velocidades: Z1 5, Z2 8, Z3 9, Z4 10, Z5 11 km/h), marcados como aprox.
+     No se tocan las que calculó la app (GPS, o km = metros por zona) ni las que ya son aprox. */
+  if(l&&l.ses&&l.ses.tipo==='run'&&String(l.date).slice(0,10)<'2026-11-27'&&!l.ses.kmEst&&!(l.ses.route&&l.ses.route.length>1)&&String(l.ses.km||'').trim()){
+    const zn=l.ses.zn||{}, V={1:5,2:8,3:9,4:10,5:11}; const kn=inf2Num(l.ses.km);
+    const zm=Object.keys(zn).reduce(function(a,z){ return a+(+zn[z].m||0); },0);
+    if(kn>0&&!(zm>=100&&Math.abs(zm/1000-kn)<0.06)){
+      const kc=Math.round(/[.,]/.test(String(l.ses.km))||kn<30?kn*100:kn);
+      let m=zm>=100?zm:Object.keys(zn).reduce(function(a,z){ return a+(+zn[z].s||0)/3600*(V[z]||8)*1000; },0);
+      l=Object.assign({},l); l.ses=Object.assign({},l.ses); if(!l.ses.kcal) l.ses.kcal=String(kc);
+      if(m>=100){ l.ses.km=(m/1000).toFixed(1).replace('.',','); l.ses.kmEst=true; } else { l.ses.km=''; } } }
+  /* 27/11/2026 (Tami): su salida en cinta del 27/11 quedó sin km o con "273", que eran las calorías
+     (el fueguito). Hizo 12′ a 8 km/h + 12′ a 10 km/h + 5′ suave ≈ 4,1 km en 29′. Solo "Yo" tiene días de running. */
+  if(l&&l.ses&&l.ses.tipo==='run'&&String(l.date).slice(0,10)==='2026-11-27'&&(!String(l.ses.km||'').trim()||/^\d{3,4}$/.test(String(l.ses.km).trim()))){
+    l=Object.assign({},l); l.ses=Object.assign({},l.ses,{km:'4,14',kmEst:true}); if(!l.ses.kcal) l.ses.kcal='273'; if(!l.ses.tr) l.ses.tr=[['12','8'],['12','10'],['5','6,5']]; if(!String(l.ses.min||'').trim()) l.ses.min='29'; }
+  return l; }
 function unionLogsArr(a,b,tomb){
   const dead=new Set(tomb||[]); const seen=new Set(); const out=[];
   (a||[]).concat(b||[]).forEach(function(l){ if(!l||!l.date||dead.has(l.date)||seen.has(l.date)) return; seen.add(l.date); out.push(fixKnownLog(l)); });
@@ -5954,7 +5974,23 @@ function zonasHTML(edad){ if(!relojOn()) return `<div class="zn-box">${relojTogg
   return `<div class="zn-box">${relojToggleHTML()}<div class="zn-h">Tus zonas ${fc?`<small>(${esc(how)})</small>`:'<small>(cargá tu edad en la Anamnesis o tu pulso máximo abajo para ver tus pulsaciones)</small>'}</div>${ZONAS.map(function(z){ const pp=zonaPpm(z.z,edad); return `<div class="zn"><i style="background:${z.c}">${z.z}</i><div><b>${z.n} · ${z.t}${pp?` · ${pp[0]}-${pp[1]} ppm`:''}</b><em class="zn-rpe">esfuerzo ${Z_RPE[z.z][0]}-${Z_RPE[z.z][1]}/10</em><span>${esc(z.d)}</span></div></div>`; }).join('')}${fc?'<div class="zn-note">Los números son una guía: si podés hablar de corrido, estás en zona 2 aunque el reloj diga otra cosa (los relojes de muñeca a veces confunden el pulso con los pasos).</div>':''}${fcSetHTML()}</div>`; }
 function sesKey(){ return 'ses|'+day+'|m'+(isDuo()?member:0); }
 function sesVal(){ const v=CACHE[sesKey()]; return (v&&wOf(v)===+week)?v:{}; }
-function updSes(f,val){ const k=sesKey(); const cur=CACHE[k]; const v=(cur&&wOf(cur)===+week)?Object.assign({},cur):{}; v[f]=String(val||'').trim(); if(f==='km') delete v.kmEst; v._w=+week; CACHE[k]=v; queueSave(); const rr=$('sesRitmo'); if(rr) rr.textContent=ritmoTxt(v); }
+/* 27/11/2026: si en distancia se anota un número de 3-4 cifras sin coma ("273"), puede ser la
+   distancia sin coma (2,73 km) o las calorías de la cinta (el fueguito). Se pregunta, no se adivina. */
+function kmFix(val){ const s=String(val||'').trim(); if(/^\d{3,4}$/.test(s)&&+s>=30){ return (+s/100).toFixed(2).replace('.',','); } return s; }
+async function updSesKm(val){ const s=String(val||'').trim(); const inp=document.querySelector('[data-chg="ses"][data-f="km"]');
+  if(/^\d{3,4}$/.test(s)&&+s>=30){ const fx=kmFix(s);
+    if(await uiConfirm('¿'+s+' km? 🤔\n\nSi es la distancia y a la cinta no se le ve la coma, serían '+fx+' km.\n\nOjo: el número con el fueguito 🔥 son calorías, no km.\n\n¿Lo anoto como '+fx+' km?')){ if(inp) inp.value=fx; updSes('km',fx,true); toast('Anotado: '+fx+' km','ok'); }
+    else { if(inp) inp.value=''; updSes('km','',true); toast('Si la cinta no muestra km: velocidad × minutos ÷ 60 (ej: 10 km/h × 12′ = 2 km)','warn'); }
+    return; }
+  updSes('km',s,true); }
+/* 27/11/2026 (Tami): velocidades de la salida (minutos a cada km/h) → la app suma los km y los minutos. */
+function tramoCalc(tr){ let km=0, mn=0; (tr||[]).forEach(function(x){ const t=inf2Num(x[0]), s=inf2Num(x[1]); if(t>0&&s>0&&s<30){ km+=s*t/60; mn+=t; } }); return {km:km,mn:mn}; }
+function tramoEdit(fn,keepFocus){ const k=sesKey(); const cur=CACHE[k]; const v=(cur&&wOf(cur)===+week)?Object.assign({},cur):{}; const tr=(Array.isArray(v.tr)&&v.tr.length)?v.tr.map(function(x){ return x.slice(); }):[['','']]; fn(tr); v.tr=tr;
+  const c=tramoCalc(tr); if(c.km>0){ v.km=c.km.toFixed(2).replace('.',','); v.kmEst=true; v.min=String(Math.round(c.mn)); }
+  v._w=+week; CACHE[k]=v; queueSave(); if(!keepFocus) renderApp(); else { const ki=document.querySelector('[data-chg="ses"][data-f="km"]'), mi=document.querySelector('[data-chg="ses"][data-f="min"]'); if(c.km>0){ if(ki) ki.value=v.km; if(mi) mi.value=v.min; } const rr=$('sesRitmo'); if(rr) rr.textContent=ritmoTxt(v); } }
+function tramoSet(i,kk,val){ tramoEdit(function(tr){ if(!tr[i]) tr[i]=['','']; tr[i][kk]=String(val||'').trim(); },true); }
+function updSes(f,val,quiet){
+  const k=sesKey(); const cur=CACHE[k]; const v=(cur&&wOf(cur)===+week)?Object.assign({},cur):{}; v[f]=String(val||'').trim(); if(f==='km') delete v.kmEst; v._w=+week; CACHE[k]=v; queueSave(); const rr=$('sesRitmo'); if(rr) rr.textContent=ritmoTxt(v); }
 /* 22/10/2026: en la Transcripta, un día de running/natación/movilidad muestra su plan (zonas,
    series o ejercicios), no la lista de ejercicios de gimnasio que quedó guardada de antes. */
 function sesTransDayHTML(d){ const t=sesTpl(d.ses||sesDefault(d.type))||sesTpl(sesDefault(d.type)); if(!t) return '';
@@ -5989,7 +6025,10 @@ function renderSesDay(m,d){
     h+=acc(`📈 Tus zonas${!cin&&ritmoZonas()?' <small>pulso y ritmo</small>':''}`,`${cin?'':ritmoBoxHTML()}<div id="znWrap">${zonasHTML(null)}</div>`);
     if(v.km||v.zn||v.route){ const kk=inf2Num(v.km), ss=+v.sec||inf2Num(v.min)*60; h+=acc(`📊 Tu salida <small>${kk>0?String(v.km).replace('.',',')+' km':''}${kk>0&&ss?' · '+paceTxt(ss,kk*1000)+'/km':''}</small>`,`${v.route&&v.route.length>1?routeMapHTML(v.route,false):''}<button type="button" class="ses-go ghost" data-act="sesSumOpen">Ver el resumen completo</button>`,false,'sal-acc'); }
     h+=myWeekHTML()+myRecordsHTML();
-    h+=acc(`✏️ Anotar a mano <small>${v.km||v.min?esc([v.km?String(v.km).replace('.',',')+' km':'',v.min?v.min+' min':'',v.inc?'pendiente '+String(v.inc).replace('.',',')+'%':''].filter(Boolean).join(' · ')):cin?'lo que marca la cinta':'si no usaste la guía'}</small>`,`<div class="cv-grid${cin?'':' three'}"><label>Distancia (km)${v.kmEst?' <small>aprox.</small>':''}<input inputmode="decimal" data-chg="ses" data-f="km" value="${esc(v.km||'')}" placeholder="4,2"></label><label>Tiempo (min)<input inputmode="numeric" data-chg="ses" data-f="min" value="${esc(v.min||'')}" placeholder="${sesMins(t)}"></label><label>Pulso prom.<input inputmode="numeric" data-chg="ses" data-f="fc" value="${esc(v.fc||'')}" placeholder="opcional"></label>${cin?`<label>Inclinación (%)<input inputmode="decimal" data-chg="ses" data-f="inc" value="${esc(v.inc||'')}" placeholder="ej. 15"></label>`:''}</div><div class="ses-ritmo" id="sesRitmo">${ritmoTxt(v)}</div>`);
+    { const tr=(Array.isArray(v.tr)&&v.tr.length)?v.tr:[['','']];
+      const sm=[v.km?String(v.km).replace('.',',')+' km':'',v.min?v.min+' min':'',v.kcal?v.kcal+' kcal':'',v.inc?'pendiente '+String(v.inc).replace('.',',')+'%':''].filter(Boolean).join(' · ');
+      const trH=`<div class="tr-box"><div class="cv-lbl">🏃 Tus velocidades <small>· la app suma los km</small></div>${tr.map(function(x,i){ return `<div class="tr-row"><label>Min<input inputmode="decimal" data-chg="tramo" data-i="${i}" data-k="0" value="${esc(x[0]||'')}" placeholder="12"></label><span>a</span><label>km/h<input inputmode="decimal" data-chg="tramo" data-i="${i}" data-k="1" value="${esc(x[1]||'')}" placeholder="8"></label>${tr.length>1?`<button type="button" class="tr-del" data-act="tramoDel" data-i="${i}" aria-label="Quitar tramo">×</button>`:''}</div>`; }).join('')}<button type="button" class="ses-link" data-act="tramoAdd">+ Agregar otra velocidad</button></div>`;
+      h+=acc(`✏️ Anotar a mano <small>${sm?esc(sm):cin?'lo que marca la cinta':'si no usaste la guía'}</small>`,`<div class="cv-grid${cin?'':' three'}"><label>Distancia (km)${v.kmEst?' <small>aprox.</small>':''}<input inputmode="decimal" data-chg="ses" data-f="km" value="${esc(v.km||'')}" placeholder="4,2"></label><label>Tiempo (min)<input inputmode="numeric" data-chg="ses" data-f="min" value="${esc(v.min||'')}" placeholder="${sesMins(t)}"></label><label>Calorías 🔥<input inputmode="numeric" data-chg="ses" data-f="kcal" value="${esc(v.kcal||'')}" placeholder="opcional"></label><label>Pulso prom.<input inputmode="numeric" data-chg="ses" data-f="fc" value="${esc(v.fc||'')}" placeholder="opcional"></label>${cin?`<label>Inclinación (%)<input inputmode="decimal" data-chg="ses" data-f="inc" value="${esc(v.inc||'')}" placeholder="ej. 15"></label>`:''}</div>${trH}<div class="ses-ritmo" id="sesRitmo">${ritmoTxt(v)}</div>`); }
     h+=`</div>`;
   } else if(t.tipo==='swim'){
     h+=`<div class="ses-top"><span>🏊 ${esc(t.niv)}</span><b>${esc(t.n)}</b><em>${swimTotal(t)} m</em></div><ol class="ses-steps">${t.ser.map(function(x,i){ const dn=(v['s'+i]||0); return `<li><div class="sw-row"><div><b>${x.rep>1?x.rep+' × ':''}${x.m} m</b> ${esc(x.q)}${x.p?` <small>· pausa ${x.p}″</small>`:''}${x.ex?` <span class="alt-tap" data-act="playVideo" data-url="${esc(exVidByName(x.ex))}" data-name="${esc(x.ex)}">🎬 video</span><span class="rd-tech" data-act="readTech" data-name="${esc(x.ex)}">📖 leer</span>`:''}</div><button type="button" class="sw-chk${dn?' on':''}" data-act="swimChk" data-i="${i}">${dn?'✓':'○'}</button></div></li>`; }).join('')}</ol>`;
@@ -8191,7 +8230,7 @@ async function closeSession(){
   let core=null;
   if(hasCoreDay(r[day])){ const ch=DB.students[active].abChoice, dn=coreDoneList(); if(coreChoiceValid(ch)&&dn.length){ core={fmt:ch.fmt, ex:ch.ex.map(id=>{ const it=coreItem(id); return it?it.n:id; }), done:dn.map(id=>{ const it=coreItem(id); return it?it.n:id; })}; } }
   let ses=null;
-  if(isSesDay(r[day])){ const t=sesDayTpl(r[day]); const v=sesVal(); if(t&&(v.km||v.min||v.m||v.fc||t.tipo==='mob')){ ses={tipo:t.tipo, n:(v.plan&&(v.test||v.plan==='Correr libre'))?v.plan:t.n, km:v.km||'', min:v.min||'', fc:v.fc||'', m:v.m||''}; if(v.route) ses.route=v.route; ['sec','splits','rest','zn','plan','rpe','feel','at','test','fcMax','inc'].forEach(function(f){ if(v[f]) ses[f]=v[f]; }); if(t.prog&&!v.test) ses.prog=t.id; if(t.tipo==='swim'&&!ses.m){ const done=(t.ser||[]).reduce(function(a,x,i){ return a+(v['s'+i]?x.rep*x.m:0); },0); if(done) ses.m=String(done); } } }
+  if(isSesDay(r[day])){ const t=sesDayTpl(r[day]); const v=sesVal(); if(t&&(v.km||v.min||v.m||v.fc||t.tipo==='mob')){ ses={tipo:t.tipo, n:(v.plan&&(v.test||v.plan==='Correr libre'))?v.plan:t.n, km:v.km||'', min:v.min||'', fc:v.fc||'', m:v.m||''}; if(v.route) ses.route=v.route; ['sec','splits','rest','zn','plan','rpe','feel','at','test','fcMax','inc','kcal','tr','kmEst'].forEach(function(f){ if(v[f]) ses[f]=v[f]; }); if(t.prog&&!v.test) ses.prog=t.id; if(t.tipo==='swim'&&!ses.m){ const done=(t.ser||[]).reduce(function(a,x,i){ return a+(v['s'+i]?x.rep*x.m:0); },0); if(done) ses.m=String(done); } } }
   if(!exs.length && !obs && !hh && !core && !ses && !_amPre()){ toast("No hay nada cargado en esta sesión todavía",'warn'); return; }
   /* 07/10/2026: aviso de sesión repetida — había días cerrados dos veces seguidas (mismo
      día de rutina, misma semana, minutos de diferencia), que duplicaban la Transcripta. */
@@ -8240,7 +8279,7 @@ function logEntryHTML(e,i){
     if(e.niv){ const q=[]; if(e.niv.n) q.push(NIV_LBL[e.niv.n]||e.niv.n); if(e.niv.imp==='sin') q.push('sin impacto'); if(e.niv.baja) q.push('carga −20%'); if(q.length) p.push('Lo hizo: '+q.join(' · ')); }
     return p.length?`<div class="log-obs">🧘 ${esc(p.join(' — '))}</div>`:''; })()+(e.obs?`<div class="log-obs">📝 ${esc(e.obs)}</div>`:'');
   const coreFmtL=e.core?((CORE_FMTS.find(f=>f.v===e.core.fmt)||{}).l||e.core.fmt):'';
-  const sesH=e.ses?(function(x){ const p=[]; if(x.km) p.push(String(x.km).replace('.',',')+' km'); if(x.m) p.push(x.m+' m'); if(x.min) p.push(x.min+' min'); if(x.inc) p.push('pendiente '+String(x.inc).replace('.',',')+'%'); if(x.fc) p.push('♥ '+x.fc); const rt=ritmoTxt(x); if(rt) p.push(rt.replace('Ritmo: ','')); if(x.rpe) p.push('esfuerzo '+x.rpe+'/10'); if(x.feel){ const fe=FEELS.find(function(f){ return f[0]===x.feel; }); if(fe) p.push(fe[1]); } if(x.test) p.push('test 12′: '+(x.test/1000).toFixed(2).replace('.',',')+' km'); return `<div class="log-ex"><div class="len">${x.tipo==='swim'?'🏊':x.tipo==='mob'?'🧘':'🏃'} ${esc(x.n)}</div><div class="lsets">${esc(p.join(' · ')||'hecho')}</div>${x.route?`<div class="gps-mini">${routeSVG(x.route)}</div>`:''}${(x.splits||x.zn||x.route)?`<button type="button" class="sum-open" data-act="sesSumLog" data-i="${(window._sumReg=window._sumReg||[]).push(Object.assign({_d:e.date},x))-1}">📊 Ver resumen</button>`:''}</div>`; })(e.ses):'';
+  const sesH=e.ses?(function(x){ const p=[]; if(x.km) p.push(String(x.km).replace('.',',')+' km'); if(x.m) p.push(x.m+' m'); if(x.min) p.push(x.min+' min'); if(x.inc) p.push('pendiente '+String(x.inc).replace('.',',')+'%'); if(x.kcal) p.push('🔥 '+x.kcal+' kcal'); if(Array.isArray(x.tr)){ const tt=x.tr.filter(function(y){ return inf2Num(y[0])>0&&inf2Num(y[1])>0; }).map(function(y){ return y[0]+'′ a '+String(y[1]).replace('.',','); }); if(tt.length) p.push(tt.join(' + ')+' km/h'); } if(x.fc) p.push('♥ '+x.fc); const rt=ritmoTxt(x); if(rt) p.push(rt.replace('Ritmo: ','')); if(x.rpe) p.push('esfuerzo '+x.rpe+'/10'); if(x.feel){ const fe=FEELS.find(function(f){ return f[0]===x.feel; }); if(fe) p.push(fe[1]); } if(x.test) p.push('test 12′: '+(x.test/1000).toFixed(2).replace('.',',')+' km'); return `<div class="log-ex"><div class="len">${x.tipo==='swim'?'🏊':x.tipo==='mob'?'🧘':'🏃'} ${esc(x.n)}</div><div class="lsets">${esc(p.join(' · ')||'hecho')}</div>${x.route?`<div class="gps-mini">${routeSVG(x.route)}</div>`:''}${(x.splits||x.zn||x.route)?`<button type="button" class="sum-open" data-act="sesSumLog" data-i="${(window._sumReg=window._sumReg||[]).push(Object.assign({_d:e.date},x))-1}">📊 Ver resumen</button>`:''}</div>`; })(e.ses):'';
   const coreH=e.core?`<div class="log-ex"><div class="len">🔥 Core · ${esc(coreFmtL)}</div><div class="lsets">${(e.core.ex||[]).map(n=>((e.core.done||[]).indexOf(n)>=0?'✓ ':'— ')+esc(n)).join(' &nbsp;|&nbsp; ')}</div></div>`:'';
   let hh='';
   if(e.health){ const fl=(e.health.alarms&&e.health.alarms.length)||e.health.pre==='warn'||e.health.post==='warn'; hh=`<div class="log-health ${fl?'flag':'ok'}">⚕ Pierna · antes: ${esc(e.health.pre||'—')} · después: ${esc(e.health.post||'—')}${(e.health.alarms&&e.health.alarms.length)?' · alarmas: '+esc(e.health.alarms.join(', ')):''}</div>`; }
@@ -10855,6 +10894,13 @@ document.addEventListener('click',e=>{
     case 'gpsSet': setGpsPref(el.dataset.v==='on'); renderApp(); break;
     case 'lugarSet': try{ localStorage.setItem('tafit:lugar:'+active,el.dataset.v); }catch(e){} renderApp(); break;
     case 'sesSumOpen': sesSummary(sesVal(),'Tu salida',{live:true}); break;
+    case 'tramoAdd': tramoEdit(function(tr){ tr.push(['','']); }); break;
+    case 'tramoDel': tramoEdit(function(tr){ tr.splice(+el.dataset.i,1); }); break;
+    case 'kmCalc': (async function(){ const a=((await uiPrompt('Escribí cada tramo como minutos a velocidad, separados por coma.\n\nEj: 12 a 8, 12 a 10, 5 a 6,5'))||'').trim(); if(!a) return;
+      let km=0, mn=0; Array.from(a.matchAll(/(\d+(?:[.,]\d+)?)\s*(?:′|'|min)?\s*a\s*(\d+(?:[.,]\d+)?)/gi)).forEach(function(m){ const t=inf2Num(m[1]), s=inf2Num(m[2]); if(t>0&&s>0&&s<30){ km+=s*t/60; mn+=t; } });
+      if(!(km>0)){ toast('No entendí los tramos. Probá: 12 a 8, 12 a 10','warn'); return; }
+      const fx=km.toFixed(2).replace('.',','); updSes('km',fx,true); const k=sesKey(); if(CACHE[k]){ CACHE[k].kmEst=true; if(!CACHE[k].min) CACHE[k].min=String(Math.round(mn)); queueSave(); }
+      toast('≈ '+fx+' km en '+Math.round(mn)+' min','ok'); renderApp(); })(); break;
     case 'sesSumLog': { const x=(window._sumReg||[])[+el.dataset.i]; if(x) sesSummary(x,'Resumen de la salida',{at:+x.at||Date.parse(x._d)}); } break;
     case 'sesElo': { const o=$('sesSum'); if(o){ o.style.display='none'; o.innerHTML=''; } sesStart('elo-run',null); } break;
     case 'sesSumClose': { const o=$('sesSum'); if(o){ o.style.display='none'; o.innerHTML=''; } } break;
@@ -11061,7 +11107,8 @@ document.addEventListener('change',e=>{
     case 'cobroAlias': cobroAlias(el.value); break;
     case 'coreToggle': coreToggle(+el.dataset.i, el.checked); break;
     case 'cardio': updCardio(+el.dataset.i,+(el.dataset.m||0),el.dataset.f,el.value); break;
-    case 'ses': updSes(el.dataset.f,el.value); break;
+    case 'ses': if(el.dataset.f==='km') updSesKm(el.value); else updSes(el.dataset.f,el.value); break;
+    case 'tramo': tramoSet(+el.dataset.i,+el.dataset.k,el.value); break;
     case 'fcset': { setFcData(el.dataset.f,el.value); const w=$('znWrap'); if(w) sesLoadEdad().then(function(ed){ w.innerHTML=zonasHTML(ed); }); toast('Zonas actualizadas ✓','ok'); break; }
     case 'sesfc': sesFcSet(el.dataset.f,el.value); break;
     case 'gpsPref': setGpsPref(el.checked); break;
@@ -11124,6 +11171,7 @@ document.addEventListener('change',e=>{
 document.addEventListener('input',e=>{ const t=e.target; if(t&&t.classList&&t.classList.contains('ls-search')){ libSheetQ=t.value; clearTimeout(window.__lsT); window.__lsT=setTimeout(libSheetRender,180); } });
 document.addEventListener('input',e=>{
   const el=e.target.closest('[data-chg="obs"]'); if(el) updObs(el.value);
+  { const se=e.target.closest('[data-chg="ses"]'); if(se&&se.dataset.f!=='km'){ updSes(se.dataset.f,se.value,true); } else if(se){ const raw=String(se.value||'').trim(); if(!/^\d{3,4}$/.test(raw)) updSes('km',raw,true); } }
   const libEl=e.target.closest('[data-chg="libSearch"]');
   if(libEl){
     libFilter=libEl.value;
