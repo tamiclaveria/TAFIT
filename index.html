@@ -714,7 +714,10 @@
   .zn-stack{display:flex;height:14px;border-radius:7px;overflow:hidden;margin-bottom:8px}.zn-stack i{display:block;height:100%}
   .zn-row{display:flex;align-items:center;gap:8px;font-size:12.5px;margin:5px 0;flex-wrap:wrap}.zn-row .zn-n{flex:1;color:#241F18}.zn-row em{flex:1 1 100%;font-style:normal;font-size:11px;color:var(--mute);padding-left:38px;margin-top:-3px}
   .sum-open{font-family:inherit;font-size:12px;font-weight:800;color:var(--accentDk);background:var(--tint2);border:none;border-radius:10px;padding:7px 12px;margin-top:6px;cursor:pointer}
-  .km-calc{display:block;margin-top:6px;font-size:12px}
+  .bi-add{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}.bi-add label{display:flex;flex-direction:column;gap:4px;font-size:11px;font-weight:700;color:var(--mute)}.bi-add select{font-family:inherit;font-size:13px;padding:7px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.bi-add-btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.bi-addday.ghost{font-weight:600;color:var(--mute)}
+.bi-addday{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:transparent;font-family:inherit;font-size:11.5px;font-weight:700;color:var(--ink);cursor:pointer;text-align:left}
+.km-calc{display:block;margin-top:6px;font-size:12px}
 .tr-box{margin-top:10px;padding:10px;border-radius:12px;background:var(--bg2,rgba(227,195,165,.12))}.tr-box .cv-lbl small{font-weight:500;color:var(--mute);text-transform:none;letter-spacing:0}
 .tr-row{display:flex;align-items:flex-end;gap:8px;margin-top:6px}.tr-row label{flex:1;display:flex;flex-direction:column;font-size:11px;color:var(--mute)}.tr-row span{padding-bottom:10px;font-size:12px;color:var(--mute)}.tr-row input{font-family:inherit;font-size:16px;padding:9px;border:1px solid var(--line);border-radius:8px;width:100%;box-sizing:border-box;background:#fff;color:inherit;margin-top:3px}
 .tr-del{border:0;background:transparent;font-size:20px;line-height:1;padding:0 4px 8px;color:var(--mute);cursor:pointer}
@@ -9490,6 +9493,33 @@ async function applyTemplate(tplId,targetId,tplObj,after){
   renderEdit();
 }
 /* 23/11/2026: aplicar un programa TaFiT con nivel/impacto (y opcionalmente fijarlos) */
+/* 27/11/2026 (Tami: "si en una rutina normal quiero agregar un día de HYROX o de funcional no me deja … o en el
+   mismo día agregar algún bloque, por ejemplo hacen fuerza y metabólico y sumar un bloque de funcional o de HYROX"):
+   desde la vista previa de cada día de un programa TaFiT se puede sumar el día completo o un bloque, como día
+   nuevo al final o dentro de un día que ya existe. Nunca reemplaza nada y antes guarda una foto de la rutina. */
+function biBlocks(d){ const out=[]; (d.ex||[]).forEach(function(e,i){ if(isBlockRow(e)) out.push({i:i,n:String(e.n).replace(/^[─\s]+|[─\s]+$/g,'')}); }); return out; }
+function biAddHTML(t,d,di){
+  const R=(DB.students[active]||{}).routine||[];
+  const opts=`<option value="new">Como día nuevo (al final)</option>`+R.map(function(x,i){ return `<option value="${i}">Dentro de ${esc(x.day)}</option>`; }).join('');
+  const bl=biBlocks(d).filter(function(b){ return !/entrada en calor/i.test(b.n); });
+  return `<div class="bi-add" data-bi="${esc(t.id)}" data-d="${di}"><label>Sumar a la rutina de ${esc((DB.students[active]||{}).name||'')}<select class="bi-to">${opts}</select></label>
+    <div class="bi-add-btns"><button type="button" class="bi-addday" data-act="biAdd" data-id="${esc(t.id)}" data-d="${di}" data-b="-1">+ Día completo</button>${bl.map(function(b){ return `<button type="button" class="bi-addday ghost" data-act="biAdd" data-id="${esc(t.id)}" data-d="${di}" data-b="${b.i}">+ ${esc(b.n)}</button>`; }).join('')}</div></div>`; }
+async function biAdd(id,di,bi){
+  const t=builtinTpls().find(function(x){ return x.id===id; }); if(!t||!t.routine[di]) return;
+  const box=document.querySelector('.bi-add[data-bi="'+id+'"][data-d="'+di+'"]'); const sel=box&&box.querySelector('.bi-to'); const tg=sel?sel.value:'new';
+  const st=DB.students[active]; if(!st) return; const R=st.routine||[];
+  const src=t.routine[di]; let rows;
+  if(bi>=0){ rows=[src.ex[bi]]; for(let j=bi+1;j<src.ex.length&&!isBlockRow(src.ex[j]);j++) rows.push(src.ex[j]); } else rows=src.ex.slice();
+  rows=cp(rows).map(function(e){ if(isBlockRow(e)){ const n=String(e.n).replace(/^[─\s]+|[─\s]+$/g,''); if(n.toLowerCase().indexOf(t.cat.toLowerCase())<0) e.n='── '+t.cat+' · '+n+' ──'; } return e; });
+  const what=bi>=0?'el bloque "'+String(src.ex[bi].n).replace(/^[─\s]+|[─\s]+$/g,'')+'"':'el día completo';
+  const sub=String(src.day).split(' · ').slice(1).join(' · ');
+  const newName='Día '+(R.length+1)+' · '+(t.cat==='HYROX'?'HYROX':t.cat+(sub&&bi<0?' · '+sub:''));
+  const dest=tg==='new'?'como "'+newName+'"':'dentro de '+(R[+tg]||{}).day;
+  if(!await uiConfirm('¿Sumar '+what+' de '+t.name+' '+dest+' en la rutina de '+st.name+'?\n\nSe agrega al final. No cambia lo que ya tiene.')) return;
+  if(R.length) snapshotRoutine(active,'antes de sumar '+what+' de '+t.name);
+  if(tg==='new'){ const d=cp(src); d.day=newName; d.ex=rows; st.routine=R.concat([d]); }
+  else { const d=R[+tg]; if(!d) return; d.ex=(d.ex||[]).concat(rows); }
+  await saveDB(); openSecs.add('biprog'); toast('✓ Sumado a la rutina de '+st.name,'ok'); renderEdit(); }
 async function applyBuiltin(id){
   const t=builtinTpls().find(function(x){ return x.id===id; }); if(!t) return;
   const box=document.querySelector('.bi-apply[data-bi="'+id+'"]'); const g=function(f){ const e=box&&box.querySelector('[data-f="'+f+'"]'); return e?(e.type==='checkbox'?e.checked:e.value):''; };
@@ -10002,7 +10032,7 @@ function renderEdit(){
     filt+='</div>';
     const list=all.filter(function(t){ return (!F.cat||t.cat===F.cat)&&(!F.dias||isDep||t.dias===+F.dias)&&(!F.modo||!t.modo||t.modo===F.modo); });
     const st3=DB.students[active]||{};
-    const prevH=function(t){ return `<details class="tpl-prev"><summary>👁 Ver contenido</summary><div class="tpl-prev-body">${t.routine.map(function(d){ const names=d.ex.filter(function(e){ return !isBlockRow(e); }).map(function(e){ return e.n; }); return `<div class="tpl-prev-day"><b>${esc(d.day)}</b><small>${esc(names.slice(0,6).join(', ')+(names.length>6?'…':''))}</small></div>`; }).join('')}</div></details>`; };
+    const prevH=function(t){ return `<details class="tpl-prev"><summary>👁 Ver contenido</summary><div class="tpl-prev-body">${t.routine.map(function(d,di){ const names=d.ex.filter(function(e){ return !isBlockRow(e); }).map(function(e){ return e.n; }); return `<div class="tpl-prev-day"><b>${esc(d.day)}</b><small>${esc(names.slice(0,6).join(', ')+(names.length>6?'…':''))}</small>${biAddHTML(t,d,di)}</div>`; }).join('')}</div></details>`; };
     const opts=DB.order.filter(function(sid){ return !DB.students[sid].archived||sid===active; }).map(function(sid){ return `<option value="${esc(sid)}"${sid===active?' selected':''}>${esc(DB.students[sid].name)}</option>`; }).join('');
     const rows=list.length?list.map(function(t){
       const nEx=t.routine.reduce(function(a,d){ return a+d.ex.filter(function(e){ return !isBlockRow(e); }).length; },0);
@@ -10912,6 +10942,7 @@ document.addEventListener('click',e=>{
     case 'volSet': { const V=window._vol||(window._vol={}); const k=el.dataset.k, v=el.dataset.v; V[k]=(k==='niv'||k==='mode'||v==='mes')?v:+v; if(k==='mode'||k==='cyc') V.wk=null; volRefresh(); break; }
     case 'biFilter': { const F=window._biF||(window._biF={}); F[el.dataset.k]=el.dataset.k==='dias'?+el.dataset.v:el.dataset.v; if(el.dataset.k==='cat'&&/^(Pádel|Hockey|Fútbol)$/.test(el.dataset.v)) F.dias=0; if(el.dataset.k==='cat'&&/^(HYROX|Funcional)$/.test(el.dataset.v)) F.modo=''; openSecs.add('biprog'); renderEdit(); break; }
     case 'applyBuiltin': applyBuiltin(id); break;
+    case 'biAdd': biAdd(id,+el.dataset.d,+el.dataset.b); break;
     case 'bienClose': window._bienOpen=false; { const w=$('bienWrap'); if(w) w.innerHTML=bienHTML(); } break;
     case 'bienOpen': window._bienOpen=true; { const w=$('bienWrap'); if(w) w.innerHTML=bienHTML(); } break;
     case 'exFb': exFb(+el.dataset.i,+(el.dataset.m||0),el.dataset.v); break;
