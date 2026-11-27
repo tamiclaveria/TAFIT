@@ -1389,7 +1389,7 @@ function showUpdateBanner(){
   d.querySelector('button').addEventListener('click', async function(){ try{ if(typeof saveData==='function'&&active) await saveData(); }catch(e){} location.reload(); });
   document.body.appendChild(d);
 }
-const APP_VERSION='v8-160'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
+const APP_VERSION='v8-161'; /* mantener SIEMPRE igual al CACHE de sw.js — se muestra en Ajustes para poder confirmar a simple vista si un dispositivo ya bajó la última versión.
   07/10/2026: esto quedó pisado en 'v8-91' durante varias subidas (hasta la v8-102) sin que nadie lo notara — o sea que el número de versión en Ajustes
   NO SIRVIÓ para confirmar nada en todo ese tiempo. De acá en adelante, cada vez que se sube un zip nuevo, bumpear este valor Y el CACHE de sw.js juntos, al mismo número. */
 let fireSync=()=>{},fireDel=()=>{};
@@ -3279,6 +3279,12 @@ function stampLists(base){
   });
   if(base&&JSON.stringify(Object.assign({},DB.settings,{_t:0}))!==JSON.stringify(Object.assign({},base.settings,{_t:0}))){ DB.settings=DB.settings||{}; DB.settings._t=now; }
 }
+/* 27/11/2026 (Tami: "a Sofi le aparecía todo el tiempo la rutina pausada por más que yo la despausé"):
+   campos que SOLO maneja la profe. El celular de la alumna nunca los marca como cambio propio (antes, al
+   llegarle "pausada" de la nube podía quedar marcado como edición suya más nueva y le ganaba a la
+   despausa), y al juntar versiones siempre manda lo de la profe. */
+const TRAINER_FIELDS=['paused','archived','planPaid','cobro','cobroExtra','forms','nivLock','tok'];
+function tfOverride(m,src){ if(!m||!src) return; TRAINER_FIELDS.forEach(function(f){ if(Object.prototype.hasOwnProperty.call(src,f)) m[f]=src[f]; else delete m[f]; const t=ftOf(src,f); if(m._ft){ if(t) m._ft[f]=t; else delete m._ft[f]; } }); }
 function stampLocalEdits(){
   const base=safeParse(_syncBaseline,null); const bs=(base&&base.students)||{}; const now=Date.now();
   if(base) stampLists(base);
@@ -3286,7 +3292,7 @@ function stampLocalEdits(){
     const st=DB.students[id]; if(!st||!Object.prototype.hasOwnProperty.call(bs,id)) return;
     const b=bs[id]||{};
     new Set(Object.keys(st).concat(Object.keys(b))).forEach(function(f){
-      if(f==='_ft') return;
+      if(f==='_ft') return; if(locked&&TRAINER_FIELDS.indexOf(f)>=0) return;
       if(JSON.stringify(st[f])!==JSON.stringify(b[f])){ st._ft=st._ft||{}; st._ft[f]=now; }
     });
   });
@@ -3318,6 +3324,7 @@ function mergeDBWithRemote(L,remote,base){
       if(val!==undefined) mergedSt[f]=val;
     });
     const ft=mergeFtMaps(localSt,remoteSt); if(Object.keys(ft).length) mergedSt._ft=ft;
+    if(locked) tfOverride(mergedSt,remoteSt);
     mergedStudents[id]=mergedSt;
   });
   const mergedOrder=(L.order||[]).filter(function(id){ return mergedStudents[id]; });
@@ -3334,7 +3341,7 @@ function mergeDBWithRemote(L,remote,base){
 }
 /* Para cuando llega una versión de la nube a ESTE celular (o cuando se sube sin baseline):
    por alumno y por campo, gana el cambio más nuevo; si ninguno está marcado, manda "pref". */
-function mergeStudentsByFt(L,R,pref){
+function mergeStudentsByFt(L,R,pref,tf){ const tfSide=locked?'R':tf;
   const out=JSON.parse(JSON.stringify(pref==='local'?L:R));
   const dead=Object.assign({},R._deleted,L._deleted); out._deleted=dead;
   out.students={};
@@ -3351,6 +3358,7 @@ function mergeStudentsByFt(L,R,pref){
       if(val!==undefined) m[f]=val;
     });
     const ft=mergeFtMaps(a,b); if(Object.keys(ft).length) m._ft=ft;
+    if(tfSide==='R') tfOverride(m,b); else if(tfSide==='L') tfOverride(m,a);
     out.students[id]=m;
   });
   const order=((pref==='local'?L.order:R.order)||[]).filter(function(id){ return out.students[id]; });
@@ -3868,7 +3876,7 @@ const RELAY={ unsub:{}, lastProj:{}, seeded:{} };
 function tokOf(id){ const s=DB.students&&DB.students[id]; return (s&&s.tok)?s.tok:null; }
 function mergeForPub(k,id,localStr,remoteStr){
   if(remoteStr==null) return localStr;
-  if(k==='tafit:students'){ const L=safeParse(localStr,null), R=safeParse(remoteStr,null); if(!L||!L.students) return remoteStr; if(!R||!R.students) return localStr; const m=mergeStudentsByFt(L,{order:[id],students:R.students[id]?{[id]:R.students[id]}:{}},'local'); return JSON.stringify(projectFor(m,id)||L); }
+  if(k==='tafit:students'){ const L=safeParse(localStr,null), R=safeParse(remoteStr,null); if(!L||!L.students) return remoteStr; if(!R||!R.students) return localStr; const m=mergeStudentsByFt(L,{order:[id],students:R.students[id]?{[id]:R.students[id]}:{}},'local','L'); return JSON.stringify(projectFor(m,id)||L); }
   if(isMergedKey(k)) return mergeKeyStr(k,localStr,remoteStr);
   if(k.indexOf('tafit:chat:')===0) return JSON.stringify(mergeChat(safeParse(localStr,[]),safeParse(remoteStr,[])));
   return localStr;
@@ -3912,7 +3920,7 @@ async function relayIn(id,k,v){
       const inc=JSON.parse(JSON.stringify(P.students[id])); inc.tok=DB.students[id].tok; /* el token lo maneja solo la profe */
       if(inc._ft) delete inc._ft.tok;
       const before=JSON.stringify(DB.students[id]);
-      DB=mergeStudentsByFt(DB,{order:[id],students:{[id]:inc}},'local');
+      DB=mergeStudentsByFt(DB,{order:[id],students:{[id]:inc}},'local','L');
       if(JSON.stringify(DB.students[id])!==before){ await saveDB(); render(); }
       return;
     }
@@ -4362,6 +4370,33 @@ const MARCE_WEEKS=[{"t": "S1", "n": "Base", "d": "3×12 con el peso de hoy. Téc
    se había abierto un ciclo nuevo y cambiado sus semanas, por eso el Volumen "Realizado" (y el Informe)
    quedaban vacíos. Si la última foto del historial es de esa prueba, se deshace: vuelve su rutina, sus
    semanas y su ciclo anterior con todas sus sesiones. Una sola vez, solo para "Yo". */
+/* 27/11/2026: una vez, la profe vuelve a publicar a cada casillero de alumno sus campos de profe (pausa,
+   archivado, cobro…) para limpiar copias viejas que quedaron marcadas como más nuevas (caso Sofi). */
+/* 27/11/2026 · "Yo" (Tami): "la Transcripta 4 también es parte de la nueva, se desconfiguró cuando puse HYROX,
+   ¿la podés unificar?". Al probar HYROX se abrió un ciclo aparte. Se unen en el ciclo actual los ciclos que
+   empezaron con esa prueba (todas sus sesiones quedan en una sola Transcripta). La rutina no se toca; si
+   quedaron las semanas de HYROX, vuelven las suyas. Una sola vez; se guarda copia de lo que se une. */
+async function yoUnificar_20261127(){
+  if(DB._seed&&DB._seed.yoUnify_20261127) return;
+  const SID='dani', st=DB.students[SID]; if(!st||String(st.name).trim()!=='Yo') return;
+  const H=st.cycleHistory||[]; if(!H.length) return;
+  const v=(st.routineVersions||[]).filter(function(x){ return /^antes de aplicar plantilla "(HYROX|Funcional|Pádel|Hockey|Fútbol)/.test(x.reason||''); }).pop();
+  const t0=v?Date.parse(v.at)-120000:Date.parse('2026-11-20T00:00:00Z');
+  let k=-1; for(let i=0;i<H.length;i++){ if(H[i]&&H[i].end&&Date.parse(H[i].end)>=t0){ k=i; break; } }
+  if(k<0) return;
+  st.cycleHistoryBak_20261127=cp(H.slice(k));
+  const first=H[k]; const biW=JSON.stringify(Object.keys(BI_WEEKS).map(function(f){ return BI_WEEKS[f]; }));
+  const isBiW=st.weeks&&Object.keys(BI_WEEKS).some(function(f){ return JSON.stringify(BI_WEEKS[f])===JSON.stringify(st.weeks); });
+  st.cycleHistory=H.slice(0,k);
+  if(first.start) st.cycleStart=first.start; else delete st.cycleStart;
+  if(isBiW&&first.weeks) st.weeks=cp(first.weeks);
+  DB._seed=DB._seed||{}; DB._seed.yoUnify_20261127=true; await saveDB();
+  if(active===SID){ if(week>=weeks().length) week=0; render(); }
+}
+async function pubTrainerFix_20261127(){
+  if(DB._seed&&DB._seed.pubTF_20261127) return; if(!fsDB||!PROFE_OK) return;
+  for(const id of (DB.order||[])){ const st=DB.students[id]; if(!st||!st.tok) continue; const proj=projectFor(DB,id); if(!proj) continue; RELAY.lastProj[id]=JSON.stringify(proj); await pushToPub(st.tok,id,'tafit:students',JSON.stringify(proj)); }
+  DB._seed=DB._seed||{}; DB._seed.pubTF_20261127=true; await saveDB(); }
 async function yoDeshacerPrueba_20261124(){
   if(DB._seed&&DB._seed.yoUndoBI_20261124) return;
   const SID='dani', st=DB.students[SID]; if(!st||String(st.name).trim()!=='Yo') return;
@@ -4601,6 +4636,8 @@ async function initFirebase(){
     try{ if(!locked) await adrianaRutina2_20261123(); }catch(e){ console.warn('Adriana rutina 2:',e); }
     try{ if(!locked) await marceDia1_20261124(); }catch(e){ console.warn('Marce día 1:',e); }
     try{ if(!locked) await yoDeshacerPrueba_20261124(); }catch(e){ console.warn('Yo deshacer prueba:',e); }
+    try{ if(!locked) await yoUnificar_20261127(); }catch(e){ console.warn('Yo unificar:',e); }
+    try{ if(!locked) await pubTrainerFix_20261127(); }catch(e){ console.warn('pub trainer fix:',e); }
     try{ if(!locked) await applyOmarPlan8_20261111(); }catch(e){ console.warn('Omar plan 8:',e); }
     try{ if(!locked) await shiftWoForCorePresets(); }catch(e){ console.warn('WO shift:',e); }
     /* push: local → cloud */
